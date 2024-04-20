@@ -42,7 +42,6 @@ app.*.map.json
 /android/app/release
 
 #MyPR(flutter) related
-.idea/
 android/
 ios/
 linux/
