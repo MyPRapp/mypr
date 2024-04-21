@@ -39,7 +39,7 @@ class MyPR extends StatelessWidget {
                   height: 25,
                 ),
                 const Text(
-                  ' Καλησπέρα Κάγκουρες!!!',
+                  ' Καλησπέρα Κάγκουρες!',
                   style: TextStyle(
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
