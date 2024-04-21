@@ -1,8 +1,9 @@
+// ignore_for_file: camel_case_types
+
 import 'package:flutter/material.dart';
 
-// ignore: camel_case_types
-class clubCard extends StatelessWidget {
-  const clubCard(this.clubName, {super.key});
+class clubsNearYouCard extends StatelessWidget {
+  const clubsNearYouCard(this.clubName, {super.key});
 
   final String clubName;
 
@@ -39,6 +40,25 @@ class clubCard extends StatelessWidget {
         ));
   }
 }
+
+class clubsList extends StatelessWidget {
+  const clubsList(this.clubName, {super.key});
+
+  final String clubName;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(onTap: () {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Gesture Detected!')));
+    });
+  }
+}
+
+
+
+
+
 
 /*return GestureDetector(
         onTap: () {

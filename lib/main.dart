@@ -97,9 +97,13 @@ class MyPR extends StatelessWidget {
                     itemCount: clubNamesList.length,
                     separatorBuilder: (context, index) =>
                         const SizedBox(width: 20),
-                    itemBuilder: (_, index) => clubCard(clubNamesList[index]),
+                    itemBuilder: (_, index) =>
+                        clubsNearYouCard(clubNamesList[index]),
                   ),
                 ),
+                Expanded(
+                  child: clubsList(clubNamesList[index]),
+                )
               ],
             ),
           ]),
