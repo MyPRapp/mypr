@@ -34,7 +34,13 @@ class clubsNearYouCard extends StatelessWidget {
                       topRight: Radius.circular(10)),
                 ),
               ),
-              Text(clubName),
+              Text(
+                clubName,
+                style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black),
+              ),
             ],
           ),
         ));
