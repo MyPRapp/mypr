@@ -101,9 +101,9 @@ class MyPR extends StatelessWidget {
                         clubsNearYouCard(clubNamesList[index]),
                   ),
                 ),
-                Expanded(
-                  child: clubsList(clubNamesList[index]),
-                )
+                //Expanded(
+                //child: clubsList(clubNamesList[index]),
+                //)
               ],
             ),
           ]),

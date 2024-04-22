@@ -1,6 +1,6 @@
-^C:\USERS\GEORG\MYPR\BUILD\WINDOWS\X64\CMAKEFILES\07E8E35E2AC60FD2C23297A2B88109CE\FLUTTER_WINDOWS.DLL.RULE
+^C:\USERS\FRADI\MYPR\BUILD\WINDOWS\X64\CMAKEFILES\09B46AA0AFA72F0A3370146469B12D3D\FLUTTER_WINDOWS.DLL.RULE
 setlocal
-"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\Users\georg\flutter PROJECT_DIR=C:\Users\georg\mypr FLUTTER_ROOT=C:\Users\georg\flutter FLUTTER_EPHEMERAL_DIR=C:\Users\georg\mypr\windows\flutter\ephemeral PROJECT_DIR=C:\Users\georg\mypr FLUTTER_TARGET=C:\Users\georg\mypr\lib\main.dart DART_DEFINES=RkxVVFRFUl9XRUJfQVVUT19ERVRFQ1Q9dHJ1ZQ==,RkxVVFRFUl9XRUJfQ0FOVkFTS0lUX1VSTD1odHRwczovL3d3dy5nc3RhdGljLmNvbS9mbHV0dGVyLWNhbnZhc2tpdC9lNzZjOTU2NDk4ODQxZTFhYjQ1ODU3N2QzODkyMDAzZTU1M2U0ZjNjLw== DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false PACKAGE_CONFIG=C:\Users\georg\mypr\.dart_tool\package_config.json C:/Users/georg/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\Users\fradi\flutter PROJECT_DIR=C:\Users\fradi\mypr FLUTTER_ROOT=C:\Users\fradi\flutter FLUTTER_EPHEMERAL_DIR=C:\Users\fradi\mypr\windows\flutter\ephemeral PROJECT_DIR=C:\Users\fradi\mypr FLUTTER_TARGET=C:\Users\fradi\mypr\lib\main.dart DART_DEFINES=RkxVVFRFUl9XRUJfQ0FOVkFTS0lUX1VSTD1odHRwczovL3d3dy5nc3RhdGljLmNvbS9mbHV0dGVyLWNhbnZhc2tpdC81YzdhZWE2ZjIwZmNhNzdjMThiZjQzZjIwN2JkZDc1MWE4ODI4YWU2Lw== DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false PACKAGE_CONFIG=C:\Users\fradi\mypr\.dart_tool\package_config.json C:/Users/fradi/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
@@ -8,7 +8,7 @@ endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
-^C:\USERS\GEORG\MYPR\BUILD\WINDOWS\X64\CMAKEFILES\D273D475AB56468E541ADAFC701A8401\FLUTTER_ASSEMBLE.RULE
+^C:\USERS\FRADI\MYPR\BUILD\WINDOWS\X64\CMAKEFILES\16D19790C2E9B0A02AFE59218935E248\FLUTTER_ASSEMBLE.RULE
 setlocal
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
@@ -16,9 +16,9 @@ endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
 exit /b %1
 :cmDone
 if %errorlevel% neq 0 goto :VCEnd
-^C:\USERS\GEORG\MYPR\WINDOWS\FLUTTER\CMAKELISTS.TXT
+^C:\USERS\FRADI\MYPR\WINDOWS\FLUTTER\CMAKELISTS.TXT
 setlocal
-"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/georg/mypr/windows -BC:/Users/georg/mypr/build/windows/x64 --check-stamp-file C:/Users/georg/mypr/build/windows/x64/flutter/CMakeFiles/generate.stamp
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -SC:/Users/fradi/mypr/windows -BC:/Users/fradi/mypr/build/windows/x64 --check-stamp-file C:/Users/fradi/mypr/build/windows/x64/flutter/CMakeFiles/generate.stamp
 if %errorlevel% neq 0 goto :cmEnd
 :cmEnd
 endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
