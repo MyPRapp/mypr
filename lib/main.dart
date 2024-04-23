@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'pages/clubs.dart';
 
 void main() => runApp(MyPR());
@@ -107,8 +108,7 @@ class MyPR extends StatelessWidget {
                       color: Colors.white),
                 ),
               ),
-              Container(
-                  child: Card(
+              Card(
                 margin: const EdgeInsets.all(20),
                 elevation: 0,
                 child: Column(
@@ -133,25 +133,8 @@ class MyPR extends StatelessWidget {
                     )
                   ],
                 ),
-              ))
-              /*Card(
-                        color: Colors.black,
-                        child: Container(
-                          height: 150,
-                          width: 350,
-                          decoration: const BoxDecoration(
-                            image: DecorationImage(
-                              fit: BoxFit.fitHeight,
-                              image: AssetImage('assets/clubPhotos/Syko.jpg'),
-                            ),
-                          ),
-                        ),
-                      ),*/
+              )
             ]),
-
-            //Expanded(
-            //child: clubsList(clubNamesList[index]),
-            //)
           ]),
         ));
   }
