@@ -14,82 +14,75 @@ class clubsNearYouCard extends StatelessWidget {
           ScaffoldMessenger.of(context)
               .showSnackBar(const SnackBar(content: Text('Gesture Detected!')));
         },
-        child: Card(
-          elevation: 20,
-          shadowColor: Colors.deepOrange,
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                width: 200,
-                height: 120,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.fill,
-                    image: AssetImage('assets/clubPhotos/$clubName.jpg'),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 5, right: 10, left: 10),
+          child: Card(
+            color: Colors.white,
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                Container(
+                  height: 120,
+                  width: 200,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.fill,
+                      image: AssetImage('assets/clubPhotos/$clubName.jpg'),
+                    ),
                   ),
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10)),
                 ),
-              ),
-              Text(
-                clubName,
-                style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-            ],
+                SizedBox(
+                  height: 67,
+                  width: 200,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 20,
+                        width: 200,
+                        child: Text(
+                          '  $clubName',
+                          style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 47,
+                        width: 200,
+                        child: Row(children: [
+                          Icon(
+                            Icons.monetization_on,
+                            color: Color(0xff9c0c04),
+                          ),
+                          Text(' 110',
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black)),
+                          Text(
+                            '    |    ',
+                            style: TextStyle(fontSize: 15),
+                          ),
+                          Icon(
+                            Icons.account_circle,
+                            color: Color(0xff9c0c04),
+                          ),
+                          Text(
+                            ' 5',
+                            style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                          )
+                        ]),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         ));
   }
 }
-
-class clubsList extends StatelessWidget {
-  const clubsList(this.clubName, {super.key});
-
-  final String clubName;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(onTap: () {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Gesture Detected!')));
-    });
-  }
-}
-
-
-
-
-
-
-/*return GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('Gesture Detected!')));
-        },
-        child: Card(
-          elevation: 20,
-          child: Column(
-            children: [
-              Container(
-                width: 200,
-                height: 120,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: AssetImage('assets/clubPhotos/$clubName.jpg'),
-                  ),
-                  borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10)),
-                ),
-              ),
-              Text(clubName)
-            ],
-          ),
-        ));
-*/
