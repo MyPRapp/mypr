@@ -39,7 +39,7 @@ class MyPR extends StatelessWidget {
                 child: Text(
                   'Καλησπέρα!',
                   style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
                 ),
@@ -49,21 +49,21 @@ class MyPR extends StatelessWidget {
                 child: TextField(
                   style: const TextStyle(
                       color: Colors.black,
-                      fontSize: 20,
+                      fontSize: 18,
                       fontWeight: FontWeight.w500),
                   cursorColor: Colors.black,
-                  cursorHeight: 30,
-                  cursorWidth: 3,
+                  cursorHeight: 25,
+                  cursorWidth: 2,
                   decoration: InputDecoration(
                     isCollapsed: true,
                     contentPadding: const EdgeInsets.all(8),
                     filled: true,
-                    fillColor: Colors.grey[800],
+                    fillColor: Colors.white70,
                     hoverColor: Colors.black,
                     hintText: 'Αναζήτηση',
                     hintStyle: const TextStyle(
                         color: Colors.black,
-                        fontSize: 22,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold),
                     focusedBorder: OutlineInputBorder(
                       borderSide: const BorderSide(color: Colors.grey),
@@ -81,7 +81,7 @@ class MyPR extends StatelessWidget {
                 child: Text(
                   'Επιλογές κοντά σου',
                   style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
                 ),
@@ -97,24 +97,26 @@ class MyPR extends StatelessWidget {
                 ),
               ),
               const Padding(
-                padding: EdgeInsets.only(left: 20, top: 40, bottom: 10),
+                padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
                 child: Text(
                   'Όλα τα αποτελέσματα',
                   style: TextStyle(
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.only(bottom: 30),
                 child: Card(
-                  margin: const EdgeInsets.only(left: 10, right: 10),
+                  color: Colors.transparent,
+                  margin: const EdgeInsets.only(left: 20, right: 10),
                   clipBehavior: Clip.antiAlias,
-                  child: Column(
+                  child: Row(
                     children: [
                       Container(
-                        height: 140,
+                        height: 120,
+                        width: 160,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
                             fit: BoxFit.cover,
@@ -122,13 +124,14 @@ class MyPR extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(
-                        height: 70,
-                        width: 390,
+                      SizedBox(
+                        height: 100,
+                        width: 300,
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(0, 5, 0, 5),
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -138,78 +141,184 @@ class MyPR extends StatelessWidget {
                                     style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.black),
+                                        color: Color(0xFF9C0C04)),
                                     textAlign: TextAlign.start,
                                   ),
                                   Row(children: [
                                     Icon(
                                       Icons.star,
                                       size: 20,
+                                      color: Color(0xFF9C0C04),
                                     ),
                                     Icon(
                                       Icons.star,
                                       size: 20,
+                                      color: Color(0xFF9C0C04),
                                     ),
                                     Icon(
                                       Icons.star,
                                       size: 20,
+                                      color: Color(0xFF9C0C04),
                                     ),
                                     Icon(
                                       Icons.star,
                                       size: 20,
+                                      color: Color(0xFF9C0C04),
                                     ),
                                     Icon(
                                       Icons.star_half,
                                       size: 20,
+                                      color: Color(0xFF9C0C04),
                                     )
                                   ]),
                                 ],
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.monetization_on,
-                                        color: Color(0xff9c0c04),
-                                      ),
-                                      Text(' 110',
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on,
+                                          color: Color(0xFF9C0C04),
+                                        ),
+                                        Text(' 110',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white)),
+                                        Text(
+                                          '  |  ',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey),
+                                        ),
+                                        Icon(
+                                          Icons.account_circle,
+                                          color: Color(0xFF9C0C04),
+                                        ),
+                                        Text(
+                                          ' 5',
                                           style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.black)),
-                                      Text(
-                                        '    |    ',
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                      Icon(
-                                        Icons.account_circle,
-                                        color: Color(0xff9c0c04),
-                                      ),
-                                      Text(
-                                        ' 5',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black),
-                                      )
-                                    ]),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Δ/Τ/Τ/Π/Π/Σ/Κ',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
+                                              color: Colors.white),
+                                        )
+                                      ]),
+                                  Padding(
+                                      padding: const EdgeInsets.only(right: 5),
+                                      child: Row(
+                                        children: [
+                                          const Text(
+                                            'Δ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Τ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Τ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Π',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Π',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Σ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Κ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            )
                           ],
                         ),
                       )
@@ -218,9 +327,439 @@ class MyPR extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.only(bottom: 30),
                 child: Card(
-                  margin: const EdgeInsets.only(left: 10, right: 10),
+                  color: Colors.transparent,
+                  margin: const EdgeInsets.only(left: 20, right: 10),
+                  clipBehavior: Clip.antiAlias,
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 120,
+                        width: 160,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: AssetImage('assets/clubPhotos/Akanthus.jpg'),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 100,
+                        width: 300,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '  Akanthus',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF9C0C04)),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  Row(children: [
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                    Icon(
+                                      Icons.star_half,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    )
+                                  ]),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on,
+                                          color: Color(0xFF9C0C04),
+                                        ),
+                                        Text(' 120',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white)),
+                                        Text(
+                                          '  |  ',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey),
+                                        ),
+                                        Icon(
+                                          Icons.account_circle,
+                                          color: Color(0xFF9C0C04),
+                                        ),
+                                        Text(
+                                          ' 5',
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        )
+                                      ]),
+                                  Padding(
+                                      padding: const EdgeInsets.only(right: 5),
+                                      child: Row(
+                                        children: [
+                                          const Text(
+                                            'Δ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Τ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Τ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Π',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Π',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Σ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Κ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 30),
+                child: Card(
+                  color: Colors.transparent,
+                  margin: const EdgeInsets.only(left: 20, right: 10),
+                  clipBehavior: Clip.antiAlias,
+                  child: Row(
+                    children: [
+                      Container(
+                        height: 120,
+                        width: 160,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: AssetImage('assets/clubPhotos/Toyroom.jpg'),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 100,
+                        width: 300,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(0, 5, 0, 0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    '  Syko',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF9C0C04)),
+                                    textAlign: TextAlign.start,
+                                  ),
+                                  Row(children: [
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                    Icon(
+                                      Icons.star,
+                                      size: 20,
+                                      color: Color(0xFF9C0C04),
+                                    ),
+                                  ]),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on,
+                                          color: Color(0xFF9C0C04),
+                                        ),
+                                        Text(' 100',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white)),
+                                        Text(
+                                          '  |  ',
+                                          style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey),
+                                        ),
+                                        Icon(
+                                          Icons.account_circle,
+                                          color: Color(0xFF9C0C04),
+                                        ),
+                                        Text(
+                                          ' 5',
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        )
+                                      ]),
+                                  Padding(
+                                      padding: const EdgeInsets.only(right: 5),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Δ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Τ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Τ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          const Text(
+                                            'Π',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Color(0xFF9C0C04)),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Π',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Σ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                          Text(
+                                            'Κ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.green[500]),
+                                          ),
+                                          const Text(
+                                            '/',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey),
+                                          ),
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              /*Padding(
+                padding: const EdgeInsets.only(bottom: 30),
+                child: Card(
+                  margin: const EdgeInsets.only(left: 50, right: 50),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
                     children: [
@@ -228,7 +767,7 @@ class MyPR extends StatelessWidget {
                         height: 140,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                             image: AssetImage('assets/clubPhotos/Akanthus.jpg'),
                           ),
                         ),
@@ -273,50 +812,57 @@ class MyPR extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.monetization_on,
-                                        color: Color(0xff9c0c04),
-                                      ),
-                                      Text(' 120',
+                            Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on,
+                                          color: Colors.black,
+                                        ),
+                                        Text(' 120',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black)),
+                                        Text(
+                                          '  |  ',
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                        Icon(
+                                          Icons.account_circle,
+                                          color: Colors.black,
+                                        ),
+                                        Text(
+                                          ' 5',
                                           style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.black)),
-                                      Text(
-                                        '    |    ',
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                      Icon(
-                                        Icons.account_circle,
-                                        color: Color(0xff9c0c04),
-                                      ),
-                                      Text(
-                                        ' 5',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black),
-                                      )
-                                    ]),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Δ/Τ/Τ/Π/Π/Σ/Κ',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
+                                              color: Colors.black),
+                                        )
+                                      ]),
+                                  Padding(
+                                      padding: EdgeInsets.only(right: 5),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Δ/Τ/Τ/Π/Π/Σ/Κ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
+                                          )
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            )
                           ],
                         ),
                       )
@@ -325,9 +871,9 @@ class MyPR extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(bottom: 20),
+                padding: const EdgeInsets.only(bottom: 30),
                 child: Card(
-                  margin: const EdgeInsets.only(left: 10, right: 10),
+                  margin: const EdgeInsets.only(left: 50, right: 50),
                   clipBehavior: Clip.antiAlias,
                   child: Column(
                     children: [
@@ -335,7 +881,7 @@ class MyPR extends StatelessWidget {
                         height: 140,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                             image: AssetImage('assets/clubPhotos/Toyroom.jpg'),
                           ),
                         ),
@@ -380,57 +926,64 @@ class MyPR extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.monetization_on,
-                                        color: Color(0xff9c0c04),
-                                      ),
-                                      Text(' 100',
+                            Padding(
+                              padding: EdgeInsets.only(left: 5),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        Icon(
+                                          Icons.monetization_on,
+                                          color: Colors.black,
+                                        ),
+                                        Text(' 100',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black)),
+                                        Text(
+                                          '  |  ',
+                                          style: TextStyle(fontSize: 15),
+                                        ),
+                                        Icon(
+                                          Icons.account_circle,
+                                          color: Colors.black,
+                                        ),
+                                        Text(
+                                          ' 5',
                                           style: TextStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.bold,
-                                              color: Colors.black)),
-                                      Text(
-                                        '    |    ',
-                                        style: TextStyle(fontSize: 15),
-                                      ),
-                                      Icon(
-                                        Icons.account_circle,
-                                        color: Color(0xff9c0c04),
-                                      ),
-                                      Text(
-                                        ' 5',
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black),
-                                      )
-                                    ]),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Δ/Τ/Τ/Π/Π/Σ/Κ',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
+                                              color: Colors.black),
+                                        )
+                                      ]),
+                                  Padding(
+                                      padding: EdgeInsets.only(right: 5),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Δ/Τ/Τ/Π/Π/Σ/Κ',
+                                            style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.black),
+                                          )
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            )
                           ],
                         ),
                       )
                     ],
                   ),
                 ),
-              ),
+              ),*/
             ]),
           ]),
         ));
