@@ -1,6 +1,8 @@
 // ignore_for_file: camel_case_types
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:mypr/pages/page2.dart';
 
 class clubsNearYouCard extends StatelessWidget {
   const clubsNearYouCard(this.clubName, {super.key});
@@ -39,12 +41,37 @@ class clubsNearYouCard extends StatelessWidget {
                       SizedBox(
                         height: 20,
                         width: 200,
-                        child: Text(
-                          '  $clubName',
-                          style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 40.0),
+                          child: ElevatedButton(
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  WidgetStateProperty.all(Colors.white),
+                              elevation: WidgetStateProperty.all(0),
+                              alignment: Alignment.centerLeft,
+                            ),
+                            child: Text(
+                              '  $clubName',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                            onPressed: () {
+                              if (clubName == 'Syko')
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SykoRoute()),
+                                );
+                              if (clubName == 'Blast')
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => const BlastRoute()),
+                                );
+                            },
+                          ),
                         ),
                       ),
                       const SizedBox(
