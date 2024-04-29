@@ -1,4 +1,6 @@
+// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
+import 'package:mypr/Pages/ProfilePage.dart';
 import 'package:mypr/Pages/ReservationPage.dart';
 import 'package:mypr/Widgets/HomePageWidgets.dart';
 
@@ -85,7 +87,34 @@ class HomePage extends StatelessWidget {
           minPrice: 120,
           maxPersons: 5,
         ),
-      ]),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ProfilePage()),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 30),
+            child: Card(
+              color: Colors.transparent,
+              margin: const EdgeInsets.only(left: 10),
+              clipBehavior: Clip.antiAlias,
+              child: Row(
+                children: [
+                  Icon(Icons.account_circle),
+                  BigClubCardInfo(
+                      clubName: 'ΠΡΟΦΙΛ',
+                      address: 'Profile Page',
+                      stars: 5,
+                      minPrice: 0,
+                      maxPersons: 1),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ])
     ]);
   }
 }
@@ -141,7 +170,7 @@ class BigClubCard extends StatelessWidget {
                     address: address,
                     stars: stars,
                     minPrice: minPrice,
-                    maxPersons: maxPersons)
+                    maxPersons: maxPersons),
               ],
             ),
           ),
@@ -194,7 +223,7 @@ class BigClubCardInfo extends StatelessWidget {
               children: [
                 MinPriceAndMaxPersons(
                     minPrice: minPrice, maxPersons: maxPersons),
-                DaysOpen()
+                const DaysOpen()
               ],
             ),
           )
@@ -226,7 +255,7 @@ class ClubsNearYouCard extends StatelessWidget {
           child: Card(
             margin: const EdgeInsets.only(bottom: 30),
             color: Colors.black,
-            shadowColor: Color(0xFF9c0c04),
+            shadowColor: const Color(0xFF9c0c04),
             clipBehavior: Clip.antiAlias,
             child: Column(
               children: [
