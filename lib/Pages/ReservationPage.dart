@@ -49,15 +49,15 @@ class ReservationPage extends StatelessWidget {
             const SizedBox(
               height: 20,
             ),
-            BuildInfoCard(package: 'Απλό', maxPersons: 5, minPrice: 110),
+            const BuildInfoCard(package: 'Απλό', maxPersons: 5, minPrice: 110),
             const SizedBox(
               height: 20,
             ),
-            BuildInfoCard(package: 'Απλό', maxPersons: 5, minPrice: 110),
+            const BuildInfoCard(package: 'Απλό', maxPersons: 5, minPrice: 110),
             const SizedBox(
               height: 20,
             ),
-            BuildInfoCard(package: 'Απλό', maxPersons: 5, minPrice: 110),
+            const BuildInfoCard(package: 'Απλό', maxPersons: 5, minPrice: 110),
           ]),
         ]));
   }

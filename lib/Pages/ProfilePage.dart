@@ -1,6 +1,7 @@
 // ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:mypr/Pages/HomePage.dart';
+import 'package:mypr/Widgets/BottomNavBar.dart';
 import 'package:mypr/Widgets/HomePageWidgets.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -11,18 +12,12 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('ΠΡΟΦΙΛ'),
+        title: const Text('ΠΡΟΦΙΛ'),
         backgroundColor: const Color(0xFF9c0c04),
       ),
       backgroundColor: Colors.black,
-      body: Column(children: [
-        Container(
-          height: 70,
-          decoration: const BoxDecoration(
-              image: DecorationImage(
-                  image: AssetImage('assets/clubPhotos/Untitled_Artwork.png'),
-                  fit: BoxFit.fitWidth)),
-        ),
+      bottomNavigationBar: const BottomNavBar(),
+      body: ListView(children: [
         Container(
           padding: const EdgeInsets.only(top: 50),
           child: const Icon(
@@ -39,40 +34,40 @@ class ProfilePage extends StatelessWidget {
               fontSize: 20,
               color: Color(0xFF9c0c04),
               fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
         ),
         const Divider(
           height: 150,
           color: Color(0xFF1e0604),
           thickness: 10,
         ),
-        SizedBox(
+        const SizedBox(
           height: 250,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               ProfileOptions(
                 label: ' Επεξεργασία Προφίλ',
-                widgetIcon: const ImageIcon(
+                widgetIcon: ImageIcon(
                   AssetImage("assets/icons/settings_icon.png"),
                   color: Color(0xFF9c0c04),
                 ),
               ),
               ProfileOptions(
                 label: ' Οι κρατήσεις μου',
-                widgetIcon: const ImageIcon(
-                    AssetImage("assets/icons/book_icon.png"),
+                widgetIcon: ImageIcon(AssetImage("assets/icons/book_icon.png"),
                     color: Color(0xFF9c0c04)),
               ),
               ProfileOptions(
                 label: ' Αγαπημένα',
-                widgetIcon: const ImageIcon(
+                widgetIcon: ImageIcon(
                   AssetImage("assets/icons/heart_icon.png"),
                   color: Color(0xFF9c0c04),
                 ),
               ),
               ProfileOptions(
                 label: ' Επικοινωνήστε μαζί μας',
-                widgetIcon: const ImageIcon(
+                widgetIcon: ImageIcon(
                     AssetImage("assets/icons/support_icon.png"),
                     color: Color(0xFF9c0c04)),
               ),
@@ -85,7 +80,8 @@ class ProfilePage extends StatelessWidget {
 }
 
 class ProfileOptions extends StatelessWidget {
-  ProfileOptions({super.key, required this.label, required this.widgetIcon});
+  const ProfileOptions(
+      {super.key, required this.label, required this.widgetIcon});
 
   final String label;
   final ImageIcon widgetIcon;

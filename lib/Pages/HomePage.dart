@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:mypr/Pages/ProfilePage.dart';
 import 'package:mypr/Pages/ReservationPage.dart';
+import 'package:mypr/Widgets/BottomNavBar.dart';
 import 'package:mypr/Widgets/HomePageWidgets.dart';
 
 class HomePage extends StatelessWidget {
@@ -10,117 +11,126 @@ class HomePage extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      Container(
-        decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage('assets/clubPhotos/Untitled_Artwork.png'),
-                fit: BoxFit.fill)),
-      ),
-      ListView(children: [
-        const Padding(
-          padding: EdgeInsets.only(top: 20, left: 10, bottom: 10),
-          child: Text(
-            'Καλησπέρα!',
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+    return Scaffold(
+        backgroundColor: const Color(0xFF000000),
+        bottomNavigationBar: const BottomNavBar(),
+        body: Stack(children: [
+          Container(
+            decoration: const BoxDecoration(
+                image: DecorationImage(
+                    image: AssetImage('assets/clubPhotos/Untitled_Artwork.png'),
+                    fit: BoxFit.fill)),
           ),
-        ),
-        const SearchWidget(),
-        const Padding(
-          padding: EdgeInsets.only(left: 20, top: 30),
-          child: Text(
-            'Επιλογές κοντά σου',
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ),
-        SizedBox(
-          height: 200,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: clubNamesList.length,
-            itemBuilder: (_, index) =>
-                ClubsNearYouCard(clubName: clubNamesList[index]),
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
-          child: Text(
-            'Όλα τα αποτελέσματα',
-            style: TextStyle(
-                fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-          ),
-        ),
-        BigClubCard(
-          clubName: 'Syko',
-          stars: 4.5,
-          address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-          minPrice: 110,
-          maxPersons: 5,
-        ),
-        BigClubCard(
-          clubName: 'Akanthus',
-          address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-          stars: 3.5,
-          minPrice: 120,
-          maxPersons: 5,
-        ),
-        BigClubCard(
-          clubName: 'Toyroom',
-          address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-          stars: 4,
-          minPrice: 110,
-          maxPersons: 5,
-        ),
-        BigClubCard(
-          clubName: 'Boutique',
-          address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-          stars: 4,
-          minPrice: 120,
-          maxPersons: 6,
-        ),
-        BigClubCard(
-          clubName: 'Lohan',
-          address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-          stars: 4.5,
-          minPrice: 120,
-          maxPersons: 5,
-        ),
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ProfilePage()),
-            );
-          },
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 30),
-            child: Card(
-              color: Colors.transparent,
-              margin: const EdgeInsets.only(left: 10),
-              clipBehavior: Clip.antiAlias,
-              child: Row(
-                children: [
-                  Icon(Icons.account_circle),
-                  BigClubCardInfo(
-                      clubName: 'ΠΡΟΦΙΛ',
-                      address: 'Profile Page',
-                      stars: 5,
-                      minPrice: 0,
-                      maxPersons: 1),
-                ],
+          ListView(children: [
+            const Padding(
+              padding: EdgeInsets.only(top: 20, left: 10, bottom: 10),
+              child: Text(
+                'Καλησπέρα!',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
-          ),
-        ),
-      ])
-    ]);
+            const SearchWidget(),
+            const Padding(
+              padding: EdgeInsets.only(left: 20, top: 30),
+              child: Text(
+                'Επιλογές κοντά σου',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+            SizedBox(
+              height: 200,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: clubNamesList.length,
+                itemBuilder: (_, index) =>
+                    ClubsNearYouCard(clubName: clubNamesList[index]),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(left: 20, top: 10, bottom: 10),
+              child: Text(
+                'Όλα τα αποτελέσματα',
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+            const BigClubCard(
+              clubName: 'Syko',
+              stars: 4.5,
+              address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
+              minPrice: 110,
+              maxPersons: 5,
+            ),
+            const BigClubCard(
+              clubName: 'Akanthus',
+              address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
+              stars: 3.5,
+              minPrice: 120,
+              maxPersons: 5,
+            ),
+            const BigClubCard(
+              clubName: 'Toyroom',
+              address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
+              stars: 4,
+              minPrice: 110,
+              maxPersons: 5,
+            ),
+            const BigClubCard(
+              clubName: 'Boutique',
+              address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
+              stars: 4,
+              minPrice: 120,
+              maxPersons: 6,
+            ),
+            const BigClubCard(
+              clubName: 'Lohan',
+              address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
+              stars: 4.5,
+              minPrice: 120,
+              maxPersons: 5,
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+              child: const Padding(
+                padding: EdgeInsets.only(bottom: 30),
+                child: Card(
+                  color: Colors.transparent,
+                  margin: EdgeInsets.only(left: 10),
+                  clipBehavior: Clip.antiAlias,
+                  child: Row(
+                    children: [
+                      Icon(Icons.account_circle),
+                      BigClubCardInfo(
+                          clubName: 'ΠΡΟΦΙΛ',
+                          address: 'Profile Page',
+                          stars: 5,
+                          minPrice: 0,
+                          maxPersons: 1),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ])
+        ]));
   }
 }
 
 class BigClubCard extends StatelessWidget {
-  BigClubCard({
+  const BigClubCard({
     super.key,
     required this.clubName,
     required this.address,
@@ -179,7 +189,7 @@ class BigClubCard extends StatelessWidget {
 }
 
 class BigClubCardInfo extends StatelessWidget {
-  BigClubCardInfo({
+  const BigClubCardInfo({
     super.key,
     required this.clubName,
     required this.address,
