@@ -1,241 +1,240 @@
-// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
+import 'package:mypr/Pages/ReservationPage.dart';
+import 'package:mypr/Widgets/ClubCardWidgets.dart';
 
-class NameAndStars extends StatelessWidget {
-  const NameAndStars({super.key, required this.clubName});
+class BigClubCard extends StatelessWidget {
+  const BigClubCard({
+    super.key,
+    required this.clubName,
+    required this.address,
+    required this.stars,
+    required this.minPrice,
+    required this.maxPersons,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.saturday,
+    required this.sunday,
+  });
+
+  final String clubName;
+  final String address;
+  final double stars;
+  final int minPrice;
+  final int maxPersons;
+  final bool monday;
+  final bool tuesday;
+  final bool wednesday;
+  final bool thursday;
+  final bool friday;
+  final bool saturday;
+  final bool sunday;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReservationPage(
+              clubName: clubName,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 30),
+        child: Card(
+          color: Colors.transparent,
+          margin: const EdgeInsets.only(left: 10),
+          clipBehavior: Clip.antiAlias,
+          child: Row(
+            children: [
+              Container(
+                height: 140,
+                width: 130,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: AssetImage('assets/clubPhotos/$clubName.jpg'),
+                  ),
+                ),
+              ),
+              BigClubCardInfo(
+                clubName: clubName,
+                address: address,
+                stars: stars,
+                minPrice: minPrice,
+                maxPersons: maxPersons,
+                monday: monday,
+                tuesday: tuesday,
+                wednesday: wednesday,
+                thursday: thursday,
+                friday: friday,
+                saturday: saturday,
+                sunday: sunday,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class BigClubCardInfo extends StatelessWidget {
+  const BigClubCardInfo({
+    super.key,
+    required this.clubName,
+    required this.address,
+    required this.stars,
+    required this.minPrice,
+    required this.maxPersons,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.saturday,
+    required this.sunday,
+  });
+
+  final String clubName;
+  final String address;
+  final double stars;
+  final int minPrice;
+  final int maxPersons;
+  final bool monday;
+  final bool tuesday;
+  final bool wednesday;
+  final bool thursday;
+  final bool friday;
+  final bool saturday;
+  final bool sunday;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 120,
+      width: 230,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              NameAndStars(clubName: clubName, stars: stars),
+              Text(
+                '  $address',
+                style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+                textAlign: TextAlign.start,
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                MinPriceAndMaxPersons(
+                  minPrice: minPrice,
+                  maxPersons: maxPersons,
+                ),
+                DaysOpen(
+                  monday: monday,
+                  tuesday: tuesday,
+                  wednesday: wednesday,
+                  thursday: thursday,
+                  friday: friday,
+                  saturday: saturday,
+                  sunday: sunday,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ClubsNearYouCard extends StatelessWidget {
+  const ClubsNearYouCard({super.key, required this.clubName});
 
   final String clubName;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          ' $clubName',
-          style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF9C0C04)),
-          textAlign: TextAlign.start,
-        ),
-        const RatingStars(),
-      ],
-    );
-  }
-}
-
-class RatingStars extends StatelessWidget {
-  const RatingStars({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(children: [
-      Icon(
-        Icons.star,
-        size: 20,
-        color: Color(0xFF9C0C04),
-      ),
-      Icon(
-        Icons.star,
-        size: 20,
-        color: Color(0xFF9C0C04),
-      ),
-      Icon(
-        Icons.star,
-        size: 20,
-        color: Color(0xFF9C0C04),
-      ),
-      Icon(
-        Icons.star,
-        size: 20,
-        color: Color(0xFF9C0C04),
-      ),
-      Icon(
-        Icons.star_half,
-        size: 20,
-        color: Color(0xFF9C0C04),
-      )
-    ]);
-  }
-}
-
-class MinPriceAndMaxPersons extends StatelessWidget {
-  const MinPriceAndMaxPersons({
-    super.key,
-    required this.minPrice,
-    required this.maxPersons,
-  });
-
-  final int minPrice;
-  final int maxPersons;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-      const Icon(
-        Icons.monetization_on,
-        color: Color(0xFF9C0C04),
-      ),
-      Text(' $minPrice',
-          style: const TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white)),
-      const Text(
-        ' | ',
-        style: TextStyle(
-            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
-      ),
-      const Icon(
-        Icons.account_circle,
-        color: Color(0xFF9C0C04),
-      ),
-      Text(
-        ' $maxPersons',
-        style: const TextStyle(
-            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
-      )
-    ]);
-  }
-}
-
-class DaysOpen extends StatelessWidget {
-  const DaysOpen({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-        padding: EdgeInsets.only(right: 5),
-        child: Row(
-          children: [
-            Text(
-              'Δ',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white24),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ReservationPage(
+              clubName: clubName,
             ),
-            Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
-            Text(
-              'Τ',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white24),
-            ),
-            Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
-            Text(
-              'Τ',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white24),
-            ),
-            Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
-            Text(
-              'Π',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white24),
-            ),
-            Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
-            Text(
-              'Π',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF9C0C04)),
-            ),
-            Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
-            Text(
-              'Σ',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF9C0C04)),
-            ),
-            Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
-            Text(
-              'Κ',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF9C0C04)),
-            ),
-          ],
-        ));
-  }
-}
-
-class SearchWidget extends StatelessWidget {
-  const SearchWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 10, right: 10),
-      child: TextField(
-        style: const TextStyle(
-            color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
-        cursorColor: Colors.black,
-        cursorHeight: 25,
-        cursorWidth: 2,
-        decoration: InputDecoration(
-          isCollapsed: true,
-          contentPadding: const EdgeInsets.all(8),
-          filled: true,
-          fillColor: Colors.white70,
-          hoverColor: Colors.black,
-          hintText: 'Αναζήτηση',
-          hintStyle: const TextStyle(
-              color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
-          focusedBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
           ),
-          enabledBorder: UnderlineInputBorder(
-            borderSide: const BorderSide(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(top: 5, left: 15, right: 15),
+        child: Card(
+          margin: const EdgeInsets.only(bottom: 30),
+          color: Colors.black,
+          shadowColor: const Color(0xFF9c0c04),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              Container(
+                height: 100,
+                width: 140,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.fill,
+                    image: AssetImage('assets/clubPhotos/$clubName.jpg'),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 51,
+                width: 140,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SizedBox(
+                      height: 23,
+                      width: 200,
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Text(
+                          clubName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF9C0C04),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                      width: 170,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 5),
+                        child:
+                            MinPriceAndMaxPersons(minPrice: 110, maxPersons: 5),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
