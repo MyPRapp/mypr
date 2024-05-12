@@ -1,3 +1,17 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "files.exclude": {
+        "**/build": true,
+        "**/.dart_tool":true,
+        "**/.idea":true,
+        "**/android":true,
+        "**/ios":true,
+        "**/linux":true,
+        "**/macos":true,
+        "**/web":true,
+        "**/windows":true,
+        ".metadata":true,
+        "analysis_options.yaml":true,
+        "pubspec.lock":true,
+      },
 }

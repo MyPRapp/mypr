@@ -1,8 +1,68 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Pages/HomePage.dart';
-import 'package:mypr/Pages/ProfilePage.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 
-class BottomNavBar extends StatefulWidget {
+@RoutePage()
+class BottomNavBar extends StatelessWidget {
+  const BottomNavBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AutoTabsRouter(
+      routes: const [
+        HomeRoute(),
+        SearchRoute(),
+        ProfileRoute(),
+      ],
+      builder: (context, child) {
+        final tabsRouter = AutoTabsRouter.of(context);
+        return Scaffold(
+            backgroundColor: Colors.black,
+            body: child,
+            bottomNavigationBar: BottomNavigationBar(
+              currentIndex: tabsRouter.activeIndex,
+              onTap: (value) {
+                tabsRouter.setActiveIndex(value);
+              },
+              iconSize: 22,
+              showUnselectedLabels: true,
+              fixedColor: Colors.black,
+              backgroundColor: const Color(0xFF9c0c04),
+              unselectedLabelStyle:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              selectedLabelStyle:
+                  const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.home,
+                    color: Colors.black,
+                  ),
+                  label: 'Αρχική',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(
+                    Icons.search,
+                    color: Colors.black,
+                  ),
+                  label: 'Αναζήτηση',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person, color: Colors.black),
+                  label: 'Προφίλ',
+                ),
+              ],
+            ));
+      },
+    );
+  }
+}
+
+
+
+
+
+/*class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
 
   @override
@@ -35,8 +95,14 @@ class BottomNavBarState extends State<BottomNavBar> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          setState(() => _currentIndex = index);
-          _loadScreen();
+          switch (index) {
+            case 0:
+              return setState(() => _currentWidget = const HomePage());
+            case 2:
+              return setState(() => _currentWidget = const ProfilePage());
+          }
+          //setState(() => _currentIndex = index);
+          //_loadScreen();
         },
         iconSize: 22,
         showUnselectedLabels: true,
@@ -69,7 +135,7 @@ class BottomNavBarState extends State<BottomNavBar> {
       ),
     );
   }
-}
+}*/
 
 /*class BottomNavBar extends StatelessWidget {
   BottomNavBar({super.key});

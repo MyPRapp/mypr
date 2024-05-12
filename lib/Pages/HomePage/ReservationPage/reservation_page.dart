@@ -1,6 +1,8 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Widgets/ReservationPageWidgets.dart';
+import 'package:mypr/Widgets/reservation_page_widgets.dart';
 
+@RoutePage()
 class ReservationPage extends StatelessWidget {
   const ReservationPage({super.key, required this.clubName});
 

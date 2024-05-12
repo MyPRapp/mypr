@@ -1,6 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Pages/ReservationPage.dart';
-import 'package:mypr/Widgets/ClubCardWidgets.dart';
+import 'package:mypr/Widgets/club_card_widgets.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 
 class BigClubCard extends StatelessWidget {
   const BigClubCard({
@@ -36,6 +37,7 @@ class BigClubCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        /*
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -43,13 +45,14 @@ class BigClubCard extends StatelessWidget {
               clubName: clubName,
             ),
           ),
-        );
+        );*/
+        AutoRouter.of(context).push(ReservationRoute(clubName: clubName));
       },
       child: Padding(
         padding: const EdgeInsets.only(bottom: 30),
         child: Card(
           color: Colors.transparent,
-          margin: const EdgeInsets.only(left: 10),
+          margin: const EdgeInsets.only(left: 20),
           clipBehavior: Clip.antiAlias,
           child: Row(
             children: [
@@ -173,6 +176,7 @@ class ClubsNearYouCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        /*
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -180,7 +184,8 @@ class ClubsNearYouCard extends StatelessWidget {
               clubName: clubName,
             ),
           ),
-        );
+        );*/
+        AutoRouter.of(context).push(ReservationRoute(clubName: clubName));
       },
       child: Padding(
         padding: const EdgeInsets.only(top: 5, left: 15, right: 15),
@@ -237,6 +242,36 @@ class ClubsNearYouCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class SearchWidget extends StatelessWidget {
+  const SearchWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 10, right: 10),
+      child: TextField(
+        //enabled: false,
+        style: const TextStyle(
+            color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+        cursorColor: Colors.black,
+        cursorHeight: 25,
+        cursorWidth: 2,
+        decoration: InputDecoration(
+            isCollapsed: true,
+            contentPadding: const EdgeInsets.all(8),
+            filled: true,
+            hintText: 'Αναζήτηση',
+            hintStyle: const TextStyle(
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
+            border: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            )),
       ),
     );
   }

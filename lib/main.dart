@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mypr/Pages/BottomNavBar.dart';
+import 'package:mypr/routes/app_router.dart';
 
 void main() => runApp(const MyPR());
 
@@ -8,10 +8,11 @@ class MyPR extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    AppRouter appRouter = AppRouter();
+    return MaterialApp.router(
       title: 'MyPR',
       debugShowCheckedModeBanner: false,
-      home: BottomNavBar(),
+      routerConfig: appRouter.config(),
     );
   }
 }
