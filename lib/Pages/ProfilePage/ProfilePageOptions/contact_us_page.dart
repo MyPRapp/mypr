@@ -10,7 +10,12 @@ class ContactUsPage extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          title: const Text("Contact Us Page"),
+          backgroundColor: const Color(0xFF9c0c04),
+          title: const Text(
+            "Contact Us Page",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
+          ),
         ),
         body: const Center(
           child: Text(

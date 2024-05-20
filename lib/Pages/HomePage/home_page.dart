@@ -47,7 +47,7 @@ class HomePage extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: clubNamesList.length,
               itemBuilder: (_, index) =>
-                  ClubsNearYouCard(clubName: clubNamesList[index]),
+                  HomePageSmallCard(clubName: clubNamesList[index]),
             ),
           ),
           const Padding(
@@ -60,7 +60,7 @@ class HomePage extends StatelessWidget {
                   color: Colors.white),
             ),
           ),
-          const BigClubCard(
+          const HomePageBigCard(
             clubName: 'Syko',
             stars: 5,
             address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
@@ -74,7 +74,7 @@ class HomePage extends StatelessWidget {
             saturday: true,
             sunday: true,
           ),
-          const BigClubCard(
+          const HomePageBigCard(
             clubName: 'Akanthus',
             address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
             stars: 3.5,
@@ -88,7 +88,7 @@ class HomePage extends StatelessWidget {
             saturday: true,
             sunday: true,
           ),
-          const BigClubCard(
+          const HomePageBigCard(
             clubName: 'Toyroom',
             address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
             stars: 4,
@@ -102,7 +102,7 @@ class HomePage extends StatelessWidget {
             saturday: true,
             sunday: true,
           ),
-          const BigClubCard(
+          const HomePageBigCard(
             clubName: 'Boutique',
             address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
             stars: 3.5,
@@ -116,7 +116,7 @@ class HomePage extends StatelessWidget {
             saturday: true,
             sunday: true,
           ),
-          const BigClubCard(
+          const HomePageBigCard(
             clubName: 'Lohan',
             address: 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
             stars: 4.5,

@@ -10,7 +10,12 @@ class CustomiseProfilePage extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          title: const Text("Customise Profile Page"),
+          backgroundColor: const Color(0xFF9c0c04),
+          title: const Text(
+            "Customise Profile Page",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
+          ),
         ),
         body: const Center(
           child: Text(

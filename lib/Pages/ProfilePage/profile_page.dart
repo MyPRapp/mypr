@@ -14,7 +14,7 @@ class ProfilePage extends StatelessWidget {
         title: const Text(
           'ΠΡΟΦΙΛ',
           style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 25, color: Colors.black),
+              fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black),
         ),
         backgroundColor: const Color(0xFF9c0c04),
       ),
@@ -69,7 +69,7 @@ class ProfilePage extends StatelessWidget {
                 child: const ProfileOptions(
                     label: ' Αγαπημένα',
                     widgetIcon: ImageIcon(
-                      AssetImage("assets/icons/heart_icon.png"),
+                      AssetImage("assets/icons/heart(liked)_icon.png"),
                       color: Color(0xFF9c0c04),
                     )),
               ),

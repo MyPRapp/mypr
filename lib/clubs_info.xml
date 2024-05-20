@@ -1,0 +1,20 @@
+<data>
+    <club>
+        <name>Lohan</name>
+        <stars>4.5</stars>
+        <address>Ιερά Οδός 123, Κεραμεικός<address>
+        <minPrice1>110</minPrice1>
+        <maxPersons1>5</maxPersons1>
+        <minPrice2>180</minPrice2>
+        <maxPersons2>5</maxPersons2>
+        <minPrice3>300</minPrice3>
+        <maxPersons3>6</maxPersons3>
+        <monday>false</monday>
+        <tuesday>false</tuesday>
+        <wednesday>false</wednesday>
+        <thursday>false</thursday>
+        <friday>true</friday>
+        <saturday>true</saturday>
+        <sunday>true</sunday>
+    </club>
+</data>

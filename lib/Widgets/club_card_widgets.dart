@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
 class NameAndStars extends StatelessWidget {
   const NameAndStars({super.key, required this.clubName, required this.stars});
@@ -256,6 +257,45 @@ class DaysOpen extends StatelessWidget {
                   color: sundayColor),
             ),
           ],
+        ));
+  }
+}
+
+class LikeButton extends StatefulWidget {
+  const LikeButton({super.key});
+
+  @override
+  State<LikeButton> createState() => _LikeButtonState();
+}
+
+class _LikeButtonState extends State<LikeButton> {
+  bool liked = false;
+
+  void toggleButton() {
+    setState(() {
+      liked = !liked;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+        onTap: toggleButton,
+        child: SizedBox(
+          height: 40,
+          width: 60,
+          child: liked
+              ? const ImageIcon(
+                      AssetImage("assets/icons/heart(liked)_icon.png"),
+                      color: Color(0xFF9c0c04))
+                  .animate(target: liked ? 1 : 0)
+                  .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
+                  .then()
+                  .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
+              : const ImageIcon(
+                  AssetImage("assets/icons/heart(unliked)_icon.png"),
+                  color: Color(0xFF9c0c04),
+                ),
         ));
   }
 }

@@ -10,7 +10,12 @@ class MyReservationsPage extends StatelessWidget {
     return Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
-          title: const Text("My Reservations Page"),
+          backgroundColor: const Color(0xFF9c0c04),
+          title: const Text(
+            "My Reservations Page",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 20, color: Colors.black),
+          ),
         ),
         body: const Center(
           child: Text(

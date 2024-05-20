@@ -23,7 +23,7 @@ class ProfileOptions extends StatelessWidget {
           borderRadius: const BorderRadius.all(Radius.circular(5))),
       child: Row(
         children: [
-          widgetIcon,
+          SizedBox(height: 40, child: widgetIcon),
           Text(
             label,
             style: const TextStyle(

@@ -3,6 +3,61 @@ import 'package:flutter/material.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 
+class HomePageBigCard extends StatelessWidget {
+  const HomePageBigCard({
+    super.key,
+    required this.clubName,
+    required this.address,
+    required this.stars,
+    required this.minPrice,
+    required this.maxPersons,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.saturday,
+    required this.sunday,
+  });
+
+  final String clubName;
+  final String address;
+  final double stars;
+  final int minPrice;
+  final int maxPersons;
+  final bool monday;
+  final bool tuesday;
+  final bool wednesday;
+  final bool thursday;
+  final bool friday;
+  final bool saturday;
+  final bool sunday;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [
+      BigClubCard(
+        clubName: clubName,
+        address: address,
+        stars: stars,
+        minPrice: minPrice,
+        maxPersons: maxPersons,
+        monday: monday,
+        tuesday: tuesday,
+        wednesday: wednesday,
+        thursday: thursday,
+        friday: friday,
+        saturday: saturday,
+        sunday: sunday,
+      ),
+      const Padding(
+        padding: EdgeInsets.only(left: 10, top: 0),
+        child: LikeButton(),
+      )
+    ]);
+  }
+}
+
 class BigClubCard extends StatelessWidget {
   const BigClubCard({
     super.key,
@@ -167,8 +222,25 @@ class BigClubCardInfo extends StatelessWidget {
   }
 }
 
-class ClubsNearYouCard extends StatelessWidget {
-  const ClubsNearYouCard({super.key, required this.clubName});
+class HomePageSmallCard extends StatelessWidget {
+  const HomePageSmallCard({super.key, required this.clubName});
+
+  final String clubName;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(children: [
+      SmallClubCard(clubName: clubName),
+      const Padding(
+        padding: EdgeInsets.only(left: 5, top: 5),
+        child: LikeButton(),
+      )
+    ]);
+  }
+}
+
+class SmallClubCard extends StatelessWidget {
+  const SmallClubCard({super.key, required this.clubName});
 
   final String clubName;
 
