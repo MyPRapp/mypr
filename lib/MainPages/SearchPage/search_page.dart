@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Widgets/home_page_widgets.dart';
+import 'package:mypr/Widgets/search_widget.dart';
 
 @RoutePage()
 class SearchPage extends StatelessWidget {

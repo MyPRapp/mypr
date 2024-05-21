@@ -85,6 +85,17 @@ class ProfilePage extends StatelessWidget {
                         color: Color(0xFF9c0c04))),
               ),
               const SizedBox(height: 30),
+              GestureDetector(
+                onTap: () {
+                  AutoRouter.of(context).push(const SignUpRoute());
+                },
+                child: const ProfileOptions(
+                    label: ' Δημιουργία προφίλ',
+                    widgetIcon: ImageIcon(
+                        AssetImage("assets/icons/settings_icon.png"),
+                        color: Color(0xFF9c0c04))),
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ],

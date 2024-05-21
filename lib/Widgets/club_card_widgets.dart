@@ -29,6 +29,7 @@ class NameAndStars extends StatelessWidget {
   }
 }
 
+//RatingStars is used by NameAndStars
 //if(stars <= 0 || stars > 5), then color = grey
 class RatingStars extends StatelessWidget {
   const RatingStars({super.key, required this.stars});

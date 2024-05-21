@@ -14,5 +14,6 @@ class MyPR extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter.config(),
     );
+    // return const MaterialApp(home: SignUpPage());
   }
 }

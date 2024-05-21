@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class BuildInfoCard extends StatelessWidget {
-  const BuildInfoCard({
+class PackagesInfo extends StatelessWidget {
+  const PackagesInfo({
     super.key,
     required this.package,
     required this.maxPersons,
