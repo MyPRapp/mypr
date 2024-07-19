@@ -2,9 +2,14 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
 @RoutePage()
-class SignUpPage extends StatelessWidget {
+class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
+  @override
+  State<SignUpPage> createState() => _SignUpPageState();
+}
+
+class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
@@ -38,7 +43,7 @@ class SignUpPage extends StatelessWidget {
                 ))
           ]),
           Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            SizedBox(height: 40),
+            SizedBox(height: 30),
             Padding(
               padding: EdgeInsets.only(right: 133),
               child: SizedBox(
@@ -50,7 +55,7 @@ class SignUpPage extends StatelessWidget {
                     )),
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             SizedBox(
               height: 40,
               width: 300,
@@ -204,7 +209,7 @@ class SignUpPage extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: 200,
+                    width: 190,
                     child: Text(
                       'Έχεις ήδη λογαριασμό; ',
                       style: TextStyle(
@@ -214,7 +219,7 @@ class SignUpPage extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 100,
+                    width: 90,
                     child: Text(
                       'Συνδέσου.',
                       style: TextStyle(

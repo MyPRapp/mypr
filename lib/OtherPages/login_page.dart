@@ -9,105 +9,138 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       backgroundColor: Colors.black,
-      body: Column(children: [
-        SizedBox(height: 40),
-        Stack(children: [
+      body: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: Column(children: [
           SizedBox(
-              height: 150,
-              width: 250,
-              child: Image(
-                  image: AssetImage('assets/launch_icon/Logo_v2.2.png'),
-                  fit: BoxFit.contain)),
-          Text('Καλώς όρισες στην',
-              style: TextStyle(
-                color: Color(0xFF9c0c04),
-                fontSize: 27,
-                fontWeight: FontWeight.w900,
-              ))
-        ]),
-        Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 70),
-              Text('  Κάνε εγγραφή.',
+            height: 40,
+            width: double.maxFinite,
+            child: Image(
+              image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+              fit: BoxFit.fitWidth,
+              alignment: Alignment(0, -0.3),
+            ),
+          ),
+          SizedBox(height: 40),
+          Stack(children: [
+            SizedBox(
+                height: 123,
+                width: 220,
+                child: Image(
+                    image: AssetImage('assets/launch_icon/Logo_v2.2.png'),
+                    fit: BoxFit.contain)),
+            Text('Καλώς όρισες στην',
+                style: TextStyle(
+                  color: Color(0xFF9c0c04),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                ))
+          ]),
+          Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+            SizedBox(height: 40),
+            Padding(
+              padding: EdgeInsets.only(right: 185),
+              child: SizedBox(
+                child: Text('Συνδέσου.',
+                    style: TextStyle(
+                      color: Color(0xFF9c0c04),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                    )),
+              ),
+            ),
+            SizedBox(height: 20),
+            SizedBox(
+              height: 35,
+              width: 300,
+              child: TextField(
                   style: TextStyle(
-                    color: Color(0xFF9c0c04),
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                  )),
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                  child: Card(
-                    color: Color.fromARGB(104, 107, 107, 107),
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: ' Όνομα',
-                                hintStyle: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontWeight: FontWeight.w900),
-                                border: InputBorder.none,
-                              )),
-                          Divider(
-                              height: 10, color: Colors.black, thickness: 2),
-                          TextField(
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: ' Επίθετο',
-                                hintStyle: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontWeight: FontWeight.w900),
-                                border: InputBorder.none,
-                              )),
-                          Divider(
-                              height: 10, color: Colors.black, thickness: 2),
-                          TextField(
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: ' Τηλέφωνο(+30)',
-                                hintStyle: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontWeight: FontWeight.w900),
-                                border: InputBorder.none,
-                              )),
-                          Divider(
-                              height: 10, color: Colors.black, thickness: 2),
-                          TextField(
-                              style: TextStyle(
-                                fontSize: 25,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: ' Email',
-                                hintStyle: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontWeight: FontWeight.w900),
-                                border: InputBorder.none,
-                              )),
-                        ]),
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
+                  decoration: InputDecoration(
+                    hintText: 'Email/Τηλέφωνο(+30)',
+                    hintStyle: TextStyle(
+                      color: Color.fromARGB(180, 156, 12, 4),
+                    ),
+                    border: InputBorder.none,
+                  )),
+            ),
+            SizedBox(
+              width: 300,
+              child: Divider(
+                  height: 10,
+                  color: Color.fromARGB(60, 156, 12, 4),
+                  thickness: 7),
+            ),
+            SizedBox(height: 10),
+            SizedBox(
+              height: 35,
+              width: 300,
+              child: TextField(
+                  style: TextStyle(
+                    fontSize: 23,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Κωδικός',
+                    hintStyle: TextStyle(
+                      color: Color.fromARGB(180, 156, 12, 4),
+                    ),
+                    border: InputBorder.none,
+                  )),
+            ),
+            SizedBox(height: 20),
+            Padding(
+              padding: EdgeInsets.only(left: 30),
+              child: SizedBox(
+                height: 30,
+                width: 330,
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 200,
+                      child: Text(
+                        'Δεν έχεις λογαριασμό; ',
+                        style: TextStyle(
+                            color: Color(0xFF9C0C04),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(
+                      width: 130,
+                      child: Text(
+                        'Κάνε εγγραφή.',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w900),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ]),
-      ]),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 78, top: 5),
+              child: SizedBox(
+                width: 220,
+                child: Text(
+                  'Ξέχασες τον κωδικό σου;',
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w900),
+                ),
+              ),
+            ),
+          ]),
+        ]),
+      ),
     );
   }
 }

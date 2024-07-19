@@ -61,6 +61,16 @@ class HomePage extends StatelessWidget {
                   color: Colors.white),
             ),
           ),
+          /* Center(
+            child: ElevatedButton(
+              onPressed: () {
+                // Navigate back to first route when tapped.
+                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                    overlays: [SystemUiOverlay.top]);
+              },
+              child: const Text('Go back!'),
+            ),
+          ), */
           const HomePageBigCard(
             clubName: 'Syko',
             stars: 5,

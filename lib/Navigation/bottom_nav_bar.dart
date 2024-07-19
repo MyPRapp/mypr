@@ -3,11 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 
 @RoutePage()
-class BottomNavBar extends StatelessWidget {
+class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
 
   @override
+  State<BottomNavBar> createState() => _BottomNavBarState();
+}
+
+class _BottomNavBarState extends State<BottomNavBar> {
+  double bottomBarHeight = 60;
+  bool _show = true;
+
+  void showBottomBar() {
+    bottomBarHeight = 60;
+    setState(() {
+      _show = true;
+    });
+  }
+
+  void hideBottomBar() {
+    bottomBarHeight = 0;
+    setState(() {
+      _show = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ModalRoute.of(context)?.settings.name;
     return AutoTabsRouter(
       routes: const [
         HomeRoute(),
@@ -19,40 +42,44 @@ class BottomNavBar extends StatelessWidget {
         return Scaffold(
             backgroundColor: Colors.black,
             body: child,
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: tabsRouter.activeIndex,
-              onTap: (value) {
-                tabsRouter.setActiveIndex(value);
-              },
-              iconSize: 22,
-              showUnselectedLabels: true,
-              fixedColor: Colors.black,
-              backgroundColor: const Color(0xFF9c0c04),
-              unselectedLabelStyle:
-                  const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-              selectedLabelStyle:
-                  const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-              items: const [
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.home,
-                    color: Colors.black,
-                  ),
-                  label: 'Αρχική',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(
-                    Icons.search,
-                    color: Colors.black,
-                  ),
-                  label: 'Αναζήτηση',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.person, color: Colors.black),
-                  label: 'Προφίλ',
-                ),
-              ],
-            ));
+            bottomNavigationBar: SizedBox(
+                height: bottomBarHeight,
+                child: _show
+                    ? BottomNavigationBar(
+                        currentIndex: tabsRouter.activeIndex,
+                        onTap: (value) {
+                          tabsRouter.setActiveIndex(value);
+                        },
+                        iconSize: 22,
+                        showUnselectedLabels: true,
+                        fixedColor: Colors.black,
+                        backgroundColor: const Color(0xFF9c0c04),
+                        unselectedLabelStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
+                        selectedLabelStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
+                        items: const [
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.home,
+                              color: Colors.black,
+                            ),
+                            label: 'Αρχική',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(
+                              Icons.search,
+                              color: Colors.black,
+                            ),
+                            label: 'Αναζήτηση',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.person, color: Colors.black),
+                            label: 'Προφίλ',
+                          ),
+                        ],
+                      )
+                    : Container(height: 0)));
       },
     );
   }
