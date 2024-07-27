@@ -18,6 +18,8 @@ class HomePageBigCard extends StatelessWidget {
     required this.friday,
     required this.saturday,
     required this.sunday,
+    required this.liked,
+    this.onRemove,
   });
 
   final String clubName;
@@ -32,29 +34,33 @@ class HomePageBigCard extends StatelessWidget {
   final bool friday;
   final bool saturday;
   final bool sunday;
+  final bool liked;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      BigClubCard(
-        clubName: clubName,
-        address: address,
-        stars: stars,
-        minPrice: minPrice,
-        maxPersons: maxPersons,
-        monday: monday,
-        tuesday: tuesday,
-        wednesday: wednesday,
-        thursday: thursday,
-        friday: friday,
-        saturday: saturday,
-        sunday: sunday,
-      ),
-      const Padding(
-        padding: EdgeInsets.only(left: 10, top: 0),
-        child: LikeButton(),
-      )
-    ]);
+    return Stack(
+      children: [
+        BigClubCard(
+          clubName: clubName,
+          address: address,
+          stars: stars,
+          minPrice: minPrice,
+          maxPersons: maxPersons,
+          monday: monday,
+          tuesday: tuesday,
+          wednesday: wednesday,
+          thursday: thursday,
+          friday: friday,
+          saturday: saturday,
+          sunday: sunday,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 10, top: 0),
+          child: LikeButton(liked: liked, onRemove: onRemove),
+        ),
+      ],
+    );
   }
 }
 
@@ -223,17 +229,25 @@ class BigClubCardInfo extends StatelessWidget {
 }
 
 class HomePageSmallCard extends StatelessWidget {
-  const HomePageSmallCard({super.key, required this.clubName});
+  const HomePageSmallCard({
+    super.key,
+    required this.clubName,
+    required this.liked,
+  });
 
+  final bool liked;
   final String clubName;
 
   @override
   Widget build(BuildContext context) {
     return Stack(children: [
       SmallClubCard(clubName: clubName),
-      const Padding(
-        padding: EdgeInsets.only(left: 5, top: 5),
-        child: LikeButton(),
+      Padding(
+        padding: const EdgeInsets.only(left: 5, top: 5),
+        child: LikeButton(
+          liked: liked,
+          onRemove: () {},
+        ),
       )
     ]);
   }

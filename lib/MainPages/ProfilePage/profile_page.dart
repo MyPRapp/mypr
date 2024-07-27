@@ -10,39 +10,54 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'ΠΡΟΦΙΛ',
-          style: TextStyle(
-              fontWeight: FontWeight.bold, fontSize: 22, color: Colors.black),
-        ),
-        backgroundColor: const Color(0xFF9c0c04),
-      ),
       backgroundColor: Colors.black,
-      body: ListView(
+      body: Column(
         children: [
-          Container(
-            padding: const EdgeInsets.only(top: 50),
-            child: const Icon(
-              Icons.account_circle_outlined,
-              size: 100,
-              color: Color(0xFF9c0c04),
+          const SizedBox(
+            height: 50,
+            width: double.maxFinite,
+            child: Image(
+              image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+              fit: BoxFit.fitWidth,
+              alignment: Alignment(0, -0.3),
             ),
           ),
-          const Text(
-            'Αντώνιος Παπαρδελης',
-            style: TextStyle(
-                fontSize: 20,
-                color: Color(0xFF9c0c04),
-                fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
+          Container(
+              padding: const EdgeInsets.only(top: 50),
+              child: SizedBox(
+                height: 130,
+                width: 130,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(300),
+                  child: Image.asset(
+                    'assets/clubPhotos/giorgos_sto_plintirio.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )),
+          const Padding(
+            padding: EdgeInsets.only(top: 30.0),
+            child: Text(
+              'Αντώνιος Παπαρδελης',
+              style: TextStyle(
+                  fontSize: 20,
+                  color: Color(0xFF9c0c04),
+                  fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
           ),
-          const Divider(height: 100, color: Color(0xFF1e0604), thickness: 10),
+          const Padding(
+            padding: EdgeInsets.only(top: 60),
+            child: Divider(
+                height: 100,
+                color: Color.fromARGB(255, 99, 11, 4),
+                thickness: 10),
+          ),
           Column(
             children: [
               GestureDetector(
                 onTap: () {
-                  AutoRouter.of(context).push(const CustomiseProfileRoute());
+                  AutoRouter.of(context).push(const CustomizeProfileRoute());
                 },
                 child: const ProfileOptions(
                     label: ' Επεξεργασία Προφίλ',
@@ -64,7 +79,7 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 30),
               GestureDetector(
                 onTap: () {
-                  AutoRouter.of(context).push(const FavouritesRoute());
+                  AutoRouter.of(context).push(const FavoritesRoute());
                 },
                 child: const ProfileOptions(
                     label: ' Αγαπημένα',

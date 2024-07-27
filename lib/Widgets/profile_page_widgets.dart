@@ -11,9 +11,9 @@ class ProfileOptions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(left: 10),
-      margin: const EdgeInsets.only(left: 20, right: 20),
+      margin: const EdgeInsets.only(left: 50, right: 50),
       decoration: BoxDecoration(
-          border: Border.all(color: const Color(0xFF9c0c04), width: 5),
+          border: Border.all(color: const Color(0xFF9c0c04), width: 7),
           borderRadius: const BorderRadius.all(Radius.circular(5))),
       child: Row(children: [
         SizedBox(height: 40, child: widgetIcon),

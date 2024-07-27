@@ -6,7 +6,6 @@ import 'package:mypr/Widgets/search_widget.dart';
 @RoutePage()
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,8 +46,10 @@ class HomePage extends StatelessWidget {
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: clubNamesList.length,
-              itemBuilder: (_, index) =>
-                  HomePageSmallCard(clubName: clubNamesList[index]),
+              itemBuilder: (_, index) => HomePageSmallCard(
+                clubName: clubNamesList[index],
+                liked: false,
+              ),
             ),
           ),
           const Padding(
@@ -61,16 +62,6 @@ class HomePage extends StatelessWidget {
                   color: Colors.white),
             ),
           ),
-          /* Center(
-            child: ElevatedButton(
-              onPressed: () {
-                // Navigate back to first route when tapped.
-                SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                    overlays: [SystemUiOverlay.top]);
-              },
-              child: const Text('Go back!'),
-            ),
-          ), */
           const HomePageBigCard(
             clubName: 'Syko',
             stars: 5,
@@ -84,6 +75,7 @@ class HomePage extends StatelessWidget {
             friday: true,
             saturday: true,
             sunday: true,
+            liked: false,
           ),
           const HomePageBigCard(
             clubName: 'Akanthus',
@@ -98,6 +90,7 @@ class HomePage extends StatelessWidget {
             friday: true,
             saturday: true,
             sunday: true,
+            liked: false,
           ),
           const HomePageBigCard(
             clubName: 'Toyroom',
@@ -112,6 +105,7 @@ class HomePage extends StatelessWidget {
             friday: true,
             saturday: true,
             sunday: true,
+            liked: false,
           ),
           const HomePageBigCard(
             clubName: 'Boutique',
@@ -126,6 +120,7 @@ class HomePage extends StatelessWidget {
             friday: true,
             saturday: true,
             sunday: true,
+            liked: false,
           ),
           const HomePageBigCard(
             clubName: 'Lohan',
@@ -140,6 +135,7 @@ class HomePage extends StatelessWidget {
             friday: true,
             saturday: true,
             sunday: true,
+            liked: false,
           ),
         ]),
       ]),

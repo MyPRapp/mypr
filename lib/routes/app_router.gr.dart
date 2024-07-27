@@ -16,9 +16,9 @@ import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
 import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i10;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/contact_us_page.dart'
     as _i2;
-import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customise_profile_page.dart'
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customize_profile_page.dart'
     as _i3;
-import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favourites_page.dart'
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favorites_page.dart'
     as _i4;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/my_reservations_page.dart'
     as _i8;
@@ -46,16 +46,16 @@ abstract class $AppRouter extends _i14.RootStackRouter {
         child: const _i2.ContactUsPage(),
       );
     },
-    CustomiseProfileRoute.name: (routeData) {
+    CustomizeProfileRoute.name: (routeData) {
       return _i14.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i3.CustomiseProfilePage(),
+        child: const _i3.CustomizeProfilePage(),
       );
     },
-    FavouritesRoute.name: (routeData) {
+    FavoritesRoute.name: (routeData) {
       return _i14.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i4.FavouritesPage(),
+        child: const _i4.FavoritesPage(),
       );
     },
     HomeNavigation.name: (routeData) {
@@ -148,29 +148,29 @@ class ContactUsRoute extends _i14.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i3.CustomiseProfilePage]
-class CustomiseProfileRoute extends _i14.PageRouteInfo<void> {
-  const CustomiseProfileRoute({List<_i14.PageRouteInfo>? children})
+/// [_i3.CustomizeProfilePage]
+class CustomizeProfileRoute extends _i14.PageRouteInfo<void> {
+  const CustomizeProfileRoute({List<_i14.PageRouteInfo>? children})
       : super(
-          CustomiseProfileRoute.name,
+          CustomizeProfileRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'CustomiseProfileRoute';
+  static const String name = 'CustomizeProfileRoute';
 
   static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i4.FavouritesPage]
-class FavouritesRoute extends _i14.PageRouteInfo<void> {
-  const FavouritesRoute({List<_i14.PageRouteInfo>? children})
+/// [_i4.FavoritesPage]
+class FavoritesRoute extends _i14.PageRouteInfo<void> {
+  const FavoritesRoute({List<_i14.PageRouteInfo>? children})
       : super(
-          FavouritesRoute.name,
+          FavoritesRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'FavouritesRoute';
+  static const String name = 'FavoritesRoute';
 
   static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
 }

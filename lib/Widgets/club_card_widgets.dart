@@ -263,40 +263,52 @@ class DaysOpen extends StatelessWidget {
 }
 
 class LikeButton extends StatefulWidget {
-  const LikeButton({super.key});
+  final bool liked;
+  final VoidCallback? onRemove;
+
+  const LikeButton({super.key, required this.liked, this.onRemove});
 
   @override
   State<LikeButton> createState() => _LikeButtonState();
 }
 
 class _LikeButtonState extends State<LikeButton> {
-  bool liked = false;
+  late bool liked;
+
+  @override
+  void initState() {
+    super.initState();
+    liked = widget.liked;
+  }
 
   void toggleButton() {
     setState(() {
       liked = !liked;
+      if (!liked && widget.onRemove != null) {
+        widget.onRemove!();
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: toggleButton,
-        child: SizedBox(
-          height: 40,
-          width: 60,
-          child: liked
-              ? const ImageIcon(
-                      AssetImage("assets/icons/heart(liked)_icon.png"),
-                      color: Color(0xFF9c0c04))
-                  .animate(target: liked ? 1 : 0)
-                  .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
-                  .then()
-                  .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
-              : const ImageIcon(
-                  AssetImage("assets/icons/heart(unliked)_icon.png"),
-                  color: Color(0xFF9c0c04),
-                ),
-        ));
+      onTap: toggleButton,
+      child: SizedBox(
+        height: 40,
+        width: 60,
+        child: liked
+            ? const ImageIcon(AssetImage("assets/icons/heart(liked)_icon.png"),
+                    color: Color(0xFF9c0c04))
+                .animate(target: liked ? 1 : 0)
+                .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
+                .then()
+                .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
+            : const ImageIcon(
+                AssetImage("assets/icons/heart(unliked)_icon.png"),
+                color: Color(0xFF9c0c04),
+              ),
+      ),
+    );
   }
 }
