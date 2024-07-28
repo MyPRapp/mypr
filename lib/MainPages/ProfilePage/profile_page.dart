@@ -47,7 +47,7 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const Padding(
-            padding: EdgeInsets.only(top: 60),
+            padding: EdgeInsets.only(top: 50),
             child: Divider(
                 height: 100,
                 color: Color.fromARGB(255, 99, 11, 4),
@@ -98,19 +98,7 @@ class ProfilePage extends StatelessWidget {
                     widgetIcon: ImageIcon(
                         AssetImage("assets/icons/support_icon.png"),
                         color: Color(0xFF9c0c04))),
-              ),
-              const SizedBox(height: 30),
-              GestureDetector(
-                onTap: () {
-                  AutoRouter.of(context).push(const SignUpRoute());
-                },
-                child: const ProfileOptions(
-                    label: ' Δημιουργία προφίλ',
-                    widgetIcon: ImageIcon(
-                        AssetImage("assets/icons/settings_icon.png"),
-                        color: Color(0xFF9c0c04))),
-              ),
-              const SizedBox(height: 30),
+              )
             ],
           ),
         ],

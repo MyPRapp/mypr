@@ -7,8 +7,13 @@ class AppRouter extends $AppRouter {
   @override
   List<AutoRoute> get routes => [
         AutoRoute(
-          page: BottomNavBar.page,
+          page: SignUpRoute.page,
           initial: true,
+        ),
+        AutoRoute(page: PhoneLoginRoute.page),
+        AutoRoute(page: EmailLoginRoute.page),
+        AutoRoute(
+          page: BottomNavBarRoute.page,
           children: [
             AutoRoute(
               page: HomeNavigation.page,
@@ -21,7 +26,6 @@ class AppRouter extends $AppRouter {
             AutoRoute(page: SearchRoute.page),
             AutoRoute(
               page: ProfileNavigation.page,
-              initial: true,
               children: [
                 AutoRoute(page: ProfileRoute.page, initial: true),
                 AutoRoute(page: CustomizeProfileRoute.page),

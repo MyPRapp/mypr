@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/routes/app_router.gr.dart'; // Ensure this import
 
 @RoutePage()
 class SignUpPage extends StatefulWidget {
@@ -10,229 +11,291 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  void _navigateToMainApp() {
+    context.router.replaceAll([const BottomNavBarRoute()]);
+  }
+
+  void _navigateToPhoneLoginPage() {
+    context.router.replaceAll([const PhoneLoginRoute()]);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Colors.black,
       body: SizedBox(
         height: double.infinity,
         width: double.infinity,
-        child: Column(children: [
-          SizedBox(
-            height: 40,
-            width: double.maxFinite,
-            child: Image(
-              image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
-              fit: BoxFit.fitWidth,
-              alignment: Alignment(0, -0.3),
-            ),
-          ),
-          SizedBox(height: 40),
-          Stack(children: [
-            SizedBox(
-                height: 123,
-                width: 220,
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(
+                height: 60,
+                width: double.maxFinite,
                 child: Image(
-                    image: AssetImage('assets/launch_icon/Logo_v2.2.png'),
-                    fit: BoxFit.contain)),
-            Text('Καλώς όρισες στην',
-                style: TextStyle(
-                  color: Color(0xFF9c0c04),
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                ))
-          ]),
-          Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-            SizedBox(height: 30),
-            Padding(
-              padding: EdgeInsets.only(right: 133),
-              child: SizedBox(
-                child: Text('Κάνε εγγραφή.',
+                  image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment(0, -0.3),
+                ),
+              ),
+              const Image(
+                image: AssetImage(
+                    'assets/clubPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
+              ),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                const SizedBox(
+                  child: Text(
+                    'Δημιουργία λογαριασμού',
                     style: TextStyle(
                       color: Color(0xFF9c0c04),
-                      fontSize: 24,
+                      fontSize: 20,
                       fontWeight: FontWeight.w900,
-                    )),
-              ),
-            ),
-            SizedBox(height: 20),
-            SizedBox(
-              height: 40,
-              width: 300,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  SizedBox(
-                    height: 40,
-                    width: 140,
-                    child: TextField(
-                        style: TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 50,
+                  width: 400,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(
+                        height: 50,
+                        width: 190,
+                        child: TextField(
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Όνομα',
+                              hintStyle: TextStyle(
+                                color: Color.fromARGB(132, 156, 12, 4),
+                              ),
+                              border: InputBorder.none,
+                            )),
+                      ),
+                      const SizedBox(
+                        width: 20,
+                        child: VerticalDivider(
+                          color: Color.fromARGB(204, 156, 12, 4),
+                          thickness: 7,
                         ),
-                        decoration: InputDecoration(
-                          hintText: 'Όνομα',
-                          hintStyle: TextStyle(
-                            color: Color.fromARGB(180, 156, 12, 4),
-                          ),
-                          border: InputBorder.none,
-                        )),
-                  ),
-                  VerticalDivider(
-                    color: Color.fromARGB(60, 156, 12, 4),
-                    thickness: 7,
-                  ),
-                  SizedBox(
-                    height: 40,
-                    width: 140,
-                    child: TextField(
-                        style: TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                      ),
+                      Container(
+                        height: 50,
+                        width: 190,
+                        alignment: Alignment.centerLeft,
+                        child: const Padding(
+                          padding: EdgeInsets.only(left: 5),
+                          child: TextField(
+                              style: TextStyle(
+                                fontSize: 23,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                              decoration: InputDecoration(
+                                hintText: 'Επίθετο',
+                                hintStyle: TextStyle(
+                                  color: Color.fromARGB(132, 156, 12, 4),
+                                ),
+                                border: InputBorder.none,
+                              )),
                         ),
-                        decoration: InputDecoration(
-                          hintText: 'Επίθετο',
-                          hintStyle: TextStyle(
-                            color: Color.fromARGB(180, 156, 12, 4),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: Divider(
+                      height: 10,
+                      color: Color.fromARGB(204, 156, 12, 4),
+                      thickness: 7),
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: TextField(
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Τηλέφωνο(+30)',
+                        hintStyle: TextStyle(
+                          color: Color.fromARGB(132, 156, 12, 4),
+                        ),
+                        border: InputBorder.none,
+                      )),
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: Divider(
+                      height: 10,
+                      color: Color.fromARGB(204, 156, 12, 4),
+                      thickness: 7),
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: TextField(
+                      style: TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Email',
+                        hintStyle: TextStyle(
+                          color: Color.fromARGB(132, 156, 12, 4),
+                        ),
+                        border: InputBorder.none,
+                      )),
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: Divider(
+                      height: 10,
+                      color: Color.fromARGB(204, 156, 12, 4),
+                      thickness: 7),
+                ),
+                SizedBox(
+                  width: 400,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(
+                        width: 300,
+                        child: TextField(
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Κωδικός',
+                              hintStyle: TextStyle(
+                                color: Color.fromARGB(132, 156, 12, 4),
+                              ),
+                              border: InputBorder.none,
+                            )),
+                      ),
+                      SizedBox(
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.visibility_off_rounded,
+                            color: Color(0xFF9C0C04),
                           ),
-                          border: InputBorder.none,
-                        )),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            SizedBox(
-              width: 300,
-              child: Divider(
-                  height: 10,
-                  color: Color.fromARGB(60, 156, 12, 4),
-                  thickness: 7),
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              height: 35,
-              width: 300,
-              child: TextField(
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: Divider(
+                      height: 10,
+                      color: Color.fromARGB(204, 156, 12, 4),
+                      thickness: 7),
+                ),
+                SizedBox(
+                  width: 400,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(
+                        width: 300,
+                        child: TextField(
+                            style: TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: InputDecoration(
+                              hintText: 'Επιβεβαίωση κωδικού',
+                              hintStyle: TextStyle(
+                                color: Color.fromARGB(132, 156, 12, 4),
+                              ),
+                              border: InputBorder.none,
+                            )),
+                      ),
+                      SizedBox(
+                        child: IconButton(
+                          onPressed: () {},
+                          icon: const Icon(
+                            Icons.visibility_off_rounded,
+                            color: Color(0xFF9C0C04),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  decoration: InputDecoration(
-                    hintText: 'Τηλέφωνο(+30)',
-                    hintStyle: TextStyle(
-                      color: Color.fromARGB(180, 156, 12, 4),
-                    ),
-                    border: InputBorder.none,
-                  )),
-            ),
-            SizedBox(
-              width: 300,
-              child: Divider(
-                  height: 10,
-                  color: Color.fromARGB(60, 156, 12, 4),
-                  thickness: 7),
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              height: 35,
-              width: 300,
-              child: TextField(
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Email',
-                    hintStyle: TextStyle(
-                      color: Color.fromARGB(180, 156, 12, 4),
-                    ),
-                    border: InputBorder.none,
-                  )),
-            ),
-            SizedBox(
-              width: 300,
-              child: Divider(
-                  height: 10,
-                  color: Color.fromARGB(60, 156, 12, 4),
-                  thickness: 7),
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              height: 35,
-              width: 300,
-              child: TextField(
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Κωδικός',
-                    hintStyle: TextStyle(
-                      color: Color.fromARGB(180, 156, 12, 4),
-                    ),
-                    border: InputBorder.none,
-                  )),
-            ),
-            SizedBox(
-              width: 300,
-              child: Divider(
-                  height: 10,
-                  color: Color.fromARGB(60, 156, 12, 4),
-                  thickness: 7),
-            ),
-            SizedBox(height: 10),
-            SizedBox(
-              height: 35,
-              width: 300,
-              child: TextField(
-                  style: TextStyle(
-                    fontSize: 23,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  decoration: InputDecoration(
-                    hintText: 'Επιβεβαίωση κωδικού',
-                    hintStyle: TextStyle(
-                      color: Color.fromARGB(180, 156, 12, 4),
-                    ),
-                    border: InputBorder.none,
-                  )),
-            ),
-            SizedBox(
-              height: 50,
-              width: 300,
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 190,
-                    child: Text(
+                ),
+                SizedBox(
+                  height: 100,
+                  width: 400,
+                  child: Row(children: [
+                    const Text(
                       'Έχεις ήδη λογαριασμό; ',
                       style: TextStyle(
-                          color: Color(0xFF9C0C04),
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold),
+                        color: Color(0xFF9C0C04),
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  SizedBox(
-                    width: 90,
-                    child: Text(
-                      'Συνδέσου.',
-                      style: TextStyle(
+                    TextButton(
+                      onPressed: _navigateToPhoneLoginPage,
+                      child: const Text(
+                        'Συνδέσου',
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900),
-                    ),
+                          fontSize: 20,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    )
+                  ]),
+                ),
+              ]),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    side: const BorderSide(color: Color(0xFF9C0C04)),
                   ),
-                ],
+                  backgroundColor: Colors.transparent,
+                ),
+                onPressed: () {
+                  _navigateToMainApp();
+                },
+                child: const Text(
+                  'Εγγραφή',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            )
-          ]),
-        ]),
+              const SizedBox(
+                height: 20,
+              ),
+              const SizedBox(
+                height: 60,
+                width: double.maxFinite,
+                child: Image(
+                  image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment(0, -0.3),
+                ),
+              ),
+            ]),
       ),
     );
   }
