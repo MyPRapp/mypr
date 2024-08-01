@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mypr/OtherPages/global_state.dart';
+import 'package:provider/provider.dart';
 
 class PresentationPage extends StatefulWidget {
   const PresentationPage({super.key});
@@ -10,6 +12,9 @@ class PresentationPage extends StatefulWidget {
 class _PresentationPageState extends State<PresentationPage> {
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().hide();
+    });
     return Scaffold(
       bottomNavigationBar: BottomNavigationBar(
         iconSize: 22,

@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/profile_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:provider/provider.dart';
 
 @RoutePage()
 class ProfilePage extends StatelessWidget {
@@ -9,6 +11,9 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().show();
+    });
     return Scaffold(
       backgroundColor: Colors.black,
       body: Column(

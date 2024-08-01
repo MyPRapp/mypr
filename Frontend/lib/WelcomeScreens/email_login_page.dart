@@ -1,16 +1,40 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:provider/provider.dart';
+
+import '../services/auth_service.dart';
 
 @RoutePage()
-class PhoneLoginPage extends StatefulWidget {
-  const PhoneLoginPage({super.key});
+class EmailLoginPage extends StatefulWidget {
+  const EmailLoginPage({super.key});
 
   @override
-  State<PhoneLoginPage> createState() => _PhoneLoginPageState();
+  State<EmailLoginPage> createState() => _EmailLoginPageState();
 }
 
-class _PhoneLoginPageState extends State<PhoneLoginPage> {
+class _EmailLoginPageState extends State<EmailLoginPage> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+
+  Future<void> _login(BuildContext context) async {
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    bool success = await _authService.login(email, password);
+
+    if (success) {
+      // ignore: use_build_context_synchronously
+      context.router.replaceAll([const BottomNavBarRoute()]);
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Λάθος email ή κωδικός')),
+      );
+    }
+  }
+
   bool _obscureText = true;
 
   void _togglePasswordVisibility() {
@@ -19,20 +43,19 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
     });
   }
 
-  void _navigateToMainApp() {
-    context.router.replaceAll([const BottomNavBarRoute()]);
-  }
-
   void _navigateToSignUpPage() {
     context.router.replaceAll([const SignUpRoute()]);
   }
 
-  void _navigateToEmailLoginPage() {
-    context.router.replaceAll([const EmailLoginRoute()]);
+  void _navigateToPhoneLoginPage() {
+    context.router.replaceAll([const PhoneLoginRoute()]);
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().hide();
+    });
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -74,16 +97,17 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(
+                  SizedBox(
                     width: 420,
                     child: TextField(
-                      style: TextStyle(
+                      controller: _emailController,
+                      style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      decoration: InputDecoration(
-                        hintText: 'Τηλέφωνο(+30)',
+                      decoration: const InputDecoration(
+                        hintText: 'Email',
                         hintStyle: TextStyle(
                           color: Color.fromARGB(132, 156, 12, 4),
                         ),
@@ -107,6 +131,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                         SizedBox(
                           width: 350,
                           child: TextField(
+                            controller: _passwordController,
                             obscureText: _obscureText,
                             style: const TextStyle(
                               fontSize: 23,
@@ -150,7 +175,13 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      'Στάλθηκε email για επαναφορά κωδικού')),
+                            );
+                          },
                           child: const Text(
                             'Επαναφορά κωδικού',
                             style: TextStyle(
@@ -164,9 +195,9 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     ),
                   ),
                   TextButton(
-                    onPressed: _navigateToEmailLoginPage,
+                    onPressed: _navigateToPhoneLoginPage,
                     child: const Text(
-                      'Σύνδεση με email',
+                      'Σύνδεση με κινητό',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 17,
@@ -198,7 +229,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                 backgroundColor: Colors.black,
               ),
               onPressed: () {
-                _navigateToMainApp();
+                _login(context);
               },
               child: const Text(
                 'Είσοδος',

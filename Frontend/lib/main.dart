@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 void main() {
   runApp(
     ChangeNotifierProvider(
-      create: (context) => GlobalState(),
+      create: (context) => BottomNavBarVisibility(),
       child: const MyPR(),
     ),
   );
@@ -14,9 +14,11 @@ void main() {
 
 class MyPR extends StatelessWidget {
   const MyPR({super.key});
+
   @override
   Widget build(BuildContext context) {
-    AppRouter appRouter = AppRouter();
+    final appRouter = AppRouter();
+
     return MaterialApp.router(
       title: 'MyPR',
       debugShowCheckedModeBanner: false,

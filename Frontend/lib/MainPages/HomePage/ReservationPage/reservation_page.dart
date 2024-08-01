@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/reservation_page_widgets.dart';
+import 'package:provider/provider.dart';
 
 @RoutePage()
 class ReservationPage extends StatefulWidget {
@@ -71,11 +73,10 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().hide();
+    });
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.clubName),
-        backgroundColor: const Color(0xFF9c0c04),
-      ),
       body: Stack(children: [
         Container(
           decoration: const BoxDecoration(
@@ -88,6 +89,33 @@ class _ReservationPageState extends State<ReservationPage> {
         Padding(
           padding: const EdgeInsets.all(15),
           child: ListView(children: [
+            Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 5),
+                  child: IconButton(
+                    onPressed: () {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        context.read<BottomNavBarVisibility>().show();
+                      });
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(
+                      Icons.chevron_left,
+                      color: Colors.white,
+                      size: 35,
+                    ),
+                  ),
+                ),
+                const Text(
+                  'ΠΡΟΦΙΛ',
+                  style: TextStyle(
+                      color: Color(0xFF9C0C04),
+                      fontSize: 36,
+                      fontWeight: FontWeight.bold),
+                )
+              ],
+            ),
             Padding(
               padding: const EdgeInsets.all(35),
               child: ClipRRect(

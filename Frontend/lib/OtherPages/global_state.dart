@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 
 class ClubInfo {
   bool liked;
@@ -21,6 +21,25 @@ class GlobalState extends ChangeNotifier {
       // Add new club info
       _clubInfoList.add(ClubInfo(liked: liked, clubName: clubName));
     }
+    notifyListeners();
+  }
+}
+ */
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+class BottomNavBarVisibility extends ChangeNotifier {
+  bool _isVisible = true;
+
+  bool get isVisible => _isVisible;
+
+  void show() {
+    _isVisible = true;
+    notifyListeners();
+  }
+
+  void hide() {
+    _isVisible = false;
     notifyListeners();
   }
 }

@@ -1,5 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/routes/app_router.gr.dart';
+import 'package:provider/provider.dart';
 
 @RoutePage()
 class CustomizeProfilePage extends StatelessWidget {
@@ -7,6 +10,9 @@ class CustomizeProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().hide();
+    });
     return Scaffold(
       backgroundColor: const Color(0xFF1D2428),
       body: Column(
@@ -24,6 +30,9 @@ class CustomizeProfilePage extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 5),
                         child: IconButton(
                           onPressed: () {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              context.read<BottomNavBarVisibility>().show();
+                            });
                             Navigator.pop(context);
                           },
                           icon: const Icon(
@@ -58,49 +67,36 @@ class CustomizeProfilePage extends StatelessWidget {
                             ),
                           )),
                       const SizedBox(width: 16),
-                      Expanded(
+                      const Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Text(
-                                  'Αντώνιος Παπαρδέλης',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Αντώνιος Παπαρδέλης',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.edit,
-                                      color: Colors.white),
-                                  onPressed: () {
-                                    // Handle edit button press
-                                  },
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              '(+30)6980984213',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 226, 16, 5),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'papardelis@gmail.com',
-                              style: TextStyle(
-                                  color: Color.fromARGB(255, 226, 16, 5),
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ],
-                        ),
-                      ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '(+30)6980984213',
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 226, 16, 5),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                'papardelis@gmail.com',
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 226, 16, 5),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ]),
+                      )
                     ],
                   ),
                 ],
@@ -167,7 +163,7 @@ class CustomizeProfilePage extends StatelessWidget {
                       backgroundColor: Colors.black,
                     ),
                     onPressed: () {
-                      // Handle logout
+                      context.router.replaceAll([const SignUpRoute()]);
                     },
                     child: const Text(
                       'Αποσύνδεση',

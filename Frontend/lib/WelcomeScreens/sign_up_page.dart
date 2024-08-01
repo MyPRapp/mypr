@@ -1,6 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/routes/app_router.gr.dart'; // Ensure this import
+import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/routes/app_router.gr.dart';
+import 'package:provider/provider.dart';
+
+import '../services/auth_service.dart';
 
 @RoutePage()
 class SignUpPage extends StatefulWidget {
@@ -11,16 +15,59 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  void _navigateToMainApp() {
-    context.router.replaceAll([const BottomNavBarRoute()]);
+  final TextEditingController _userNameController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final AuthService _authService = AuthService();
+
+  _register() async {
+    String username = _userNameController.text.trim();
+    String password = _passwordController.text.trim();
+    String email = _emailController.text.trim();
+    String lastName = _lastNameController.text.trim();
+    String firstName = _firstNameController.text.trim();
+    String phone = _phoneController.text.trim();
+    bool success = await _authService.register(
+        username, password, firstName, lastName, email, phone);
+    if (success) {
+      // ignore: use_build_context_synchronously
+      context.router.replaceAll([const BottomNavBarRoute()]);
+    } else {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Login failed')),
+      );
+    }
+  }
+
+  bool _obscureText = true;
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
+
+  bool _obscureText2 = true;
+
+  void _togglePasswordVisibility2() {
+    setState(() {
+      _obscureText2 = !_obscureText2;
+    });
   }
 
   void _navigateToPhoneLoginPage() {
-    context.router.replaceAll([const PhoneLoginRoute()]);
+    context.router.replaceAll([const EmailLoginRoute()]);
   }
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().hide();
+    });
     return Scaffold(
       backgroundColor: Colors.black,
       body: SizedBox(
@@ -60,16 +107,17 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         height: 50,
                         width: 190,
                         child: TextField(
-                            style: TextStyle(
+                            controller: _firstNameController,
+                            style: const TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: Colors.white,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Όνομα',
                               hintStyle: TextStyle(
                                 color: Color.fromARGB(132, 156, 12, 4),
@@ -88,15 +136,16 @@ class _SignUpPageState extends State<SignUpPage> {
                         height: 50,
                         width: 190,
                         alignment: Alignment.centerLeft,
-                        child: const Padding(
-                          padding: EdgeInsets.only(left: 5),
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5),
                           child: TextField(
-                              style: TextStyle(
+                              controller: _lastNameController,
+                              style: const TextStyle(
                                 fontSize: 23,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.black,
+                                color: Colors.white,
                               ),
-                              decoration: InputDecoration(
+                              decoration: const InputDecoration(
                                 hintText: 'Επίθετο',
                                 hintStyle: TextStyle(
                                   color: Color.fromARGB(132, 156, 12, 4),
@@ -115,15 +164,40 @@ class _SignUpPageState extends State<SignUpPage> {
                       color: Color.fromARGB(204, 156, 12, 4),
                       thickness: 7),
                 ),
-                const SizedBox(
+                SizedBox(
                   width: 400,
                   child: TextField(
-                      style: TextStyle(
+                      controller: _userNameController,
+                      style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
+                        hintText: 'Username',
+                        hintStyle: TextStyle(
+                          color: Color.fromARGB(132, 156, 12, 4),
+                        ),
+                        border: InputBorder.none,
+                      )),
+                ),
+                const SizedBox(
+                  width: 400,
+                  child: Divider(
+                      height: 10,
+                      color: Color.fromARGB(204, 156, 12, 4),
+                      thickness: 7),
+                ),
+                SizedBox(
+                  width: 400,
+                  child: TextField(
+                      controller: _phoneController,
+                      style: const TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      decoration: const InputDecoration(
                         hintText: 'Τηλέφωνο(+30)',
                         hintStyle: TextStyle(
                           color: Color.fromARGB(132, 156, 12, 4),
@@ -138,15 +212,16 @@ class _SignUpPageState extends State<SignUpPage> {
                       color: Color.fromARGB(204, 156, 12, 4),
                       thickness: 7),
                 ),
-                const SizedBox(
+                SizedBox(
                   width: 400,
                   child: TextField(
-                      style: TextStyle(
+                      controller: _emailController,
+                      style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Email',
                         hintStyle: TextStyle(
                           color: Color.fromARGB(132, 156, 12, 4),
@@ -166,15 +241,17 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 300,
                         child: TextField(
-                            style: TextStyle(
+                            obscureText: _obscureText,
+                            controller: _passwordController,
+                            style: const TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Κωδικός',
                               hintStyle: TextStyle(
                                 color: Color.fromARGB(132, 156, 12, 4),
@@ -184,7 +261,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       SizedBox(
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: _togglePasswordVisibility,
                           icon: const Icon(
                             Icons.visibility_off_rounded,
                             color: Color(0xFF9C0C04),
@@ -206,15 +283,16 @@ class _SignUpPageState extends State<SignUpPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SizedBox(
+                      SizedBox(
                         width: 300,
                         child: TextField(
-                            style: TextStyle(
+                            obscureText: _obscureText2,
+                            style: const TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Επιβεβαίωση κωδικού',
                               hintStyle: TextStyle(
                                 color: Color.fromARGB(132, 156, 12, 4),
@@ -224,7 +302,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       SizedBox(
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: _togglePasswordVisibility2,
                           icon: const Icon(
                             Icons.visibility_off_rounded,
                             color: Color(0xFF9C0C04),
@@ -271,7 +349,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   backgroundColor: Colors.transparent,
                 ),
                 onPressed: () {
-                  _navigateToMainApp();
+                  _register();
                 },
                 child: const Text(
                   'Εγγραφή',
