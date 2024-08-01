@@ -63,10 +63,26 @@ class FavoritesPageState extends State<FavoritesPage> {
       'liked': true,
     },
     {
-      'id': 3, // Add unique id
-      'clubName': 'Syko',
+      'id': 4, // Add unique id
+      'clubName': 'Akanthus',
       'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
       'stars': 5.0,
+      'minPrice': 110,
+      'maxPersons': 5,
+      'monday': false,
+      'tuesday': false,
+      'wednesday': true,
+      'thursday': false,
+      'friday': true,
+      'saturday': true,
+      'sunday': true,
+      'liked': true,
+    },
+    {
+      'id': 5, // Add unique id
+      'clubName': 'Blast',
+      'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
+      'stars': 3.5,
       'minPrice': 110,
       'maxPersons': 5,
       'monday': false,
@@ -91,19 +107,28 @@ class FavoritesPageState extends State<FavoritesPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
-    return Scaffold(
+    void onBackPressed(BuildContext context, bool isPopInvoked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        context.read<BottomNavBarVisibility>().show();
+      });
+    }
+
+    return PopScope(
+      onPopInvoked: (bool isPopInvoked) {
+        onBackPressed(context, isPopInvoked);
+      },
+      child: Scaffold(
         backgroundColor: Colors.black,
-        body: Stack(children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 50),
-            child: ListView.builder(
-              itemCount: favoriteClubs.length,
-              itemBuilder: (context, index) {
-                final club = favoriteClubs[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 10.0, horizontal: 20.0),
-                  child: HomePageBigCard(
+        body: Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 80),
+              child: ListView.builder(
+                itemCount: favoriteClubs.length,
+                itemBuilder: (context, index) {
+                  final club = favoriteClubs[index];
+                  return HomePageBigCard(
                     key: ValueKey(club['id']), // Use unique key
                     clubName: club['clubName'],
                     address: club['address'],
@@ -119,38 +144,43 @@ class FavoritesPageState extends State<FavoritesPage> {
                     sunday: club['sunday'],
                     liked: club['liked'],
                     onRemove: () => removeCard(club['id']),
-                  ),
-                );
-              },
-            ),
-          ),
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 5),
-                child: IconButton(
-                  onPressed: () {
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      context.read<BottomNavBarVisibility>().show();
-                    });
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(
-                    Icons.chevron_left,
-                    color: Colors.white,
-                    size: 35,
-                  ),
-                ),
+                  );
+                },
               ),
-              const Text(
-                'ΑΓΑΠΗΜΕΝΑ',
-                style: TextStyle(
-                    color: Color(0xFF9C0C04),
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold),
-              )
-            ],
-          ),
-        ]));
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 50),
+              child: Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5),
+                    child: IconButton(
+                      onPressed: () {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          context.read<BottomNavBarVisibility>().show();
+                        });
+                        Navigator.pop(context);
+                      },
+                      icon: const Icon(
+                        Icons.chevron_left,
+                        color: Colors.white,
+                        size: 35,
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    'ΑΓΑΠΗΜΕΝΑ',
+                    style: TextStyle(
+                        color: Color(0xFF9C0C04),
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold),
+                  )
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

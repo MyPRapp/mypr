@@ -282,12 +282,25 @@ class _LikeButtonState extends State<LikeButton> {
   }
 
   void toggleButton() {
-    setState(() {
-      liked = !liked;
-      if (!liked && widget.onRemove != null) {
-        widget.onRemove!();
-      }
-    });
+    setState(
+      () {
+        liked = !liked;
+        if (!liked && widget.onRemove != null) {
+          widget.onRemove!();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Durations.medium4,
+                content: Text('Αφαιρέθηκε από τα αγαπημένα')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Durations.medium4,
+                content: Text('Προστέθηκε στα αγαπημένα')),
+          );
+        }
+      },
+    );
   }
 
   @override

@@ -127,22 +127,28 @@ class CustomInputDecoration {
     required bool isCounterValid,
   }) {
     return InputDecoration(
-      suffix: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            onPressed: decrement,
-            icon: const Icon(Icons.remove, color: Colors.white),
-          ),
-          IconButton(
-            onPressed: increment,
-            icon: const Icon(Icons.add, color: Colors.white),
-          ),
-        ],
+      suffix: Padding(
+        padding: const EdgeInsets.only(top: 15),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              onPressed: decrement,
+              icon: const Icon(Icons.remove, color: Colors.white),
+            ),
+            IconButton(
+              onPressed: increment,
+              icon: const Icon(Icons.add, color: Colors.white),
+            ),
+          ],
+        ),
       ),
-      hintText: hintText,
-      hintStyle: const TextStyle(color: Colors.white, fontSize: 16),
+      hintText: ' $hintText',
+      hintStyle: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+      ),
       labelText: 'Αριθμός ατόμων',
       labelStyle: const TextStyle(color: Color(0xFF9C0C04)),
       enabledBorder: const OutlineInputBorder(

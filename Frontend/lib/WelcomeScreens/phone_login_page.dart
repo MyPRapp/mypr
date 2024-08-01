@@ -2,8 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/routes/app_router.gr.dart';
-import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
+
+import '../services/auth_service.dart';
 
 @RoutePage()
 class PhoneLoginPage extends StatefulWidget {
@@ -52,11 +53,15 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
     return Scaffold(
-      body: Container(
+        body: SingleChildScrollView(
+      child: Container(
+        height: screenHeight,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.black, Color(0xFF9C0C04)],
@@ -67,10 +72,10 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(
-              height: 60,
-              width: double.maxFinite,
-              child: Image(
+            SizedBox(
+              height: 80,
+              width: screenWidth,
+              child: const Image(
                 image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
                 fit: BoxFit.fitWidth,
                 alignment: Alignment(0, -0.3),
@@ -81,7 +86,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                   'assets/clubPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
             ),
             SizedBox(
-              width: 420,
+              width: screenWidth - 50,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -96,15 +101,16 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(
-                    width: 420,
+                  SizedBox(
+                    width: screenWidth - 50,
                     child: TextField(
-                      style: TextStyle(
+                      controller: _emailController,
+                      style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: 'Τηλέφωνο(+30)',
                         hintStyle: TextStyle(
                           color: Color.fromARGB(132, 156, 12, 4),
@@ -122,13 +128,14 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     ),
                   ),
                   SizedBox(
-                    width: 420,
+                    width: screenWidth - 50,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SizedBox(
-                          width: 350,
+                          width: screenWidth - 100,
                           child: TextField(
+                            controller: _passwordController,
                             obscureText: _obscureText,
                             style: const TextStyle(
                               fontSize: 23,
@@ -145,6 +152,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                           ),
                         ),
                         SizedBox(
+                          width: 50,
                           child: IconButton(
                             onPressed: _togglePasswordVisibility,
                             icon: Icon(
@@ -159,15 +167,14 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 30),
+                    padding: const EdgeInsets.only(top: 15),
                     child: SizedBox(
-                      width: 420,
                       child: Row(children: [
                         const Text(
                           '  Ξέχασες τον κωδικό;',
                           style: TextStyle(
                             color: Color(0xFF9C0C04),
-                            fontSize: 18,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -183,7 +190,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                             'Επαναφορά κωδικού',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 17,
+                              fontSize: 15,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -197,7 +204,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                       'Σύνδεση με email',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -208,7 +215,7 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                       'Δημιουργία λογαριασμού',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -226,7 +233,8 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                 backgroundColor: Colors.black,
               ),
               onPressed: () {
-                _login(context);
+                // _login(context);
+                context.router.replaceAll([const BottomNavBarRoute()]);
               },
               child: const Text(
                 'Είσοδος',
@@ -237,10 +245,10 @@ class _PhoneLoginPageState extends State<PhoneLoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 200)
+            const SizedBox(height: 100)
           ],
         ),
       ),
-    );
+    ));
   }
 }

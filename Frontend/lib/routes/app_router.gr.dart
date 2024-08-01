@@ -10,9 +10,10 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i15;
 import 'package:flutter/material.dart' as _i16;
+import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
 import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
     as _i12;
-import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
+import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i11;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/contact_us_page.dart'
     as _i2;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customize_profile_page.dart'
@@ -21,7 +22,6 @@ import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favorites_page.dar
     as _i5;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/my_reservations_page.dart'
     as _i8;
-import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i11;
 import 'package:mypr/MainPages/SearchPage/search_page.dart' as _i13;
 import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i1;
 import 'package:mypr/Navigation/home_navigation.dart' as _i6;

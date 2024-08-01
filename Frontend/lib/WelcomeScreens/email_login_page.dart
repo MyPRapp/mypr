@@ -53,11 +53,15 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
     return Scaffold(
-      body: Container(
+        body: SingleChildScrollView(
+      child: Container(
+        height: screenHeight,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.black, Color(0xFF9C0C04)],
@@ -68,10 +72,10 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const SizedBox(
-              height: 60,
-              width: double.maxFinite,
-              child: Image(
+            SizedBox(
+              height: 80,
+              width: screenWidth,
+              child: const Image(
                 image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
                 fit: BoxFit.fitWidth,
                 alignment: Alignment(0, -0.3),
@@ -82,7 +86,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                   'assets/clubPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
             ),
             SizedBox(
-              width: 420,
+              width: screenWidth - 50,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -98,7 +102,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                     ),
                   ),
                   SizedBox(
-                    width: 420,
+                    width: screenWidth - 50,
                     child: TextField(
                       controller: _emailController,
                       style: const TextStyle(
@@ -124,12 +128,12 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                     ),
                   ),
                   SizedBox(
-                    width: 420,
+                    width: screenWidth - 50,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         SizedBox(
-                          width: 350,
+                          width: screenWidth - 100,
                           child: TextField(
                             controller: _passwordController,
                             obscureText: _obscureText,
@@ -148,6 +152,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                           ),
                         ),
                         SizedBox(
+                          width: 50,
                           child: IconButton(
                             onPressed: _togglePasswordVisibility,
                             icon: Icon(
@@ -162,15 +167,14 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(top: 30),
+                    padding: const EdgeInsets.only(top: 15),
                     child: SizedBox(
-                      width: 420,
                       child: Row(children: [
                         const Text(
                           '  Ξέχασες τον κωδικό;',
                           style: TextStyle(
                             color: Color(0xFF9C0C04),
-                            fontSize: 18,
+                            fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -186,7 +190,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                             'Επαναφορά κωδικού',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 17,
+                              fontSize: 15,
                               fontWeight: FontWeight.w900,
                             ),
                           ),
@@ -200,7 +204,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                       'Σύνδεση με κινητό',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -211,7 +215,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                       'Δημιουργία λογαριασμού',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 17,
+                        fontSize: 15,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -229,7 +233,8 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                 backgroundColor: Colors.black,
               ),
               onPressed: () {
-                _login(context);
+                // _login(context);
+                context.router.replaceAll([const BottomNavBarRoute()]);
               },
               child: const Text(
                 'Είσοδος',
@@ -240,10 +245,10 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 200)
+            const SizedBox(height: 100)
           ],
         ),
       ),
-    );
+    ));
   }
 }

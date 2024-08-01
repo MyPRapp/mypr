@@ -47,37 +47,34 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                   bottom: 40,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      child: SizedBox(
-                        height: 70,
-                        child: BottomNavigationBar(
-                          currentIndex: tabsRouter.activeIndex,
-                          onTap: onTap,
-                          iconSize: 22,
-                          showUnselectedLabels: true,
-                          selectedItemColor: const Color(0xFF9C0C04),
-                          unselectedItemColor: Colors.white,
-                          backgroundColor: Colors.black,
-                          unselectedLabelStyle: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
-                          selectedLabelStyle: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.bold),
-                          items: const [
-                            BottomNavigationBarItem(
-                              icon: Icon(Icons.home),
-                              label: 'Αρχική',
-                            ),
-                            BottomNavigationBarItem(
-                              icon: Icon(Icons.search),
-                              label: 'Αναζήτηση',
-                            ),
-                            BottomNavigationBarItem(
-                              icon: Icon(Icons.person),
-                              label: 'Προφίλ',
-                            ),
-                          ],
-                        ),
+                    child: SizedBox(
+                      height: 70,
+                      child: BottomNavigationBar(
+                        currentIndex: tabsRouter.activeIndex,
+                        onTap: onTap,
+                        iconSize: 22,
+                        showUnselectedLabels: true,
+                        selectedItemColor: const Color(0xFF9C0C04),
+                        unselectedItemColor: Colors.white,
+                        backgroundColor: Colors.black,
+                        unselectedLabelStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
+                        selectedLabelStyle: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.bold),
+                        items: const [
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.home),
+                            label: 'Αρχική',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.search),
+                            label: 'Αναζήτηση',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.person),
+                            label: 'Προφίλ',
+                          ),
+                        ],
                       ),
                     ),
                   ),

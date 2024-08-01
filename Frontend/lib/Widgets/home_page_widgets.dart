@@ -119,7 +119,7 @@ class BigClubCard extends StatelessWidget {
             children: [
               Container(
                 height: 140,
-                width: 130,
+                width: 120,
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     fit: BoxFit.cover,
