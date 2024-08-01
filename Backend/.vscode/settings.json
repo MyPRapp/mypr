@@ -1,5 +1,6 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
+    "python.pythonPath": "${workspaceFolder}/Backend/.venv/Scripts/python.exe",
     "files.exclude": {
         "**/build": true,
         "**/.dart_tool":true,
@@ -18,6 +19,5 @@
         "**/.flutter-plugins-dependencies":true,
         "**/jwt_auth_app.iml":true,
         "**/.gitignore":true,
-        "**/.vscode":true,
       },
 }

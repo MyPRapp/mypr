@@ -139,4 +139,5 @@ app.*.symbols
 
 # User added
 **.gitignore
-desktop.ini
+**desktop.ini
+**.venv

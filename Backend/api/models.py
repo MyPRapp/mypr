@@ -38,6 +38,8 @@ class Clubs(models.Model):
     club_name = models.CharField(max_length=30)
     phone = models.CharField(max_length=15,blank=True,null=True)
     location = models.CharField(max_length=100)
+    rating = models.DecimalField(range(1,5),decimal_places= 2,max_digits=3)
+
     
     def __str__(self):
         return self.club_name
@@ -65,7 +67,7 @@ class Bookings(models.Model):
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
     number_of_people = models.IntegerField()
     booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, default=REGULAR)
-    booked_at = models.DateTimeField(auto_now_add=True)
+    booked_at = models.DateTimeField()
 
     def __str__(self):
         return f'Booking {self.id} by {self.user} for {self.club}'
@@ -84,6 +86,7 @@ class Catalogue(models.Model):
     club = models.ForeignKey('Clubs', on_delete=models.CASCADE)
     service_type = models.CharField(max_length=10, choices=SERVICE_TYPE_CHOICES)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    max_person = models.IntegerField()
 
     def __str__(self):
         return f'{self.club.name} - {self.service_type}: {self.price}'

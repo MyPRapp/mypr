@@ -11,16 +11,18 @@ class BookingScreen extends StatefulWidget {
 
 class _BookingScreenState extends State<BookingScreen> {
   final _formKey = GlobalKey<FormState>(); // Key to manage the form state
-  final TextEditingController _dateController = TextEditingController();
+  final TextEditingController _clubNameController = TextEditingController();
+  final TextEditingController _bookingTypeController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
-  final TextEditingController _notesController = TextEditingController();
+  final TextEditingController _numberOfPeopleController = TextEditingController();
   final BookingService _bookingService = BookingService();
   // Function to handle form submission
   _submitForm() async {
-    String date = _dateController.text.trim();
-    String time = _timeController.text.trim();
-    String notes = _notesController.text.trim();
-    bool success = await _bookingService.submitForm(date, time, notes);
+    String clubName = _clubNameController.text.trim();
+    String type = _bookingTypeController.text.trim();
+    String bookedAt = _timeController.text.trim();
+    String numberOfPeople = _numberOfPeopleController.text.trim(); 
+    bool success = await _bookingService.submitForm(clubName,type,bookedAt,numberOfPeople);
     if (success) {
       // ignore: use_build_context_synchronously
       Navigator.pop(context);
@@ -29,9 +31,9 @@ class _BookingScreenState extends State<BookingScreen> {
     }
 
     // Clear the form fields
-    _dateController.clear();
+    _clubNameController.clear();
+    _bookingTypeController.clear();
     _timeController.clear();
-    _notesController.clear();
   }
 
   @override
@@ -47,12 +49,12 @@ class _BookingScreenState extends State<BookingScreen> {
             children: [
               // Date input field
               TextFormField(
-                controller: _dateController,
-                decoration: const InputDecoration(labelText: 'Booking Date'),
-                keyboardType: TextInputType.datetime,
+                controller: _clubNameController,
+                decoration: const InputDecoration(labelText: 'Club Name'),
+                keyboardType: TextInputType.name,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a date';
+                    return 'Please enter a name';
                   }
                   return null;
                 },
@@ -60,12 +62,12 @@ class _BookingScreenState extends State<BookingScreen> {
               const SizedBox(height: 16),
               // Time input field
               TextFormField(
-                controller: _timeController,
-                decoration: const InputDecoration(labelText: 'Booking Time'),
-                keyboardType: TextInputType.datetime,
+                controller: _bookingTypeController,
+                decoration: const InputDecoration(labelText: 'Booking Type'),
+                keyboardType: TextInputType.name,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a time';
+                    return 'Please enter a type';
                   }
                   return null;
                 },
@@ -73,13 +75,18 @@ class _BookingScreenState extends State<BookingScreen> {
               const SizedBox(height: 16),
               // Notes input field
               TextFormField(
-                controller: _notesController,
+                controller: _timeController,
                 decoration:
-                    const InputDecoration(labelText: 'Additional Notes'),
-                keyboardType: TextInputType.text,
-                maxLines: 4,
+                    const InputDecoration(labelText: 'Booked at'),
+                keyboardType: TextInputType.datetime,
               ),
-              const SizedBox(height: 20),
+              TextFormField(
+                controller: _numberOfPeopleController,
+                decoration:
+                    const InputDecoration(labelText: 'Number of people'),
+                keyboardType: TextInputType.name,
+              ),
+              const SizedBox(height: 16),
               // Submit button
               ElevatedButton(
                 onPressed: _submitForm,

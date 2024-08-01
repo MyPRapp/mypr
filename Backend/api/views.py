@@ -8,9 +8,10 @@ from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
 
 
-
-
 # Create your views here.
+
+
+#Bookings realated functions
 class BookingCreate(generics.ListCreateAPIView):
     serializer_class = BookingsSerializer
     permission_classes = [IsAuthenticated]
@@ -20,10 +21,8 @@ class BookingCreate(generics.ListCreateAPIView):
         return Bookings.objects.filter(user=user)
     
     def perform_create(self, serializer):
-        if serializer.is_valid():
             serializer.save(user=self.request.user)
-        else:
-            print(serializer.errors)
+
 
 class BookingDelete(generics.DestroyAPIView):
     serializer_class = BookingsSerializer
@@ -34,7 +33,7 @@ class BookingDelete(generics.DestroyAPIView):
         return Bookings.objects.filter(user=user)
 
 
-
+#User related functions
 class PrintUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -44,21 +43,22 @@ class PrintUserView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
       
 
-class CreateClubView(generics.CreateAPIView):
-    queryset = Clubs.objects.all()
-    serializer_class = ClubsSerializer
-    permission_classes = [IsAdminUser]
-
-
-
 class CreateUserView(generics.CreateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
 
 
+#Club related functions
+class CreateClubView(generics.CreateAPIView):
+    queryset = Clubs.objects.all()
+    serializer_class = ClubsSerializer
+    permission_classes = [IsAdminUser]
 
-
+class PrintAllClubs(generics.ListAPIView):
+    queryset = Clubs.objects.all()
+    serializer_class = ClubsSerializer            
+    permission_classes = [AllowAny]
 
 
 

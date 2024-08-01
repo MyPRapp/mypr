@@ -14,14 +14,29 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class BookingsSerializer(serializers.ModelSerializer):
+    club_name = serializers.CharField(write_only=True)
+    club = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Bookings
-        fields = ["id","club","booking_type","booked_at"]
-        #fields = ["id","club","user","status","number_of_people","booking_type","booked_at"]
-        extra_kwargs = {"user":{"read_only": True}}
+        fields = ['id', 'club', 'club_name', 'user', 'status', 'number_of_people', 'booking_type', 'booked_at']
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'club': {'read_only': True},
+        }
+
+    def create(self, validated_data):
+        club_name = validated_data.pop('club_name')
+        try:
+            club = Clubs.objects.get(club_name=club_name)
+        except Clubs.DoesNotExist:
+            raise serializers.ValidationError(f'Club with name "{club_name}" does not exist.')
+        
+        validated_data['club'] = club
+        return super().create(validated_data)
 
 class ClubsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clubs
-        fields = ["id","club_name","phone","location"]
+        fields = ["id","club_name","phone","location","rating",]
 

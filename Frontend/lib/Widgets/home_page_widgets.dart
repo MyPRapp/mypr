@@ -232,11 +232,35 @@ class HomePageSmallCard extends StatelessWidget {
   const HomePageSmallCard({
     super.key,
     required this.clubName,
+    required this.address,
+    required this.stars,
+    required this.minPrice,
+    required this.maxPersons,
+    required this.monday,
+    required this.tuesday,
+    required this.wednesday,
+    required this.thursday,
+    required this.friday,
+    required this.saturday,
+    required this.sunday,
     required this.liked,
+    this.onRemove,
   });
 
-  final bool liked;
   final String clubName;
+  final String address;
+  final double stars;
+  final int minPrice;
+  final int maxPersons;
+  final bool monday;
+  final bool tuesday;
+  final bool wednesday;
+  final bool thursday;
+  final bool friday;
+  final bool saturday;
+  final bool sunday;
+  final bool liked;
+  final VoidCallback? onRemove;
 
   @override
   Widget build(BuildContext context) {

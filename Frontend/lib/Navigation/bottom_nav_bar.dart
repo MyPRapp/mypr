@@ -46,7 +46,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                   child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
                       child: SizedBox(
-                        height: 0,
+                        height: 70,
                         child: BottomNavigationBar(
                           currentIndex: tabsRouter.activeIndex,
                           onTap: onTap,
