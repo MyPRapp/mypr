@@ -1,4 +1,4 @@
-package com.example.jwt_auth_app
+package com.example.mypr
 
 import io.flutter.embedding.android.FlutterActivity
 
