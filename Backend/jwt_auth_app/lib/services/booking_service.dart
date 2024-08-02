@@ -1,16 +1,19 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingService {
-  final String baseUrl = 'http://127.0.0.1:8000/api'; // or your local network IP
+  final String baseUrl =
+      'http://127.0.0.1:8000/api'; // or your local network IP
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
 
-  Future<bool> submitForm(String clubName, String type, String time,String numberOfPeople) async {
+  Future<bool> submitForm(
+      String clubName, String type, String time, String numberOfPeople) async {
     String? accessToken = await getAccessToken();
 
     if (accessToken == null) {
@@ -43,7 +46,18 @@ class BookingService {
       return false;
     }
   }
+
+  // Function to fetch club details from the server
+  Future<Map<String, dynamic>> getClubDetails(String clubId) async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/clubs/details/$clubId'),
+      headers: {'Content-Type': 'application/json'},
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Failed to load club details');
+    }
+  }
 }
-
-
-

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Bookings,CustomUser,Clubs
+from .models import Bookings,CustomUser,Clubs,Catalogue
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -38,5 +38,10 @@ class BookingsSerializer(serializers.ModelSerializer):
 class ClubsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clubs
-        fields = ["id","club_name","phone","location","rating",]
+        fields = ["id","club_name","phone","location","rating","availability",]
 
+
+class CatalogueSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Catalogue
+        fields = ['club','service_type', 'price', 'max_person']

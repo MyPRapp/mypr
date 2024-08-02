@@ -30,7 +30,9 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     } else {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Λάθος email ή κωδικός')),
+        const SnackBar(
+            duration: Durations.long4,
+            content: Text('Λάθος email/τηλέφωνο ή κωδικός')),
       );
     }
   }
@@ -45,10 +47,6 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
 
   void _navigateToSignUpPage() {
     context.router.replaceAll([const SignUpRoute()]);
-  }
-
-  void _navigateToPhoneLoginPage() {
-    context.router.replaceAll([const PhoneLoginRoute()]);
   }
 
   @override
@@ -111,7 +109,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                         color: Colors.white,
                       ),
                       decoration: const InputDecoration(
-                        hintText: 'Email',
+                        hintText: 'Email/Τηλέφωνο(+30)',
                         hintStyle: TextStyle(
                           color: Color.fromARGB(132, 156, 12, 4),
                         ),
@@ -182,6 +180,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
+                                  duration: Durations.long4,
                                   content: Text(
                                       'Στάλθηκε email για επαναφορά κωδικού')),
                             );
@@ -196,17 +195,6 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                           ),
                         )
                       ]),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _navigateToPhoneLoginPage,
-                    child: const Text(
-                      'Σύνδεση με κινητό',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w900,
-                      ),
                     ),
                   ),
                   TextButton(
@@ -233,8 +221,8 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                 backgroundColor: Colors.black,
               ),
               onPressed: () {
-                // _login(context);
-                context.router.replaceAll([const BottomNavBarRoute()]);
+                _login(context);
+                // context.router.replaceAll([const BottomNavBarRoute()]);
               },
               child: const Text(
                 'Είσοδος',

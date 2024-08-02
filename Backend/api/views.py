@@ -1,9 +1,9 @@
 from django.shortcuts import render
-from .models import Bookings,CustomUser,Clubs
+from .models import Bookings,CustomUser,Clubs,Catalogue
 from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer,BookingsSerializer,ClubsSerializer
+from .serializers import UserSerializer,BookingsSerializer,ClubsSerializer,CatalogueSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
 
@@ -50,6 +50,24 @@ class CreateUserView(generics.CreateAPIView):
 
 
 #Club related functions
+
+class ClubCatalogueView(generics.ListAPIView):
+    serializer_class = CatalogueSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        club_id = self.kwargs['club_id']
+        return Catalogue.objects.filter(club_id=club_id)
+
+
+
+class CatalogueCreateView(generics.CreateAPIView):
+    queryset = Catalogue.objects.all()
+    serializer_class = CatalogueSerializer
+    permission_classes = [AllowAny]
+
+
+
 class CreateClubView(generics.CreateAPIView):
     queryset = Clubs.objects.all()
     serializer_class = ClubsSerializer

@@ -19,5 +19,6 @@
         "**/.flutter-plugins-dependencies":true,
         "**/jwt_auth_app.iml":true,
         "**/.gitignore":true,
+        "**/.vscode":true,
       },
 }

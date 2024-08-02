@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django import forms
-from .models import CustomUser,Clubs,Bookings
+from .models import CustomUser,Clubs,Bookings,Catalogue
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -54,4 +54,10 @@ class BookingsAdmin(admin.ModelAdmin):
     search_fields = ('club', 'booking_type','booked_at')  # Adjust based on your needs
     list_filter = ('club', 'booking_type','booked_at')  # Adjust based on your needs
 
+
+@admin.register(Catalogue)
+class BookingsAdmin(admin.ModelAdmin):
+    list_display = ('id','service_type', 'price', 'max_person')  # Adjust this based on your model fields
+    search_fields = ('id','service_type', 'price', 'max_person')  # Adjust based on your needs
+    list_filter = ('id','service_type', 'price', 'max_person')  # Adjust based on your needs
 

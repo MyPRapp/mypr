@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'register_screen.dart';
-import 'welcome_screen.dart';
+import 'package:jwt_auth_app/services/club_details_screen.dart';
+
 import '../services/auth_service.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -24,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         // ignore: use_build_context_synchronously
         context,
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+        MaterialPageRoute(builder: (context) => const ClubsPage()),
       );
     } else {
       // ignore: use_build_context_synchronously
@@ -60,7 +61,8 @@ class _LoginScreenState extends State<LoginScreen> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                  MaterialPageRoute(
+                      builder: (context) => const RegisterScreen()),
                 );
               },
               child: const Text('Register'),

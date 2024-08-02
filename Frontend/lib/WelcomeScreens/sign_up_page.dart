@@ -38,7 +38,8 @@ class _SignUpPageState extends State<SignUpPage> {
     } else {
       // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login failed')),
+        const SnackBar(
+            duration: Durations.long4, content: Text('Login failed')),
       );
     }
   }
@@ -370,8 +371,8 @@ class _SignUpPageState extends State<SignUpPage> {
                         backgroundColor: Colors.transparent,
                       ),
                       onPressed: () {
-                        // _register();
-                        context.router.replaceAll([const BottomNavBarRoute()]);
+                        _register();
+                        // context.router.replaceAll([const BottomNavBarRoute()]);
                       },
                       child: const Text(
                         'Εγγραφή',

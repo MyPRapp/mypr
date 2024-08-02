@@ -39,6 +39,7 @@ class Clubs(models.Model):
     phone = models.CharField(max_length=15,blank=True,null=True)
     location = models.CharField(max_length=100)
     rating = models.DecimalField(range(1,5),decimal_places= 2,max_digits=3)
+    availability = models.CharField(max_length=7)
 
     
     def __str__(self):
@@ -89,4 +90,4 @@ class Catalogue(models.Model):
     max_person = models.IntegerField()
 
     def __str__(self):
-        return f'{self.club.name} - {self.service_type}: {self.price}'
+        return f'{self.club.club_name} - {self.service_type}: {self.price}'

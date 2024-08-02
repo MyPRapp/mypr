@@ -128,7 +128,7 @@ class FavoritesPageState extends State<FavoritesPage> {
                 itemCount: favoriteClubs.length,
                 itemBuilder: (context, index) {
                   final club = favoriteClubs[index];
-                  return HomePageBigCard(
+                  return BigClubCard(
                     key: ValueKey(club['id']), // Use unique key
                     clubName: club['clubName'],
                     address: club['address'],

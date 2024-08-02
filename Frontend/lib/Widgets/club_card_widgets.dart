@@ -125,24 +125,17 @@ class MinPriceAndMaxPersons extends StatelessWidget {
 }
 
 class DaysOpen extends StatelessWidget {
-  const DaysOpen({
-    super.key,
-    required this.monday,
-    required this.tuesday,
-    required this.wednesday,
-    required this.thursday,
-    required this.friday,
-    required this.saturday,
-    required this.sunday,
-  });
+  const DaysOpen(
+      {super.key,
+      required this.monday,
+      required this.tuesday,
+      required this.wednesday,
+      required this.thursday,
+      required this.friday,
+      required this.saturday,
+      required this.sunday});
 
-  final bool monday;
-  final bool tuesday;
-  final bool wednesday;
-  final bool thursday;
-  final bool friday;
-  final bool saturday;
-  final bool sunday;
+  final bool monday, tuesday, wednesday, thursday, friday, saturday, sunday;
 
   @override
   Widget build(BuildContext context) {
@@ -285,13 +278,15 @@ class _LikeButtonState extends State<LikeButton> {
     setState(
       () {
         liked = !liked;
-        if (!liked && widget.onRemove != null) {
-          widget.onRemove!();
+        if (!liked) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
                 duration: Durations.medium4,
                 content: Text('Αφαιρέθηκε από τα αγαπημένα')),
           );
+          if (widget.onRemove != null) {
+            widget.onRemove!();
+          }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
