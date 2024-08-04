@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 class NameAndStars extends StatelessWidget {
   const NameAndStars({super.key, required this.clubName, required this.stars});
@@ -79,8 +78,7 @@ class MinPriceAndMaxPersons extends StatelessWidget {
     required this.maxPersons,
   });
 
-  final int minPrice;
-  final int maxPersons;
+  final int minPrice, maxPersons;
 
   @override
   Widget build(BuildContext context) {
@@ -252,71 +250,5 @@ class DaysOpen extends StatelessWidget {
             ),
           ],
         ));
-  }
-}
-
-class LikeButton extends StatefulWidget {
-  final bool liked;
-  final VoidCallback? onRemove;
-
-  const LikeButton({super.key, required this.liked, this.onRemove});
-
-  @override
-  State<LikeButton> createState() => _LikeButtonState();
-}
-
-class _LikeButtonState extends State<LikeButton> {
-  late bool liked;
-
-  @override
-  void initState() {
-    super.initState();
-    liked = widget.liked;
-  }
-
-  void toggleButton() {
-    setState(
-      () {
-        liked = !liked;
-        if (!liked) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                duration: Durations.medium4,
-                content: Text('Αφαιρέθηκε από τα αγαπημένα')),
-          );
-          if (widget.onRemove != null) {
-            widget.onRemove!();
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                duration: Durations.medium4,
-                content: Text('Προστέθηκε στα αγαπημένα')),
-          );
-        }
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: toggleButton,
-      child: SizedBox(
-        height: 40,
-        width: 60,
-        child: liked
-            ? const ImageIcon(AssetImage("assets/icons/heart(liked)_icon.png"),
-                    color: Color(0xFF9c0c04))
-                .animate(target: liked ? 1 : 0)
-                .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
-                .then()
-                .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
-            : const ImageIcon(
-                AssetImage("assets/icons/heart(unliked)_icon.png"),
-                color: Color(0xFF9c0c04),
-              ),
-      ),
-    );
   }
 }

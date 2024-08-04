@@ -76,7 +76,7 @@ class _ReservationPageState extends State<ReservationPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
-    void onBackPressed(BuildContext context, bool isPopInvoked) {
+    void onBackPressed(BuildContext context) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<BottomNavBarVisibility>().show();
       });
@@ -84,7 +84,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
     return PopScope(
         onPopInvoked: (bool isPopInvoked) {
-          onBackPressed(context, isPopInvoked);
+          onBackPressed(context);
         },
         child: Scaffold(
           body: Stack(children: [

@@ -10,11 +10,12 @@ class CustomizeProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userDetails = context.watch<UserProvider>().userDetails;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
 
-    void onBackPressed(BuildContext context, bool isPopInvoked) {
+    void onBackPressed(BuildContext context) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<BottomNavBarVisibility>().show();
       });
@@ -22,7 +23,7 @@ class CustomizeProfilePage extends StatelessWidget {
 
     return PopScope(
         onPopInvoked: (bool isPopInvoked) {
-          onBackPressed(context, isPopInvoked);
+          onBackPressed(context);
         },
         child: Scaffold(
           backgroundColor: const Color(0xFF1D2428),
@@ -84,30 +85,30 @@ class CustomizeProfilePage extends StatelessWidget {
                                 ),
                               )),
                           const SizedBox(width: 16),
-                          const Expanded(
+                          Expanded(
                             child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Αντώνιος Παπαρδέλης',
-                                    style: TextStyle(
+                                    '${userDetails?['first_name']} ${userDetails?['last_name']}',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    '(+30)6980984213',
-                                    style: TextStyle(
+                                    '${userDetails?['phone']} ',
+                                    style: const TextStyle(
                                         color: Color.fromARGB(255, 226, 16, 5),
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
-                                  SizedBox(height: 4),
+                                  const SizedBox(height: 4),
                                   Text(
-                                    'papardelis@gmail.com',
-                                    style: TextStyle(
+                                    '${userDetails?['email']}',
+                                    style: const TextStyle(
                                         color: Color.fromARGB(255, 226, 16, 5),
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
@@ -141,12 +142,12 @@ class CustomizeProfilePage extends StatelessWidget {
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 12),
-                        title: const Text('Αλλαγή κωδικού',
+                        title: const Text('Προσθήκη/Αλλαγή φωτογραφίας',
                             style: TextStyle(color: Colors.white)),
                         trailing: const Icon(Icons.chevron_right,
                             color: Colors.white),
                         onTap: () {
-                          // Handle change password
+                          // Handle change email
                         },
                       ),
                     ),
@@ -158,12 +159,12 @@ class CustomizeProfilePage extends StatelessWidget {
                       child: ListTile(
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 12),
-                        title: const Text('Αλλαγή email',
+                        title: const Text('Αλλαγή κωδικού',
                             style: TextStyle(color: Colors.white)),
                         trailing: const Icon(Icons.chevron_right,
                             color: Colors.white),
                         onTap: () {
-                          // Handle change email
+                          // Handle change password
                         },
                       ),
                     ),
@@ -180,7 +181,7 @@ class CustomizeProfilePage extends StatelessWidget {
                           backgroundColor: Colors.black,
                         ),
                         onPressed: () {
-                          context.router.replaceAll([const EmailLoginRoute()]);
+                          context.router.replaceAll([const SignUpRoute()]);
                         },
                         child: const Text(
                           'Αποσύνδεση',

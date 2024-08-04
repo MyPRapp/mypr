@@ -7,7 +7,15 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (context) => BottomNavBarVisibility(),
-      child: const MyPR(),
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => UserProvider()),
+          ChangeNotifierProvider(create: (_) => ClubProvider()),
+          ChangeNotifierProvider(create: (_) => BottomNavBarVisibility()),
+          // Add other providers here
+        ],
+        child: const MyPR(),
+      ),
     ),
   );
 }

@@ -4,8 +4,6 @@ import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
-import '../services/auth_service.dart';
-
 @RoutePage()
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -61,7 +59,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _navigateToEmailLoginPage() {
-    context.router.replaceAll([const EmailLoginRoute()]);
+    context.router.replaceAll([const LoginRoute()]);
   }
 
   @override
@@ -279,9 +277,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                   width: 40,
                                   child: IconButton(
                                     onPressed: _togglePasswordVisibility,
-                                    icon: const Icon(
-                                      Icons.visibility_off_rounded,
-                                      color: Color(0xFF9C0C04),
+                                    icon: Icon(
+                                      _obscureText
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: const Color(0xFF9C0C04),
                                     ),
                                   ),
                                 ),
@@ -322,9 +322,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                   width: 40,
                                   child: IconButton(
                                     onPressed: _togglePasswordVisibility2,
-                                    icon: const Icon(
-                                      Icons.visibility_off_rounded,
-                                      color: Color(0xFF9C0C04),
+                                    icon: Icon(
+                                      _obscureText2
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                      color: const Color(0xFF9C0C04),
                                     ),
                                   ),
                                 ),

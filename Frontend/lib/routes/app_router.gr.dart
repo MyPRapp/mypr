@@ -10,23 +10,23 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i14;
 import 'package:flutter/material.dart' as _i15;
+import 'package:mypr/MainPages/HomePage/home_page.dart' as _i6;
 import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
     as _i11;
-import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
+import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i10;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/contact_us_page.dart'
     as _i2;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customize_profile_page.dart'
     as _i3;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favorites_page.dart'
-    as _i5;
+    as _i4;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/my_reservations_page.dart'
     as _i8;
-import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i10;
 import 'package:mypr/MainPages/SearchPage/search_page.dart' as _i12;
 import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i1;
-import 'package:mypr/Navigation/home_navigation.dart' as _i6;
+import 'package:mypr/Navigation/home_navigation.dart' as _i5;
 import 'package:mypr/Navigation/profile_navigation.dart' as _i9;
-import 'package:mypr/WelcomeScreens/email_login_page.dart' as _i4;
+import 'package:mypr/WelcomeScreens/login_page.dart' as _i7;
 import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i13;
 
 abstract class $AppRouter extends _i14.RootStackRouter {
@@ -52,28 +52,28 @@ abstract class $AppRouter extends _i14.RootStackRouter {
         child: const _i3.CustomizeProfilePage(),
       );
     },
-    EmailLoginRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i4.EmailLoginPage(),
-      );
-    },
     FavoritesRoute.name: (routeData) {
       return _i14.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i5.FavoritesPage(),
+        child: const _i4.FavoritesPage(),
       );
     },
     HomeNavigation.name: (routeData) {
       return _i14.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i6.HomeNavigation(),
+        child: const _i5.HomeNavigation(),
       );
     },
     HomeRoute.name: (routeData) {
       return _i14.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: _i7.HomePage(),
+        child: const _i6.HomePage(),
+      );
+    },
+    LoginRoute.name: (routeData) {
+      return _i14.AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const _i7.LoginPage(),
       );
     },
     MyReservationsRoute.name: (routeData) {
@@ -162,21 +162,7 @@ class CustomizeProfileRoute extends _i14.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i4.EmailLoginPage]
-class EmailLoginRoute extends _i14.PageRouteInfo<void> {
-  const EmailLoginRoute({List<_i14.PageRouteInfo>? children})
-      : super(
-          EmailLoginRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'EmailLoginRoute';
-
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
-}
-
-/// generated route for
-/// [_i5.FavoritesPage]
+/// [_i4.FavoritesPage]
 class FavoritesRoute extends _i14.PageRouteInfo<void> {
   const FavoritesRoute({List<_i14.PageRouteInfo>? children})
       : super(
@@ -190,7 +176,7 @@ class FavoritesRoute extends _i14.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i6.HomeNavigation]
+/// [_i5.HomeNavigation]
 class HomeNavigation extends _i14.PageRouteInfo<void> {
   const HomeNavigation({List<_i14.PageRouteInfo>? children})
       : super(
@@ -204,7 +190,7 @@ class HomeNavigation extends _i14.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i7.HomePage]
+/// [_i6.HomePage]
 class HomeRoute extends _i14.PageRouteInfo<void> {
   const HomeRoute({List<_i14.PageRouteInfo>? children})
       : super(
@@ -213,6 +199,20 @@ class HomeRoute extends _i14.PageRouteInfo<void> {
         );
 
   static const String name = 'HomeRoute';
+
+  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+}
+
+/// generated route for
+/// [_i7.LoginPage]
+class LoginRoute extends _i14.PageRouteInfo<void> {
+  const LoginRoute({List<_i14.PageRouteInfo>? children})
+      : super(
+          LoginRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'LoginRoute';
 
   static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
 }

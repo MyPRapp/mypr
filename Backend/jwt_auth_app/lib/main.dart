@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jwt_auth_app/services/club_details_screen.dart';
+import 'package:jwt_auth_app/services/auth_service.dart';
 
 import 'screens/login_screen.dart';
 // import 'services/auth_service.dart';
@@ -20,13 +20,13 @@ class MyApp extends StatelessWidget {
       ),
       home: const LoginScreen(),
       routes: {
-        '/welcome': (context) => const ClubsPage(),
+        '/welcome': (context) => const WelcomeScreen(),
         // Add other routes here
       },
     );
   }
 }
-/* 
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
@@ -50,4 +50,4 @@ class WelcomeScreen extends StatelessWidget {
       ),
     );
   }
-} */
+}

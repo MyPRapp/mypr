@@ -13,101 +13,13 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class FavoritesPageState extends State<FavoritesPage> {
-  final List<Map<String, dynamic>> favoriteClubs = [
-    {
-      'id': 1, // Add unique id
-      'clubName': 'Lohan',
-      'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-      'stars': 4.5,
-      'minPrice': 120,
-      'maxPersons': 5,
-      'monday': false,
-      'tuesday': false,
-      'wednesday': false,
-      'thursday': false,
-      'friday': true,
-      'saturday': true,
-      'sunday': true,
-      'liked': true,
-    },
-    {
-      'id': 2, // Add unique id
-      'clubName': 'Toyroom',
-      'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-      'stars': 4.0,
-      'minPrice': 110,
-      'maxPersons': 5,
-      'monday': true,
-      'tuesday': true,
-      'wednesday': false,
-      'thursday': false,
-      'friday': true,
-      'saturday': true,
-      'sunday': true,
-      'liked': true,
-    },
-    {
-      'id': 3, // Add unique id
-      'clubName': 'Syko',
-      'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-      'stars': 5.0,
-      'minPrice': 110,
-      'maxPersons': 5,
-      'monday': false,
-      'tuesday': false,
-      'wednesday': true,
-      'thursday': false,
-      'friday': true,
-      'saturday': true,
-      'sunday': true,
-      'liked': true,
-    },
-    {
-      'id': 4, // Add unique id
-      'clubName': 'Akanthus',
-      'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-      'stars': 5.0,
-      'minPrice': 110,
-      'maxPersons': 5,
-      'monday': false,
-      'tuesday': false,
-      'wednesday': true,
-      'thursday': false,
-      'friday': true,
-      'saturday': true,
-      'sunday': true,
-      'liked': true,
-    },
-    {
-      'id': 5, // Add unique id
-      'clubName': 'Blast',
-      'address': 'ΙΑΚΧΟΥ 8, ΚΕΡΑΜΕΙΚΟΣ',
-      'stars': 3.5,
-      'minPrice': 110,
-      'maxPersons': 5,
-      'monday': false,
-      'tuesday': false,
-      'wednesday': true,
-      'thursday': false,
-      'friday': true,
-      'saturday': true,
-      'sunday': true,
-      'liked': true,
-    },
-  ];
-
-  void removeCard(int id) {
-    setState(() {
-      favoriteClubs.removeWhere((club) => club['id'] == id);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
-    void onBackPressed(BuildContext context, bool isPopInvoked) {
+
+    void onBackPressed(BuildContext context) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         context.read<BottomNavBarVisibility>().show();
       });
@@ -115,41 +27,14 @@ class FavoritesPageState extends State<FavoritesPage> {
 
     return PopScope(
       onPopInvoked: (bool isPopInvoked) {
-        onBackPressed(context, isPopInvoked);
+        onBackPressed(context);
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Stack(
-          alignment: Alignment.topCenter,
+        body: ListView(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 80),
-              child: ListView.builder(
-                itemCount: favoriteClubs.length,
-                itemBuilder: (context, index) {
-                  final club = favoriteClubs[index];
-                  return BigClubCard(
-                    key: ValueKey(club['id']), // Use unique key
-                    clubName: club['clubName'],
-                    address: club['address'],
-                    stars: club['stars'],
-                    minPrice: club['minPrice'],
-                    maxPersons: club['maxPersons'],
-                    monday: club['monday'],
-                    tuesday: club['tuesday'],
-                    wednesday: club['wednesday'],
-                    thursday: club['thursday'],
-                    friday: club['friday'],
-                    saturday: club['saturday'],
-                    sunday: club['sunday'],
-                    liked: club['liked'],
-                    onRemove: () => removeCard(club['id']),
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 50),
+              padding: const EdgeInsets.only(top: 20),
               child: Row(
                 children: [
                   Padding(
@@ -178,9 +63,49 @@ class FavoritesPageState extends State<FavoritesPage> {
                 ],
               ),
             ),
+            Consumer<ClubProvider>(
+              builder: (context, clubProvider, child) {
+                final likedClubs = clubProvider.likedClubs;
+                return SizedBox(
+                  height: likedClubs.length * 200,
+                  child: ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: likedClubs.length,
+                    itemBuilder: (context, index) {
+                      final club = likedClubs[index];
+                      final daysOpen = _daysOpen(clubProvider, club.clubName);
+                      return BigClubCard(
+                        clubName: club.clubName,
+                        stars: club.clubRating,
+                        address: club.clubLocation,
+                        minPrice: club.clubMinPrice,
+                        maxPersons: club.clubMaxPersons,
+                        monday: daysOpen[0],
+                        tuesday: daysOpen[1],
+                        wednesday: daysOpen[2],
+                        thursday: daysOpen[3],
+                        friday: daysOpen[4],
+                        saturday: daysOpen[5],
+                        sunday: daysOpen[6],
+                        liked: clubProvider.isLiked(club.clubName),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
           ],
         ),
       ),
     );
+  }
+
+  List<bool> _daysOpen(ClubProvider clubProvider, String clubName) {
+    final String availabilityInBytes =
+        clubProvider.getClubAvailability(clubName);
+
+    List<bool> daysOpen =
+        availabilityInBytes.split('').map((char) => char == '1').toList();
+    return daysOpen;
   }
 }
