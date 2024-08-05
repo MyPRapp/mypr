@@ -48,8 +48,11 @@ SIMPLE_JWT = {
 }
 
 
-AUTH_USER_MODEL = 'api.CustomUser' 
+AUTH_USER_MODEL = 'api.CustomUser'
 
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 # Application definition
