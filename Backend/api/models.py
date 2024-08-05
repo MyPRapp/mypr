@@ -40,6 +40,7 @@ class Clubs(models.Model):
     location = models.CharField(max_length=100)
     rating = models.DecimalField(range(1,5),decimal_places= 2,max_digits=3)
     availability = models.CharField(max_length=7)
+    photo = models.ImageField(upload_to='club_photos/',blank=True,null=True)
 
     
     def __str__(self):
