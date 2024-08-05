@@ -87,7 +87,6 @@ class FavoritesPageState extends State<FavoritesPage> {
                         friday: daysOpen[4],
                         saturday: daysOpen[5],
                         sunday: daysOpen[6],
-                        liked: clubProvider.isLiked(club.clubName),
                       );
                     },
                   ),

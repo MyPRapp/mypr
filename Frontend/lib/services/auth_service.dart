@@ -4,8 +4,43 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl =
-      'http://127.0.0.1:8000/api'; // or your local network IP
+  final String baseUrl = 'http://127.0.0.1:8000/api';
+
+  Future<bool> login(String username, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/token/'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'username': username, 'password': password}),
+    );
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      String? accessToken = data['access'];
+      String? refreshToken = data['refresh'];
+
+      if (accessToken != null && refreshToken != null) {
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access_token', accessToken);
+        await prefs.setString('refresh_token', refreshToken);
+        await prefs.setString('saved_email', username);
+        await prefs.setString('saved_password', password);
+
+        // Fetch and save user details
+        final userResponse = await http.get(
+          Uri.parse('$baseUrl/user/print'),
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
+
+        if (userResponse.statusCode == 200) {
+          var userDetails = jsonDecode(userResponse.body);
+          await prefs.setString('user_details', jsonEncode(userDetails));
+        }
+
+        return true;
+      }
+    }
+    return false;
+  }
 
   Future<bool> register(String username, String password, String firstName,
       String lastName, String email, String phone) async {
@@ -18,7 +53,7 @@ class AuthService {
         'first_name': firstName,
         'last_name': lastName,
         'email': email,
-        'phone': phone
+        'phone': phone,
       }),
     );
 
@@ -30,45 +65,6 @@ class AuthService {
       return true;
     } else {
       print('Registration failed: ${response.body}');
-      return false;
-    }
-  }
-
-  Future<bool> login(String email, String password) async {
-    // Use the email as username for login
-    final response = await http.post(
-      Uri.parse('$baseUrl/token/'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'username': email, // Send email as username
-        'password': password
-      }),
-    );
-
-    print('Login response status: ${response.statusCode}');
-    print('Login response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      try {
-        var data = jsonDecode(response.body);
-        String? accessToken = data['access'];
-        String? refreshToken = data['refresh'];
-
-        if (accessToken != null && refreshToken != null) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          await prefs.setString('access_token', accessToken);
-          await prefs.setString('refresh_token', refreshToken);
-          return true;
-        } else {
-          print('Access token or refresh token is null');
-          return false;
-        }
-      } catch (e) {
-        print('Error decoding login response: $e');
-        return false;
-      }
-    } else {
-      print('Login failed: ${response.body}');
       return false;
     }
   }

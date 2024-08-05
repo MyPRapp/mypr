@@ -5,17 +5,14 @@ import 'package:provider/provider.dart';
 
 void main() {
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => BottomNavBarVisibility(),
-      child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => UserProvider()),
-          ChangeNotifierProvider(create: (_) => ClubProvider()),
-          ChangeNotifierProvider(create: (_) => BottomNavBarVisibility()),
-          // Add other providers here
-        ],
-        child: const MyPR(),
-      ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => ClubProvider()),
+        ChangeNotifierProvider(create: (_) => BottomNavBarVisibility()),
+        ChangeNotifierProvider(create: (_) => GlobalState()),
+      ],
+      child: const MyPR(),
     ),
   );
 }

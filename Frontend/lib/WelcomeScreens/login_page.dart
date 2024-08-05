@@ -5,6 +5,8 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/auth_service.dart';
+
 @RoutePage()
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,14 +19,20 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
-
+  bool _obscureText = true;
+  bool isLoading = false;
   @override
   void initState() {
     super.initState();
-    _loadSavedCredentials();
+    _initialize();
   }
 
-  Future<void> _loadSavedCredentials() async {
+  Future<void> _initialize() async {
+    await _loadSavedUserCredentials();
+    await _checkAndFetchClubs();
+  }
+
+  Future<void> _loadSavedUserCredentials() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? savedEmail = prefs.getString('saved_email');
     String? savedPassword = prefs.getString('saved_password');
@@ -37,25 +45,41 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _login(BuildContext context) async {
+  Future<void> _checkAndFetchClubs() async {
+    final globalState = context.read<GlobalState>();
+    if (!globalState.dataLoaded) {
+      await _fetchClubsAndCatalogues();
+      if (mounted) {
+        globalState.setDataLoaded(true);
+      }
+    }
+  }
+
+  Future<void> _fetchClubsAndCatalogues() async {
+    ClubProvider clubProvider = context.read<ClubProvider>();
+    await clubProvider.loadClubsFromPreferences();
+    await clubProvider.fetchClubsAndCatalogues();
+    await clubProvider.loadLikedClubs();
+  }
+
+  Future<void> _login() async {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     bool success = await _authService.login(email, password);
 
-    if (success) {
-      // ignore: use_build_context_synchronously
-      context.router.replaceAll([const BottomNavBarRoute()]);
-    } else {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            duration: Durations.long4,
-            content: Text('Λάθος email/τηλέφωνο ή κωδικός')),
-      );
+    if (mounted) {
+      if (success) {
+        context.router.replaceAll([const BottomNavBarRoute()]);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            duration: Duration(seconds: 4),
+            content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
+          ),
+        );
+      }
     }
   }
-
-  bool _obscureText = true;
 
   void _togglePasswordVisibility() {
     setState(() {
@@ -64,7 +88,9 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _navigateToSignUpPage() {
-    context.router.replaceAll([const SignUpRoute()]);
+    if (mounted) {
+      context.router.replaceAll([const SignUpRoute()]);
+    }
   }
 
   @override
@@ -72,8 +98,11 @@ class _LoginPageState extends State<LoginPage> {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().hide();
+      if (mounted) {
+        context.read<BottomNavBarVisibility>().hide();
+      }
     });
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -117,104 +146,90 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      width: screenWidth - 50,
-                      child: TextField(
-                        controller: _emailController,
-                        style: const TextStyle(
-                          fontSize: 23,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                    TextField(
+                      controller: _emailController,
+                      style: const TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                      decoration: const InputDecoration(
+                        hintText: 'Email/Τηλέφωνο(+30)',
+                        hintStyle: TextStyle(
+                          color: Color.fromARGB(132, 156, 12, 4),
                         ),
-                        decoration: const InputDecoration(
-                          hintText: 'Email/Τηλέφωνο(+30)',
-                          hintStyle: TextStyle(
-                            color: Color.fromARGB(132, 156, 12, 4),
-                          ),
-                          border: InputBorder.none,
-                        ),
+                        border: InputBorder.none,
                       ),
                     ),
-                    const SizedBox(
-                      width: 420,
-                      child: Divider(
-                        height: 10,
-                        color: Color.fromARGB(204, 156, 12, 4),
-                        thickness: 7,
-                      ),
+                    const Divider(
+                      height: 10,
+                      color: Color.fromARGB(204, 156, 12, 4),
+                      thickness: 7,
                     ),
-                    SizedBox(
-                      width: screenWidth - 50,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: screenWidth - 100,
-                            child: TextField(
-                              controller: _passwordController,
-                              obscureText: _obscureText,
-                              style: const TextStyle(
-                                fontSize: 23,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _passwordController,
+                            obscureText: _obscureText,
+                            style: const TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Κωδικός',
+                              hintStyle: TextStyle(
+                                color: Color.fromARGB(132, 156, 12, 4),
                               ),
-                              decoration: const InputDecoration(
-                                hintText: 'Κωδικός',
-                                hintStyle: TextStyle(
-                                  color: Color.fromARGB(132, 156, 12, 4),
-                                ),
-                                border: InputBorder.none,
-                              ),
+                              border: InputBorder.none,
                             ),
                           ),
-                          SizedBox(
-                            width: 50,
-                            child: IconButton(
-                              onPressed: _togglePasswordVisibility,
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: const Color(0xFF9C0C04),
+                        ),
+                        IconButton(
+                          onPressed: _togglePasswordVisibility,
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: const Color(0xFF9C0C04),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 15),
+                      child: Row(
+                        children: [
+                          const Text(
+                            '  Ξέχασες τον κωδικό;',
+                            style: TextStyle(
+                              color: Color(0xFF9C0C04),
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  duration: Duration(seconds: 4),
+                                  content: Text(
+                                      'Στάλθηκε email για επαναφορά κωδικού'),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              'Επαναφορά κωδικού',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 15),
-                      child: SizedBox(
-                        child: Row(
-                          children: [
-                            const Text(
-                              '  Ξέχασες τον κωδικό;',
-                              style: TextStyle(
-                                color: Color(0xFF9C0C04),
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      duration: Durations.long4,
-                                      content: Text(
-                                          'Στάλθηκε email για επαναφορά κωδικού')),
-                                );
-                              },
-                              child: const Text(
-                                'Επαναφορά κωδικού',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
                       ),
                     ),
                     TextButton(
@@ -227,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -238,12 +253,13 @@ class _LoginPageState extends State<LoginPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 22, vertical: 18),
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: const BorderSide(color: Color(0xFF9C0C04))),
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(color: Color(0xFF9C0C04)),
+                      ),
                       backgroundColor: Colors.black,
                     ),
                     onPressed: () {
-                      _login(context);
+                      _login();
                     },
                     child: const Text(
                       'Είσοδος',
@@ -256,7 +272,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 100)
+              const SizedBox(height: 100),
             ],
           ),
         ),

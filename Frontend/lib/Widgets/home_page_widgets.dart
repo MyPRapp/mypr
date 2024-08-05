@@ -20,7 +20,6 @@ class BigClubCard extends StatelessWidget {
     required this.friday,
     required this.saturday,
     required this.sunday,
-    required this.liked,
     this.onRemove,
   });
 
@@ -28,14 +27,7 @@ class BigClubCard extends StatelessWidget {
   final VoidCallback? onRemove;
   final String clubName, address;
   final int minPrice, maxPersons;
-  final bool monday,
-      tuesday,
-      wednesday,
-      thursday,
-      friday,
-      saturday,
-      sunday,
-      liked;
+  final bool monday, tuesday, wednesday, thursday, friday, saturday, sunday;
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +133,6 @@ class SmallClubCard extends StatelessWidget {
     required this.clubName,
     required this.minPrice,
     required this.maxPersons,
-    required this.liked,
     this.onRemove,
   });
 
@@ -149,7 +140,6 @@ class SmallClubCard extends StatelessWidget {
   final int minPrice;
   final int maxPersons;
   final VoidCallback? onRemove;
-  final bool liked;
 
   @override
   Widget build(BuildContext context) {

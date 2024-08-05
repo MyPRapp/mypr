@@ -22,7 +22,7 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
-android {
+android {ndkVersion "25.1.8937393"
     namespace "com.example.mypr"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
