@@ -38,7 +38,7 @@ class BookingsSerializer(serializers.ModelSerializer):
 class ClubsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clubs
-        fields = ["id","club_name","phone","location","rating","availability","photos"]
+        fields = ["id","club_name","phone","location","rating","availability"]
 
 
 class CatalogueSerializer(serializers.ModelSerializer):

@@ -1,13 +1,14 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:mypr/Widgets/reservation_page_widgets.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
 @RoutePage()
 class ReservationPage extends StatefulWidget {
   const ReservationPage({super.key, required this.clubName});
-
   final String clubName;
 
   @override
@@ -73,6 +74,15 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   Widget build(BuildContext context) {
+    ClubProvider clubProvider = context.watch<ClubProvider>();
+    // final club =
+    //     clubProvider.getClubByID(clubProvider.getClubIDByName(widget.clubName));
+    final userDetails = context.watch<UserProvider>().userDetails;
+    // final catalogues = context.read<ClubProvider>().allCatalogues;
+    print('aa');
+    // clubProvider.printAllCatalogues();
+    print('aaa');
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
@@ -100,29 +110,39 @@ class _ReservationPageState extends State<ReservationPage> {
               padding: const EdgeInsets.all(15),
               child: ListView(children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: IconButton(
-                        onPressed: () {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            context.read<BottomNavBarVisibility>().show();
-                          });
-                          Navigator.pop(context);
-                        },
-                        icon: const Icon(
-                          Icons.chevron_left,
-                          color: Colors.white,
-                          size: 35,
+                    Row(children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: IconButton(
+                          onPressed: () {
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              context.read<BottomNavBarVisibility>().show();
+                            });
+                            Navigator.pop(context);
+                            AutoRouter.of(context).push(const HomeRoute());
+                          },
+                          icon: const Icon(
+                            Icons.chevron_left,
+                            color: Colors.white,
+                            size: 35,
+                          ),
                         ),
                       ),
-                    ),
-                    const Text(
-                      'ΠΡΟΦΙΛ',
-                      style: TextStyle(
-                          color: Color(0xFF9C0C04),
-                          fontSize: 36,
-                          fontWeight: FontWeight.bold),
+                      Text(
+                        widget.clubName,
+                        style: const TextStyle(
+                            color: Color(0xFF9C0C04),
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ]),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 5),
+                      child: Container(
+                          alignment: Alignment.centerRight,
+                          child: LikeButton(clubName: widget.clubName)),
                     )
                   ],
                 ),
@@ -147,7 +167,7 @@ class _ReservationPageState extends State<ReservationPage> {
                 ),
                 const PackagesInfo(
                   package: 'Απλό',
-                  maxPersons: 6,
+                  maxPersons: 5,
                   minPrice: 110,
                 ),
                 const PackagesInfo(

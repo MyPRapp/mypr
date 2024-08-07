@@ -15,6 +15,7 @@ class FavoritesPage extends StatefulWidget {
 class FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
+    ClubProvider clubProvider = context.watch<ClubProvider>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
@@ -34,7 +35,7 @@ class FavoritesPageState extends State<FavoritesPage> {
         body: ListView(
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 20),
+              padding: const EdgeInsets.only(top: 20, bottom: 10),
               child: Row(
                 children: [
                   Padding(
@@ -59,7 +60,32 @@ class FavoritesPageState extends State<FavoritesPage> {
                         color: Color(0xFF9C0C04),
                         fontSize: 30,
                         fontWeight: FontWeight.bold),
-                  )
+                  ),
+                  SizedBox(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 30, top: 5),
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(
+                                  color: Colors.black, width: 2),
+                            ),
+                            backgroundColor: const Color(0xFF9C0C04),
+                          ),
+                          onPressed: clubProvider.deleteAllLiked,
+                          child: const Text(
+                            'Αφαίρεση όλων',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.black,
+                            ),
+                          )),
+                    ),
+                  ),
                 ],
               ),
             ),

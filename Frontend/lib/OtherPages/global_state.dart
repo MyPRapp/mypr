@@ -103,6 +103,17 @@ class ClubProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> deleteAllLiked() async {
+    final prefs = await SharedPreferences.getInstance();
+    for (var club in _clubs) {
+      if (club.clubIsLiked) {
+        club.clubIsLiked = false;
+        await prefs.setBool(club.clubName, false);
+      }
+    }
+    notifyListeners();
+  }
+
   void addOrUpdateClub(ClubInfoStruct club) {
     if (club.clubID <= 0) {
       return;
@@ -128,8 +139,20 @@ class ClubProvider with ChangeNotifier {
         .clubAvailability;
   }
 
+  ClubInfoStruct getClubByID(int clubID) {
+    return _clubs.firstWhere((club) => club.clubID == clubID);
+  }
+
+  ClubInfoStruct getClubByName(String clubName) {
+    return _clubs.firstWhere((club) => club.clubName == clubName);
+  }
+
   int getClubIDByName(String clubName) {
     return _clubs.firstWhere((club) => club.clubName == clubName).clubID;
+  }
+
+  String getClubNameByID(int clubID) {
+    return _clubs.firstWhere((club) => club.clubID == clubID).clubName;
   }
 
   void printAllClubIDsAndNames() {
@@ -170,7 +193,6 @@ class ClubProvider with ChangeNotifier {
   //PUSH SP LIST TO _CLUBS
   Future<void> loadClubsFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // await prefs.clear();
     List<String> storedClubs = prefs.getStringList('clubs') ?? [];
     if (storedClubs.isNotEmpty) {
       for (String clubJson in storedClubs) {
@@ -273,27 +295,74 @@ class ClubProvider with ChangeNotifier {
   }
 }
 
-class UserProvider with ChangeNotifier {
-  Map<String, dynamic>? _userDetails;
+class UserInfoStruct {
+  int userID;
+  String username;
+  String password;
+  String firstName;
+  String lastName;
+  String email;
+  String phone;
 
-  Map<String, dynamic>? get userDetails => _userDetails;
+  UserInfoStruct({
+    required this.userID,
+    this.username = '',
+    this.password = '',
+    this.firstName = '',
+    this.lastName = '',
+    this.email = '',
+    this.phone = '',
+  });
 
-  UserProvider() {
-    _loadUserDetails();
+  factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
+    return UserInfoStruct(
+      userID: json['id'] ?? -1,
+      username: json['username'] ?? '',
+      password: json['password'] ?? '',
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'] ?? '',
+    );
   }
 
-  Future<void> _loadUserDetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  Map<String, dynamic> toJson() {
+    return {
+      'id': userID,
+      'username': username,
+      'password': password,
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'phone': phone,
+    };
+  }
+}
+
+class UserProvider with ChangeNotifier {
+  UserInfoStruct? _userDetails;
+
+  UserInfoStruct? get userDetails => _userDetails;
+
+  Future<void> loadUserDetailsFromPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDetailsString = prefs.getString('user_details');
 
     if (userDetailsString != null) {
-      _userDetails = jsonDecode(userDetailsString);
+      _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
       notifyListeners();
     }
   }
 
-  Future<void> fetchUserDetails() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> saveUserDetailsToPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_userDetails != null) {
+      await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
+    }
+  }
+
+  Future<void> fetchUserDetailsFromServer() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('access_token');
 
     if (token != null) {
@@ -303,8 +372,8 @@ class UserProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _userDetails = jsonDecode(response.body);
-        await prefs.setString('user_details', jsonEncode(_userDetails));
+        _userDetails = UserInfoStruct.fromJson(jsonDecode(response.body));
+        await saveUserDetailsToPreferences();
         notifyListeners();
       } else {
         throw Exception('Failed to load user details');
@@ -312,6 +381,12 @@ class UserProvider with ChangeNotifier {
     } else {
       throw Exception('No access token found');
     }
+  }
+
+  Future<void> syncUserDetails() async {
+    await loadUserDetailsFromPreferences();
+    await fetchUserDetailsFromServer();
+    notifyListeners();
   }
 }
 

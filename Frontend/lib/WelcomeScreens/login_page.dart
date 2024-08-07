@@ -69,7 +69,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if (mounted) {
       if (success) {
-        context.router.replaceAll([const BottomNavBarRoute()]);
+        await context.read<UserProvider>().syncUserDetails();
+        if (mounted) {
+          context.router.replaceAll([const BottomNavBarRoute()]);
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -106,7 +109,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: screenHeight,
+          height: screenHeight + 300,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Colors.black, Color(0xFF9C0C04)],
@@ -272,7 +275,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 100),
+              const SizedBox(height: 400),
             ],
           ),
         ),

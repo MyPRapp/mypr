@@ -52,7 +52,7 @@ class ProfilePage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: Text(
-                      '${userDetails['first_name']} ${userDetails['last_name']}',
+                      '${userDetails.firstName} ${userDetails.firstName}',
                       style: const TextStyle(
                           fontSize: 20,
                           color: Color(0xFF9c0c04),
