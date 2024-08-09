@@ -94,7 +94,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 height: 70,
                 width: screenWidth,
                 child: const Image(
-                  image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+                  image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
                   fit: BoxFit.cover,
                   alignment: Alignment(0, -0.3),
                 ),
@@ -103,7 +103,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 height: 150,
                 child: Image(
                   image: AssetImage(
-                      'assets/clubPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
+                      'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
                 ),
               ),
               SizedBox(

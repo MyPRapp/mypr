@@ -81,7 +81,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(30),
                                         child: Image.asset(
-                                          'assets/clubPhotos/giorgos_sto_plintirio.png',
+                                          'assets/otherPhotos/giorgos_sto_plintirio.png',
                                           fit: BoxFit.cover,
                                         ),
                                       ),

@@ -101,7 +101,7 @@ class SearchPageState extends State<SearchPage> {
                           ),
                           onTap: () {
                             AutoRouter.of(context).push(ReservationRoute(
-                              clubName: clubName,
+                              club: clubProvider.getClubByName(clubName),
                             ));
                             setState(() {
                               _isDropdownVisible = false;

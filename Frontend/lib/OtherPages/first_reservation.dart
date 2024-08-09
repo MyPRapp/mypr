@@ -55,7 +55,7 @@ class _PresentationPageState extends State<PresentationPage> {
             height: 40,
             width: double.maxFinite,
             child: Image(
-              image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+              image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
               fit: BoxFit.fitWidth,
               alignment: Alignment(0, -0.3),
             ),
@@ -116,7 +116,7 @@ class _PresentationPageState extends State<PresentationPage> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8.0),
                     child: const Image(
-                      image: AssetImage('assets/clubPhotos/Syko.jpg'),
+                      image: AssetImage('assets/otherPhotos/Syko.jpg'),
                       fit: BoxFit.fill,
                     ),
                   ),

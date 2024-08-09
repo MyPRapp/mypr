@@ -30,6 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
     await _checkAndFetchClubs();
+    _login();
   }
 
   Future<void> _loadSavedUserCredentials() async {
@@ -57,9 +58,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _fetchClubsAndCatalogues() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
-    await clubProvider.loadClubsFromPreferences();
     await clubProvider.fetchClubsAndCatalogues();
-    await clubProvider.loadLikedClubs();
   }
 
   Future<void> _login() async {
@@ -124,14 +123,14 @@ class _LoginPageState extends State<LoginPage> {
                 height: 80,
                 width: screenWidth,
                 child: const Image(
-                  image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+                  image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
                   fit: BoxFit.fitWidth,
                   alignment: Alignment(0, -0.3),
                 ),
               ),
               const Image(
                 image: AssetImage(
-                    'assets/clubPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
+                    'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
               ),
               SizedBox(
                 width: screenWidth - 50,

@@ -26,6 +26,7 @@ import 'package:mypr/MainPages/SearchPage/search_page.dart' as _i12;
 import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i1;
 import 'package:mypr/Navigation/home_navigation.dart' as _i5;
 import 'package:mypr/Navigation/profile_navigation.dart' as _i9;
+import 'package:mypr/OtherPages/global_state.dart' as _i16;
 import 'package:mypr/WelcomeScreens/login_page.dart' as _i7;
 import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i13;
 
@@ -100,7 +101,7 @@ abstract class $AppRouter extends _i14.RootStackRouter {
         routeData: routeData,
         child: _i11.ReservationPage(
           key: args.key,
-          clubName: args.clubName,
+          club: args.club,
         ),
       );
     },
@@ -264,13 +265,13 @@ class ProfileRoute extends _i14.PageRouteInfo<void> {
 class ReservationRoute extends _i14.PageRouteInfo<ReservationRouteArgs> {
   ReservationRoute({
     _i15.Key? key,
-    required String clubName,
+    required _i16.ClubInfoStruct club,
     List<_i14.PageRouteInfo>? children,
   }) : super(
           ReservationRoute.name,
           args: ReservationRouteArgs(
             key: key,
-            clubName: clubName,
+            club: club,
           ),
           initialChildren: children,
         );
@@ -284,16 +285,16 @@ class ReservationRoute extends _i14.PageRouteInfo<ReservationRouteArgs> {
 class ReservationRouteArgs {
   const ReservationRouteArgs({
     this.key,
-    required this.clubName,
+    required this.club,
   });
 
   final _i15.Key? key;
 
-  final String clubName;
+  final _i16.ClubInfoStruct club;
 
   @override
   String toString() {
-    return 'ReservationRouteArgs{key: $key, clubName: $clubName}';
+    return 'ReservationRouteArgs{key: $key, club: $club}';
   }
 }
 

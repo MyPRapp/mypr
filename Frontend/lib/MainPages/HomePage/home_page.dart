@@ -4,7 +4,6 @@ import 'package:mypr/MainPages/SearchPage/search_page.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
@@ -18,7 +17,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
@@ -26,17 +24,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _refresh() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
-    await clubProvider.loadClubsFromPreferences();
     await clubProvider.fetchClubsAndCatalogues();
-    await clubProvider.loadLikedClubs();
-
-    // This function will be called when the user pulls down to refresh
-    // You can add your refresh logic here
-  }
-
-  Future<void> _clearSharedPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
   }
 
   @override
@@ -44,22 +32,21 @@ class _HomePageState extends State<HomePage> {
     final tabsRouter = AutoTabsRouter.of(context);
     ClubProvider clubProvider = context.watch<ClubProvider>();
 
-    // Add a listener to monitor active index changes
     tabsRouter.addListener(() {
       if (tabsRouter.activeIndex == 1) {
-        // Trigger some mechanism to focus the search bar in SearchPage
-        FocusManager.instance.primaryFocus
-            ?.unfocus(); // Ensure any other focus is removed
+        FocusManager.instance.primaryFocus?.unfocus();
         SearchPageState.requestFocus();
       }
     });
+    AutoRouter.of(context).isRoot;
+    AutoRouter.of(context).isTopMost;
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
       body: Stack(children: [
         Container(
           decoration: const BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/clubPhotos/Untitled_Artwork.png'),
+              image: AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
               fit: BoxFit.fill,
             ),
           ),
@@ -111,9 +98,6 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
                 onPressed: _refresh, child: const Text('REFRESH PAGE')),
-            ElevatedButton(
-                onPressed: _clearSharedPreferences,
-                child: const Text('CLEAR SP')),
             Padding(
               padding: const EdgeInsets.only(left: 20, top: 30),
               child: Text(
@@ -129,9 +113,7 @@ class _HomePageState extends State<HomePage> {
                 itemBuilder: (context, index) {
                   final club = clubProvider.allClubs[index];
                   return SmallClubCard(
-                    clubName: club.clubName,
-                    minPrice: club.clubMinPrice,
-                    maxPersons: club.clubMaxPersons,
+                    club: club,
                   );
                 },
               ),
@@ -150,20 +132,8 @@ class _HomePageState extends State<HomePage> {
                 itemCount: clubProvider.allClubs.length,
                 itemBuilder: (context, index) {
                   final club = clubProvider.allClubs[index];
-                  final daysOpen = _daysOpen(club.clubAvailability);
                   return BigClubCard(
-                    clubName: club.clubName,
-                    stars: club.clubRating,
-                    address: club.clubLocation,
-                    minPrice: club.clubMinPrice,
-                    maxPersons: club.clubMaxPersons,
-                    monday: daysOpen[0],
-                    tuesday: daysOpen[1],
-                    wednesday: daysOpen[2],
-                    thursday: daysOpen[3],
-                    friday: daysOpen[4],
-                    saturday: daysOpen[5],
-                    sunday: daysOpen[6],
+                    club: club,
                   );
                 },
               ),
@@ -172,10 +142,6 @@ class _HomePageState extends State<HomePage> {
         )
       ]),
     );
-  }
-
-  List<bool> _daysOpen(String availabilityInBytes) {
-    return availabilityInBytes.split('').map((char) => char == '1').toList();
   }
 
   TextStyle textStyle1() {

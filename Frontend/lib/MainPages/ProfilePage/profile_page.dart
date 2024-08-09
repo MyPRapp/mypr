@@ -31,7 +31,7 @@ class ProfilePage extends StatelessWidget {
                     height: 70,
                     width: screenWidth,
                     child: const Image(
-                      image: AssetImage('assets/clubPhotos/IMG_0041.jpg'),
+                      image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
                       fit: BoxFit.fitWidth,
                       alignment: Alignment(0, -0.3),
                     ),
@@ -44,7 +44,7 @@ class ProfilePage extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(300),
                           child: Image.asset(
-                            'assets/clubPhotos/giorgos_sto_plintirio.png',
+                            'assets/otherPhotos/giorgos_sto_plintirio.png',
                             fit: BoxFit.cover,
                           ),
                         ),

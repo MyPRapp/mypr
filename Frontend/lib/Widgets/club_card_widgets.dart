@@ -1,4 +1,79 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:mypr/OtherPages/global_state.dart';
+import 'package:provider/provider.dart';
+
+// LikeButton widget
+class LikeButton extends StatefulWidget {
+  const LikeButton({
+    super.key,
+    required this.club,
+    this.onRemove,
+    this.big = false,
+  });
+
+  final ClubInfoStruct club;
+  final VoidCallback? onRemove;
+  final bool big;
+
+  @override
+  LikeButtonState createState() => LikeButtonState();
+}
+
+class LikeButtonState extends State<LikeButton> {
+  bool tapped = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final double size = widget.big ? 30 : 22;
+
+    return GestureDetector(
+      onTap: () {
+        context.read<ClubProvider>().toggleLike(widget.club.clubName);
+        setState(() {
+          tapped = true;
+        });
+
+        if (widget.onRemove != null &&
+            !context.read<ClubProvider>().isLiked(widget.club.clubName)) {
+          tapped = false;
+          widget.onRemove!();
+        }
+
+        if (widget.club.clubIsLiked) {
+          tapped = false;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Duration(milliseconds: 1500),
+                content: Text('Αφαιρέθηκε από τα αγαπημένα')),
+          );
+          if (widget.onRemove != null) {
+            widget.onRemove!();
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                duration: Duration(milliseconds: 1500),
+                content: Text('Προστέθηκε στα αγαπημένα')),
+          );
+        }
+      },
+      child: SizedBox(
+        height: 40,
+        width: 40,
+        child: widget.club.clubIsLiked
+            ? Icon(Icons.favorite_rounded,
+                    size: size, color: const Color(0xFF9c0c04))
+                .animate(target: tapped ? 1 : 0)
+                .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
+                .then()
+                .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
+            : Icon(Icons.favorite_border_rounded,
+                size: size + 3, color: const Color(0xFF9c0c04)),
+      ),
+    );
+  }
+}
 
 class NameAndStars extends StatelessWidget {
   const NameAndStars({super.key, required this.clubName, required this.stars});

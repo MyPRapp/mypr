@@ -99,20 +99,8 @@ class FavoritesPageState extends State<FavoritesPage> {
                     itemCount: likedClubs.length,
                     itemBuilder: (context, index) {
                       final club = likedClubs[index];
-                      final daysOpen = _daysOpen(clubProvider, club.clubName);
                       return BigClubCard(
-                        clubName: club.clubName,
-                        stars: club.clubRating,
-                        address: club.clubLocation,
-                        minPrice: club.clubMinPrice,
-                        maxPersons: club.clubMaxPersons,
-                        monday: daysOpen[0],
-                        tuesday: daysOpen[1],
-                        wednesday: daysOpen[2],
-                        thursday: daysOpen[3],
-                        friday: daysOpen[4],
-                        saturday: daysOpen[5],
-                        sunday: daysOpen[6],
+                        club: club,
                       );
                     },
                   ),
@@ -123,14 +111,5 @@ class FavoritesPageState extends State<FavoritesPage> {
         ),
       ),
     );
-  }
-
-  List<bool> _daysOpen(ClubProvider clubProvider, String clubName) {
-    final String availabilityInBytes =
-        clubProvider.getClubAvailability(clubName);
-
-    List<bool> daysOpen =
-        availabilityInBytes.split('').map((char) => char == '1').toList();
-    return daysOpen;
   }
 }
