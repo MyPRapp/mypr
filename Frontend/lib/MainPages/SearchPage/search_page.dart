@@ -71,7 +71,7 @@ class SearchPageState extends State<SearchPage> {
                   onChanged: filterClubs,
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
-                    hintText: 'Search for clubs',
+                    hintText: 'Τι ψάχνεις;',
                     hintStyle: TextStyle(color: Colors.grey),
                     filled: true,
                     fillColor: Colors.black,

@@ -1,6 +1,165 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
+
+class ConfirmationDialog extends StatelessWidget {
+  final List<dynamic> reservationInfo;
+
+  const ConfirmationDialog({super.key, required this.reservationInfo});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Material(
+        color: Colors.black.withOpacity(0.8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF9C0C04), width: 4),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Ευχαριστούμε για την κράτηση, Θα λάβετε σύντομα email επιβεβαίωσης',
+                style: TextStyle(
+                  color: Color(0xFF9C0C04),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
+              _buildInfoRow('Όνομα κλαμπ:', reservationInfo[2]),
+              _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
+              _buildInfoRow('Απλό:', reservationInfo[5].toString()),
+              _buildInfoRow('Special:', reservationInfo[6].toString()),
+              _buildInfoRow('Premium:', reservationInfo[7].toString()),
+              _buildInfoRow('Ημερομηνία:', reservationInfo[8]),
+              _buildInfoRow('Συνολική Τιμή:', '${reservationInfo[4]} €'),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF9C0C04),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: const Text(
+                  'Εντάξει',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BookingDatePicker extends StatefulWidget {
+  const BookingDatePicker({super.key, required this.onDateSelected});
+
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  State<BookingDatePicker> createState() => _BookingDatePickerState();
+}
+
+class _BookingDatePickerState extends State<BookingDatePicker> {
+  DateTime? _selectedDate;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: _selectedDate ?? DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2025),
+          builder: (BuildContext context, Widget? child) {
+            return Theme(
+              data: ThemeData.dark().copyWith(
+                colorScheme: const ColorScheme.dark(
+                  primary: Color(0xFF9C0C04),
+                  onPrimary: Colors.white,
+                  surface: Colors.black,
+                  onSurface: Colors.white,
+                ),
+                dialogBackgroundColor: Colors.black,
+              ),
+              child: child!,
+            );
+          },
+        );
+
+        if (pickedDate != null) {
+          setState(() {
+            _selectedDate = pickedDate;
+          });
+          widget.onDateSelected(_selectedDate!);
+        }
+      },
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'Ημερομηνία κράτησης',
+          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        child: Text(
+          _selectedDate != null
+              ? DateFormat('dd MMMM, yyyy').format(_selectedDate!)
+              : 'Επιλέξτε ημερομηνία',
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+      ),
+    );
+  }
+}
 
 class PackagesInfo extends StatelessWidget {
   const PackagesInfo({

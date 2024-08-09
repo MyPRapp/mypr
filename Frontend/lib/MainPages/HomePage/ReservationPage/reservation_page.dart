@@ -6,6 +6,8 @@ import 'package:mypr/Widgets/reservation_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
+import '../../../services/booking_service.dart';
+
 @RoutePage()
 class ReservationPage extends StatefulWidget {
   const ReservationPage({super.key, required this.club});
@@ -17,8 +19,9 @@ class ReservationPage extends StatefulWidget {
 
 class _ReservationPageState extends State<ReservationPage> {
   // Add a list to store the reservation information
-  List<dynamic> reservationInfo = [-1, '', '', -1, -1, -1, -1, ''];
+  List<dynamic> reservationInfo = [-1, '', '', -1, 0.0, -1, -1, -1, ''];
 
+  final BookingService _bookingService = BookingService();
   // GlobalKeys to access the state of NameTextField and PersonsTextField
   final GlobalKey<NameTextFieldState> nameTextFieldKey =
       GlobalKey<NameTextFieldState>();
@@ -50,7 +53,17 @@ class _ReservationPageState extends State<ReservationPage> {
 
     // Initialize the list with default values
     final userDetails = context.read<UserProvider>().userDetails;
-    reservationInfo = [userDetails?.userID ?? -1, '', '', -1, -1, -1, -1, ''];
+    reservationInfo = [
+      userDetails?.userID ?? -1,
+      '',
+      '',
+      -1,
+      0.0,
+      -1,
+      -1,
+      -1,
+      ''
+    ];
   }
 
   void printReservationInfo(List<dynamic> reservationInfo) {
@@ -59,10 +72,11 @@ class _ReservationPageState extends State<ReservationPage> {
     print('ReservationName: ${reservationInfo[1]}');
     print('ClubName: ${reservationInfo[2]}');
     print('Persons: ${reservationInfo[3]}');
-    print('Regular: ${reservationInfo[4]}');
-    print('Special: ${reservationInfo[5]}');
-    print('Premium: ${reservationInfo[6]}');
-    print('Date: ${reservationInfo[7]}');
+    print('Price: ${reservationInfo[4]}');
+    print('Regular: ${reservationInfo[5]}');
+    print('Special: ${reservationInfo[6]}');
+    print('Premium: ${reservationInfo[7]}');
+    print('Date: ${reservationInfo[8]}');
   }
 
   // Initialize catalogues outside the build method
@@ -183,6 +197,7 @@ class _ReservationPageState extends State<ReservationPage> {
               ),
             ),
           ),
+          const SizedBox(height: 50),
           const Text(
             ' Φιάλες και Τιμές',
             style: TextStyle(
@@ -225,6 +240,15 @@ class _ReservationPageState extends State<ReservationPage> {
           const SizedBox(height: 25),
           SizedBox(
             height: 70,
+            child: BookingDatePicker(
+              onDateSelected: (selectedDate) {
+                reservationInfo[8] = selectedDate.toString();
+              },
+            ),
+          ),
+          const SizedBox(height: 25),
+          SizedBox(
+            height: 70,
             child: PersonsTextField(
               key: personsTextFieldKey, // Assign the key to PersonsTextField
               maxPersons: maxPersons, // Pass the dynamically updated maxPersons
@@ -258,23 +282,79 @@ class _ReservationPageState extends State<ReservationPage> {
                 foregroundColor: Colors.white,
                 backgroundColor: const Color(0xFF9C0C04),
               ),
-              onPressed: () {
+              onPressed: () async {
                 final userDetails = context.read<UserProvider>().userDetails;
+
                 // Update the reservationInfo list with the actual values
-                reservationInfo[0] = userDetails?.userID;
+                reservationInfo[0] = userDetails?.userID ?? -1;
                 reservationInfo[1] =
                     nameTextFieldKey.currentState?.nameController.text ??
                         ''; // Name
                 reservationInfo[2] = widget.club.clubName;
                 reservationInfo[3] =
                     personsTextFieldKey.currentState?.persons ?? -1; // Persons
-                reservationInfo[4] = counters['Απλό']; // Regular
-                reservationInfo[5] = counters['Special']; // Special
-                reservationInfo[6] = counters['Premium']; // Premium
-                reservationInfo[7] = DateTime.now().toString(); // Date
+                reservationInfo[5] = counters['Απλό'];
+                reservationInfo[6] = counters['Special'];
+                reservationInfo[7] = counters['Premium'];
+                reservationInfo[8] = reservationInfo[8].isEmpty
+                    ? ''
+                    : reservationInfo[8]; // Date
 
-                // Print the list to the terminal
-                printReservationInfo(reservationInfo);
+                // Calculate the total price
+                reservationInfo[4] =
+                    (counters['Απλό']! * double.parse(regularCatalogue.price)) +
+                        (counters['Special']! *
+                            double.parse(specialCatalogue.price)) +
+                        (counters['Premium']! *
+                            double.parse(premiumCatalogue.price));
+
+                // Check if all required fields are filled
+                bool allFieldsFilled = reservationInfo
+                    .sublist(1, 8)
+                    .every((element) => element != '' && element != -1);
+
+                if (allFieldsFilled) {
+                  // Submit the booking
+                  bool success = await _bookingService.submitForm(
+                    reservationInfo[2], // Club name
+                    'Regular', // Adjust this as needed based on selected packages
+                    reservationInfo[8], // Date
+                    reservationInfo[3].toString(), // Number of persons
+                  );
+
+                  if (!mounted) return; // Check if the widget is still mounted
+
+                  if (success) {
+                    // Show the confirmation dialog
+                    showDialog(
+                      context: context,
+                      barrierDismissible:
+                          false, // Prevent closing by tapping outside
+                      builder: (BuildContext context) {
+                        return ConfirmationDialog(
+                            reservationInfo: reservationInfo);
+                      },
+                    );
+                  } else {
+                    // Show error message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά.'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                } else {
+                  if (!mounted) return; // Check if the widget is still mounted
+                  // Show error message for incomplete fields
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                }
               },
               child: const Text(
                 'Κράτηση',
