@@ -56,6 +56,12 @@ class ClubInfoStruct {
     );
   }
 
+  get regularCatalogue => null;
+
+  get specialCatalogue => null;
+
+  get premiumCatalogue => null;
+
   Map<String, dynamic> toJson() {
     return {
       'id': clubID,
@@ -101,13 +107,13 @@ class CatalogueInfoStruct {
   int clubID;
   String serviceType;
   String price;
-  int maxPerson;
+  int maxPersons;
 
   CatalogueInfoStruct({
     required this.clubID,
     required this.serviceType,
     required this.price,
-    required this.maxPerson,
+    required this.maxPersons,
   });
 
   factory CatalogueInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -115,7 +121,7 @@ class CatalogueInfoStruct {
       clubID: json['club'] ?? -1,
       serviceType: json['service_type'] ?? '',
       price: json['price'] ?? '',
-      maxPerson: json['max_person'] ?? -1,
+      maxPersons: json['max_person'] ?? -1,
     );
   }
 
@@ -124,7 +130,7 @@ class CatalogueInfoStruct {
       'club': clubID,
       'service_type': serviceType,
       'price': price,
-      'max_person': maxPerson,
+      'max_person': maxPersons,
     };
   }
 }
@@ -133,14 +139,14 @@ class ClubProvider with ChangeNotifier {
   final List<ClubInfoStruct> _clubs = [];
   final List<CatalogueInfoStruct> _catalogues = [];
 
-  ////LIST GETTERS
+////LIST GETTERS
   List<ClubInfoStruct> get allClubs => _clubs;
   List<CatalogueInfoStruct> get allCatalogues => _catalogues;
   List<ClubInfoStruct> get likedClubs =>
       _clubs.where((club) => club.clubIsLiked).toList();
-  ////LIST GETTERS <END>
+////LIST GETTERS <END>
 
-  ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
+////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
   Future<void> fetchClubsAndCatalogues() async {
     const url =
         'http://127.0.0.1:8000/api/clubs/print/'; // Replace with your API URL
@@ -167,9 +173,9 @@ class ClubProvider with ChangeNotifier {
       print('Error fetching clubs: $e');
     }
   }
-  ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING <END>
+////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING <END>
 
-  ////MANAGE CLUBS LIST
+////MANAGE CLUBS LIST
   void addOrUpdateClub(ClubInfoStruct club) {
     if (club.clubID <= 0) {
       return;
@@ -189,9 +195,9 @@ class ClubProvider with ChangeNotifier {
     _catalogues.removeWhere((catalogue) => catalogue.clubID == clubID);
     notifyListeners();
   }
-  //MANAGE CLUBS LIST <END>
+////MANAGE CLUBS LIST <END>
 
-  //MANAGE CATALOGUES LIST
+////MANAGE CATALOGUES LIST
   void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
     if (catalogue.clubID <= 0) {
       return;
@@ -205,6 +211,20 @@ class ClubProvider with ChangeNotifier {
       _catalogues.add(catalogue);
     }
     notifyListeners();
+  }
+
+  CatalogueInfoStruct getRegularCatalogue(List<CatalogueInfoStruct> catalogues,
+      ClubInfoStruct club, String serviceType) {
+    var catalogueList = catalogues
+        .where((catalogue) =>
+            catalogue.clubID == club.clubID &&
+            catalogue.serviceType == serviceType)
+        .toList();
+
+    if (catalogueList.isNotEmpty) {
+      return catalogueList[0];
+    }
+    return catalogues[0];
   }
 
   Future<void> _fetchAndSaveCatalogues() async {
@@ -238,7 +258,7 @@ class ClubProvider with ChangeNotifier {
             // Update the club's minPrice and maxPersons for the 'Regular' service type
             if (catalogue.serviceType == 'Regular') {
               club.clubMinPrice = double.parse(catalogue.price).toInt();
-              club.clubMaxPersons = catalogue.maxPerson;
+              club.clubMaxPersons = catalogue.maxPersons;
               addOrUpdateClub(club);
             }
           }
@@ -251,9 +271,9 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  //MANAGE CATALOGUES LIST <END>
+////MANAGE CATALOGUES LIST <END>
 
-  ////MANAGE LIKED CLUBS
+////MANAGE LIKED CLUBS
   void toggleLike(String clubName) {
     for (var club in _clubs) {
       if (club.clubName == clubName) {
@@ -281,7 +301,7 @@ class ClubProvider with ChangeNotifier {
     }
     notifyListeners();
   }
-  ////MANAGE LIKED CLUBS <END>
+////MANAGE LIKED CLUBS <END>
 
 ////OTHER HELPFUL FUNCTIONS
   String getClubAvailability(String clubName) {
@@ -355,13 +375,13 @@ class ClubProvider with ChangeNotifier {
   void printAllCatalogues() {
     for (var catalogue in _catalogues) {
       print(
-          '{"clubID:"${catalogue.clubID},"clubName:${getClubNameByID(catalogue.clubID)}","serviceType:"${catalogue.serviceType},"price:"${catalogue.price},"maxPerson:"${catalogue.maxPerson}}');
+          '{"clubID:"${catalogue.clubID},"clubName:${getClubNameByID(catalogue.clubID)}","serviceType:"${catalogue.serviceType},"price:"${catalogue.price},"maxPersons:"${catalogue.maxPersons}}');
     }
   }
 
   void printCatalogue(CatalogueInfoStruct catalogue) {
     print(
-        '{"clubID:"${catalogue.clubID},"clubName:${getClubNameByID(catalogue.clubID)}","serviceType:"${catalogue.serviceType},"price:"${catalogue.price},"maxPerson:"${catalogue.maxPerson}}');
+        '{"clubID:"${catalogue.clubID},"clubName:${getClubNameByID(catalogue.clubID)}","serviceType:"${catalogue.serviceType},"price:"${catalogue.price},"maxPersons:"${catalogue.maxPersons}}');
   }
 ////OTHER HELPFUL FUNCTIONS <END>
 }

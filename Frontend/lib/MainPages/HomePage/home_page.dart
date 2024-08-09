@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mypr/MainPages/SearchPage/search_page.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
 @RoutePage()
@@ -38,8 +39,11 @@ class _HomePageState extends State<HomePage> {
         SearchPageState.requestFocus();
       }
     });
-    AutoRouter.of(context).isRoot;
-    AutoRouter.of(context).isTopMost;
+    // AutoRouter.of(context).isRoot;
+    // AutoRouter.of(context).isTopMost;
+    AutoRouter.of(context).push(ReservationRoute(
+      club: clubProvider.getClubByName('Sabbia'),
+    ));
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
       body: Stack(children: [
