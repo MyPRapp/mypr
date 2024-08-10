@@ -99,80 +99,85 @@ class BigClubCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(club.clubAvailability);
+    final screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         AutoRouter.of(context).push(ReservationRoute(club: club));
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 30),
-        child: Card(
-          color: Colors.transparent,
-          margin: const EdgeInsets.only(left: 20),
-          clipBehavior: Clip.antiAlias,
-          child: Row(children: [
-            Stack(children: [
-              Container(
-                height: 140,
-                width: 120,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    fit: BoxFit.cover,
-                    image: AssetImage('assets/clubPhotos/${club.clubName}.jpg'),
+        padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
+        child: SizedBox(
+          width: screenWidth - 20,
+          child: Card(
+            color: Colors.transparent,
+            clipBehavior: Clip.antiAlias,
+            child: Row(children: [
+              Stack(children: [
+                Container(
+                  height: 140,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image:
+                          AssetImage('assets/clubPhotos/${club.clubName}.jpg'),
+                    ),
                   ),
                 ),
-              ),
-              Container(
-                alignment: Alignment.topLeft,
-                child: LikeButton(
-                  onRemove: onRemove,
-                  club: club,
+                Container(
+                  alignment: Alignment.topLeft,
+                  child: LikeButton(
+                    onRemove: onRemove,
+                    club: club,
+                  ),
                 ),
-              ),
-            ]),
-            SizedBox(
-              height: 120,
-              width: 230,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          NameAndStars(
-                              clubName: club.clubName, stars: club.clubRating),
-                          Text(
-                            '  ${club.clubLocation}',
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.start,
-                          ),
-                        ]),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5),
-                      child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ]),
+              SizedBox(
+                height: 120,
+                width: screenWidth - 150,
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            MinPriceAndMaxPersons(
-                              minPrice: club.clubMinPrice,
-                              maxPersons: club.clubMaxPersons,
-                            ),
-                            DaysOpen(
-                              monday: daysOpen[0],
-                              tuesday: daysOpen[1],
-                              wednesday: daysOpen[2],
-                              thursday: daysOpen[3],
-                              friday: daysOpen[4],
-                              saturday: daysOpen[5],
-                              sunday: daysOpen[6],
+                            NameAndStars(
+                                clubName: club.clubName,
+                                stars: club.clubRating),
+                            Text(
+                              '  ${club.clubLocation}',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              textAlign: TextAlign.start,
                             ),
                           ]),
-                    ),
-                  ]),
-            )
-          ]),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 5),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              MinPriceAndMaxPersons(
+                                minPrice: club.clubMinPrice,
+                                maxPersons: club.clubMaxPersons,
+                              ),
+                              DaysOpen(
+                                monday: daysOpen[0],
+                                tuesday: daysOpen[1],
+                                wednesday: daysOpen[2],
+                                thursday: daysOpen[3],
+                                friday: daysOpen[4],
+                                saturday: daysOpen[5],
+                                sunday: daysOpen[6],
+                              ),
+                            ]),
+                      ),
+                    ]),
+              )
+            ]),
+          ),
         ),
       ),
     );

@@ -10,6 +10,16 @@ class ConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Format the date to 'dd/MM'
+    String formattedDate = '';
+    if (reservationInfo[8].isNotEmpty) {
+      DateTime date = DateTime.parse(reservationInfo[8]);
+      formattedDate = DateFormat('dd/MM').format(date);
+    }
+
+    // Format the price to 2 decimal places
+    String formattedPrice = reservationInfo[4].toStringAsFixed(2);
+
     return Center(
       child: Material(
         color: Colors.black.withOpacity(0.8),
@@ -35,13 +45,16 @@ class ConfirmationDialog extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
-              _buildInfoRow('Όνομα κλαμπ:', reservationInfo[2]),
+              _buildInfoRow('Μαγαζί:', reservationInfo[2]),
               _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
-              _buildInfoRow('Απλό:', reservationInfo[5].toString()),
-              _buildInfoRow('Special:', reservationInfo[6].toString()),
-              _buildInfoRow('Premium:', reservationInfo[7].toString()),
-              _buildInfoRow('Ημερομηνία:', reservationInfo[8]),
-              _buildInfoRow('Συνολική Τιμή:', '${reservationInfo[4]} €'),
+              if (reservationInfo[5] > 0)
+                _buildInfoRow('Απλό:', reservationInfo[5].toString()),
+              if (reservationInfo[6] > 0)
+                _buildInfoRow('Special:', reservationInfo[6].toString()),
+              if (reservationInfo[7] > 0)
+                _buildInfoRow('Premium:', reservationInfo[7].toString()),
+              _buildInfoRow('Ημερομηνία:', formattedDate),
+              _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
