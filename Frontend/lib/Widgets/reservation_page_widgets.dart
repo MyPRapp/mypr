@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
@@ -35,10 +36,10 @@ class ConfirmationDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'Ευχαριστούμε για την κράτηση, Θα λάβετε σύντομα email επιβεβαίωσης',
+                'Ευχαριστούμε για την κράτηση!\nΘα λάβετε σύντομα email επιβεβαίωσης.',
                 style: TextStyle(
                   color: Color(0xFF9C0C04),
-                  fontSize: 22,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -47,13 +48,29 @@ class ConfirmationDialog extends StatelessWidget {
               _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
               _buildInfoRow('Μαγαζί:', reservationInfo[2]),
               _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Container(
+                  alignment: Alignment.centerLeft,
+                  child: const Text(
+                    'Φιάλες',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
               if (reservationInfo[5] > 0)
-                _buildInfoRow('Απλό:', reservationInfo[5].toString()),
+                _buildInfoRow('      Απλή:', reservationInfo[5].toString()),
               if (reservationInfo[6] > 0)
-                _buildInfoRow('Special:', reservationInfo[6].toString()),
+                _buildInfoRow('      Special:', reservationInfo[6].toString()),
               if (reservationInfo[7] > 0)
-                _buildInfoRow('Premium:', reservationInfo[7].toString()),
+                _buildInfoRow('      Premium:', reservationInfo[7].toString()),
               _buildInfoRow('Ημερομηνία:', formattedDate),
+              if (reservationInfo[9] != '')
+                _buildCommentSection(reservationInfo[9]),
               _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -93,15 +110,110 @@ class ConfirmationDialog extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
+          Flexible(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildCommentSection(String comment) {
+    return Padding(
+        padding: const EdgeInsets.only(top: 10),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Σχόλια κράτησης:',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ..._splitCommentIntoLines(
+                      comment, 20), // Call the function here
+                  const SizedBox(height: 5),
+                ],
+              )
+            ]));
+  }
+
+  List<Widget> _splitCommentIntoLines(String comment, int maxLength) {
+    List<Widget> lines = [];
+    for (int i = 0; i < comment.length; i += maxLength) {
+      String part = comment.substring(
+          i, i + maxLength > comment.length ? comment.length : i + maxLength);
+      lines.add(
+        Text(
+          part,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+      );
+    }
+    return lines;
+  }
+}
+
+class CommentSection extends StatelessWidget {
+  final TextEditingController commentController;
+
+  const CommentSection({
+    super.key,
+    required this.commentController,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 10),
+        const Text(
+          'Σχόλια (Προαιρετικά)',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: commentController,
+          maxLines: 4,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(
+                100), // Limit input to 100 characters
+          ],
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.2),
+            hintText: 'Γράψτε τα σχόλια σας εδώ...',
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(15),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -361,7 +473,7 @@ class PersonsTextFieldState extends State<PersonsTextField> {
         textFieldFocusNode.requestFocus();
       });
     } else {
-      if (widget.counters['Απλό'] == 0 &&
+      if (widget.counters['Απλή'] == 0 &&
           widget.counters['Special'] == 0 &&
           widget.counters['Premium'] == 0) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -445,9 +557,10 @@ class CategoriesTextField extends StatefulWidget {
   final CatalogueInfoStruct regularCatalogue;
   final CatalogueInfoStruct specialCatalogue;
   final CatalogueInfoStruct premiumCatalogue;
-  final Map<String, int> counters; // Passed from ReservationPage
-  final VoidCallback
-      onCountersChanged; // Callback to notify when counters change
+  final Map<String, int> counters;
+  final VoidCallback onCountersChanged;
+  final bool isDiscountApplied;
+  final int discount;
 
   const CategoriesTextField({
     super.key,
@@ -455,7 +568,9 @@ class CategoriesTextField extends StatefulWidget {
     required this.specialCatalogue,
     required this.premiumCatalogue,
     required this.counters,
-    required this.onCountersChanged, // Initialize callback
+    required this.onCountersChanged,
+    required this.isDiscountApplied,
+    required this.discount,
   });
 
   @override
@@ -482,6 +597,15 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     updateSelectedText();
   }
 
+  @override
+  void didUpdateWidget(CategoriesTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isDiscountApplied != widget.isDiscountApplied ||
+        oldWidget.discount != widget.discount) {
+      updateSelectedText();
+    }
+  }
+
   void toggleDropdown() {
     setState(() {
       _isExpanded = !_isExpanded;
@@ -495,11 +619,22 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
 
   void increment(String category) {
     setState(() {
-      int incrementValue = _getCategoryPrice(category);
-      widget.counters[category] = (widget.counters[category] ?? 0) + 1;
-      price += incrementValue;
-      updateSelectedText();
-      widget.onCountersChanged(); // Notify ReservationPage of the change
+      if (widget.counters[category]! < 9) {
+        int incrementValue = _getCategoryPrice(category);
+        widget.counters[category] = (widget.counters[category] ?? 0) + 1;
+        price += incrementValue;
+        updateSelectedText();
+        widget.onCountersChanged();
+      } else {
+        // Show SnackBar when the limit is reached
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
     });
   }
 
@@ -510,14 +645,14 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
         widget.counters[category] = widget.counters[category]! - 1;
         price -= decrementValue;
         updateSelectedText();
-        widget.onCountersChanged(); // Notify ReservationPage of the change
+        widget.onCountersChanged();
       }
     });
   }
 
   int _getCategoryPrice(String category) {
     switch (category) {
-      case 'Απλό':
+      case 'Απλή':
         return double.parse(widget.regularCatalogue.price).toInt();
       case 'Special':
         return double.parse(widget.specialCatalogue.price).toInt();
@@ -529,8 +664,13 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
   }
 
   void updateSelectedText() {
-    if (price > 0) {
-      selectedText = 'Τιμή: $price €';
+    double finalPrice = price.toDouble();
+    if (widget.isDiscountApplied) {
+      finalPrice = finalPrice * (1 - (widget.discount / 100));
+    }
+
+    if (finalPrice > 0) {
+      selectedText = 'Τιμή: ${finalPrice.toStringAsFixed(2)} €';
     } else {
       selectedText = '';
     }
@@ -550,7 +690,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                 Icons.arrow_drop_down,
                 color: Color(0xFF9C0C04),
               ),
-              labelText: 'Κατηγορίες',
+              labelText: 'Φιάλες',
               labelStyle: TextStyle(color: Color(0xFF9C0C04)),
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
@@ -585,53 +725,56 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
           ),
         ),
         const SizedBox(height: 10),
-        ClipRect(
-          child: SizeTransition(
-            sizeFactor: _heightFactor,
-            axisAlignment: -1.0,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: const Color(0xFF9C0C04), width: 4),
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.black,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: widget.counters.keys.map((key) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 10, horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            key,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 16),
-                          ),
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () => decrement(key),
-                                icon: const Icon(Icons.remove,
-                                    color: Colors.white),
-                              ),
-                              Text(
-                                widget.counters[key].toString(),
-                                style: const TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
-                              IconButton(
-                                onPressed: () => increment(key),
-                                icon:
-                                    const Icon(Icons.add, color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+        Visibility(
+          visible: _isExpanded,
+          child: ClipRect(
+            child: SizeTransition(
+              sizeFactor: _heightFactor,
+              axisAlignment: -1.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFF9C0C04), width: 4),
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.black,
+                ),
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: widget.counters.keys.map((key) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 10, horizontal: 15),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              key,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () => decrement(key),
+                                  icon: const Icon(Icons.remove,
+                                      color: Colors.white),
+                                ),
+                                Text(
+                                  widget.counters[key].toString(),
+                                  style: const TextStyle(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                                IconButton(
+                                  onPressed: () => increment(key),
+                                  icon: const Icon(Icons.add,
+                                      color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
             ),

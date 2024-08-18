@@ -19,7 +19,19 @@ class ReservationPage extends StatefulWidget {
 
 class _ReservationPageState extends State<ReservationPage> {
   // Add a list to store the reservation information
-  List<dynamic> reservationInfo = [-1, '', '', -1, 0.0, -1, -1, -1, ''];
+  List<dynamic> reservationInfo = [
+    -1,
+    '',
+    '',
+    -1,
+    0.0,
+    -1,
+    -1,
+    -1,
+    '',
+    '',
+    0,
+  ];
 
   final BookingService _bookingService = BookingService();
   // GlobalKeys to access the state of NameTextField and PersonsTextField
@@ -30,10 +42,11 @@ class _ReservationPageState extends State<ReservationPage> {
 
   int? selectedPrice; // Store the price from the CustomDropdownWithCounter
   int maxPersons = 0; // Track the maximum persons dynamically
+  bool isDiscountApplied = false; // Track discount checkbox state
 
   // Create the counters map in the parent widget
   Map<String, int> counters = {
-    'Απλό': 0,
+    'Απλή': 0,
     'Special': 0,
     'Premium': 0,
   };
@@ -62,7 +75,9 @@ class _ReservationPageState extends State<ReservationPage> {
       -1,
       -1,
       -1,
-      ''
+      '',
+      '',
+      20, // Default discount value
     ];
   }
 
@@ -77,6 +92,8 @@ class _ReservationPageState extends State<ReservationPage> {
     print('Special: ${reservationInfo[6]}');
     print('Premium: ${reservationInfo[7]}');
     print('Date: ${reservationInfo[8]}');
+    print('Comment: ${reservationInfo[9]}');
+    print('Discount: ${reservationInfo[10]}'); // Print the discount value
   }
 
   // Initialize catalogues outside the build method
@@ -95,7 +112,7 @@ class _ReservationPageState extends State<ReservationPage> {
   // Method to calculate and update the maximum persons allowed
   void updateMaxPersons() {
     setState(() {
-      maxPersons = regularCatalogue.maxPersons * counters['Απλό']! +
+      maxPersons = regularCatalogue.maxPersons * counters['Απλή']! +
           specialCatalogue.maxPersons * counters['Special']! +
           premiumCatalogue.maxPersons * counters['Premium']!;
     });
@@ -105,6 +122,30 @@ class _ReservationPageState extends State<ReservationPage> {
   void onBackPressed(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
+    });
+  }
+
+  // Add a TextEditingController for the comment section
+  final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose the controller when the widget is disposed
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  void calculatePrice() {
+    double price = (counters['Απλή']! * double.parse(regularCatalogue.price)) +
+        (counters['Special']! * double.parse(specialCatalogue.price)) +
+        (counters['Premium']! * double.parse(premiumCatalogue.price));
+
+    if (isDiscountApplied) {
+      price = price * (1 - (reservationInfo[10] / 100));
+    }
+
+    setState(() {
+      reservationInfo[4] = price;
     });
   }
 
@@ -207,7 +248,7 @@ class _ReservationPageState extends State<ReservationPage> {
             ),
           ),
           PackagesInfo(
-            package: 'Απλό',
+            package: 'Απλή',
             maxPersons: regularCatalogue.maxPersons,
             minPrice: double.parse(regularCatalogue.price).toInt(),
           ),
@@ -256,17 +297,46 @@ class _ReservationPageState extends State<ReservationPage> {
             ),
           ),
           const SizedBox(height: 25),
-          SizedBox(
-            height: 270,
-            child: CategoriesTextField(
-              regularCatalogue: regularCatalogue,
-              specialCatalogue: specialCatalogue,
-              premiumCatalogue: premiumCatalogue,
-              counters: counters, // Pass the map to the widget
-              onCountersChanged:
-                  updateMaxPersons, // Update maxPersons when counters change
-            ),
+          CategoriesTextField(
+            regularCatalogue: regularCatalogue,
+            specialCatalogue: specialCatalogue,
+            premiumCatalogue: premiumCatalogue,
+            counters: counters, // Pass the map to the widget
+            onCountersChanged: () {
+              updateMaxPersons();
+              calculatePrice();
+            },
+            isDiscountApplied: isDiscountApplied, // Pass the discount state
+            discount: reservationInfo[10], // Pass the discount value
           ),
+          CommentSection(
+            commentController: _commentController,
+          ),
+          const SizedBox(height: 25),
+          if (reservationInfo[10] >
+              0) // Show only if discount is greater than 0
+            Row(
+              children: [
+                Checkbox(
+                  value: isDiscountApplied,
+                  onChanged: (value) {
+                    setState(() {
+                      isDiscountApplied = value!;
+                      calculatePrice(); // Recalculate price with discount
+                    });
+                  },
+                  activeColor: const Color(0xFF9C0C04),
+                ),
+                Text(
+                  'Χρήση εκπτωτικού κουπονιού ${reservationInfo[10]}%',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(height: 25),
           Container(
             alignment: Alignment.center,
             width: double.infinity,
@@ -293,28 +363,29 @@ class _ReservationPageState extends State<ReservationPage> {
                 reservationInfo[2] = widget.club.clubName;
                 reservationInfo[3] =
                     personsTextFieldKey.currentState?.persons ?? -1; // Persons
-                reservationInfo[5] = counters['Απλό'];
+                reservationInfo[5] = counters['Απλή'];
                 reservationInfo[6] = counters['Special'];
                 reservationInfo[7] = counters['Premium'];
-                reservationInfo[8] = reservationInfo[8].isEmpty
-                    ? ''
-                    : reservationInfo[8]; // Date
+                reservationInfo[9] = _commentController.text; // Comment
 
                 // Calculate the total price
-                reservationInfo[4] =
-                    (counters['Απλό']! * double.parse(regularCatalogue.price)) +
-                        (counters['Special']! *
-                            double.parse(specialCatalogue.price)) +
-                        (counters['Premium']! *
-                            double.parse(premiumCatalogue.price));
+                calculatePrice();
 
                 // Check if all required fields are filled
                 bool allFieldsFilled = reservationInfo
                     .sublist(1, 8)
                     .every((element) => element != '' && element != -1);
 
-                if (allFieldsFilled) {
-                  // Submit the booking
+                if (reservationInfo[4] == 0 || reservationInfo[8].isEmpty) {
+                  // If the price is zero or the date is not set, show the SnackBar
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
+                } else if (allFieldsFilled) {
+                  // Submit the booking only if all fields are filled and valid
                   bool success = await _bookingService.submitForm(
                     reservationInfo[2], // Club name
                     'Regular', // Adjust this as needed based on selected packages
@@ -325,6 +396,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   if (!mounted) return; // Check if the widget is still mounted
 
                   if (success) {
+                    printReservationInfo(reservationInfo);
                     // Show the confirmation dialog
                     showDialog(
                       context: context,
@@ -340,7 +412,7 @@ class _ReservationPageState extends State<ReservationPage> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text(
-                            'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά.'),
+                            'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.'),
                         duration: Duration(seconds: 3),
                       ),
                     );

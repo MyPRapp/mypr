@@ -30,7 +30,7 @@ class SmallClubCard extends StatelessWidget {
           child: Column(children: [
             Stack(children: [
               SizedBox(
-                height: 100,
+                height: 90,
                 width: 140,
                 child: Image.network(
                     'http://127.0.0.1:8000/media/club_photos/${club.clubName}.jpg'),

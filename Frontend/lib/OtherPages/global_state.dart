@@ -464,6 +464,7 @@ class UserProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         _userDetails = UserInfoStruct.fromJson(jsonDecode(response.body));
+        print(_userDetails);
         await saveUserDetailsToPreferences();
         notifyListeners();
       } else {
