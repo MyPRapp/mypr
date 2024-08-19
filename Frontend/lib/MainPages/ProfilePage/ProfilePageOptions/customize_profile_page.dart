@@ -3,10 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @RoutePage()
 class CustomizeProfilePage extends StatelessWidget {
   const CustomizeProfilePage({super.key});
+  void _signOut(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('saved_email');
+    await prefs.remove('saved_password');
+
+    if (context.mounted) {
+      context.router.replaceAll([const LoginRoute()]);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +99,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          '${userDetails.firstName} ${userDetails.firstName}',
+                                          '${userDetails.firstName} ${userDetails.lastName}',
                                           style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 18,
@@ -171,30 +181,29 @@ class CustomizeProfilePage extends StatelessWidget {
                           ),
                           const SizedBox(height: 40),
                           Center(
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 20),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(14),
-                                    side: const BorderSide(
-                                        color: Color(0xFF9C0C04), width: 2)),
-                                backgroundColor: Colors.black,
+                              child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                side: const BorderSide(
+                                    color: Color(0xFF9C0C04), width: 2),
                               ),
-                              onPressed: () {
-                                context.router
-                                    .replaceAll([const SignUpRoute()]);
-                              },
-                              child: const Text(
-                                'Αποσύνδεση',
-                                style: TextStyle(
-                                  color: Color(0xFF9C0C04),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              backgroundColor: Colors.black,
+                            ),
+                            onPressed: () {
+                              _signOut(context);
+                            },
+                            child: const Text(
+                              'Αποσύνδεση',
+                              style: TextStyle(
+                                color: Color(0xFF9C0C04),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          )
+                          ))
                         ],
                       ),
                     ),

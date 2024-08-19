@@ -58,7 +58,7 @@ class AuthService {
     );
 
     print('Register response status: ${response.statusCode}');
-    print('Register response body: ${response.body}');
+    print('Register response body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 201) {
       print('Registration successful');

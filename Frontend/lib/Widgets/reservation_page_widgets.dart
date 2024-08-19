@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
@@ -187,7 +186,7 @@ class CommentSection extends StatelessWidget {
       children: [
         const SizedBox(height: 10),
         const Text(
-          'Σχόλια (Προαιρετικά)',
+          'Σχόλια (Προαιρετικό)',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -198,14 +197,7 @@ class CommentSection extends StatelessWidget {
         TextField(
           controller: commentController,
           maxLines: 4,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(
-                100), // Limit input to 100 characters
-            FilteringTextInputFormatter.allow(
-              RegExp(
-                  r'[a-zA-Zα-ωΑ-Ω0-9\s.,!?@#%^&*()_+\-=\[\]{};:"\\|,.<>\/?]+'),
-            ), // Allow Greek, English, numbers, and specific symbols
-          ],
+          inputFormatters: [NoEmojisTextInputFormatter()],
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             filled: true,

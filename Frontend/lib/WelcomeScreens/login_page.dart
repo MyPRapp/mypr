@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final AuthService _authService = AuthService();
   bool _obscureText = true;
   bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
     await _checkAndFetchClubs();
-    await _login();
+    // await _login();
   }
 
   Future<void> _loadSavedUserCredentials() async {
@@ -150,6 +151,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     TextField(
                       controller: _emailController,
+                      inputFormatters: [NoEmojisTextInputFormatter()],
                       style: const TextStyle(
                         fontSize: 23,
                         fontWeight: FontWeight.bold,
@@ -175,6 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                           child: TextField(
                             controller: _passwordController,
                             obscureText: _obscureText,
+                            inputFormatters: [NoEmojisTextInputFormatter()],
                             style: const TextStyle(
                               fontSize: 23,
                               fontWeight: FontWeight.bold,

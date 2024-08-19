@@ -14,7 +14,7 @@ class ProfilePage extends StatelessWidget {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     final userDetails = context.watch<UserProvider>().userDetails;
-
+    print(userDetails?.username);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
@@ -52,7 +52,7 @@ class ProfilePage extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: Text(
-                      '${userDetails.firstName} ${userDetails.firstName}',
+                      '${userDetails.firstName} ${userDetails.lastName}',
                       style: const TextStyle(
                           fontSize: 20,
                           color: Color(0xFF9c0c04),

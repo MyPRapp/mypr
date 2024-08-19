@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -466,7 +467,12 @@ class UserProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        _userDetails = UserInfoStruct.fromJson(jsonDecode(response.body));
+        // Decode the response body using UTF-8 to handle different alphabets correctly
+        final decodedBody = utf8.decode(response.bodyBytes);
+        print(decodedBody); // Now this should print correctly
+
+        // Parse the JSON from the correctly decoded string
+        _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
         await saveUserDetailsToPreferences();
         notifyListeners();
       } else {
@@ -497,5 +503,22 @@ class BottomNavBarVisibility extends ChangeNotifier {
   void hide() {
     _isVisible = false;
     notifyListeners();
+  }
+}
+
+class NoEmojisTextInputFormatter extends TextInputFormatter {
+  // Updated RegExp to allow Greek and English letters, numbers, and specific symbols
+  final RegExp _allowedCharacters =
+      RegExp(r'[\p{L}\p{N}\p{P}\p{Zs}!@#$%^&*(){}]+', unicode: true);
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    // Allow the text to be completely deleted (empty string)
+    if (newValue.text.isEmpty || _allowedCharacters.hasMatch(newValue.text)) {
+      return newValue;
+    }
+    // If the new value contains restricted characters, return the old value
+    return oldValue;
   }
 }
