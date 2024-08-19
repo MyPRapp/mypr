@@ -15,15 +15,11 @@ class CustomizeProfilePage extends StatelessWidget {
       context.read<BottomNavBarVisibility>().hide();
     });
 
-    void onBackPressed(BuildContext context) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        context.read<BottomNavBarVisibility>().show();
-      });
-    }
-
     return PopScope(
         onPopInvoked: (bool isPopInvoked) {
-          onBackPressed(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<BottomNavBarVisibility>().show();
+          });
         },
         child: Scaffold(
           backgroundColor: const Color(0xFF1D2428),

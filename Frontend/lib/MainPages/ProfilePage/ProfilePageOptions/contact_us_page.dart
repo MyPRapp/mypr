@@ -2,20 +2,44 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
 
+  Future<void> _launchInstagram() async {
+    try {
+      final Uri uri = Uri.parse('https://www.instagram.com/mypr_app/');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      } else {
+        throw 'Could not launch $uri';
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<BottomNavBarVisibility>().hide();
+    });
+
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 40),
-            child: Row(
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/otherPhotos/mustangBackground.png'),
+            fit: BoxFit.fill,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Row(
               children: [
                 Padding(
                   padding: const EdgeInsets.only(top: 5),
@@ -28,150 +52,156 @@ class ContactUsPage extends StatelessWidget {
                     },
                     icon: const Icon(
                       Icons.chevron_left,
-                      color: Colors.white,
-                      size: 35,
+                      color: Color(0xFF9C0C04),
+                      size: 50,
                     ),
                   ),
                 ),
                 const Text(
                   'ΕΠΙΚΟΙΝΩΝΗΣΤΕ ΜΑΖΙ ΜΑΣ',
                   style: TextStyle(
-                      color: Color(0xFF9C0C04),
-                      fontSize: 36,
-                      fontWeight: FontWeight.bold),
-                )
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ],
             ),
-          ),
-          Row(
-            children: [
-              // Left section
-              Expanded(
-                flex: 1,
-                child: Container(
-                  color: Colors.black,
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Image.asset(
-                        'assets/logo.png', // Replace with your logo asset path
-                        height: 50,
-                      ),
-                      const SizedBox(height: 40),
-                      const Text(
-                        'CALL US',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        '69-43784099\n69-80984213',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      const Text(
-                        'BUSINESS HOURS',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Mon-Fri.......10am-8pm\nSat, Sun.....10am-3pm',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      const Text(
-                        'FOLLOW US',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Row(
-                        children: [
-                          Icon(Icons.camera_alt,
-                              color: Colors.white,
-                              size: 30), // Replace with an Instagram icon
-                          SizedBox(width: 10),
-                          Icon(Icons.facebook,
-                              color: Colors.white,
-                              size: 30), // Replace with a Facebook icon
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Middle divider
-              Container(
-                color: const Color(0xFF9C0C04),
-                width: 10,
-              ),
-
-              // Right section
-              Expanded(
-                flex: 2,
-                child: Container(
-                  color: Colors.black,
-                  padding: const EdgeInsets.all(40),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'CONTACT FORM',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      _buildTextField('Enter your name'),
-                      const SizedBox(height: 20),
-                      _buildTextField('Enter a valid email address'),
-                      const SizedBox(height: 20),
-                      _buildTextField('Enter your message', maxLines: 4),
-                      const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          side: const BorderSide(color: Colors.white),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 40,
-                            vertical: 15,
+            Row(
+              children: [
+                // Left section
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Πάρε μας τηλέφωνο',
+                          style: TextStyle(
+                            color: Color(0xFF9C0C04),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        child: const Text(
-                          'Send',
-                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        const SizedBox(height: 10),
+                        const Text(
+                          ' 69 43784099\n 69 80984213',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 50),
+                        const Text(
+                          'Ωράριο επικοινωνίας',
+                          style: TextStyle(
+                            color: Color(0xFF9C0C04),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        const Text(
+                          'Δευτέρα-Πέμπτη\n10πμ-8μμ\n\nΠαρασκευή-Κυριακή\n2μμ-3πμ',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 50),
+                        const Text(
+                          'Κάνε ένα follow',
+                          style: TextStyle(
+                            color: Color(0xFF9C0C04),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        GestureDetector(
+                          onTap: _launchInstagram,
+                          child: const Padding(
+                            padding: EdgeInsets.only(left: 5),
+                            child: ImageIcon(
+                              AssetImage('assets/icons/instagram_icon.png'),
+                              size: 30,
+                              color: Color(0xFF9C0C04),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+
+                // Middle divider
+                Container(
+                  color: const Color(0xFF9C0C04),
+                  width: 10,
+                ),
+
+                // Right section
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Στείλε μας ένα μήνυμα',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 30),
+                        _buildTextField('Ονοματεπώνυμο'),
+                        const SizedBox(height: 20),
+                        _buildTextField('Email'),
+                        const SizedBox(height: 20),
+                        _buildTextField('Μήνυμα', maxLines: 4),
+                        const SizedBox(height: 30),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 15),
+                          child: ElevatedButton(
+                            onPressed: () {},
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.black,
+                              side: const BorderSide(color: Colors.white),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 22,
+                                vertical: 15,
+                              ),
+                            ),
+                            child: const Text(
+                              'Αποστολή',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 50),
+            Container(
+              alignment: Alignment.bottomRight,
+              child: Image.asset(
+                'assets/otherPhotos/Logo_v2.2-removebg.png', // Replace with your logo asset path
+                height: 140,
               ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }

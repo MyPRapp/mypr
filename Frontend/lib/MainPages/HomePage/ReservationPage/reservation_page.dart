@@ -7,6 +7,7 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
 import '../../../services/booking_service.dart';
+import '../../../services/points_service.dart';
 
 @RoutePage()
 class ReservationPage extends StatefulWidget {
@@ -77,8 +78,28 @@ class _ReservationPageState extends State<ReservationPage> {
       -1,
       '',
       '',
-      20, // Default discount value
+      0,
     ];
+  }
+
+  int _currentPoints = 0;
+  final PointsService _pointsService =
+      PointsService(); // Create an instance of PointsService
+
+  Future<void> _retractPoints(int pointsToRetract) async {
+    try {
+      int updatedPoints = await _pointsService.retractPoints(
+          pointsToRetract); // Use the instance to call retractPoints
+      setState(() {
+        _currentPoints = updatedPoints;
+      });
+      print(
+          "$pointsToRetract points retracted successfully. Current points: $_currentPoints");
+    } catch (error) {
+      print(
+        "Failed to retract points: $error",
+      );
+    }
   }
 
   void printReservationInfo(List<dynamic> reservationInfo) {
@@ -93,7 +114,7 @@ class _ReservationPageState extends State<ReservationPage> {
     print('Premium: ${reservationInfo[7]}');
     print('Date: ${reservationInfo[8]}');
     print('Comment: ${reservationInfo[9]}');
-    print('Discount: ${reservationInfo[10]}'); // Print the discount value
+    print('Discount(%): ${reservationInfo[10]}');
   }
 
   // Initialize catalogues outside the build method
@@ -222,6 +243,7 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   Widget buildContent() {
+    final userDetails = context.read<UserProvider>().userDetails;
     return Container(
       padding: const EdgeInsets.all(15),
       child: Column(
@@ -313,8 +335,7 @@ class _ReservationPageState extends State<ReservationPage> {
             commentController: _commentController,
           ),
           const SizedBox(height: 25),
-          if (reservationInfo[10] >
-              0) // Show only if discount is greater than 0
+          if (userDetails!.points >= 20)
             Row(
               children: [
                 Checkbox(
@@ -322,14 +343,21 @@ class _ReservationPageState extends State<ReservationPage> {
                   onChanged: (value) {
                     setState(() {
                       isDiscountApplied = value!;
+                      reservationInfo[10] =
+                          isDiscountApplied ? 20 : 0; // Set the discount value
                       calculatePrice(); // Recalculate price with discount
+
+                      // Notify CategoriesTextField to update the price display
+                      final categoriesTextFieldState = context
+                          .findAncestorStateOfType<CategoriesTextFieldState>();
+                      categoriesTextFieldState?.updateSelectedText();
                     });
                   },
                   activeColor: const Color(0xFF9C0C04),
                 ),
-                Text(
-                  'Χρήση εκπτωτικού κουπονιού ${reservationInfo[10]}%',
-                  style: const TextStyle(
+                const Text(
+                  'Χρήση εκπτωτικού κουπονιού 20%',
+                  style: TextStyle(
                     color: Colors.white,
                     fontSize: 18,
                   ),
@@ -367,10 +395,16 @@ class _ReservationPageState extends State<ReservationPage> {
                 reservationInfo[6] = counters['Special'];
                 reservationInfo[7] = counters['Premium'];
                 reservationInfo[9] = _commentController.text; // Comment
-
+                if (isDiscountApplied) {
+                  await _retractPoints(20);
+                  reservationInfo[10] = 20;
+                } else {
+                  reservationInfo[10] = 0;
+                }
                 // Calculate the total price
                 calculatePrice();
-
+                String fourBitString =
+                    '${reservationInfo[5]}${reservationInfo[6]}${reservationInfo[7]}${reservationInfo[10] ~/ 10}';
                 // Check if all required fields are filled
                 bool allFieldsFilled = reservationInfo
                     .sublist(1, 8)
@@ -378,21 +412,24 @@ class _ReservationPageState extends State<ReservationPage> {
 
                 if (reservationInfo[4] == 0 || reservationInfo[8].isEmpty) {
                   // If the price is zero or the date is not set, show the SnackBar
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+                  }
                 } else if (allFieldsFilled) {
                   // Submit the booking only if all fields are filled and valid
                   bool success = await _bookingService.submitForm(
                     reservationInfo[2], // Club name
-                    'Regular', // Adjust this as needed based on selected packages
+                    fourBitString, // 4-bit string for selected packages and discount
                     reservationInfo[8], // Date
                     reservationInfo[3].toString(), // Number of persons
+                    reservationInfo[9],
                   );
-
+                  print(fourBitString);
                   if (!mounted) return; // Check if the widget is still mounted
 
                   if (success) {

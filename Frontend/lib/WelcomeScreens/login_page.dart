@@ -30,7 +30,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
     await _checkAndFetchClubs();
-    _login();
+    await _login();
   }
 
   Future<void> _loadSavedUserCredentials() async {

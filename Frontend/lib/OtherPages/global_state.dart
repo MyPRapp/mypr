@@ -387,7 +387,7 @@ class ClubProvider with ChangeNotifier {
 }
 
 class UserInfoStruct {
-  int userID;
+  int userID, points;
   String username;
   String password;
   String firstName;
@@ -403,6 +403,7 @@ class UserInfoStruct {
     this.lastName = '',
     this.email = '',
     this.phone = '',
+    this.points = -1,
   });
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -414,6 +415,7 @@ class UserInfoStruct {
       lastName: json['last_name'] ?? '',
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
+      points: json['points'] ?? -1,
     );
   }
 
@@ -426,6 +428,7 @@ class UserInfoStruct {
       'last_name': lastName,
       'email': email,
       'phone': phone,
+      'points': points,
     };
   }
 }
@@ -464,7 +467,6 @@ class UserProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         _userDetails = UserInfoStruct.fromJson(jsonDecode(response.body));
-        print(_userDetails);
         await saveUserDetailsToPreferences();
         notifyListeners();
       } else {

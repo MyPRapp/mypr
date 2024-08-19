@@ -1,16 +1,19 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingService {
-  final String baseUrl = 'http://127.0.0.1:8000/api'; // or your local network IP
+  final String baseUrl =
+      'http://127.0.0.1:8000/api'; // or your local network IP
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
 
-  Future<bool> submitForm(String clubName, String type, String time,String numberOfPeople) async {
+  Future<bool> submitForm(String clubName, String type, String time,
+      String numberOfPeople, String comments) async {
     String? accessToken = await getAccessToken();
 
     if (accessToken == null) {
@@ -29,6 +32,7 @@ class BookingService {
         'booking_type': type,
         'booked_at': time,
         'number_of_people': numberOfPeople,
+        'comments': comments,
       }),
     );
 
@@ -44,6 +48,3 @@ class BookingService {
     }
   }
 }
-
-
-

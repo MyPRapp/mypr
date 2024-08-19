@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -199,6 +201,10 @@ class CommentSection extends StatelessWidget {
           inputFormatters: [
             LengthLimitingTextInputFormatter(
                 100), // Limit input to 100 characters
+            FilteringTextInputFormatter.allow(
+              RegExp(
+                  r'[a-zA-Zα-ωΑ-Ω0-9\s.,!?@#%^&*()_+\-=\[\]{};:"\\|,.<>\/?]+'),
+            ), // Allow Greek, English, numbers, and specific symbols
           ],
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
@@ -214,74 +220,6 @@ class CommentSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class BookingDatePicker extends StatefulWidget {
-  const BookingDatePicker({super.key, required this.onDateSelected});
-
-  final ValueChanged<DateTime> onDateSelected;
-
-  @override
-  State<BookingDatePicker> createState() => _BookingDatePickerState();
-}
-
-class _BookingDatePickerState extends State<BookingDatePicker> {
-  DateTime? _selectedDate;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () async {
-        DateTime? pickedDate = await showDatePicker(
-          context: context,
-          initialDate: _selectedDate ?? DateTime.now(),
-          firstDate: DateTime.now(),
-          lastDate: DateTime(2025),
-          builder: (BuildContext context, Widget? child) {
-            return Theme(
-              data: ThemeData.dark().copyWith(
-                colorScheme: const ColorScheme.dark(
-                  primary: Color(0xFF9C0C04),
-                  onPrimary: Colors.white,
-                  surface: Colors.black,
-                  onSurface: Colors.white,
-                ),
-                dialogBackgroundColor: Colors.black,
-              ),
-              child: child!,
-            );
-          },
-        );
-
-        if (pickedDate != null) {
-          setState(() {
-            _selectedDate = pickedDate;
-          });
-          widget.onDateSelected(_selectedDate!);
-        }
-      },
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Ημερομηνία κράτησης',
-          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
-        ),
-        child: Text(
-          _selectedDate != null
-              ? DateFormat('dd MMMM, yyyy').format(_selectedDate!)
-              : 'Επιλέξτε ημερομηνία',
-          style: const TextStyle(color: Colors.white, fontSize: 16),
-        ),
-      ),
     );
   }
 }
@@ -366,48 +304,51 @@ class NameTextField extends StatefulWidget {
 }
 
 class NameTextFieldState extends State<NameTextField> {
-  final TextEditingController nameController = TextEditingController();
+  late TextEditingController nameController;
   late FocusNode focusNode;
 
   @override
   void initState() {
     super.initState();
-    focusNode = FocusNode();
     final userDetails = context.read<UserProvider>().userDetails;
-    _autofillUserName(userDetails);
-
-    focusNode.addListener(() {
-      if (!focusNode.hasFocus && nameController.text.isEmpty) {
-        _autofillUserName(userDetails);
-      }
-    });
+    nameController = TextEditingController(
+      text: '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}',
+    );
+    focusNode = FocusNode();
   }
 
-  void _autofillUserName(UserInfoStruct? userDetails) {
-    if (userDetails?.firstName != '' || userDetails?.lastName != '') {
-      nameController.text =
-          '${userDetails?.firstName} ${userDetails?.lastName}';
-    }
+  void _handleTap() {
+    focusNode.requestFocus();
+    Timer(const Duration(milliseconds: 250), () {
+      focusNode.unfocus();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: nameController,
-      focusNode: focusNode,
-      decoration: const InputDecoration(
-        labelText: 'Όνομα κράτησης',
-        labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+    return GestureDetector(
+      onTap: _handleTap,
+      child: AbsorbPointer(
+        absorbing: true, // Prevent the user from interacting with the TextField
+        child: TextField(
+          controller: nameController,
+          focusNode: focusNode,
+          readOnly: true, // Make the TextField non-editable
+          decoration: const InputDecoration(
+            labelText: 'Όνομα κράτησης',
+            labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+          ),
+          style: const TextStyle(color: Colors.white),
         ),
       ),
-      style: const TextStyle(color: Colors.white),
     );
   }
 
@@ -789,5 +730,73 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     _controller.dispose();
     priceController.dispose();
     super.dispose();
+  }
+}
+
+class BookingDatePicker extends StatefulWidget {
+  const BookingDatePicker({super.key, required this.onDateSelected});
+
+  final ValueChanged<DateTime> onDateSelected;
+
+  @override
+  State<BookingDatePicker> createState() => _BookingDatePickerState();
+}
+
+class _BookingDatePickerState extends State<BookingDatePicker> {
+  DateTime? _selectedDate;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: _selectedDate ?? DateTime.now(),
+          firstDate: DateTime.now(),
+          lastDate: DateTime(2025),
+          builder: (BuildContext context, Widget? child) {
+            return Theme(
+              data: ThemeData.dark().copyWith(
+                colorScheme: const ColorScheme.dark(
+                  primary: Color(0xFF9C0C04),
+                  onPrimary: Colors.white,
+                  surface: Colors.black,
+                  onSurface: Colors.white,
+                ),
+                dialogBackgroundColor: Colors.black,
+              ),
+              child: child!,
+            );
+          },
+        );
+
+        if (pickedDate != null) {
+          setState(() {
+            _selectedDate = pickedDate;
+          });
+          widget.onDateSelected(_selectedDate!);
+        }
+      },
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'Ημερομηνία κράτησης',
+          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+        ),
+        child: Text(
+          _selectedDate != null
+              ? DateFormat('dd MMMM, yyyy').format(_selectedDate!)
+              : 'Επιλέξτε ημερομηνία',
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+      ),
+    );
   }
 }
