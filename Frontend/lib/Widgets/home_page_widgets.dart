@@ -64,17 +64,18 @@ class SmallClubCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    SizedBox(
-                      height: 20,
-                      width: 170,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 5),
-                        child: MinPriceAndMaxPersons(
-                          minPrice: club.clubMinPrice,
-                          maxPersons: club.clubMaxPersons,
+                    if (club.clubMinPrice >= 0 && club.clubMaxPersons >= 0)
+                      SizedBox(
+                        height: 20,
+                        width: 170,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 5),
+                          child: MinPriceAndMaxPersons(
+                            minPrice: club.clubMinPrice,
+                            maxPersons: club.clubMaxPersons,
+                          ),
                         ),
                       ),
-                    ),
                   ]),
             ),
           ]),
@@ -90,12 +91,14 @@ class BigClubCard extends StatelessWidget {
     required this.club,
     this.onRemove,
   });
+
   List<bool> _daysOpen(String availabilityInBytes) {
     return availabilityInBytes.split('').map((char) => char == '1').toList();
   }
 
   final ClubInfoStruct club;
   final VoidCallback? onRemove;
+
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(club.clubAvailability);
@@ -159,10 +162,12 @@ class BigClubCard extends StatelessWidget {
                         child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              MinPriceAndMaxPersons(
-                                minPrice: club.clubMinPrice,
-                                maxPersons: club.clubMaxPersons,
-                              ),
+                              if (club.clubMinPrice >= 0 &&
+                                  club.clubMaxPersons >= 0)
+                                MinPriceAndMaxPersons(
+                                  minPrice: club.clubMinPrice,
+                                  maxPersons: club.clubMaxPersons,
+                                ),
                               DaysOpen(
                                 monday: daysOpen[0],
                                 tuesday: daysOpen[1],

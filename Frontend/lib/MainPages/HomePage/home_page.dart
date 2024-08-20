@@ -20,6 +20,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
+    _refresh();
   }
 
   Future<void> _refresh() async {
