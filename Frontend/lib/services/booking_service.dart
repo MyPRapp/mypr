@@ -37,7 +37,7 @@ class BookingService {
     );
 
     print('Submit form response status: ${response.statusCode}');
-    print('Submit form response body: ${response.body}');
+    print('Submit form response body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 201) {
       print('Booking successful');

@@ -16,44 +16,37 @@ class SmallClubCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
     return GestureDetector(
       onTap: () {
         AutoRouter.of(context).push(ReservationRoute(club: club));
       },
       child: Padding(
         padding: const EdgeInsets.only(top: 5, left: 15, right: 15),
-        child: Card(
-          margin: const EdgeInsets.only(bottom: 30),
-          color: Colors.black,
-          shadowColor: const Color(0xFF9c0c04),
-          clipBehavior: Clip.antiAlias,
-          child: Column(children: [
-            Stack(children: [
-              SizedBox(
-                height: 90,
-                width: 140,
-                child: Image.network(
-                    'http://127.0.0.1:8000/media/club_photos/${club.clubName}.jpg'),
-              ),
-              Container(
-                alignment: Alignment.topLeft,
-                child: LikeButton(
-                  onRemove: onRemove,
-                  club: club,
-                ),
-              ),
-            ]),
-            SizedBox(
-              height: 51,
-              width: 140,
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15.0), // Apply border radius here
+          child: Container(
+            color: Colors.black,
+            height: screenHeight / 2.7,
+            width: screenWidth / 3.8,
+            child: Stack(
+              children: [
+                Column(
                   children: [
                     SizedBox(
-                      height: 23,
-                      width: 200,
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 10),
+                      height: screenHeight / 8,
+                      width: screenWidth / 3.8,
+                      child: Image.network(
+                        'http://127.0.0.1:8000/media/club_photos/${club.clubName}.jpg',
+                        fit: BoxFit
+                            .fill, // Ensure the image fits within the bounds
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
                         child: Text(
                           club.clubName,
                           style: const TextStyle(
@@ -64,21 +57,22 @@ class SmallClubCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (club.clubMinPrice >= 0 && club.clubMaxPersons >= 0)
-                      SizedBox(
-                        height: 20,
-                        width: 170,
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: MinPriceAndMaxPersons(
-                            minPrice: club.clubMinPrice,
-                            maxPersons: club.clubMaxPersons,
-                          ),
-                        ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5),
+                      child: MinPriceAndMaxPersons(
+                        minPrice: club.clubMinPrice,
+                        maxPersons: club.clubMaxPersons,
                       ),
-                  ]),
+                    ),
+                  ],
+                ),
+                LikeButton(
+                  onRemove: onRemove,
+                  club: club,
+                ),
+              ],
             ),
-          ]),
+          ),
         ),
       ),
     );

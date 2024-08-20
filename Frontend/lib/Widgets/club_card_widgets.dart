@@ -3,7 +3,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
 
-// LikeButton widget
 class LikeButton extends StatefulWidget {
   const LikeButton({
     super.key,
@@ -164,14 +163,24 @@ class MinPriceAndMaxPersons extends StatelessWidget {
           Icons.monetization_on,
           color: Color(0xFF9C0C04),
         ),
-        Text(
-          ' $minPrice',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        if (minPrice >= 0 && maxPersons >= 0)
+          Text(
+            ' $minPrice',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        ),
+        if (minPrice < 0 || maxPersons < 0)
+          const Text(
+            '     ',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         const Text(
           ' | ',
           style: TextStyle(
@@ -184,14 +193,24 @@ class MinPriceAndMaxPersons extends StatelessWidget {
           Icons.account_circle,
           color: Color(0xFF9C0C04),
         ),
-        Text(
-          ' $maxPersons',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        if (minPrice >= 0 && maxPersons >= 0)
+          Text(
+            ' $maxPersons',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        ),
+        if (minPrice < 0 || maxPersons < 0)
+          const Text(
+            ' ',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
       ],
     );
   }
