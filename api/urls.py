@@ -14,4 +14,5 @@ urlpatterns = [
     path('reduce-points/', views.ReducePointsView.as_view(), name='reduce_points'),
     path('reset-password/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('reset_password_page/', views.reset_password_page_view, name='reset_password'),
+    path('user/change_photo/',views.UserPhotoUpdateView.as_view(),name= 'change-photo'),
 ]

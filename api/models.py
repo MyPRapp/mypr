@@ -8,6 +8,7 @@ from django.contrib.auth.models import AbstractUser,Group, Permission
 class CustomUser(AbstractUser):
     phone = models.CharField(max_length= 15)
     points = models.IntegerField()
+    photo = models.ImageField(upload_to='user_photos/',blank=True,null=True,default= 'user_photos/Default_User.jpg')
 
     groups = models.ManyToManyField(
         Group,
@@ -67,6 +68,7 @@ class Bookings(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name= "bookings")
     club = models.ForeignKey(Clubs, on_delete=models.CASCADE,related_name= "booking_I_made")  # Assuming 'Clubs' is another model in your app
+    reservation_name = models.CharField(max_length= 20,default="InputReservationName")
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
     number_of_people = models.IntegerField()
     booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, default=REGULAR)

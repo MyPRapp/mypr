@@ -15,17 +15,17 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'phone', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions','points')
+        fields = ('username', 'email', 'phone', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions','points','photo')
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
-    list_display = ('username', 'email', 'phone', 'is_staff', 'is_active', 'points')
+    list_display = ('username', 'email', 'phone', 'is_staff', 'is_active', 'points','photo')
     list_filter = ('is_staff', 'is_active', 'groups')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('email', 'phone', 'first_name', 'last_name', 'points')}),
+        ('Personal info', {'fields': ('email', 'phone', 'first_name', 'last_name', 'points','photo')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
