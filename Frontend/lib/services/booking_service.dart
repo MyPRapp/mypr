@@ -1,20 +1,19 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingService {
   final String baseUrl =
-      'http://$validatedIp:8000/api'; // or your local network IP
+      'http://192.168.1.9:8000/api'; // or your local network IP
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
 
-  Future<bool> submitForm(String clubName, String type, String time,
-      String numberOfPeople, String comments) async {
+  Future<bool> submitForm(String reservationName, String clubName, String type,
+      String time, String numberOfPeople, String comments) async {
     String? accessToken = await getAccessToken();
 
     if (accessToken == null) {
@@ -29,6 +28,7 @@ class BookingService {
         'Authorization': 'Bearer $accessToken',
       },
       body: jsonEncode({
+        'reservation_name': reservationName,
         'club_name': clubName,
         'booking_type': type,
         'booked_at': time,

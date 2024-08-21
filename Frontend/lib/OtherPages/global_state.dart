@@ -5,21 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-String validatedIp = "192.168.1.9";
-
-// Add the IP validation function
-void validateAndReturnIpAddress(String ipAddress) {
-  final RegExp ipRegex = RegExp(
-    r'^(\d{1,3}\.){3}\d{1,3}$',
-  );
-
-  if (ipRegex.hasMatch(ipAddress)) {
-    validatedIp = ipAddress;
-  } else {
-    validatedIp = '127.0.0.1';
-  }
-  print('Connecting to server at: $validatedIp');
-}
+String validatedIp = 'https://6n171zc2-8000.euw.devtunnels.ms';
 
 class GlobalState with ChangeNotifier {
   bool _dataLoaded = false;
@@ -29,7 +15,7 @@ class GlobalState with ChangeNotifier {
   void setDataLoaded(bool value) {
     _dataLoaded = value;
     notifyListeners();
-    print('Connecting to server at: $validatedIp');
+    print('Connecting to server at: http://192.168.1.9:8000/');
   }
 }
 
@@ -74,12 +60,6 @@ class ClubInfoStruct {
     );
   }
 
-  get regularCatalogue => null;
-
-  get specialCatalogue => null;
-
-  get premiumCatalogue => null;
-
   Map<String, dynamic> toJson() {
     return {
       'id': clubID,
@@ -92,32 +72,6 @@ class ClubInfoStruct {
       'availability': clubAvailability,
       'clubPhoto': clubPhoto
     };
-  }
-
-  ClubInfoStruct copyWith({
-    int? clubID,
-    String? clubName,
-    int? clubMinPrice,
-    int? clubMaxPersons,
-    String? clubPhone,
-    String? clubLocation,
-    double? clubRating,
-    String? clubAvailability,
-    bool? clubIsLiked,
-    String? clubPhoto,
-  }) {
-    return ClubInfoStruct(
-      clubID: clubID ?? this.clubID,
-      clubName: clubName ?? this.clubName,
-      clubMinPrice: clubMinPrice ?? this.clubMinPrice,
-      clubMaxPersons: clubMaxPersons ?? this.clubMaxPersons,
-      clubPhone: clubPhone ?? this.clubPhone,
-      clubLocation: clubLocation ?? this.clubLocation,
-      clubRating: clubRating ?? this.clubRating,
-      clubAvailability: clubAvailability ?? this.clubAvailability,
-      clubIsLiked: clubIsLiked ?? this.clubIsLiked,
-      clubPhoto: clubPhoto ?? this.clubPhoto,
-    );
   }
 }
 
@@ -167,7 +121,8 @@ class ClubProvider with ChangeNotifier {
 ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
   Future<void> fetchClubsAndCatalogues() async {
     var url =
-        'http://$validatedIp:8000/api/clubs/print/'; // Replace with your API URL
+        'http://192.168.1.9:8000/api/clubs/print/'; // Replace with your API URL
+    print('url: $url');
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -260,7 +215,7 @@ class ClubProvider with ChangeNotifier {
     }
 
     final url =
-        'http://$validatedIp:8000/api/clubs/${club.clubID}/catalogue'; // Replace with your API URL
+        'http://192.168.1.9:8000/api/clubs/${club.clubID}/catalogue'; // Replace with your API URL
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -412,6 +367,7 @@ class UserInfoStruct {
   String lastName;
   String email;
   String phone;
+  String photo;
 
   UserInfoStruct({
     required this.userID,
@@ -422,6 +378,7 @@ class UserInfoStruct {
     this.email = '',
     this.phone = '',
     this.points = -1,
+    this.photo = '',
   });
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -434,6 +391,7 @@ class UserInfoStruct {
       email: json['email'] ?? '',
       phone: json['phone'] ?? '',
       points: json['points'] ?? -1,
+      photo: json['photo'] ?? '',
     );
   }
 
@@ -447,6 +405,7 @@ class UserInfoStruct {
       'email': email,
       'phone': phone,
       'points': points,
+      'photo': photo,
     };
   }
 }
@@ -479,7 +438,7 @@ class UserProvider with ChangeNotifier {
 
     if (token != null) {
       final response = await http.get(
-        Uri.parse('http://$validatedIp:8000/api/user/print'),
+        Uri.parse('http://192.168.1.9:8000/api/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -555,4 +514,14 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
     // If the new value contains restricted characters, return the old value
     return oldValue;
   }
+}
+
+String formatName(String name) {
+  // Trim leading and trailing spaces
+  String trimmedName = name.trim();
+
+  // Replace multiple spaces between words with a single space
+  String formattedName = trimmedName.replaceAll(RegExp(r'\s+'), ' ');
+
+  return formattedName;
 }

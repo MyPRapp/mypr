@@ -37,7 +37,7 @@ class SmallClubCard extends StatelessWidget {
                     SizedBox(
                       height: screenHeight / 8,
                       child: Image.network(
-                        'http://$validatedIp:8000/media/club_photos/${club.clubName}.jpg',
+                        club.clubPhoto,
                         fit: BoxFit
                             .fill, // Ensure the image fits within the bounds
                       ),
@@ -96,6 +96,7 @@ class BigClubCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(club.clubAvailability);
     final screenWidth = MediaQuery.of(context).size.width;
+    print(club.clubPhoto);
     return GestureDetector(
       onTap: () {
         AutoRouter.of(context).push(ReservationRoute(club: club));
@@ -104,20 +105,18 @@ class BigClubCard extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
         child: SizedBox(
           width: screenWidth - 20,
+          height: 150,
           child: Card(
             color: Colors.transparent,
             clipBehavior: Clip.antiAlias,
             child: Row(children: [
               Stack(children: [
-                Container(
-                  height: 140,
-                  width: 120,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image:
-                          AssetImage('assets/clubPhotos/${club.clubName}.jpg'),
-                    ),
+                SizedBox(
+                  height: 150,
+                  width: screenWidth - 300,
+                  child: Image.network(
+                    club.clubPhoto,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 Container(

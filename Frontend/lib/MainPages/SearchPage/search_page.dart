@@ -32,7 +32,7 @@ class SearchPageState extends State<SearchPage> {
           clubProvider.allClubs.map((club) => club.clubName).toList();
       setState(() {
         if (query.isEmpty) {
-          _filteredClubs = clubs.take(5).toList();
+          _filteredClubs = clubs.toList();
         } else {
           _filteredClubs = clubs
               .where((club) => club.toLowerCase().contains(query.toLowerCase()))
@@ -65,6 +65,7 @@ class SearchPageState extends State<SearchPage> {
             padding: const EdgeInsets.all(20),
             child: Column(
               children: [
+                const SizedBox(height: 50),
                 TextField(
                   controller: _controller,
                   focusNode: _focusNode,
@@ -72,9 +73,8 @@ class SearchPageState extends State<SearchPage> {
                   style: const TextStyle(color: Colors.white),
                   decoration: const InputDecoration(
                     hintText: 'Τι ψάχνεις;',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    filled: true,
-                    fillColor: Colors.black,
+                    hintStyle:
+                        TextStyle(color: Color.fromARGB(255, 182, 176, 176)),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(8)),
                       borderSide: BorderSide.none,
@@ -94,6 +94,7 @@ class SearchPageState extends State<SearchPage> {
                       itemCount: _filteredClubs.length,
                       itemBuilder: (context, index) {
                         final clubName = _filteredClubs[index];
+
                         return ListTile(
                           title: Text(
                             clubName,

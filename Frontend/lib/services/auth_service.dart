@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl = 'http://$validatedIp:8000/api';
+  final String baseUrl = 'http://192.168.1.9:8000/api';
 
   Future<bool> login(String username, String password) async {
     final response = await http.post(
@@ -40,6 +39,7 @@ class AuthService {
         return true;
       }
     }
+
     return false;
   }
 

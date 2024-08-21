@@ -42,8 +42,8 @@ class ProfilePage extends StatelessWidget {
                         width: 130,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(300),
-                          child: Image.asset(
-                            'assets/otherPhotos/giorgos_sto_plintirio.png',
+                          child: Image.network(
+                            'http://192.168.1.9:8000/${userDetails.photo}',
                             fit: BoxFit.cover,
                           ),
                         ),

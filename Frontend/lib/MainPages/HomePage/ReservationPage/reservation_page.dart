@@ -382,11 +382,16 @@ class _ReservationPageState extends State<ReservationPage> {
                         isSubmitting = true; // Block further submissions
                       });
 
+                      // Get and format the name from the TextField
+                      String rawName = nameTextFieldKey
+                              .currentState?.nameController.text ??
+                          '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+                      String formattedName = formatName(rawName);
+
                       // Update the reservationInfo list with the actual values
                       reservationInfo[0] = userDetails?.userID ?? -1;
                       reservationInfo[1] =
-                          nameTextFieldKey.currentState?.nameController.text ??
-                              ''; // Name
+                          formattedName; // Name formatted by the utility function
                       reservationInfo[2] = widget.club.clubName;
                       reservationInfo[3] =
                           personsTextFieldKey.currentState?.persons ??
@@ -395,23 +400,58 @@ class _ReservationPageState extends State<ReservationPage> {
                       reservationInfo[6] = counters['Special'];
                       reservationInfo[7] = counters['Premium'];
                       reservationInfo[9] = _commentController.text; // Comment
+
                       if (isDiscountApplied) {
                         await _retractPoints(20);
                         reservationInfo[10] = 20;
                       } else {
                         reservationInfo[10] = 0;
                       }
+
                       // Calculate the total price
                       calculatePrice();
                       String fourBitString =
                           '${reservationInfo[5]}${reservationInfo[6]}${reservationInfo[7]}${reservationInfo[10] ~/ 10}';
-                      // Check if all required fields are filled
-                      bool allFieldsFilled = reservationInfo
-                          .sublist(1, 8)
-                          .every((element) => element != '' && element != -1);
 
-                      if (reservationInfo[4] == 0 ||
-                          reservationInfo[8].isEmpty) {
+                      // Validate that reservationInfo[1] has the format: "string string"
+                      final RegExp namePattern =
+                          RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true);
+
+                      bool isNameValid =
+                          namePattern.hasMatch(reservationInfo[1]);
+
+                      // Check if all required fields are filled and the name is valid
+                      bool allFieldsFilled = reservationInfo
+                              .sublist(1, 8)
+                              .every((element) =>
+                                  element != '' && element != -1) &&
+                          isNameValid;
+
+                      if (isNameValid) {
+                        // Update the TextEditingController with the valid name
+                        nameTextFieldKey.currentState?.nameController.text =
+                            reservationInfo[1];
+                      }
+
+                      if (!allFieldsFilled) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+                            ..showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  isNameValid
+                                      ? 'Παρακαλώ συμπληρώστε όλα τα πεδία'
+                                      : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
+                                ),
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                        }
+                      } else if (reservationInfo[4] == 0 ||
+                          reservationInfo[8].isEmpty ||
+                          fourBitString == '' ||
+                          fourBitString == '0000') {
                         if (mounted) {
                           ScaffoldMessenger.of(context)
                             ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
@@ -423,13 +463,15 @@ class _ReservationPageState extends State<ReservationPage> {
                               ),
                             );
                         }
-                      } else if (allFieldsFilled) {
+                      } else {
+                        // Proceed with form submission
                         bool success = await _bookingService.submitForm(
+                          reservationInfo[1],
                           reservationInfo[2], // Club name
                           fourBitString, // 4-bit string for selected packages and discount
                           reservationInfo[8], // Date
                           reservationInfo[3].toString(), // Number of persons
-                          reservationInfo[9],
+                          reservationInfo[9], // Comment
                         );
                         print(fourBitString);
                         if (!mounted) return;
@@ -456,17 +498,6 @@ class _ReservationPageState extends State<ReservationPage> {
                               ),
                             );
                         }
-                      } else {
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context)
-                          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-                          ..showSnackBar(
-                            const SnackBar(
-                              content:
-                                  Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-                              duration: Duration(seconds: 3),
-                            ),
-                          );
                       }
 
                       setState(() {

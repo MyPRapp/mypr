@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -312,40 +310,36 @@ class NameTextFieldState extends State<NameTextField> {
       text: '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}',
     );
     focusNode = FocusNode();
-  }
 
-  void _handleTap() {
-    focusNode.requestFocus();
-    Timer(const Duration(milliseconds: 250), () {
-      focusNode.unfocus();
+    focusNode.addListener(() {
+      if (!focusNode.hasFocus) {
+        if (nameController.text.trim().isEmpty) {
+          nameController.text =
+              '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+        }
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _handleTap,
-      child: AbsorbPointer(
-        absorbing: true, // Prevent the user from interacting with the TextField
-        child: TextField(
-          controller: nameController,
-          focusNode: focusNode,
-          readOnly: true, // Make the TextField non-editable
-          decoration: const InputDecoration(
-            labelText: 'Όνομα κράτησης',
-            labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-          ),
-          style: const TextStyle(color: Colors.white),
+    return TextField(
+      controller: nameController,
+      focusNode: focusNode,
+      inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
+      decoration: const InputDecoration(
+        labelText: 'Όνομα κράτησης',
+        labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
       ),
+      style: const TextStyle(color: Colors.white),
     );
   }
 
