@@ -41,20 +41,24 @@ class LikeButtonState extends State<LikeButton> {
 
         if (widget.club.clubIsLiked) {
           tapped = false;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                duration: Duration(milliseconds: 1500),
-                content: Text('Αφαιρέθηκε από τα αγαπημένα')),
-          );
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+            ..showSnackBar(
+              const SnackBar(
+                  duration: Duration(milliseconds: 1500),
+                  content: Text('Προστέθηκε στα αγαπημένα')),
+            );
           if (widget.onRemove != null) {
             widget.onRemove!();
           }
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                duration: Duration(milliseconds: 1500),
-                content: Text('Προστέθηκε στα αγαπημένα')),
-          );
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+            ..showSnackBar(
+              const SnackBar(
+                  duration: Duration(milliseconds: 1500),
+                  content: Text('Αφαιρέθηκε από τα αγαπημένα')),
+            );
         }
       },
       child: SizedBox(

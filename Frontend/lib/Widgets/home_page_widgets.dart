@@ -28,17 +28,16 @@ class SmallClubCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(15.0), // Apply border radius here
           child: Container(
             color: Colors.black,
-            height: screenHeight / 2.7,
-            width: screenWidth / 3.8,
+            height: screenHeight / 2.2,
+            width: screenWidth / 2.7,
             child: Stack(
               children: [
                 Column(
                   children: [
                     SizedBox(
                       height: screenHeight / 8,
-                      width: screenWidth / 3.8,
                       child: Image.network(
-                        'http://127.0.0.1:8000/media/club_photos/${club.clubName}.jpg',
+                        'http://$validatedIp:8000/media/club_photos/${club.clubName}.jpg',
                         fit: BoxFit
                             .fill, // Ensure the image fits within the bounds
                       ),

@@ -1,19 +1,16 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
+import 'package:mypr/OtherPages/global_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
-
 class PointsService {
-  static const String apiUrl = 'http://127.0.0.1:8000/api/reduce-points/';
- 
+  static String apiUrl = 'http://$validatedIp:8000/api/reduce-points/';
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('access_token');
   }
-
 
   Future<int> retractPoints(int points) async {
     String? accessToken = await getAccessToken();

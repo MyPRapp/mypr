@@ -18,6 +18,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _serverController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _obscureText = true;
   bool isLoading = false;
@@ -31,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
     await _checkAndFetchClubs();
-    await _login();
+    // await _login();
   }
 
   Future<void> _loadSavedUserCredentials() async {
@@ -74,12 +75,14 @@ class _LoginPageState extends State<LoginPage> {
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(seconds: 4),
-            content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+          ..showSnackBar(
+            const SnackBar(
+              duration: Duration(seconds: 4),
+              content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
+            ),
+          );
       }
     }
   }
@@ -109,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          height: screenHeight + 300,
+          height: screenHeight + 400,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Colors.black, Color(0xFF9C0C04)],
@@ -217,13 +220,15 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           TextButton(
                             onPressed: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  duration: Duration(seconds: 4),
-                                  content: Text(
-                                      'Στάλθηκε email για επαναφορά κωδικού'),
-                                ),
-                              );
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+                                ..showSnackBar(
+                                  const SnackBar(
+                                    duration: Duration(seconds: 4),
+                                    content: Text(
+                                        'Στάλθηκε email για επαναφορά κωδικού'),
+                                  ),
+                                );
                             },
                             child: const Text(
                               'Επαναφορά κωδικού',
@@ -263,15 +268,84 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       backgroundColor: Colors.black,
                     ),
-                    onPressed: () {
-                      _login();
-                    },
+                    onPressed: _login,
                     child: const Text(
                       'Είσοδος',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: SizedBox(
+                      width: 350,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _serverController,
+                            inputFormatters: [NoEmojisTextInputFormatter()],
+                            style: const TextStyle(
+                              fontSize: 23,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Enter server\'s IP',
+                              hintStyle: TextStyle(
+                                color: Color.fromARGB(132, 156, 12, 4),
+                              ),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: Divider(
+                              height: 10,
+                              color: Color.fromARGB(204, 156, 12, 4),
+                              thickness: 5,
+                            ),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 22, vertical: 18),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side:
+                                    const BorderSide(color: Color(0xFF9C0C04)),
+                              ),
+                              backgroundColor: Colors.black,
+                            ),
+                            onPressed: () {
+                              // Extract the server IP address as a string
+                              String serverIp = _serverController.text.trim();
+
+                              validateAndReturnIpAddress(serverIp);
+
+                              // Show a snackbar with the validated IP
+                              ScaffoldMessenger.of(context)
+                                ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+                                ..showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                        'Connecting to server at: $validatedIp'),
+                                  ),
+                                );
+                            },
+                            child: const Text(
+                              'Connect to server',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

@@ -58,7 +58,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                               .read<BottomNavBarVisibility>()
                                               .show();
                                         });
-                                        Navigator.pop(context);
+                                        context.router.back();
                                       },
                                       icon: const Icon(
                                         Icons.chevron_left,

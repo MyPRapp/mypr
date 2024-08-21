@@ -45,7 +45,7 @@ class FavoritesPageState extends State<FavoritesPage> {
                         WidgetsBinding.instance.addPostFrameCallback((_) {
                           context.read<BottomNavBarVisibility>().show();
                         });
-                        Navigator.pop(context);
+                        context.router.back();
                       },
                       icon: const Icon(
                         Icons.chevron_left,

@@ -26,6 +26,7 @@ class _HomePageState extends State<HomePage> {
   Future<void> _refresh() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
     await clubProvider.fetchClubsAndCatalogues();
+    print('Page refreshed');
   }
 
   @override

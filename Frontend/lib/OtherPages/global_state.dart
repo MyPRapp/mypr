@@ -5,6 +5,22 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
+String validatedIp = "192.168.1.9";
+
+// Add the IP validation function
+void validateAndReturnIpAddress(String ipAddress) {
+  final RegExp ipRegex = RegExp(
+    r'^(\d{1,3}\.){3}\d{1,3}$',
+  );
+
+  if (ipRegex.hasMatch(ipAddress)) {
+    validatedIp = ipAddress;
+  } else {
+    validatedIp = '127.0.0.1';
+  }
+  print('Connecting to server at: $validatedIp');
+}
+
 class GlobalState with ChangeNotifier {
   bool _dataLoaded = false;
 
@@ -13,6 +29,7 @@ class GlobalState with ChangeNotifier {
   void setDataLoaded(bool value) {
     _dataLoaded = value;
     notifyListeners();
+    print('Connecting to server at: $validatedIp');
   }
 }
 
@@ -149,8 +166,8 @@ class ClubProvider with ChangeNotifier {
 
 ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
   Future<void> fetchClubsAndCatalogues() async {
-    const url =
-        'http://127.0.0.1:8000/api/clubs/print/'; // Replace with your API URL
+    var url =
+        'http://$validatedIp:8000/api/clubs/print/'; // Replace with your API URL
     try {
       final response = await http.get(Uri.parse(url));
 
@@ -243,7 +260,7 @@ class ClubProvider with ChangeNotifier {
     }
 
     final url =
-        'http://127.0.0.1:8000/api/clubs/${club.clubID}/catalogue'; // Replace with your API URL
+        'http://$validatedIp:8000/api/clubs/${club.clubID}/catalogue'; // Replace with your API URL
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -286,7 +303,7 @@ class ClubProvider with ChangeNotifier {
   }
 
   bool isLiked(String clubName) {
-    for (var club in _clubs) {
+    for (var club in likedClubs) {
       if (club.clubName == clubName) {
         return club.clubIsLiked;
       }
@@ -462,7 +479,7 @@ class UserProvider with ChangeNotifier {
 
     if (token != null) {
       final response = await http.get(
-        Uri.parse('http://127.0.0.1:8000/api/user/print'),
+        Uri.parse('http://$validatedIp:8000/api/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       );
 
@@ -507,14 +524,31 @@ class BottomNavBarVisibility extends ChangeNotifier {
 }
 
 class NoEmojisTextInputFormatter extends TextInputFormatter {
-  // Updated RegExp to allow Greek and English letters, numbers, and specific symbols
+  // Updated RegExp to allow Greek and English letters, numbers, and specific symbols, but block spaces and other restricted characters
   final RegExp _allowedCharacters =
-      RegExp(r'[\p{L}\p{N}\p{P}\p{Zs}!@#$%^&*(){}]+', unicode: true);
+      RegExp(r'^[\p{L}\p{N}\p{P}!@#$%^&*(){}]+$', unicode: true);
 
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
     // Allow the text to be completely deleted (empty string)
+    if (newValue.text.isEmpty || _allowedCharacters.hasMatch(newValue.text)) {
+      return newValue;
+    }
+    // If the new value contains restricted characters, including spaces, return the old value
+    return oldValue;
+  }
+}
+
+class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
+  // RegExp to allow Greek and English letters, numbers, spaces, and specific symbols, but block emojis
+  final RegExp _allowedCharacters =
+      RegExp(r'^[\p{L}\p{N}\p{P}\s!@#$%^&*(){}]+$', unicode: true);
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    // Allow the text if it matches the allowed characters or is empty
     if (newValue.text.isEmpty || _allowedCharacters.hasMatch(newValue.text)) {
       return newValue;
     }

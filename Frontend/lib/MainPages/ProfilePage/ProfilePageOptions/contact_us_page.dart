@@ -7,17 +7,22 @@ import 'package:url_launcher/url_launcher.dart';
 @RoutePage()
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
-
   Future<void> _launchInstagram() async {
-    try {
-      final Uri uri = Uri.parse('https://www.instagram.com/mypr_app/');
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      } else {
-        throw 'Could not launch $uri';
-      }
-    } catch (e) {
-      print('Error: $e');
+    // Define the Instagram URLs for app and web
+    final Uri instagramAppUri = Uri.parse('instagram://user?username=mypr_app');
+    final Uri instagramWebUri =
+        Uri.parse('https://www.instagram.com/mypr_app/');
+
+    // Check if the Instagram app can be launched
+    if (await canLaunchUrl(instagramAppUri)) {
+      // Launch Instagram app
+      await launchUrl(instagramAppUri);
+    } else if (await canLaunchUrl(instagramWebUri)) {
+      // Fall back to launching Instagram web if the app is not installed
+      await launchUrl(instagramWebUri);
+    } else {
+      // Handle the case where neither the app nor the web URL can be launched
+      print('Could not launch Instagram');
     }
   }
 
@@ -48,7 +53,7 @@ class ContactUsPage extends StatelessWidget {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         context.read<BottomNavBarVisibility>().show();
                       });
-                      Navigator.pop(context);
+                      context.router.back();
                     },
                     icon: const Icon(
                       Icons.chevron_left,

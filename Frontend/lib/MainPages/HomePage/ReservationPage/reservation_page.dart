@@ -19,7 +19,6 @@ class ReservationPage extends StatefulWidget {
 }
 
 class _ReservationPageState extends State<ReservationPage> {
-  // Add a list to store the reservation information
   List<dynamic> reservationInfo = [
     -1,
     '',
@@ -35,17 +34,16 @@ class _ReservationPageState extends State<ReservationPage> {
   ];
 
   final BookingService _bookingService = BookingService();
-  // GlobalKeys to access the state of NameTextField and PersonsTextField
   final GlobalKey<NameTextFieldState> nameTextFieldKey =
       GlobalKey<NameTextFieldState>();
   final GlobalKey<PersonsTextFieldState> personsTextFieldKey =
       GlobalKey<PersonsTextFieldState>();
 
-  int? selectedPrice; // Store the price from the CustomDropdownWithCounter
-  int maxPersons = 0; // Track the maximum persons dynamically
-  bool isDiscountApplied = false; // Track discount checkbox state
+  int? selectedPrice;
+  int maxPersons = 0;
+  bool isDiscountApplied = false;
+  bool isSubmitting = false; // Add a flag to track submission status
 
-  // Create the counters map in the parent widget
   Map<String, int> counters = {
     'Απλή': 0,
     'Special': 0,
@@ -63,9 +61,8 @@ class _ReservationPageState extends State<ReservationPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
-    updateMaxPersons(); // Initialize maxPersons
+    updateMaxPersons();
 
-    // Initialize the list with default values
     final userDetails = context.read<UserProvider>().userDetails;
     reservationInfo = [
       userDetails?.userID ?? -1,
@@ -83,22 +80,18 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   int _currentPoints = 0;
-  final PointsService _pointsService =
-      PointsService(); // Create an instance of PointsService
+  final PointsService _pointsService = PointsService();
 
   Future<void> _retractPoints(int pointsToRetract) async {
     try {
-      int updatedPoints = await _pointsService.retractPoints(
-          pointsToRetract); // Use the instance to call retractPoints
+      int updatedPoints = await _pointsService.retractPoints(pointsToRetract);
       setState(() {
         _currentPoints = updatedPoints;
       });
       print(
           "$pointsToRetract points retracted successfully. Current points: $_currentPoints");
     } catch (error) {
-      print(
-        "Failed to retract points: $error",
-      );
+      print("Failed to retract points: $error");
     }
   }
 
@@ -117,7 +110,6 @@ class _ReservationPageState extends State<ReservationPage> {
     print('Discount(%): ${reservationInfo[10]}');
   }
 
-  // Initialize catalogues outside the build method
   void initializeCatalogues() {
     ClubProvider clubProvider = context.read<ClubProvider>();
     final catalogues = clubProvider.getCataloguesByClubID(widget.club.clubID);
@@ -130,7 +122,6 @@ class _ReservationPageState extends State<ReservationPage> {
         clubProvider.getRegularCatalogue(catalogues, widget.club, 'Premium');
   }
 
-  // Method to calculate and update the maximum persons allowed
   void updateMaxPersons() {
     setState(() {
       maxPersons = regularCatalogue.maxPersons * counters['Απλή']! +
@@ -139,19 +130,16 @@ class _ReservationPageState extends State<ReservationPage> {
     });
   }
 
-  // Function to handle back button press
   void onBackPressed(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
   }
 
-  // Add a TextEditingController for the comment section
   final TextEditingController _commentController = TextEditingController();
 
   @override
   void dispose() {
-    // Dispose the controller when the widget is disposed
     _commentController.dispose();
     super.dispose();
   }
@@ -252,11 +240,15 @@ class _ReservationPageState extends State<ReservationPage> {
             padding: const EdgeInsets.all(15),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(30),
-              child: Image(
-                image: AssetImage(
-                  'assets/clubPhotos/${widget.club.clubName}.jpg',
+              child: SizedBox(
+                width: 520,
+                height: 350,
+                child: Image(
+                  image: AssetImage(
+                    'assets/clubPhotos/${widget.club.clubName}.jpg',
+                  ),
+                  fit: BoxFit.cover,
                 ),
-                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -297,7 +289,7 @@ class _ReservationPageState extends State<ReservationPage> {
           SizedBox(
             height: 70,
             child: NameTextField(
-              key: nameTextFieldKey, // Assign the key to NameTextField
+              key: nameTextFieldKey,
             ),
           ),
           const SizedBox(height: 25),
@@ -313,8 +305,8 @@ class _ReservationPageState extends State<ReservationPage> {
           SizedBox(
             height: 70,
             child: PersonsTextField(
-              key: personsTextFieldKey, // Assign the key to PersonsTextField
-              maxPersons: maxPersons, // Pass the dynamically updated maxPersons
+              key: personsTextFieldKey,
+              maxPersons: maxPersons,
               counters: counters,
             ),
           ),
@@ -323,13 +315,13 @@ class _ReservationPageState extends State<ReservationPage> {
             regularCatalogue: regularCatalogue,
             specialCatalogue: specialCatalogue,
             premiumCatalogue: premiumCatalogue,
-            counters: counters, // Pass the map to the widget
+            counters: counters,
             onCountersChanged: () {
               updateMaxPersons();
               calculatePrice();
             },
-            isDiscountApplied: isDiscountApplied, // Pass the discount state
-            discount: reservationInfo[10], // Pass the discount value
+            isDiscountApplied: isDiscountApplied,
+            discount: reservationInfo[10],
           ),
           CommentSection(
             commentController: _commentController,
@@ -380,91 +372,107 @@ class _ReservationPageState extends State<ReservationPage> {
                 foregroundColor: Colors.white,
                 backgroundColor: const Color(0xFF9C0C04),
               ),
-              onPressed: () async {
-                final userDetails = context.read<UserProvider>().userDetails;
+              onPressed: isSubmitting
+                  ? null
+                  : () async {
+                      final userDetails =
+                          context.read<UserProvider>().userDetails;
 
-                // Update the reservationInfo list with the actual values
-                reservationInfo[0] = userDetails?.userID ?? -1;
-                reservationInfo[1] =
-                    nameTextFieldKey.currentState?.nameController.text ??
-                        ''; // Name
-                reservationInfo[2] = widget.club.clubName;
-                reservationInfo[3] =
-                    personsTextFieldKey.currentState?.persons ?? -1; // Persons
-                reservationInfo[5] = counters['Απλή'];
-                reservationInfo[6] = counters['Special'];
-                reservationInfo[7] = counters['Premium'];
-                reservationInfo[9] = _commentController.text; // Comment
-                if (isDiscountApplied) {
-                  await _retractPoints(20);
-                  reservationInfo[10] = 20;
-                } else {
-                  reservationInfo[10] = 0;
-                }
-                // Calculate the total price
-                calculatePrice();
-                String fourBitString =
-                    '${reservationInfo[5]}${reservationInfo[6]}${reservationInfo[7]}${reservationInfo[10] ~/ 10}';
-                // Check if all required fields are filled
-                bool allFieldsFilled = reservationInfo
-                    .sublist(1, 8)
-                    .every((element) => element != '' && element != -1);
+                      setState(() {
+                        isSubmitting = true; // Block further submissions
+                      });
 
-                if (reservationInfo[4] == 0 || reservationInfo[8].isEmpty) {
-                  // If the price is zero or the date is not set, show the SnackBar
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                } else if (allFieldsFilled) {
-                  // Submit the booking only if all fields are filled and valid
-                  bool success = await _bookingService.submitForm(
-                    reservationInfo[2], // Club name
-                    fourBitString, // 4-bit string for selected packages and discount
-                    reservationInfo[8], // Date
-                    reservationInfo[3].toString(), // Number of persons
-                    reservationInfo[9],
-                  );
-                  print(fourBitString);
-                  if (!mounted) return; // Check if the widget is still mounted
+                      // Update the reservationInfo list with the actual values
+                      reservationInfo[0] = userDetails?.userID ?? -1;
+                      reservationInfo[1] =
+                          nameTextFieldKey.currentState?.nameController.text ??
+                              ''; // Name
+                      reservationInfo[2] = widget.club.clubName;
+                      reservationInfo[3] =
+                          personsTextFieldKey.currentState?.persons ??
+                              -1; // Persons
+                      reservationInfo[5] = counters['Απλή'];
+                      reservationInfo[6] = counters['Special'];
+                      reservationInfo[7] = counters['Premium'];
+                      reservationInfo[9] = _commentController.text; // Comment
+                      if (isDiscountApplied) {
+                        await _retractPoints(20);
+                        reservationInfo[10] = 20;
+                      } else {
+                        reservationInfo[10] = 0;
+                      }
+                      // Calculate the total price
+                      calculatePrice();
+                      String fourBitString =
+                          '${reservationInfo[5]}${reservationInfo[6]}${reservationInfo[7]}${reservationInfo[10] ~/ 10}';
+                      // Check if all required fields are filled
+                      bool allFieldsFilled = reservationInfo
+                          .sublist(1, 8)
+                          .every((element) => element != '' && element != -1);
 
-                  if (success) {
-                    printReservationInfo(reservationInfo);
-                    // Show the confirmation dialog
-                    showDialog(
-                      context: context,
-                      barrierDismissible:
-                          false, // Prevent closing by tapping outside
-                      builder: (BuildContext context) {
-                        return ConfirmationDialog(
-                            reservationInfo: reservationInfo);
-                      },
-                    );
-                  } else {
-                    // Show error message
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.'),
-                        duration: Duration(seconds: 3),
-                      ),
-                    );
-                  }
-                } else {
-                  if (!mounted) return; // Check if the widget is still mounted
-                  // Show error message for incomplete fields
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-                      duration: Duration(seconds: 3),
-                    ),
-                  );
-                }
-              },
+                      if (reservationInfo[4] == 0 ||
+                          reservationInfo[8].isEmpty) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+                            ..showSnackBar(
+                              const SnackBar(
+                                content:
+                                    Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                        }
+                      } else if (allFieldsFilled) {
+                        bool success = await _bookingService.submitForm(
+                          reservationInfo[2], // Club name
+                          fourBitString, // 4-bit string for selected packages and discount
+                          reservationInfo[8], // Date
+                          reservationInfo[3].toString(), // Number of persons
+                          reservationInfo[9],
+                        );
+                        print(fourBitString);
+                        if (!mounted) return;
+
+                        if (success) {
+                          printReservationInfo(reservationInfo);
+                          showDialog(
+                            context: context,
+                            barrierDismissible:
+                                false, // Prevent closing by tapping outside
+                            builder: (BuildContext context) {
+                              return ConfirmationDialog(
+                                  reservationInfo: reservationInfo);
+                            },
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+                            ..showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                    'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.'),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                        }
+                      } else {
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context)
+                          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+                          ..showSnackBar(
+                            const SnackBar(
+                              content:
+                                  Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+                              duration: Duration(seconds: 3),
+                            ),
+                          );
+                      }
+
+                      setState(() {
+                        isSubmitting = false; // Allow submissions again
+                      });
+                    },
               child: const Text(
                 'Κράτηση',
                 style: TextStyle(

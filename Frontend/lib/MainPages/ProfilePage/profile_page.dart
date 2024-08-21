@@ -14,7 +14,6 @@ class ProfilePage extends StatelessWidget {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     final userDetails = context.watch<UserProvider>().userDetails;
-    print(userDetails?.username);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });

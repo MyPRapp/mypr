@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mypr/OtherPages/global_state.dart';
@@ -75,7 +76,11 @@ class ConfirmationDialog extends StatelessWidget {
               _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () {
+                  // Close the confirmation dialog
+                  Navigator.pop(context);
+                  context.router.back();
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF9C0C04),
                   shape: RoundedRectangleBorder(
@@ -197,7 +202,7 @@ class CommentSection extends StatelessWidget {
         TextField(
           controller: commentController,
           maxLines: 4,
-          inputFormatters: [NoEmojisTextInputFormatter()],
+          inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             filled: true,
@@ -409,21 +414,25 @@ class PersonsTextFieldState extends State<PersonsTextField> {
       if (widget.counters['Απλή'] == 0 &&
           widget.counters['Special'] == 0 &&
           widget.counters['Premium'] == 0) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-            'Παρακαλώ επιλέξτε ένα πακέτο',
-          ),
-          duration: Duration(seconds: 3),
-        ));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+          ..showSnackBar(const SnackBar(
             content: Text(
-              'Μέγιστος αριθμός ατόμων! Για διαφορετικό πακέτο επικοινωνήστε μαζί μας',
+              'Παρακαλώ επιλέξτε ένα πακέτο',
             ),
             duration: Duration(seconds: 3),
-          ),
-        );
+          ));
+      } else {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+          ..showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Μέγιστος αριθμός ατόμων! Για διαφορετικό πακέτο επικοινωνήστε μαζί μας',
+              ),
+              duration: Duration(seconds: 3),
+            ),
+          );
       }
     }
   }
@@ -560,13 +569,15 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
         widget.onCountersChanged();
       } else {
         // Show SnackBar when the limit is reached
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+          ..showSnackBar(
+            const SnackBar(
+              content:
+                  Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας'),
+              duration: Duration(seconds: 3),
+            ),
+          );
       }
     });
   }

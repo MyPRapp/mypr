@@ -8,18 +8,18 @@ import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 
 class NoEmojisTextInputFormatter extends TextInputFormatter {
-  // RegExp to allow Greek and English letters, numbers, and specific symbols without emojis
+  // RegExp to allow Greek and English letters, numbers, and specific symbols without emojis and whitespace (spaces, tabs, etc.)
   final RegExp _allowedCharacters =
-      RegExp(r'[\p{L}\p{N}\p{P}\p{Zs}!@#$%^&*(){}]+', unicode: true);
+      RegExp(r'^[\p{L}\p{N}\p{P}!@#$%^&*(){}]+$', unicode: true);
 
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    // Allow the text to be completely deleted (empty string)
+    // If the new value is empty or only contains allowed characters (no spaces or disallowed characters)
     if (newValue.text.isEmpty || _allowedCharacters.hasMatch(newValue.text)) {
       return newValue;
     }
-    // If the new value contains restricted characters, return the old value
+    // If the new value contains restricted characters, including spaces, return the old value
     return oldValue;
   }
 }
@@ -71,12 +71,14 @@ class _SignUpPageState extends State<SignUpPage> {
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(seconds: 4),
-            content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+          ..showSnackBar(
+            const SnackBar(
+              duration: Duration(seconds: 4),
+              content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
+            ),
+          );
       }
     }
   }
@@ -104,20 +106,24 @@ class _SignUpPageState extends State<SignUpPage> {
       if (registerSuccess) {
         _login();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            duration: Duration(seconds: 4),
-            content: Text('Υπήρξε κάποιο πρόβλημα κατά την εγγραφή'),
-          ),
-        );
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+          ..showSnackBar(
+            const SnackBar(
+              duration: Duration(seconds: 4),
+              content: Text('Υπήρξε κάποιο πρόβλημα κατά την εγγραφή'),
+            ),
+          );
       }
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-          duration: Duration(seconds: 4),
-        ),
-      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+            duration: Duration(seconds: 4),
+          ),
+        );
     }
   }
 
