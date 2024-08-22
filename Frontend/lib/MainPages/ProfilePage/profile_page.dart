@@ -43,7 +43,7 @@ class ProfilePage extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(300),
                           child: Image.network(
-                            'http://192.168.1.9:8000/${userDetails.photo}',
+                            'http://$validatedIp:8000/${userDetails.photo}',
                             fit: BoxFit.cover,
                           ),
                         ),

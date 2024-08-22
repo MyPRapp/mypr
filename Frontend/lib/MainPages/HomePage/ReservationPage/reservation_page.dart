@@ -451,7 +451,7 @@ class _ReservationPageState extends State<ReservationPage> {
                       } else if (reservationInfo[4] == 0 ||
                           reservationInfo[8].isEmpty ||
                           fourBitString == '' ||
-                          fourBitString == '0000') {
+                          fourBitString[0] == '0000') {
                         if (mounted) {
                           ScaffoldMessenger.of(context)
                             ..hideCurrentSnackBar() // Hide the current SnackBar if it exists

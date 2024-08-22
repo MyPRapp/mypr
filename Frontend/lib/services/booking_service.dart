@@ -1,11 +1,12 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:mypr/OtherPages/global_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingService {
   final String baseUrl =
-      'http://192.168.1.9:8000/api'; // or your local network IP
+      'http://$validatedIp:8000/api'; // or your local network IP
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

@@ -24,7 +24,7 @@ class LikeButtonState extends State<LikeButton> {
 
   @override
   Widget build(BuildContext context) {
-    final double size = widget.big ? 30 : 22;
+    final double size = widget.big ? 30 : 24;
 
     return GestureDetector(
       onTap: () {
@@ -90,7 +90,7 @@ class NameAndStars extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          ' $clubName',
+          clubName,
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,

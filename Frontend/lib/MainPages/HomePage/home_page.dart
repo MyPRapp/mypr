@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
-    _refresh();
+    // _refresh();
   }
 
   Future<void> _refresh() async {
@@ -40,11 +40,7 @@ class _HomePageState extends State<HomePage> {
         SearchPageState.requestFocus();
       }
     });
-    // AutoRouter.of(context).isRoot;
-    // AutoRouter.of(context).isTopMost;
-    // AutoRouter.of(context).push(ReservationRoute(
-    //   club: clubProvider.getClubByName('Sabbia'),
-    // ));
+
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
       body: Stack(children: [
@@ -101,10 +97,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            ElevatedButton(
-                onPressed: _refresh, child: const Text('REFRESH PAGE')),
             Padding(
-              padding: const EdgeInsets.only(left: 20, top: 30),
+              padding: const EdgeInsets.only(left: 20, top: 15, bottom: 10),
               child: Text(
                 'Επιλογές κοντά σου',
                 style: textStyle1(),

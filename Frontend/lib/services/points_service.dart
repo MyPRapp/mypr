@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:mypr/OtherPages/global_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PointsService {
-  static String apiUrl = 'http://192.168.1.9:8000/api/reduce-points/';
+  static String apiUrl = 'http://$validatedIp:8000/api/reduce-points/';
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
