@@ -23,10 +23,11 @@ class AppRouter extends $AppRouter {
             AutoRoute(page: SearchRoute.page),
             AutoRoute(
               page: ProfileNavigation.page,
+              initial: false,
               children: [
                 AutoRoute(page: ProfileRoute.page),
                 AutoRoute(page: CustomizeProfileRoute.page),
-                AutoRoute(page: MyReservationsRoute.page),
+                AutoRoute(page: MyBookingsRoute.page, initial: false),
                 AutoRoute(page: FavoritesRoute.page),
                 AutoRoute(page: ContactUsRoute.page),
                 AutoRoute(page: SignUpRoute.page),

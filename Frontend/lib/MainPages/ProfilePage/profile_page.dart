@@ -82,8 +82,7 @@ class ProfilePage extends StatelessWidget {
                       const SizedBox(height: 30),
                       GestureDetector(
                         onTap: () {
-                          AutoRouter.of(context)
-                              .push(const MyReservationsRoute());
+                          AutoRouter.of(context).push(const MyBookingsRoute());
                         },
                         child: const ProfileOptions(
                             label: ' Οι κρατήσεις μου',

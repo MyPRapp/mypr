@@ -124,9 +124,9 @@ class ClubProvider with ChangeNotifier {
         'http://$validatedIp:8000/api/clubs/print/'; // Replace with your API URL
     try {
       final response = await http.get(Uri.parse(url));
-
+      final decodedBody = utf8.decode(response.bodyBytes);
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
+        final List<dynamic> data = jsonDecode(decodedBody);
 
         for (var item in data) {
           final club = ClubInfoStruct.fromJson(item);
@@ -145,6 +145,7 @@ class ClubProvider with ChangeNotifier {
       print('Error fetching clubs: $e');
     }
   }
+
 ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING <END>
 
 ////MANAGE CLUBS LIST
@@ -185,7 +186,7 @@ class ClubProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  CatalogueInfoStruct getRegularCatalogue(List<CatalogueInfoStruct> catalogues,
+  CatalogueInfoStruct getCatalogue(List<CatalogueInfoStruct> catalogues,
       ClubInfoStruct club, String serviceType) {
     var catalogueList = catalogues
         .where((catalogue) =>
@@ -358,6 +359,28 @@ class ClubProvider with ChangeNotifier {
 ////OTHER HELPFUL FUNCTIONS <END>
 }
 
+class Booking {
+  final int bookingID;
+  final int userID;
+  final int clubID;
+  final String bookingName;
+  final DateTime date;
+  final int persons;
+  final String fourbitString;
+  final double price;
+
+  Booking({
+    required this.bookingID,
+    required this.userID,
+    required this.clubID,
+    required this.bookingName,
+    required this.date,
+    required this.persons,
+    required this.fourbitString,
+    required this.price,
+  });
+}
+
 class UserInfoStruct {
   int userID, points;
   String username;
@@ -382,16 +405,15 @@ class UserInfoStruct {
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
     return UserInfoStruct(
-      userID: json['id'] ?? -1,
-      username: json['username'] ?? '',
-      password: json['password'] ?? '',
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'] ?? '',
-      points: json['points'] ?? -1,
-      photo: json['photo'] ?? '',
-    );
+        userID: json['id'] ?? -1,
+        username: json['username'] ?? '',
+        password: json['password'] ?? '',
+        firstName: json['first_name'] ?? '',
+        lastName: json['last_name'] ?? '',
+        email: json['email'] ?? '',
+        phone: json['phone'] ?? '',
+        points: json['points'] ?? -1,
+        photo: json['photo'] ?? '');
   }
 
   Map<String, dynamic> toJson() {

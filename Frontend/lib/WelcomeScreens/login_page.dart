@@ -18,10 +18,10 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _serverController = TextEditingController();
+  // final TextEditingController _serverController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _obscureText = true;
-  bool isLoading = false;
+  bool? _loginFailed;
 
   @override
   void initState() {
@@ -31,8 +31,18 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
-    await _checkAndFetchClubs();
-    // await _login();
+    _checkAndFetchClubs();
+    _login();
+  }
+
+  void _startTimeout() {
+    Future.delayed(const Duration(seconds: 3), () {
+      if (_loginFailed == null) {
+        setState(() {
+          _loginFailed = true;
+        });
+      }
+    });
   }
 
   Future<void> _loadSavedUserCredentials() async {
@@ -64,24 +74,36 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
+    setState(() {
+      _loginFailed = null; // Reset the login status to trigger the indicator
+    });
+    _startTimeout(); // Start the timeout again
+
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     bool success = await _authService.login(email, password);
+
     if (mounted) {
+      setState(() {
+        _loginFailed = !success;
+      });
       if (success) {
         await context.read<UserProvider>().syncUserDetails();
         if (mounted) {
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
       } else {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-          ..showSnackBar(
-            const SnackBar(
-              duration: Duration(seconds: 4),
-              content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
-            ),
-          );
+        if (_emailController.text.isNotEmpty &&
+            _passwordController.text.isNotEmpty) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                duration: Duration(seconds: 4),
+                content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
+              ),
+            );
+        }
       }
     }
   }
@@ -108,9 +130,10 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Container(
+    // Display the gradient background with a red loading indicator in the middle
+    if (_loginFailed == false || _loginFailed == null) {
+      return Scaffold(
+        body: Container(
           height: screenHeight,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -119,270 +142,293 @@ class _LoginPageState extends State<LoginPage> {
               end: Alignment.bottomCenter,
             ),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 70,
-                width: screenWidth,
-                child: const Image(
-                  image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
-                  fit: BoxFit.fitWidth,
-                  alignment: Alignment(0, -0.3),
-                ),
+          child: const Center(
+            child: CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // If login fails, show the login form
+    else {
+      return Scaffold(
+        body: SingleChildScrollView(
+          child: Container(
+            height: screenHeight,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black, Color(0xFF9C0C04)],
+                begin: Alignment.center,
+                end: Alignment.bottomCenter,
               ),
-              const SizedBox(height: 25),
-              const Image(
-                image: AssetImage(
-                    'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
-              ),
-              Container(
-                width: screenWidth - 50,
-                height: screenHeight / 2.5,
-                padding: const EdgeInsets.all(2), // Add padding for the border
-                decoration: BoxDecoration(
-                  border: Border.all(
-                      color: const Color(0xFF9C0C04),
-                      width: 4), // Circular red border
-                  borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 70,
+                  width: screenWidth,
+                  child: const Image(
+                    image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
+                    fit: BoxFit.fitWidth,
+                    alignment: Alignment(0, -0.3),
+                  ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const Padding(
-                        padding: EdgeInsets.only(bottom: 30, top: 5),
-                        child: Text(
-                          'Είσοδος στην εφαρμογή',
-                          style: TextStyle(
-                            color: Color(0xFF9C0C04),
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
+                const SizedBox(height: 25),
+                const Image(
+                  image: AssetImage(
+                      'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
+                ),
+                Container(
+                  width: screenWidth - 50,
+                  height: screenHeight / 2.5,
+                  padding:
+                      const EdgeInsets.all(2), // Add padding for the border
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: const Color(0xFF9C0C04),
+                        width: 4), // Circular red border
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 30, top: 5),
+                          child: Text(
+                            'Είσοδος στην εφαρμογή',
+                            style: TextStyle(
+                              color: Color(0xFF9C0C04),
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ),
-                      Column(
-                        children: [
-                          TextField(
-                            controller: _emailController,
-                            inputFormatters: [NoEmojisTextInputFormatter()],
-                            keyboardType: TextInputType.emailAddress,
-                            autofillHints: const [AutofillHints.email],
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            decoration: const InputDecoration(
-                              hintText: 'Email/Τηλέφωνο(+30)',
-                              hintStyle: TextStyle(
-                                color: Color.fromARGB(132, 156, 12, 4),
+                        Column(
+                          children: [
+                            TextField(
+                              controller: _emailController,
+                              inputFormatters: [NoEmojisTextInputFormatter()],
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [AutofillHints.email],
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                          const Divider(
-                            height: 10,
-                            color: Color.fromARGB(204, 156, 12, 4),
-                            thickness: 7,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _passwordController,
-                                  obscureText: _obscureText,
-                                  keyboardType: TextInputType.text,
-                                  autofillHints: const [AutofillHints.password],
-                                  inputFormatters: [
-                                    NoEmojisTextInputFormatter()
-                                  ],
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                  decoration: const InputDecoration(
-                                    hintText: 'Κωδικός',
-                                    hintStyle: TextStyle(
-                                      color: Color.fromARGB(132, 156, 12, 4),
-                                    ),
-                                    border: InputBorder.none,
-                                  ),
+                              decoration: const InputDecoration(
+                                hintText: 'Email/Τηλέφωνο(+30)',
+                                hintStyle: TextStyle(
+                                  color: Color.fromARGB(132, 156, 12, 4),
                                 ),
-                              ),
-                              IconButton(
-                                onPressed: _togglePasswordVisibility,
-                                icon: Icon(
-                                  _obscureText
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                  color: const Color(0xFF9C0C04),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Ξέχασες τον κωδικό;',
-                                style: TextStyle(
-                                  color: Color(0xFF9C0C04),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  ScaffoldMessenger.of(context)
-                                    ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-                                    ..showSnackBar(
-                                      const SnackBar(
-                                        duration: Duration(seconds: 2),
-                                        content: Text(
-                                            'Στάλθηκε email για επαναφορά κωδικού'),
-                                      ),
-                                    );
-                                },
-                                child: const Text(
-                                  'Επαναφορά κωδικού',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 10),
-                            child: TextButton(
-                              onPressed: _navigateToSignUpPage,
-                              child: const Text(
-                                'Δημιουργία λογαριασμού',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
-                                ),
+                                border: InputBorder.none,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Column(
-                children: [
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 18, vertical: 15),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: const BorderSide(color: Color(0xFF9C0C04)),
-                      ),
-                      backgroundColor: Colors.black,
-                    ),
-                    onPressed: _login,
-                    child: const Text(
-                      'Είσοδος',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10),
-                    child: SizedBox(
-                      width: 350,
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _serverController,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            decoration: const InputDecoration(
-                              hintText: 'Enter server\'s IP',
-                              hintStyle: TextStyle(color: Colors.black),
-                              border: InputBorder.none,
-                            ),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 10),
-                            child: Divider(
+                            const Divider(
                               height: 10,
                               color: Color.fromARGB(204, 156, 12, 4),
                               thickness: 7,
                             ),
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 13, vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side:
-                                    const BorderSide(color: Color(0xFF9C0C04)),
-                              ),
-                              backgroundColor: Colors.black,
-                            ),
-                            onPressed: () {
-                              // Extract the server IP address as a string
-                              validatedIp = '$validatedIp:8000';
-                              String serverIp = _serverController.text.trim();
-                              if (serverIp != '' && serverIp != ' ') {
-                                validatedIp = serverIp;
-                              }
-                              print(
-                                  'Connecting to server at: http://$validatedIp:8000/');
-                              // Show a snackbar with the validated IP
-                              ScaffoldMessenger.of(context)
-                                ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-                                ..showSnackBar(
-                                  SnackBar(
-                                    duration: const Duration(seconds: 2),
-                                    content: Text(
-                                        'Connecting to server at: http://$validatedIp:8000/'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    controller: _passwordController,
+                                    obscureText: _obscureText,
+                                    keyboardType: TextInputType.text,
+                                    autofillHints: const [
+                                      AutofillHints.password
+                                    ],
+                                    inputFormatters: [
+                                      NoEmojisTextInputFormatter()
+                                    ],
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      hintText: 'Κωδικός',
+                                      hintStyle: TextStyle(
+                                        color: Color.fromARGB(132, 156, 12, 4),
+                                      ),
+                                      border: InputBorder.none,
+                                    ),
                                   ),
-                                );
-                            },
-                            child: const Text(
-                              'Connect to server',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 19,
-                                fontWeight: FontWeight.bold,
+                                ),
+                                IconButton(
+                                  onPressed: _togglePasswordVisibility,
+                                  icon: Icon(
+                                    _obscureText
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                    color: const Color(0xFF9C0C04),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Ξέχασες τον κωδικό;',
+                                  style: TextStyle(
+                                    color: Color(0xFF9C0C04),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    ScaffoldMessenger.of(context)
+                                      ..hideCurrentSnackBar()
+                                      ..showSnackBar(
+                                        const SnackBar(
+                                          duration: Duration(seconds: 2),
+                                          content: Text(
+                                              'Στάλθηκε email για επαναφορά κωδικού'),
+                                        ),
+                                      );
+                                  },
+                                  child: const Text(
+                                    'Επαναφορά κωδικού',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: TextButton(
+                                onPressed: _navigateToSignUpPage,
+                                child: const Text(
+                                  'Δημιουργία λογαριασμού',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ],
+                ),
+                const SizedBox(height: 50),
+                Column(
+                  children: [
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: const BorderSide(color: Color(0xFF9C0C04)),
+                        ),
+                        backgroundColor: const Color.fromARGB(139, 0, 0, 0),
+                      ),
+                      onPressed: _login,
+                      child: const Text(
+                        'Είσοδος',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    // Padding(
+                    //   padding: const EdgeInsets.only(top: 10),
+                    //   child: SizedBox(
+                    //     width: 350,
+                    //     child: Column(
+                    //       children: [
+                    //         TextField(
+                    //           controller: _serverController,
+                    //           style: const TextStyle(
+                    //             fontSize: 20,
+                    //             fontWeight: FontWeight.bold,
+                    //             color: Colors.white,
+                    //           ),
+                    //           decoration: const InputDecoration(
+                    //             hintText: 'Enter server\'s IP',
+                    //             hintStyle: TextStyle(color: Colors.black),
+                    //             border: InputBorder.none,
+                    //           ),
+                    //         ),
+                    //         const Padding(
+                    //           padding: EdgeInsets.only(bottom: 10),
+                    //           child: Divider(
+                    //             height: 10,
+                    //             color: Color.fromARGB(204, 156, 12, 4),
+                    //             thickness: 7,
+                    //           ),
+                    //         ),
+                    // ElevatedButton(
+                    //   style: ElevatedButton.styleFrom(
+                    //     padding: const EdgeInsets.symmetric(
+                    //         horizontal: 13, vertical: 14),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(20),
+                    //       side: const BorderSide(
+                    //           color: Color(0xFF9C0C04)),
+                    //     ),
+                    //     backgroundColor: Colors.black,
+                    //   ),
+                    //   onPressed: () {
+                    //     String serverIp = _serverController.text.trim();
+                    //     if (serverIp != '' && serverIp != ' ') {
+                    //       validatedIp = serverIp;
+                    //     }
+                    //     print(
+                    //         'Connecting to server at: http://$validatedIp:8000/');
+                    //     ScaffoldMessenger.of(context)
+                    //       ..hideCurrentSnackBar()
+                    //       ..showSnackBar(
+                    //         SnackBar(
+                    //           duration: const Duration(seconds: 2),
+                    //           content: Text(
+                    //               'Connecting to server at: http://$validatedIp:8000/'),
+                    //         ),
+                    //       );
+                    //   },
+                    //   child: const Text(
+                    //     'Connect to server',
+                    //     style: TextStyle(
+                    //       color: Colors.white,
+                    //       fontSize: 19,
+                    //       fontWeight: FontWeight.bold,
+                    //     ),
+                    //   ),
+                    // ),
+                    // ],
+                    // ),
+                    // ),
+                    // ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

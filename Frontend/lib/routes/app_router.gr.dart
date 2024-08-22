@@ -77,10 +77,10 @@ abstract class $AppRouter extends _i14.RootStackRouter {
         child: const _i7.LoginPage(),
       );
     },
-    MyReservationsRoute.name: (routeData) {
+    MyBookingsRoute.name: (routeData) {
       return _i14.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i8.MyReservationsPage(),
+        child: const _i8.MyBookingsPage(),
       );
     },
     ProfileNavigation.name: (routeData) {
@@ -219,15 +219,15 @@ class LoginRoute extends _i14.PageRouteInfo<void> {
 }
 
 /// generated route for
-/// [_i8.MyReservationsPage]
-class MyReservationsRoute extends _i14.PageRouteInfo<void> {
-  const MyReservationsRoute({List<_i14.PageRouteInfo>? children})
+/// [_i8.MyBookingsPage]
+class MyBookingsRoute extends _i14.PageRouteInfo<void> {
+  const MyBookingsRoute({List<_i14.PageRouteInfo>? children})
       : super(
-          MyReservationsRoute.name,
+          MyBookingsRoute.name,
           initialChildren: children,
         );
 
-  static const String name = 'MyReservationsRoute';
+  static const String name = 'MyBookingsRoute';
 
   static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
 }

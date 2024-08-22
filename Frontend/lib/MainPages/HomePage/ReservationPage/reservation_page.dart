@@ -115,11 +115,16 @@ class _ReservationPageState extends State<ReservationPage> {
     final catalogues = clubProvider.getCataloguesByClubID(widget.club.clubID);
 
     regularCatalogue =
-        clubProvider.getRegularCatalogue(catalogues, widget.club, 'Regular');
-    specialCatalogue =
-        clubProvider.getRegularCatalogue(catalogues, widget.club, 'Special');
+        clubProvider.getCatalogue(catalogues, widget.club, 'Regular');
+    specialCatalogue = clubProvider.getCatalogue(
+        catalogues, widget.club, 'Single'); //Έτσι λεγεται πλεον
+    if ((double.parse(specialCatalogue.price)).toInt() <=
+        (double.parse(regularCatalogue.price)).toInt()) {
+      specialCatalogue =
+          clubProvider.getCatalogue(catalogues, widget.club, 'Special');
+    } //Έτσι λεγοταν παλια και μερικα club εχουν αυτη την τιμη
     premiumCatalogue =
-        clubProvider.getRegularCatalogue(catalogues, widget.club, 'Premium');
+        clubProvider.getCatalogue(catalogues, widget.club, 'Premium');
   }
 
   void updateMaxPersons() {
@@ -243,11 +248,9 @@ class _ReservationPageState extends State<ReservationPage> {
               child: SizedBox(
                 width: 520,
                 height: 350,
-                child: Image(
-                  image: AssetImage(
-                    'assets/clubPhotos/${widget.club.clubName}.jpg',
-                  ),
-                  fit: BoxFit.cover,
+                child: Image.network(
+                  widget.club.clubPhoto,
+                  fit: BoxFit.fill, // Ensure the image fits within the bounds
                 ),
               ),
             ),
