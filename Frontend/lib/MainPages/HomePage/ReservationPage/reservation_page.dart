@@ -305,15 +305,6 @@ class _ReservationPageState extends State<ReservationPage> {
             ),
           ),
           const SizedBox(height: 25),
-          SizedBox(
-            height: 70,
-            child: PersonsTextField(
-              key: personsTextFieldKey,
-              maxPersons: maxPersons,
-              counters: counters,
-            ),
-          ),
-          const SizedBox(height: 25),
           CategoriesTextField(
             regularCatalogue: regularCatalogue,
             specialCatalogue: specialCatalogue,
@@ -326,6 +317,15 @@ class _ReservationPageState extends State<ReservationPage> {
             isDiscountApplied: isDiscountApplied,
             discount: reservationInfo[10],
           ),
+          const SizedBox(height: 25),
+          SizedBox(
+            height: 70,
+            child: PersonsTextField(
+              key: personsTextFieldKey,
+              maxPersons: maxPersons,
+              counters: counters,
+            ),
+          ),
           CommentSection(
             commentController: _commentController,
           ),
@@ -333,11 +333,10 @@ class _ReservationPageState extends State<ReservationPage> {
           if (userDetails!.points >= 20)
             Row(
               children: [
-                Checkbox(
-                  value: isDiscountApplied,
-                  onChanged: (value) {
+                GestureDetector(
+                  onTap: () {
                     setState(() {
-                      isDiscountApplied = value!;
+                      isDiscountApplied = !isDiscountApplied;
                       reservationInfo[10] =
                           isDiscountApplied ? 20 : 0; // Set the discount value
                       calculatePrice(); // Recalculate price with discount
@@ -348,13 +347,35 @@ class _ReservationPageState extends State<ReservationPage> {
                       categoriesTextFieldState?.updateSelectedText();
                     });
                   },
-                  activeColor: const Color(0xFF9C0C04),
-                ),
-                const Text(
-                  'Χρήση εκπτωτικού κουπονιού 20%',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: isDiscountApplied,
+                        onChanged: (value) {
+                          setState(() {
+                            isDiscountApplied = value!;
+                            reservationInfo[10] = isDiscountApplied
+                                ? 20
+                                : 0; // Set the discount value
+                            calculatePrice(); // Recalculate price with discount
+
+                            // Notify CategoriesTextField to update the price display
+                            final categoriesTextFieldState =
+                                context.findAncestorStateOfType<
+                                    CategoriesTextFieldState>();
+                            categoriesTextFieldState?.updateSelectedText();
+                          });
+                        },
+                        activeColor: const Color(0xFF9C0C04),
+                      ),
+                      const Text(
+                        'Χρήση εκπτωτικού κουπονιού 20%',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

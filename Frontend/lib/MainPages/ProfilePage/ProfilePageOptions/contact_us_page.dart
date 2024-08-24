@@ -7,22 +7,27 @@ import 'package:url_launcher/url_launcher.dart';
 @RoutePage()
 class ContactUsPage extends StatelessWidget {
   const ContactUsPage({super.key});
-  Future<void> _launchInstagram() async {
-    // Define the Instagram URLs for app and web
-    final Uri instagramAppUri = Uri.parse('instagram://user?username=mypr_app');
-    final Uri instagramWebUri =
-        Uri.parse('https://www.instagram.com/mypr_app/');
 
-    // Check if the Instagram app can be launched
-    if (await canLaunchUrl(instagramAppUri)) {
-      // Launch Instagram app
-      await launchUrl(instagramAppUri);
-    } else if (await canLaunchUrl(instagramWebUri)) {
-      // Fall back to launching Instagram web if the app is not installed
-      await launchUrl(instagramWebUri);
-    } else {
-      // Handle the case where neither the app nor the web URL can be launched
-      print('Could not launch Instagram');
+  Future<void> _launchInstagram() async {
+    const String username = 'mypr_app';
+
+    // Instagram URI schemes
+    final Uri instagramAppUri =
+        Uri.parse('instagram://user?username=$username');
+    final Uri instagramWebUri =
+        Uri.parse('https://www.instagram.com/$username/');
+
+    // Attempt to launch the Instagram app first
+    try {
+      final bool canLaunchApp = await canLaunchUrl(instagramAppUri);
+      if (canLaunchApp) {
+        await launchUrl(instagramAppUri, mode: LaunchMode.externalApplication);
+      } else {
+        // Fallback to web URL if the app is not installed
+        await launchUrl(instagramWebUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      print('Could not launch Instagram: $e');
     }
   }
 

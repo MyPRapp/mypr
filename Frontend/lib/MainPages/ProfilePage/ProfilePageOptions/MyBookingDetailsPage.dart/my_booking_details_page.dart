@@ -1,0 +1,277 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:mypr/OtherPages/global_state.dart';
+import 'package:provider/provider.dart';
+
+import '../../../../Widgets/booking_card_widgets.dart';
+import '../../../../routes/app_router.gr.dart';
+
+@RoutePage()
+class BookingDetailsPage extends StatelessWidget {
+  final Booking booking;
+  final String title;
+  final bool isHistory;
+
+  const BookingDetailsPage({
+    super.key,
+    required this.booking,
+    required this.title,
+    this.isHistory = false,
+  });
+  @override
+  Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
+    final earnedPoints = (booking.price * 0.1).toInt();
+    final discountPercentage =
+        (int.tryParse(booking.fourbitString[3]) ?? 0) * 10;
+    ClubProvider clubProvider = context.read<ClubProvider>();
+
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: Text(
+          title,
+          style: const TextStyle(
+            color: Color(0xFF9C0C04),
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.chevron_left,
+            color: Colors.white,
+            size: 30,
+          ),
+          onPressed: () {
+            context.router.back();
+          },
+        ),
+      ),
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Stack(
+            children: [
+              Container(
+                height: constraints.maxHeight < screenHeight
+                    ? screenHeight
+                    : constraints.maxHeight,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image:
+                        AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+              SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        clubProvider.getClubNameByID(booking.clubID),
+                        style: const TextStyle(
+                          color: Color(0xFF9C0C04),
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.network(
+                          clubProvider.getClubByID(booking.clubID).clubPhoto,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      BuildRichText(
+                          label: 'Όνομα Κράτησης:', value: booking.bookingName),
+                      const SizedBox(height: 10),
+                      BuildRichText(label: 'Ημερομηνία:', value: formattedDate),
+                      const SizedBox(height: 10),
+                      BuildRichText(
+                          label: 'Άτομα:', value: booking.persons.toString()),
+                      const SizedBox(height: 10),
+                      BuildRichText(label: 'Σχόλια:', value: booking.comments),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
+                        style: const TextStyle(
+                          color: Color(0xFF9C0C04),
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+                      Text(
+                        'Από την κράτηση σου κέρδισες $earnedPoints πόντους.',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                      if (discountPercentage > 0) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          'Χρησιμοποιήθηκε κουπόνι $discountPercentage%.',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      if (isHistory)
+                        _buildHistoryBottomSection(context)
+                      else
+                        _buildRegularBottomSection(context),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildRegularBottomSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Για οποιαδήποτε αλλαγή ή απορία σχετικά με την κράτηση, παρακαλώ επικοινωνήστε μαζί μας.',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 50,
+              vertical: 15,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF9C0C04),
+          ),
+          onPressed: () {
+            AutoRouter.of(context).push(const ContactUsRoute());
+          },
+          child: const Text(
+            'Επικοινώνησε μαζί μας',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(height: 30),
+      ],
+    );
+  }
+
+  Widget _buildHistoryBottomSection(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Για οποιαδήποτε απορία σχετικά με την κράτηση, παρακαλώ επικοινωνήστε μαζί μας.',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+          ),
+        ),
+        const SizedBox(height: 20),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 50,
+              vertical: 15,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF9C0C04),
+          ),
+          onPressed: () {
+            AutoRouter.of(context).push(const ContactUsRoute());
+          },
+          child: const Text(
+            'Επικοινώνησε μαζί μας',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(height: 30),
+        const Text(
+          'Άφησε μία κριτική:',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 10),
+        InteractiveNameAndStars(
+          clubName:
+              context.read<ClubProvider>().getClubNameByID(booking.clubID),
+          initialStars: 0, // Replace with actual value
+        ),
+        const SizedBox(height: 30),
+      ],
+    );
+  }
+}
+
+class BuildRichText extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const BuildRichText({
+    super.key,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: '$label ',
+            style: const TextStyle(
+                color: Color(0xFF9C0C04), // Red color for label
+                fontSize: 18,
+                fontWeight: FontWeight.bold),
+          ),
+          TextSpan(
+            text: value,
+            style: const TextStyle(
+              color: Colors.white, // White color for value
+              fontSize: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -368,6 +368,8 @@ class Booking {
   final int persons;
   final String fourbitString;
   final double price;
+  final String comments;
+  final int status;
 
   Booking({
     required this.bookingID,
@@ -378,6 +380,8 @@ class Booking {
     required this.persons,
     required this.fourbitString,
     required this.price,
+    required this.comments,
+    required this.status,
   });
 }
 

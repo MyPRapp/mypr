@@ -1,16 +1,14 @@
 import 'package:auto_route/auto_route.dart';
-
-import 'app_router.gr.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 
 @AutoRouterConfig()
 class AppRouter extends $AppRouter {
   @override
   List<AutoRoute> get routes => [
         AutoRoute(page: LoginRoute.page, initial: true),
-        AutoRoute(page: SignUpRoute.page, initial: false),
+        AutoRoute(page: SignUpRoute.page),
         AutoRoute(
           page: BottomNavBarRoute.page,
-          initial: false,
           children: [
             AutoRoute(
               page: HomeNavigation.page,
@@ -28,9 +26,11 @@ class AppRouter extends $AppRouter {
                 AutoRoute(page: ProfileRoute.page),
                 AutoRoute(page: CustomizeProfileRoute.page),
                 AutoRoute(page: MyBookingsRoute.page, initial: false),
+                AutoRoute(
+                    page: BookingDetailsRoute
+                        .page), // Handle booking details here
                 AutoRoute(page: FavoritesRoute.page),
                 AutoRoute(page: ContactUsRoute.page),
-                AutoRoute(page: SignUpRoute.page),
                 AutoRoute(page: ReservationRoute.page),
                 AutoRoute(page: HomeRoute.page),
               ],

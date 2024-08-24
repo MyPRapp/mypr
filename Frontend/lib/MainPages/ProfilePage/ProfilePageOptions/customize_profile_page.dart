@@ -79,19 +79,42 @@ class CustomizeProfilePage extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                Container(
-                                    padding: const EdgeInsets.only(top: 50),
+                                if (userDetails.photo != '')
+                                  Container(
+                                      padding: const EdgeInsets.only(top: 35),
+                                      child: SizedBox(
+                                        height: 130,
+                                        width: 130,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(300),
+                                          child: Image.network(
+                                            'http://$validatedIp:8000/${userDetails.photo}',
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      )),
+                                if (userDetails.photo == '')
+                                  Container(
+                                    padding: const EdgeInsets.only(top: 35),
                                     child: SizedBox(
                                       height: 130,
                                       width: 130,
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(30),
-                                        child: Image.network(
-                                          'http://$validatedIp:8000/${userDetails.photo}',
-                                          fit: BoxFit.cover,
+                                        borderRadius:
+                                            BorderRadius.circular(300),
+                                        child: Container(
+                                          color: const Color(0xFF9C0C04),
+                                          child: const Icon(
+                                            Icons.person,
+                                            color: Colors.black,
+                                            size:
+                                                100, // Adjust the size to fit well within the container
+                                          ),
                                         ),
                                       ),
-                                    )),
+                                    ),
+                                  ),
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(

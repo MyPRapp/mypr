@@ -8,122 +8,184 @@
 // coverage:ignore-file
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'package:auto_route/auto_route.dart' as _i14;
-import 'package:flutter/material.dart' as _i15;
-import 'package:mypr/MainPages/HomePage/home_page.dart' as _i6;
+import 'package:auto_route/auto_route.dart' as _i15;
+import 'package:flutter/material.dart' as _i16;
+import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
 import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
-    as _i11;
-import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i10;
+    as _i12;
+import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i11;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/contact_us_page.dart'
-    as _i2;
-import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customize_profile_page.dart'
     as _i3;
-import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favorites_page.dart'
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customize_profile_page.dart'
     as _i4;
-import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/my_reservations_page.dart'
-    as _i8;
-import 'package:mypr/MainPages/SearchPage/search_page.dart' as _i12;
-import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i1;
-import 'package:mypr/Navigation/home_navigation.dart' as _i5;
-import 'package:mypr/Navigation/profile_navigation.dart' as _i9;
-import 'package:mypr/OtherPages/global_state.dart' as _i16;
-import 'package:mypr/WelcomeScreens/login_page.dart' as _i7;
-import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i13;
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favorites_page.dart'
+    as _i5;
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/my_bookings.dart'
+    as _i9;
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/MyBookingDetailsPage.dart/my_booking_details_page.dart'
+    as _i1;
+import 'package:mypr/MainPages/SearchPage/search_page.dart' as _i13;
+import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i2;
+import 'package:mypr/Navigation/home_navigation.dart' as _i6;
+import 'package:mypr/Navigation/profile_navigation.dart' as _i10;
+import 'package:mypr/OtherPages/global_state.dart' as _i17;
+import 'package:mypr/WelcomeScreens/login_page.dart' as _i8;
+import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i14;
 
-abstract class $AppRouter extends _i14.RootStackRouter {
+abstract class $AppRouter extends _i15.RootStackRouter {
   $AppRouter({super.navigatorKey});
 
   @override
-  final Map<String, _i14.PageFactory> pagesMap = {
-    BottomNavBarRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+  final Map<String, _i15.PageFactory> pagesMap = {
+    BookingDetailsRoute.name: (routeData) {
+      final args = routeData.argsAs<BookingDetailsRouteArgs>();
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i1.BottomNavBarPage(),
+        child: _i1.BookingDetailsPage(
+          key: args.key,
+          booking: args.booking,
+          title: args.title,
+          isHistory: args.isHistory,
+        ),
+      );
+    },
+    BottomNavBarRoute.name: (routeData) {
+      return _i15.AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const _i2.BottomNavBarPage(),
       );
     },
     ContactUsRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i2.ContactUsPage(),
+        child: const _i3.ContactUsPage(),
       );
     },
     CustomizeProfileRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i3.CustomizeProfilePage(),
+        child: const _i4.CustomizeProfilePage(),
       );
     },
     FavoritesRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i4.FavoritesPage(),
+        child: const _i5.FavoritesPage(),
       );
     },
     HomeNavigation.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i5.HomeNavigation(),
+        child: const _i6.HomeNavigation(),
       );
     },
     HomeRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i6.HomePage(),
+        child: const _i7.HomePage(),
       );
     },
     LoginRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i7.LoginPage(),
+        child: const _i8.LoginPage(),
       );
     },
     MyBookingsRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i8.MyBookingsPage(),
+        child: const _i9.MyBookingsPage(),
       );
     },
     ProfileNavigation.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i9.ProfileNavigation(),
+        child: const _i10.ProfileNavigation(),
       );
     },
     ProfileRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i10.ProfilePage(),
+        child: const _i11.ProfilePage(),
       );
     },
     ReservationRoute.name: (routeData) {
       final args = routeData.argsAs<ReservationRouteArgs>();
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: _i11.ReservationPage(
+        child: _i12.ReservationPage(
           key: args.key,
           club: args.club,
         ),
       );
     },
     SearchRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i12.SearchPage(),
+        child: const _i13.SearchPage(),
       );
     },
     SignUpRoute.name: (routeData) {
-      return _i14.AutoRoutePage<dynamic>(
+      return _i15.AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const _i13.SignUpPage(),
+        child: const _i14.SignUpPage(),
       );
     },
   };
 }
 
 /// generated route for
-/// [_i1.BottomNavBarPage]
-class BottomNavBarRoute extends _i14.PageRouteInfo<void> {
-  const BottomNavBarRoute({List<_i14.PageRouteInfo>? children})
+/// [_i1.BookingDetailsPage]
+class BookingDetailsRoute extends _i15.PageRouteInfo<BookingDetailsRouteArgs> {
+  BookingDetailsRoute({
+    _i16.Key? key,
+    required _i17.Booking booking,
+    required String title,
+    bool isHistory = false,
+    List<_i15.PageRouteInfo>? children,
+  }) : super(
+          BookingDetailsRoute.name,
+          args: BookingDetailsRouteArgs(
+            key: key,
+            booking: booking,
+            title: title,
+            isHistory: isHistory,
+          ),
+          initialChildren: children,
+        );
+
+  static const String name = 'BookingDetailsRoute';
+
+  static const _i15.PageInfo<BookingDetailsRouteArgs> page =
+      _i15.PageInfo<BookingDetailsRouteArgs>(name);
+}
+
+class BookingDetailsRouteArgs {
+  const BookingDetailsRouteArgs({
+    this.key,
+    required this.booking,
+    required this.title,
+    this.isHistory = false,
+  });
+
+  final _i16.Key? key;
+
+  final _i17.Booking booking;
+
+  final String title;
+
+  final bool isHistory;
+
+  @override
+  String toString() {
+    return 'BookingDetailsRouteArgs{key: $key, booking: $booking, title: $title, isHistory: $isHistory}';
+  }
+}
+
+/// generated route for
+/// [_i2.BottomNavBarPage]
+class BottomNavBarRoute extends _i15.PageRouteInfo<void> {
+  const BottomNavBarRoute({List<_i15.PageRouteInfo>? children})
       : super(
           BottomNavBarRoute.name,
           initialChildren: children,
@@ -131,13 +193,13 @@ class BottomNavBarRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'BottomNavBarRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i2.ContactUsPage]
-class ContactUsRoute extends _i14.PageRouteInfo<void> {
-  const ContactUsRoute({List<_i14.PageRouteInfo>? children})
+/// [_i3.ContactUsPage]
+class ContactUsRoute extends _i15.PageRouteInfo<void> {
+  const ContactUsRoute({List<_i15.PageRouteInfo>? children})
       : super(
           ContactUsRoute.name,
           initialChildren: children,
@@ -145,13 +207,13 @@ class ContactUsRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'ContactUsRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i3.CustomizeProfilePage]
-class CustomizeProfileRoute extends _i14.PageRouteInfo<void> {
-  const CustomizeProfileRoute({List<_i14.PageRouteInfo>? children})
+/// [_i4.CustomizeProfilePage]
+class CustomizeProfileRoute extends _i15.PageRouteInfo<void> {
+  const CustomizeProfileRoute({List<_i15.PageRouteInfo>? children})
       : super(
           CustomizeProfileRoute.name,
           initialChildren: children,
@@ -159,13 +221,13 @@ class CustomizeProfileRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'CustomizeProfileRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i4.FavoritesPage]
-class FavoritesRoute extends _i14.PageRouteInfo<void> {
-  const FavoritesRoute({List<_i14.PageRouteInfo>? children})
+/// [_i5.FavoritesPage]
+class FavoritesRoute extends _i15.PageRouteInfo<void> {
+  const FavoritesRoute({List<_i15.PageRouteInfo>? children})
       : super(
           FavoritesRoute.name,
           initialChildren: children,
@@ -173,13 +235,13 @@ class FavoritesRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'FavoritesRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i5.HomeNavigation]
-class HomeNavigation extends _i14.PageRouteInfo<void> {
-  const HomeNavigation({List<_i14.PageRouteInfo>? children})
+/// [_i6.HomeNavigation]
+class HomeNavigation extends _i15.PageRouteInfo<void> {
+  const HomeNavigation({List<_i15.PageRouteInfo>? children})
       : super(
           HomeNavigation.name,
           initialChildren: children,
@@ -187,13 +249,13 @@ class HomeNavigation extends _i14.PageRouteInfo<void> {
 
   static const String name = 'HomeNavigation';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i6.HomePage]
-class HomeRoute extends _i14.PageRouteInfo<void> {
-  const HomeRoute({List<_i14.PageRouteInfo>? children})
+/// [_i7.HomePage]
+class HomeRoute extends _i15.PageRouteInfo<void> {
+  const HomeRoute({List<_i15.PageRouteInfo>? children})
       : super(
           HomeRoute.name,
           initialChildren: children,
@@ -201,13 +263,13 @@ class HomeRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'HomeRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i7.LoginPage]
-class LoginRoute extends _i14.PageRouteInfo<void> {
-  const LoginRoute({List<_i14.PageRouteInfo>? children})
+/// [_i8.LoginPage]
+class LoginRoute extends _i15.PageRouteInfo<void> {
+  const LoginRoute({List<_i15.PageRouteInfo>? children})
       : super(
           LoginRoute.name,
           initialChildren: children,
@@ -215,13 +277,13 @@ class LoginRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'LoginRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i8.MyBookingsPage]
-class MyBookingsRoute extends _i14.PageRouteInfo<void> {
-  const MyBookingsRoute({List<_i14.PageRouteInfo>? children})
+/// [_i9.MyBookingsPage]
+class MyBookingsRoute extends _i15.PageRouteInfo<void> {
+  const MyBookingsRoute({List<_i15.PageRouteInfo>? children})
       : super(
           MyBookingsRoute.name,
           initialChildren: children,
@@ -229,13 +291,13 @@ class MyBookingsRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'MyBookingsRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i9.ProfileNavigation]
-class ProfileNavigation extends _i14.PageRouteInfo<void> {
-  const ProfileNavigation({List<_i14.PageRouteInfo>? children})
+/// [_i10.ProfileNavigation]
+class ProfileNavigation extends _i15.PageRouteInfo<void> {
+  const ProfileNavigation({List<_i15.PageRouteInfo>? children})
       : super(
           ProfileNavigation.name,
           initialChildren: children,
@@ -243,13 +305,13 @@ class ProfileNavigation extends _i14.PageRouteInfo<void> {
 
   static const String name = 'ProfileNavigation';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i10.ProfilePage]
-class ProfileRoute extends _i14.PageRouteInfo<void> {
-  const ProfileRoute({List<_i14.PageRouteInfo>? children})
+/// [_i11.ProfilePage]
+class ProfileRoute extends _i15.PageRouteInfo<void> {
+  const ProfileRoute({List<_i15.PageRouteInfo>? children})
       : super(
           ProfileRoute.name,
           initialChildren: children,
@@ -257,16 +319,16 @@ class ProfileRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'ProfileRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i11.ReservationPage]
-class ReservationRoute extends _i14.PageRouteInfo<ReservationRouteArgs> {
+/// [_i12.ReservationPage]
+class ReservationRoute extends _i15.PageRouteInfo<ReservationRouteArgs> {
   ReservationRoute({
-    _i15.Key? key,
-    required _i16.ClubInfoStruct club,
-    List<_i14.PageRouteInfo>? children,
+    _i16.Key? key,
+    required _i17.ClubInfoStruct club,
+    List<_i15.PageRouteInfo>? children,
   }) : super(
           ReservationRoute.name,
           args: ReservationRouteArgs(
@@ -278,8 +340,8 @@ class ReservationRoute extends _i14.PageRouteInfo<ReservationRouteArgs> {
 
   static const String name = 'ReservationRoute';
 
-  static const _i14.PageInfo<ReservationRouteArgs> page =
-      _i14.PageInfo<ReservationRouteArgs>(name);
+  static const _i15.PageInfo<ReservationRouteArgs> page =
+      _i15.PageInfo<ReservationRouteArgs>(name);
 }
 
 class ReservationRouteArgs {
@@ -288,9 +350,9 @@ class ReservationRouteArgs {
     required this.club,
   });
 
-  final _i15.Key? key;
+  final _i16.Key? key;
 
-  final _i16.ClubInfoStruct club;
+  final _i17.ClubInfoStruct club;
 
   @override
   String toString() {
@@ -299,9 +361,9 @@ class ReservationRouteArgs {
 }
 
 /// generated route for
-/// [_i12.SearchPage]
-class SearchRoute extends _i14.PageRouteInfo<void> {
-  const SearchRoute({List<_i14.PageRouteInfo>? children})
+/// [_i13.SearchPage]
+class SearchRoute extends _i15.PageRouteInfo<void> {
+  const SearchRoute({List<_i15.PageRouteInfo>? children})
       : super(
           SearchRoute.name,
           initialChildren: children,
@@ -309,13 +371,13 @@ class SearchRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'SearchRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }
 
 /// generated route for
-/// [_i13.SignUpPage]
-class SignUpRoute extends _i14.PageRouteInfo<void> {
-  const SignUpRoute({List<_i14.PageRouteInfo>? children})
+/// [_i14.SignUpPage]
+class SignUpRoute extends _i15.PageRouteInfo<void> {
+  const SignUpRoute({List<_i15.PageRouteInfo>? children})
       : super(
           SignUpRoute.name,
           initialChildren: children,
@@ -323,5 +385,5 @@ class SignUpRoute extends _i14.PageRouteInfo<void> {
 
   static const String name = 'SignUpRoute';
 
-  static const _i14.PageInfo<void> page = _i14.PageInfo<void>(name);
+  static const _i15.PageInfo<void> page = _i15.PageInfo<void>(name);
 }

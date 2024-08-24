@@ -91,15 +91,9 @@ class _SignUpPageState extends State<SignUpPage> {
       String email = _emailController.text.trim();
       String password = _passwordController.text.trim();
       String phone = _phoneController.text.trim();
-
+      int points = 20;
       bool registerSuccess = await _authService.register(
-        username,
-        password,
-        firstName,
-        lastName,
-        email,
-        phone,
-      );
+          username, password, firstName, lastName, email, phone, points);
 
       if (!mounted) return;
 

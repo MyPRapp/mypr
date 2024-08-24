@@ -20,7 +20,6 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
-    // _refresh();
   }
 
   Future<void> _refresh() async {
@@ -43,103 +42,117 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
-      body: Stack(children: [
-        Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
-              fit: BoxFit.fill,
-            ),
-          ),
-        ),
-        RefreshIndicator(
-          onRefresh: _refresh,
-          child: ListView(children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, left: 10, bottom: 10),
-              child: Text(
-                'Καλησπέρα!',
-                style: textStyle1(),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                tabsRouter.setActiveIndex(1);
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(
-                    top: 15, left: 10, right: 10, bottom: 15),
-                child: Container(
-                  height: 70,
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    border:
-                        Border.all(width: 0.4, color: const Color(0xFF9C0C04)),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.only(left: 10, right: 10),
-                  child: const TextField(
-                    enabled: false,
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Search for clubs',
-                      hintStyle: TextStyle(color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.black,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
-                    ),
+      body: LayoutBuilder(
+        builder: (BuildContext context, BoxConstraints constraints) {
+          return Stack(
+            children: [
+              Container(
+                height: constraints.maxHeight,
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                    image:
+                        AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, top: 15, bottom: 10),
-              child: Text(
-                'Επιλογές κοντά σου',
-                style: textStyle1(),
+              RefreshIndicator(
+                onRefresh: _refresh,
+                child: ListView(
+                  children: [
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(top: 20, left: 10, bottom: 10),
+                      child: Text(
+                        'Καλησπέρα!',
+                        style: textStyle1(),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        tabsRouter.setActiveIndex(1);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            top: 15, left: 10, right: 10, bottom: 15),
+                        child: Container(
+                          height: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            border: Border.all(
+                                width: 0.4, color: const Color(0xFF9C0C04)),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          child: const TextField(
+                            enabled: false,
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              hintText: 'Search for clubs',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              filled: true,
+                              fillColor: Colors.black,
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                                borderSide: BorderSide.none,
+                              ),
+                              prefixIcon:
+                                  Icon(Icons.search, color: Colors.grey),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, top: 15, bottom: 10),
+                      child: Text(
+                        'Επιλογές κοντά σου',
+                        style: textStyle1(),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: clubProvider.allClubs.length,
+                        itemBuilder: (context, index) {
+                          final club = clubProvider.allClubs[index];
+                          return SmallClubCard(
+                            club: club,
+                          );
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding:
+                          const EdgeInsets.only(left: 20, top: 10, bottom: 10),
+                      child: Text(
+                        'Όλα τα αποτελέσματα',
+                        style: textStyle1(),
+                      ),
+                    ),
+                    ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: clubProvider.allClubs.length,
+                      itemBuilder: (context, index) {
+                        final club = clubProvider.allClubs[index];
+                        return BigClubCard(
+                          club: club,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 100)
+                  ],
+                ),
               ),
-            ),
-            SizedBox(
-              height: 200,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: clubProvider.allClubs.length,
-                itemBuilder: (context, index) {
-                  final club = clubProvider.allClubs[index];
-                  return SmallClubCard(
-                    club: club,
-                  );
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 20, top: 10, bottom: 10),
-              child: Text(
-                'Όλα τα αποτελέσματα',
-                style: textStyle1(),
-              ),
-            ),
-            SizedBox(
-              height: clubProvider.allClubs.length * 190,
-              child: ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: clubProvider.allClubs.length,
-                itemBuilder: (context, index) {
-                  final club = clubProvider.allClubs[index];
-                  return BigClubCard(
-                    club: club,
-                  );
-                },
-              ),
-            ),
-          ]),
-        )
-      ]),
+            ],
+          );
+        },
+      ),
     );
   }
 

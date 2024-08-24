@@ -38,8 +38,8 @@ class BookingService {
       }),
     );
 
-    print('Submit form response status: ${response.statusCode}');
-    print('Submit form response body: ${utf8.decode(response.bodyBytes)}');
+    // print('Submit form response status: ${response.statusCode}');
+    // print('Submit form response body: ${utf8.decode(response.bodyBytes)}');
 
     if (response.statusCode == 201) {
       print('Booking successful');
@@ -47,6 +47,34 @@ class BookingService {
     } else {
       print('Booking failed: ${response.body}');
       return false;
+    }
+  }
+
+  Future<List<dynamic>?> getBookings() async {
+    String? accessToken = await getAccessToken();
+
+    if (accessToken == null) {
+      print('Access token is null. User is not authenticated.');
+      return null;
+    }
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/bookings/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
+
+    // print('Submit form response status: ${response.statusCode}');
+    // print('Submit form response body: ${response.body}');
+
+    if (response.statusCode == 200) {
+      print('Booking retrieval successful');
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      print('Booking retrieval failed: ${response.body}');
+      return null;
     }
   }
 }

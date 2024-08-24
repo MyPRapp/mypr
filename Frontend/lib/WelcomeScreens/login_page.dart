@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
       _loginFailed = null; // Reset the login status to trigger the indicator
     });
     _startTimeout(); // Start the timeout again
-
+    final globalState = context.read<GlobalState>();
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     bool success = await _authService.login(email, password);
@@ -89,6 +89,9 @@ class _LoginPageState extends State<LoginPage> {
       });
       if (success) {
         await context.read<UserProvider>().syncUserDetails();
+        if (globalState.dataLoaded) {
+          await _fetchClubsAndCatalogues();
+        }
         if (mounted) {
           context.router.replaceAll([const BottomNavBarRoute()]);
         }

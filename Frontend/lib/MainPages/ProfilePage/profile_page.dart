@@ -35,19 +35,40 @@ class ProfilePage extends StatelessWidget {
                       alignment: Alignment(0, -0.3),
                     ),
                   ),
-                  Container(
+                  if (userDetails.photo != '')
+                    Container(
+                        padding: const EdgeInsets.only(top: 35),
+                        child: SizedBox(
+                          height: 130,
+                          width: 130,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(300),
+                            child: Image.network(
+                              'http://$validatedIp:8000/${userDetails.photo}',
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        )),
+                  if (userDetails.photo == '')
+                    Container(
                       padding: const EdgeInsets.only(top: 35),
                       child: SizedBox(
                         height: 130,
                         width: 130,
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(300),
-                          child: Image.network(
-                            'http://$validatedIp:8000/${userDetails.photo}',
-                            fit: BoxFit.cover,
+                          child: Container(
+                            color: const Color(0xFF9C0C04),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.black,
+                              size:
+                                  100, // Adjust the size to fit well within the container
+                            ),
                           ),
                         ),
-                      )),
+                      ),
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(top: 20),
                     child: Text(

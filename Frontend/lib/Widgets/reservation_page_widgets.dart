@@ -412,7 +412,7 @@ class PersonsTextFieldState extends State<PersonsTextField> {
           ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
           ..showSnackBar(const SnackBar(
             content: Text(
-              'Παρακαλώ επιλέξτε ένα πακέτο',
+              'Παρακαλώ επιλέξτε φιάλη',
             ),
             duration: Duration(seconds: 3),
           ));
@@ -422,7 +422,7 @@ class PersonsTextFieldState extends State<PersonsTextField> {
           ..showSnackBar(
             const SnackBar(
               content: Text(
-                'Μέγιστος αριθμός ατόμων! Για διαφορετικό πακέτο επικοινωνήστε μαζί μας',
+                'Μέγιστος αριθμός ατόμων! Για διαφορετικό πακέτο επικοινωνήστε μαζί μας.',
               ),
               duration: Duration(seconds: 3),
             ),
@@ -568,7 +568,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
           ..showSnackBar(
             const SnackBar(
               content:
-                  Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας'),
+                  Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας.'),
               duration: Duration(seconds: 3),
             ),
           );
