@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/booking_service.dart';
 
@@ -41,7 +44,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       final bookingsData = await BookingService().getBookings();
 
       if (bookingsData != null) {
-        // print('Bookings data received: $bookingsData'); // Debugging line
         setState(() {
           bookings.clear(); // Clear existing bookings if any
           bookings.addAll(bookingsData.map<Booking>((bookingData) {
@@ -54,19 +56,53 @@ class _MyBookingsPageState extends State<MyBookingsPage>
               date: DateTime.parse(bookingData['booked_at']),
               persons: bookingData['number_of_people'],
               fourbitString: bookingData['booking_type'],
-              price: calculatePrice(bookingData['booking_type'],
-                  bookingData['club']), // Generating random price
+              price: calculatePrice(
+                bookingData['booking_type'],
+                bookingData['club'],
+              ), // Generating random price
               status: _determineStatus(
                   bookingData['status'], bookingData['booked_at']),
               comments: _generateRandomComment(), // Generating random comments
             );
           }).toList());
+
+          // Save bookings to shared preferences
+          _saveBookingsToPreferences(bookings);
         });
       } else {
         print('No bookings available or failed to fetch bookings.');
+        // Load bookings from shared preferences if no data from server
+        _loadBookingsFromPreferences();
       }
     } catch (e) {
       print('Failed to load bookings: $e');
+      // Load bookings from shared preferences if there's an error
+      _loadBookingsFromPreferences();
+    }
+  }
+
+  Future<void> _saveBookingsToPreferences(List<Booking> bookings) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String bookingsJson =
+        jsonEncode(bookings.map((booking) => booking.toJson()).toList());
+    await prefs.setString('bookings', bookingsJson);
+  }
+
+  Future<void> _loadBookingsFromPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? bookingsJson = prefs.getString('bookings');
+
+    if (bookingsJson != null) {
+      final List<dynamic> bookingsList = jsonDecode(bookingsJson);
+
+      setState(() {
+        bookings.clear();
+        bookings.addAll(bookingsList.map<Booking>((bookingData) {
+          return Booking.fromJson(bookingData);
+        }).toList());
+      });
+    } else {
+      print('No bookings found in shared preferences.');
     }
   }
 
@@ -91,6 +127,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   late CatalogueInfoStruct regularCatalogue;
   late CatalogueInfoStruct specialCatalogue;
   late CatalogueInfoStruct premiumCatalogue;
+
   void initializeCatalogues(int clubID) {
     ClubProvider clubProvider = context.read<ClubProvider>();
     final catalogues = clubProvider.getCataloguesByClubID(clubID);
@@ -98,12 +135,12 @@ class _MyBookingsPageState extends State<MyBookingsPage>
     regularCatalogue = clubProvider.getCatalogue(
         catalogues, clubProvider.getClubByID(clubID), 'Regular');
     specialCatalogue = clubProvider.getCatalogue(catalogues,
-        clubProvider.getClubByID(clubID), 'Single'); //Έτσι λεγεται πλεον
+        clubProvider.getClubByID(clubID), 'Single'); // Έτσι λεγεται πλεον
     if ((double.parse(specialCatalogue.price)).toInt() <=
         (double.parse(regularCatalogue.price)).toInt()) {
       specialCatalogue = clubProvider.getCatalogue(
           catalogues, clubProvider.getClubByID(clubID), 'Special');
-    } //Έτσι λεγοταν παλια και μερικα club εχουν αυτη την τιμη
+    } // Έτσι λεγοταν παλια και μερικα club εχουν αυτη την τιμη
     premiumCatalogue = clubProvider.getCatalogue(
         catalogues, clubProvider.getClubByID(clubID), 'Premium');
   }
@@ -240,6 +277,22 @@ class BookingCard extends StatelessWidget {
   final Booking booking;
 
   const BookingCard({super.key, required this.booking});
+  Future<ImageProvider> _loadClubPhoto(int clubID, String photoUrl) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? base64Image = prefs.getString('club_image_$clubID');
+      if (base64Image != null) {
+        final Uint8List bytes = base64Decode(base64Image);
+        return MemoryImage(bytes);
+      } else {
+        // Fallback to loading from the network if the image isn't in preferences
+        return NetworkImage(photoUrl);
+      }
+    } catch (e) {
+      // Fallback to a default asset image in case of an error
+      return const AssetImage('assets/images/default_club_image.png');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -274,11 +327,24 @@ class BookingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  clubProvider.getClubByID(booking.clubID).clubPhoto,
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.cover,
+                child: FutureBuilder<ImageProvider>(
+                  future: _loadClubPhoto(
+                    booking.clubID,
+                    clubProvider.getClubByID(booking.clubID).clubPhoto,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasData) {
+                      return Image(
+                        image: snapshot.data!,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
                 ),
               ),
               const SizedBox(width: 20),

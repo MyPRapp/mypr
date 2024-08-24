@@ -25,54 +25,63 @@ class LikeButtonState extends State<LikeButton> {
   @override
   Widget build(BuildContext context) {
     final double size = widget.big ? 30 : 24;
+    final clubProvider = context.watch<ClubProvider>();
+
+    bool isLiked = clubProvider.isLiked(widget.club.clubID);
 
     return GestureDetector(
       onTap: () {
-        context.read<ClubProvider>().toggleLike(widget.club.clubName);
+        clubProvider.toggleLike(widget.club.clubID);
         setState(() {
           tapped = true;
         });
 
+        // Show SnackBar based on like status
+        if (isLiked) {
+          // If it was liked, show removal message
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                duration: Duration(milliseconds: 1500),
+                content: Text('Αφαιρέθηκε από τα αγαπημένα'),
+              ),
+            );
+        } else {
+          // If it was not liked, show added message
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(
+                duration: Duration(milliseconds: 1500),
+                content: Text('Προστέθηκε στα αγαπημένα'),
+              ),
+            );
+        }
+
+        // If onRemove is provided and the club is no longer liked, trigger the callback
         if (widget.onRemove != null &&
-            !context.read<ClubProvider>().isLiked(widget.club.clubName)) {
+            !clubProvider.isLiked(widget.club.clubID)) {
           tapped = false;
           widget.onRemove!();
         }
 
-        if (widget.club.clubIsLiked) {
+        setState(() {
           tapped = false;
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-            ..showSnackBar(
-              const SnackBar(
-                  duration: Duration(milliseconds: 1500),
-                  content: Text('Προστέθηκε στα αγαπημένα')),
-            );
-          if (widget.onRemove != null) {
-            widget.onRemove!();
-          }
-        } else {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-            ..showSnackBar(
-              const SnackBar(
-                  duration: Duration(milliseconds: 1500),
-                  content: Text('Αφαιρέθηκε από τα αγαπημένα')),
-            );
-        }
+        });
       },
       child: SizedBox(
         height: 40,
         width: 40,
-        child: widget.club.clubIsLiked
+        child: isLiked
             ? Icon(Icons.favorite_rounded,
-                    size: size, color: const Color(0xFF9c0c04))
+                    size: size, color: const Color.fromARGB(199, 156, 12, 4))
                 .animate(target: tapped ? 1 : 0)
                 .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
                 .then()
                 .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
             : Icon(Icons.favorite_border_rounded,
-                size: size + 3, color: const Color(0xFF9c0c04)),
+                size: size + 3, color: const Color.fromARGB(199, 156, 12, 4)),
       ),
     );
   }
@@ -93,8 +102,8 @@ class NameAndStars extends StatelessWidget {
           clubName,
           style: const TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF9C0C04),
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
           textAlign: TextAlign.start,
         ),
@@ -121,28 +130,28 @@ class RatingStars extends StatelessWidget {
           for (int i = 0; i < 5; i++)
             const Icon(
               Icons.star_border_outlined,
-              size: 20,
+              size: 18,
               color: Colors.white30,
             ),
         if (stars % 1 == 0 && stars > 0 && stars <= 5)
           for (int i = 0; i < stars; i++)
             const Icon(
               Icons.star,
-              size: 20,
-              color: Color(0xFF9C0C04),
+              size: 18,
+              color: Color.fromARGB(200, 156, 12, 4),
             ),
         if (stars % 1 != 0 && stars > 0 && stars <= 5)
           for (int i = 1; i < stars; i++)
             const Icon(
               Icons.star,
-              size: 20,
-              color: Color(0xFF9C0C04),
+              size: 18,
+              color: Color.fromARGB(200, 156, 12, 4),
             ),
         if (stars % 1 != 0 && stars > 0 && stars <= 5)
           const Icon(
             Icons.star_half,
-            size: 20,
-            color: Color(0xFF9C0C04),
+            size: 18,
+            color: Color.fromARGB(200, 156, 12, 4),
           ),
       ],
     );
@@ -164,16 +173,16 @@ class MinPriceAndMaxPersons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
         const Icon(
-          Icons.monetization_on,
-          color: Color(0xFF9C0C04),
+          Icons.monetization_on_outlined,
+          color: Color.fromARGB(197, 158, 158, 158),
         ),
         if (minPrice >= 0 && maxPersons >= 0)
           Text(
             ' $minPrice',
             style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              color: Color.fromARGB(197, 158, 158, 158),
             ),
           ),
         if (minPrice < 0 || maxPersons < 0)
@@ -181,29 +190,26 @@ class MinPriceAndMaxPersons extends StatelessWidget {
             '     ',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              color: Color.fromARGB(197, 158, 158, 158),
             ),
           ),
         const Text(
           ' | ',
           style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey,
-          ),
+              fontSize: 18, fontWeight: FontWeight.w500, color: Colors.grey),
         ),
         const Icon(
-          Icons.account_circle,
-          color: Color(0xFF9C0C04),
+          Icons.account_circle_outlined,
+          color: Color.fromARGB(197, 158, 158, 158),
         ),
         if (minPrice >= 0 && maxPersons >= 0)
           Text(
             ' $maxPersons',
             style: const TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              color: Color.fromARGB(197, 158, 158, 158),
             ),
           ),
         if (minPrice < 0 || maxPersons < 0)
@@ -211,8 +217,8 @@ class MinPriceAndMaxPersons extends StatelessWidget {
             ' ',
             style: TextStyle(
               fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontWeight: FontWeight.w500,
+              color: Color.fromARGB(197, 158, 158, 158),
             ),
           ),
       ],
@@ -243,107 +249,66 @@ class DaysOpen extends StatelessWidget {
     Color saturdayColor = Colors.white24;
     Color sundayColor = Colors.white24;
 
-    if (monday == true) mondayColor = const Color(0xFF9c0c04);
-    if (tuesday == true) tuesdayColor = const Color(0xFF9c0c04);
-    if (wednesday == true) wednesdayColor = const Color(0xFF9c0c04);
-    if (thursday == true) thursdayColor = const Color(0xFF9c0c04);
-    if (friday == true) fridayColor = const Color(0xFF9c0c04);
-    if (saturday == true) saturdayColor = const Color(0xFF9c0c04);
-    if (sunday == true) sundayColor = const Color(0xFF9c0c04);
+    Color dayColor = Colors.white;
+    if (monday == true) mondayColor = dayColor;
+    if (tuesday == true) tuesdayColor = dayColor;
+    if (wednesday == true) wednesdayColor = dayColor;
+    if (thursday == true) thursdayColor = dayColor;
+    if (friday == true) fridayColor = dayColor;
+    if (saturday == true) saturdayColor = dayColor;
+    if (sunday == true) sundayColor = dayColor;
 
     return Padding(
         padding: const EdgeInsets.only(right: 5),
         child: Row(
           children: [
             Text(
-              'Δ',
+              'Δ ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: mondayColor),
             ),
-            const Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
             Text(
-              'Τ',
+              'Τ ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: tuesdayColor),
             ),
-            const Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
             Text(
-              'Τ',
+              'Τ ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: wednesdayColor),
             ),
-            const Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
             Text(
-              'Π',
+              'Π ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: thursdayColor),
             ),
-            const Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
             Text(
-              'Π',
+              'Π ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: fridayColor),
             ),
-            const Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
-            ),
             Text(
-              'Σ',
+              'Σ ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: saturdayColor),
-            ),
-            const Text(
-              '/',
-              style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white38),
             ),
             Text(
               'Κ',
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                   color: sundayColor),
             ),
           ],

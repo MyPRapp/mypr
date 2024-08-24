@@ -1,8 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../Widgets/booking_card_widgets.dart';
 import '../../../../routes/app_router.gr.dart';
@@ -19,6 +23,23 @@ class BookingDetailsPage extends StatelessWidget {
     required this.title,
     this.isHistory = false,
   });
+  Future<ImageProvider> _loadClubPhoto(int clubID, String photoUrl) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? base64Image = prefs.getString('club_image_$clubID');
+      if (base64Image != null) {
+        final Uint8List bytes = base64Decode(base64Image);
+        return MemoryImage(bytes);
+      } else {
+        // Fallback to loading from the network if the image isn't in preferences
+        return NetworkImage(photoUrl);
+      }
+    } catch (e) {
+      // Fallback to a default asset image in case of an error
+      return const AssetImage('assets/images/default_club_image.png');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
@@ -64,77 +85,109 @@ class BookingDetailsPage extends StatelessWidget {
                   image: DecorationImage(
                     image:
                         AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
                 ),
               ),
               SingleChildScrollView(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        clubProvider.getClubNameByID(booking.clubID),
-                        style: const TextStyle(
-                          color: Color(0xFF9C0C04),
-                          fontSize: 26,
-                          fontWeight: FontWeight.bold,
+                  child: SizedBox(
+                    height: screenHeight - 100,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              clubProvider.getClubNameByID(booking.clubID),
+                              style: const TextStyle(
+                                color: Color(0xFF9C0C04),
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(15),
+                              child: FutureBuilder<ImageProvider>(
+                                future: _loadClubPhoto(
+                                  booking.clubID,
+                                  clubProvider
+                                      .getClubByID(booking.clubID)
+                                      .clubPhoto,
+                                ),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                          ConnectionState.done &&
+                                      snapshot.hasData) {
+                                    return Image(
+                                      image: snapshot.data!,
+                                      width: double.infinity,
+                                      height: 200,
+                                      fit: BoxFit.cover,
+                                    );
+                                  } else {
+                                    return const CircularProgressIndicator();
+                                  }
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            BuildRichText(
+                                label: 'Όνομα Κράτησης:',
+                                value: booking.bookingName),
+                            const SizedBox(height: 10),
+                            BuildRichText(
+                                label: 'Ημερομηνία:', value: formattedDate),
+                            const SizedBox(height: 10),
+                            BuildRichText(
+                                label: 'Άτομα:',
+                                value: booking.persons.toString()),
+                            const SizedBox(height: 10),
+                            BuildRichText(
+                                label: 'Σχόλια:', value: booking.comments),
+                            const SizedBox(height: 20),
+                            Text(
+                              'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
+                              style: const TextStyle(
+                                color: Color(0xFF9C0C04),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 15),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Image.network(
-                          clubProvider.getClubByID(booking.clubID).clubPhoto,
-                          width: double.infinity,
-                          height: 200,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      BuildRichText(
-                          label: 'Όνομα Κράτησης:', value: booking.bookingName),
-                      const SizedBox(height: 10),
-                      BuildRichText(label: 'Ημερομηνία:', value: formattedDate),
-                      const SizedBox(height: 10),
-                      BuildRichText(
-                          label: 'Άτομα:', value: booking.persons.toString()),
-                      const SizedBox(height: 10),
-                      BuildRichText(label: 'Σχόλια:', value: booking.comments),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
-                        style: const TextStyle(
-                          color: Color(0xFF9C0C04),
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 50),
-                      Text(
-                        'Από την κράτηση σου κέρδισες $earnedPoints πόντους.',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 18,
-                        ),
-                      ),
-                      if (discountPercentage > 0) ...[
-                        const SizedBox(height: 10),
-                        Text(
-                          'Χρησιμοποιήθηκε κουπόνι $discountPercentage%.',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Από την κράτηση σου κέρδισες $earnedPoints πόντους.',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+                            if (discountPercentage > 0) ...[
+                              const SizedBox(height: 10),
+                              Text(
+                                'Χρησιμοποιήθηκε κουπόνι $discountPercentage%.',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 20),
+                            if (isHistory)
+                              _buildHistoryBottomSection(context)
+                            else
+                              _buildRegularBottomSection(context),
+                          ],
                         ),
                       ],
-                      const SizedBox(height: 20),
-                      if (isHistory)
-                        _buildHistoryBottomSection(context)
-                      else
-                        _buildRegularBottomSection(context),
-                    ],
+                    ),
                   ),
                 ),
               ),

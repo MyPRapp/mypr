@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -108,17 +109,136 @@ class CatalogueInfoStruct {
 }
 
 class ClubProvider with ChangeNotifier {
+  ClubProvider() {
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await _loadClubsFromPreferences();
+    await _loadCataloguesFromPreferences();
+    await _loadLikedClubsFromPreferences();
+  }
+
   final List<ClubInfoStruct> _clubs = [];
   final List<CatalogueInfoStruct> _catalogues = [];
-
-////LIST GETTERS
+  final List<int> _likedClubIDs = []; // List to hold liked club IDs
+  // LIST GETTERS
   List<ClubInfoStruct> get allClubs => _clubs;
   List<CatalogueInfoStruct> get allCatalogues => _catalogues;
   List<ClubInfoStruct> get likedClubs =>
-      _clubs.where((club) => club.clubIsLiked).toList();
-////LIST GETTERS <END>
+      _clubs.where((club) => _likedClubIDs.contains(club.clubID)).toList();
 
-////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
+  // Save clubs to shared preferences
+  Future<void> _saveClubsToPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String clubsJson =
+        jsonEncode(_clubs.map((club) => club.toJson()).toList());
+    await prefs.setString('clubs', clubsJson);
+  }
+
+  // Save catalogues to shared preferences
+  Future<void> _saveCataloguesToPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String cataloguesJson =
+        jsonEncode(_catalogues.map((catalogue) => catalogue.toJson()).toList());
+    await prefs.setString('catalogues', cataloguesJson);
+  }
+
+  // Save liked clubs to shared preferences
+  Future<void> _saveLikedClubsToPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        'likedClubs', _likedClubIDs.map((id) => id.toString()).toList());
+  }
+
+  // Save image to shared preferences
+  Future<void> saveImageToPreferences(String key, String base64Image) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, base64Image);
+  }
+
+  // Load image from shared preferences
+  Future<Image> loadImageFromPreferences(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final base64Image = prefs.getString(key);
+
+    if (base64Image != null) {
+      final Uint8List bytes = base64Decode(base64Image);
+      return Image.memory(bytes);
+    } else {
+      throw Exception('No image found in preferences');
+    }
+  }
+
+  // Load clubs from shared preferences
+  Future<void> _loadClubsFromPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? clubsJson = prefs.getString('clubs');
+    final String? cataloguesJson = prefs.getString('catalogues');
+
+    if (clubsJson != null && cataloguesJson != null) {
+      final List<dynamic> clubsList = jsonDecode(clubsJson);
+      final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
+
+      _clubs.clear();
+      _catalogues.clear();
+
+      for (var catalogue in cataloguesList) {
+        _catalogues.add(CatalogueInfoStruct.fromJson(catalogue));
+      }
+
+      for (var club in clubsList) {
+        ClubInfoStruct clubStruct = ClubInfoStruct.fromJson(club);
+
+        // Update clubMinPrice and clubMaxPersons using the catalogues
+        final regularCatalogue = _catalogues.firstWhere(
+          (catalogue) =>
+              catalogue.clubID == clubStruct.clubID &&
+              catalogue.serviceType == 'Regular',
+          orElse: () => CatalogueInfoStruct(
+            clubID: clubStruct.clubID,
+            serviceType: 'Regular',
+            price: '0',
+            maxPersons: 0,
+          ),
+        );
+
+        clubStruct.clubMinPrice = double.parse(regularCatalogue.price).toInt();
+        clubStruct.clubMaxPersons = regularCatalogue.maxPersons;
+
+        _clubs.add(clubStruct);
+      }
+      notifyListeners();
+    }
+  }
+
+  // Load catalogues from shared preferences
+  Future<void> _loadCataloguesFromPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? cataloguesJson = prefs.getString('catalogues');
+    if (cataloguesJson != null) {
+      final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
+      _catalogues.clear();
+      for (var catalogue in cataloguesList) {
+        _catalogues.add(CatalogueInfoStruct.fromJson(catalogue));
+      }
+      notifyListeners();
+    }
+  }
+
+  // Load liked clubs from shared preferences
+  Future<void> _loadLikedClubsFromPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String>? likedClubsStringList = prefs.getStringList('likedClubs');
+
+    if (likedClubsStringList != null) {
+      _likedClubIDs.clear();
+      _likedClubIDs.addAll(likedClubsStringList.map((id) => int.parse(id)));
+      notifyListeners();
+    }
+  }
+
+  ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
   Future<void> fetchClubsAndCatalogues() async {
     var url =
         'http://$validatedIp:8000/api/clubs/print/'; // Replace with your API URL
@@ -131,13 +251,28 @@ class ClubProvider with ChangeNotifier {
         for (var item in data) {
           final club = ClubInfoStruct.fromJson(item);
 
+          // if (await isConnectedToNetwork()) {
           if (club.clubID >= 0) {
+            // Download the image, convert it to base64, and save to preferences
+            final base64Image = await imageToBase64(club.clubPhoto);
+            await saveImageToPreferences(
+                'club_image_${club.clubID}', base64Image);
+
             addOrUpdateClub(club);
           }
+          // } else {
+          //   print('No network connection');
+          // }
         }
+
+        // Save clubs to shared preferences
+        await _saveClubsToPreferences();
 
         // Fetch and update catalogues
         await _fetchAndSaveCatalogues();
+
+        // Save catalogues to shared preferences
+        await _saveCataloguesToPreferences();
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
@@ -146,9 +281,9 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING <END>
+  ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING <END>
 
-////MANAGE CLUBS LIST
+  ////MANAGE CLUBS LIST
   void addOrUpdateClub(ClubInfoStruct club) {
     if (club.clubID <= 0) {
       return;
@@ -168,14 +303,13 @@ class ClubProvider with ChangeNotifier {
     _catalogues.removeWhere((catalogue) => catalogue.clubID == clubID);
     notifyListeners();
   }
-////MANAGE CLUBS LIST <END>
+  ////MANAGE CLUBS LIST <END>
 
-////MANAGE CATALOGUES LIST
+  ////MANAGE CATALOGUES LIST
   void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
     if (catalogue.clubID <= 0) {
       return;
     }
-
     int index = _catalogues.indexWhere((c) =>
         c.clubID == catalogue.clubID && c.serviceType == catalogue.serviceType);
     if (index != -1) {
@@ -243,38 +377,33 @@ class ClubProvider with ChangeNotifier {
       throw Exception('Error fetching catalogues: $e');
     }
   }
+  ////MANAGE CATALOGUES LIST <END>
 
-////MANAGE CATALOGUES LIST <END>
-
-////MANAGE LIKED CLUBS
-  void toggleLike(String clubName) {
-    for (var club in _clubs) {
-      if (club.clubName == clubName) {
-        club.clubIsLiked = !club.clubIsLiked;
-        notifyListeners();
-        return;
-      }
+  ////MANAGE LIKED CLUBS
+  // Function to toggle like status of a club
+  void toggleLike(int clubID) {
+    if (_likedClubIDs.contains(clubID)) {
+      _likedClubIDs.remove(clubID);
+    } else {
+      _likedClubIDs.add(clubID);
     }
-  }
 
-  bool isLiked(String clubName) {
-    for (var club in likedClubs) {
-      if (club.clubName == clubName) {
-        return club.clubIsLiked;
-      }
-    }
-    return false;
-  }
-
-  void deleteAllLiked() {
-    for (var club in _clubs) {
-      if (club.clubIsLiked) {
-        club.clubIsLiked = false;
-      }
-    }
+    _saveLikedClubsToPreferences(); // Save the updated liked clubs to preferences
     notifyListeners();
   }
-////MANAGE LIKED CLUBS <END>
+
+  // Ensure the isLiked function checks the list of liked club IDs
+  bool isLiked(int clubID) {
+    return _likedClubIDs.contains(clubID);
+  }
+
+  // Method to delete all liked clubs
+  Future<void> deleteAllLiked() async {
+    _likedClubIDs.clear(); // Clear the liked clubs list
+    await _saveLikedClubsToPreferences(); // Update preferences
+    notifyListeners(); // Notify listeners to update the UI
+  }
+  ////MANAGE LIKED CLUBS <END>
 
 ////OTHER HELPFUL FUNCTIONS
   String getClubAvailability(String clubName) {
@@ -383,6 +512,36 @@ class Booking {
     required this.comments,
     required this.status,
   });
+
+  factory Booking.fromJson(Map<String, dynamic> json) {
+    return Booking(
+      bookingID: json['bookingID'],
+      userID: json['userID'],
+      clubID: json['clubID'],
+      bookingName: json['bookingName'],
+      date: DateTime.parse(json['date']),
+      persons: json['persons'],
+      fourbitString: json['fourbitString'],
+      price: json['price'],
+      comments: json['comments'],
+      status: json['status'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'bookingID': bookingID,
+      'userID': userID,
+      'clubID': clubID,
+      'bookingName': bookingName,
+      'date': date.toIso8601String(),
+      'persons': persons,
+      'fourbitString': fourbitString,
+      'price': price,
+      'comments': comments,
+      'status': status,
+    };
+  }
 }
 
 class UserInfoStruct {
@@ -393,7 +552,7 @@ class UserInfoStruct {
   String lastName;
   String email;
   String phone;
-  String photo;
+  String photo; // This will now hold the base64 string instead of a URL
 
   UserInfoStruct({
     required this.userID,
@@ -404,7 +563,7 @@ class UserInfoStruct {
     this.email = '',
     this.phone = '',
     this.points = -1,
-    this.photo = '',
+    this.photo = '', // Initialize as an empty string
   });
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -417,7 +576,7 @@ class UserInfoStruct {
         email: json['email'] ?? '',
         phone: json['phone'] ?? '',
         points: json['points'] ?? -1,
-        photo: json['photo'] ?? '');
+        photo: json['photo'] ?? ''); // Photo might be a base64 string
   }
 
   Map<String, dynamic> toJson() {
@@ -430,7 +589,7 @@ class UserInfoStruct {
       'email': email,
       'phone': phone,
       'points': points,
-      'photo': photo,
+      'photo': photo, // Store the base64 string
     };
   }
 }
@@ -440,23 +599,47 @@ class UserProvider with ChangeNotifier {
 
   UserInfoStruct? get userDetails => _userDetails;
 
+  // Save user details including the photo to shared preferences
+  Future<void> saveUserDetailsToPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (_userDetails != null) {
+      // Save user details
+      await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
+
+      // Fetch and save the user's photo as a base64 string if it exists
+      if (_userDetails!.photo.isNotEmpty) {
+        String base64Photo = await imageToBase64(
+            'http://$validatedIp:8000/${_userDetails!.photo}');
+        if (base64Photo.isNotEmpty) {
+          await prefs.setString('user_photo', base64Photo);
+        } else {
+          print('User photo could not be saved as base64');
+        }
+      }
+    }
+  }
+
+  // Load user details including the photo from shared preferences
   Future<void> loadUserDetailsFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDetailsString = prefs.getString('user_details');
+    String? userPhotoBase64 = prefs.getString('user_photo');
 
     if (userDetailsString != null) {
       _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
+
+      // If a photo is saved, convert it back from base64 and assign it to the user details
+      if (userPhotoBase64 != null && _userDetails != null) {
+        final Uint8List bytes = base64Decode(userPhotoBase64);
+        _userDetails!.photo =
+            base64Encode(bytes); // Save photo as a base64 string
+      }
+
       notifyListeners();
     }
   }
 
-  Future<void> saveUserDetailsToPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_userDetails != null) {
-      await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
-    }
-  }
-
+  // Fetch user details from the server and save them to shared preferences
   Future<void> fetchUserDetailsFromServer() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('access_token');
@@ -468,13 +651,13 @@ class UserProvider with ChangeNotifier {
       );
 
       if (response.statusCode == 200) {
-        // Decode the response body using UTF-8 to handle different alphabets correctly
         final decodedBody = utf8.decode(response.bodyBytes);
-        print(decodedBody); // Now this should print correctly
 
-        // Parse the JSON from the correctly decoded string
         _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
+
+        // Save user details and photo to shared preferences
         await saveUserDetailsToPreferences();
+
         notifyListeners();
       } else {
         throw Exception('Failed to load user details');
@@ -484,6 +667,7 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  // Sync user details by loading from preferences and fetching from the server
   Future<void> syncUserDetails() async {
     await loadUserDetailsFromPreferences();
     await fetchUserDetailsFromServer();
@@ -555,4 +739,26 @@ String formatName(String name) {
   String formattedName = trimmedName.replaceAll(RegExp(r'\s+'), ' ');
 
   return formattedName;
+}
+
+Future<String> imageToBase64(String imageUrl) async {
+  try {
+    final response = await http.get(Uri.parse(imageUrl));
+    if (response.statusCode == 200) {
+      final bytes = response.bodyBytes;
+      return base64Encode(bytes);
+    } else {
+      throw Exception('Failed to load image: ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Error in imageToBase64: $e');
+    // Return a placeholder or an empty string in case of error
+    return '';
+  }
+}
+
+Future<bool> isConnectedToNetwork() async {
+  var connectivityResult = await (Connectivity().checkConnectivity());
+  // ignore: unrelated_type_equality_checks
+  return connectivityResult != ConnectivityResult.none;
 }

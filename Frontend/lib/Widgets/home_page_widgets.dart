@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SmallClubCard extends StatelessWidget {
   const SmallClubCard({
@@ -13,6 +16,26 @@ class SmallClubCard extends StatelessWidget {
 
   final ClubInfoStruct club;
   final VoidCallback? onRemove;
+
+  Future<ImageProvider> _loadImage() async {
+    try {
+      // Try to load image from SharedPreferences first
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? base64Image = prefs.getString('club_image_${club.clubID}');
+      if (base64Image != null) {
+        return MemoryImage(base64Decode(base64Image));
+      }
+
+      // If not available, load image from network
+      final image = NetworkImage(club.clubPhoto);
+
+      // Try to fetch the image from the network
+      return image;
+    } catch (e) {
+      // If all fails, return a default image
+      return const AssetImage('assets/images/default_club_image.png');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +48,7 @@ class SmallClubCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(top: 5, left: 15, right: 15),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(15.0), // Apply border radius here
+          borderRadius: BorderRadius.circular(7),
           child: Container(
             color: Colors.black,
             height: screenHeight / 2.2,
@@ -34,13 +57,25 @@ class SmallClubCard extends StatelessWidget {
               children: [
                 Column(
                   children: [
-                    SizedBox(
-                      height: screenHeight / 8,
-                      child: Image.network(
-                        club.clubPhoto,
-                        fit: BoxFit
-                            .fill, // Ensure the image fits within the bounds
-                      ),
+                    FutureBuilder<ImageProvider>(
+                      future: _loadImage(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.done &&
+                            snapshot.hasData) {
+                          return SizedBox(
+                            height: screenHeight / 8,
+                            child: Image(
+                              image: snapshot.data!,
+                              fit: BoxFit.fill,
+                            ),
+                          );
+                        } else {
+                          return SizedBox(
+                            height: screenHeight / 8,
+                            child: const CircularProgressIndicator(),
+                          );
+                        }
+                      },
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
@@ -92,6 +127,26 @@ class BigClubCard extends StatelessWidget {
   final ClubInfoStruct club;
   final VoidCallback? onRemove;
 
+  Future<ImageProvider> _loadImage() async {
+    try {
+      // Try to load image from SharedPreferences first
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? base64Image = prefs.getString('club_image_${club.clubID}');
+      if (base64Image != null) {
+        return MemoryImage(base64Decode(base64Image));
+      }
+
+      // If not available, load image from network
+      final image = NetworkImage(club.clubPhoto);
+
+      // Try to fetch the image from the network
+      return image;
+    } catch (e) {
+      // If all fails, return a default image
+      return const AssetImage('assets/images/default_club_image.png');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(club.clubAvailability);
@@ -106,14 +161,12 @@ class BigClubCard extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
         child: SizedBox(
           width: screenWidth - 20,
-          height: screenHeight *
-              0.17, // Adjust the height proportionally to screen height
+          height: screenHeight * 0.14,
           child: ClipRect(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black
-                    .withOpacity(0.5), // Adjust background color as needed
-                borderRadius: BorderRadius.circular(15),
+                color: const Color.fromARGB(0, 0, 0, 0),
+                borderRadius: BorderRadius.circular(4),
               ),
               child: SizedBox(
                 child: Row(
@@ -121,18 +174,31 @@ class BigClubCard extends StatelessWidget {
                     Stack(
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(15),
-                            bottomLeft: Radius.circular(15),
+                          borderRadius: const BorderRadius.all(
+                            Radius.circular(4),
                           ),
-                          child: SizedBox(
-                            height: screenHeight * 0.17,
-                            width: screenWidth *
-                                0.3, // Adjust width proportionally to screen width
-                            child: Image.network(
-                              club.clubPhoto,
-                              fit: BoxFit.fill,
-                            ),
+                          child: FutureBuilder<ImageProvider>(
+                            future: _loadImage(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                      ConnectionState.done &&
+                                  snapshot.hasData) {
+                                return SizedBox(
+                                  height: screenHeight * 0.17,
+                                  width: screenWidth * 0.3,
+                                  child: Image(
+                                    image: snapshot.data!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              } else {
+                                return SizedBox(
+                                  height: screenHeight * 0.17,
+                                  width: screenWidth * 0.3,
+                                  child: const CircularProgressIndicator(),
+                                );
+                              }
+                            },
                           ),
                         ),
                         Container(
@@ -164,8 +230,8 @@ class BigClubCard extends StatelessWidget {
                                     club.clubLocation,
                                     style: const TextStyle(
                                       fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color.fromARGB(255, 102, 102, 102),
                                     ),
                                     textAlign: TextAlign.start,
                                   ),

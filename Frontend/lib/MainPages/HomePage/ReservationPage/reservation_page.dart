@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
@@ -5,6 +7,7 @@ import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/Widgets/reservation_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/booking_service.dart';
 import '../../../services/points_service.dart';
@@ -42,7 +45,7 @@ class _ReservationPageState extends State<ReservationPage> {
   int? selectedPrice;
   int maxPersons = 0;
   bool isDiscountApplied = false;
-  bool isSubmitting = false; // Add a flag to track submission status
+  bool buttonIsVisible = true; // Add a flag to track submission status
 
   Map<String, int> counters = {
     'Απλή': 0,
@@ -53,30 +56,34 @@ class _ReservationPageState extends State<ReservationPage> {
   late CatalogueInfoStruct regularCatalogue;
   late CatalogueInfoStruct specialCatalogue;
   late CatalogueInfoStruct premiumCatalogue;
-
   @override
   void initState() {
     super.initState();
-    initializeCatalogues();
+    initializeCatalogues(); // Ensure this doesn't depend on asynchronous calls
+    updateMaxPersons();
+    _loadInitialData(); // Use an async method to load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
     });
-    updateMaxPersons();
+  }
 
+  Future<void> _loadInitialData() async {
     final userDetails = context.read<UserProvider>().userDetails;
-    reservationInfo = [
-      userDetails?.userID ?? -1,
-      '',
-      '',
-      -1,
-      0.0,
-      -1,
-      -1,
-      -1,
-      '',
-      '',
-      0,
-    ];
+    setState(() {
+      reservationInfo = [
+        userDetails?.userID ?? -1,
+        '',
+        '',
+        -1,
+        0.0,
+        -1,
+        -1,
+        -1,
+        '',
+        '',
+        0,
+      ];
+    });
   }
 
   int _currentPoints = 0;
@@ -163,6 +170,28 @@ class _ReservationPageState extends State<ReservationPage> {
     });
   }
 
+  Future<void> _refresh() async {
+    ClubProvider clubProvider = context.read<ClubProvider>();
+    await clubProvider.fetchCatalogues(widget.club);
+    initializeCatalogues(); // Reinitialize catalogues with the updated data
+    updateMaxPersons(); // Update maxPersons with the refreshed catalogues
+    setState(() {}); // Trigger a rebuild to reflect the changes
+    print('Page refreshed');
+  }
+
+  Future<ImageProvider> _loadImage() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? base64Image = prefs.getString('club_image_${widget.club.clubID}');
+      if (base64Image != null) {
+        return MemoryImage(base64Decode(base64Image));
+      }
+      return NetworkImage(widget.club.clubPhoto);
+    } catch (e) {
+      return const AssetImage('assets/images/default_club_image.png');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -171,18 +200,23 @@ class _ReservationPageState extends State<ReservationPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
-              fit: BoxFit.fill,
+        body: RefreshIndicator(
+          onRefresh: _refresh,
+          child: Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
+                fit: BoxFit.fill,
+              ),
             ),
-          ),
-          child: ListView(
-            children: [
-              buildHeader(context),
-              buildContent(),
-            ],
+            child: ListView(
+              children: [
+                ElevatedButton(
+                    onPressed: _refresh, child: const Text('REFRESH PAGE')),
+                buildHeader(context),
+                buildContent(),
+              ],
+            ),
           ),
         ),
       ),
@@ -248,9 +282,19 @@ class _ReservationPageState extends State<ReservationPage> {
               child: SizedBox(
                 width: 520,
                 height: 350,
-                child: Image.network(
-                  widget.club.clubPhoto,
-                  fit: BoxFit.fill, // Ensure the image fits within the bounds
+                child: FutureBuilder<ImageProvider>(
+                  future: _loadImage(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done &&
+                        snapshot.hasData) {
+                      return Image(
+                        image: snapshot.data!,
+                        fit: BoxFit.fill,
+                      );
+                    } else {
+                      return const CircularProgressIndicator();
+                    }
+                  },
                 ),
               ),
             ),
@@ -337,11 +381,9 @@ class _ReservationPageState extends State<ReservationPage> {
                   onTap: () {
                     setState(() {
                       isDiscountApplied = !isDiscountApplied;
-                      reservationInfo[10] =
-                          isDiscountApplied ? 20 : 0; // Set the discount value
-                      calculatePrice(); // Recalculate price with discount
+                      reservationInfo[10] = isDiscountApplied ? 20 : 0;
+                      calculatePrice();
 
-                      // Notify CategoriesTextField to update the price display
                       final categoriesTextFieldState = context
                           .findAncestorStateOfType<CategoriesTextFieldState>();
                       categoriesTextFieldState?.updateSelectedText();
@@ -354,12 +396,9 @@ class _ReservationPageState extends State<ReservationPage> {
                         onChanged: (value) {
                           setState(() {
                             isDiscountApplied = value!;
-                            reservationInfo[10] = isDiscountApplied
-                                ? 20
-                                : 0; // Set the discount value
-                            calculatePrice(); // Recalculate price with discount
+                            reservationInfo[10] = isDiscountApplied ? 20 : 0;
+                            calculatePrice();
 
-                            // Notify CategoriesTextField to update the price display
                             final categoriesTextFieldState =
                                 context.findAncestorStateOfType<
                                     CategoriesTextFieldState>();
@@ -381,162 +420,152 @@ class _ReservationPageState extends State<ReservationPage> {
               ],
             ),
           const SizedBox(height: 25),
-          Container(
-            alignment: Alignment.center,
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 50,
-                  vertical: 15,
+          if (buttonIsVisible)
+            Container(
+              alignment: Alignment.center,
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 50,
+                    vertical: 15,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF9C0C04),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                foregroundColor: Colors.white,
-                backgroundColor: const Color(0xFF9C0C04),
-              ),
-              onPressed: isSubmitting
-                  ? null
-                  : () async {
-                      final userDetails =
-                          context.read<UserProvider>().userDetails;
+                onPressed: () async {
+                  final userDetails = context.read<UserProvider>().userDetails;
 
-                      setState(() {
-                        isSubmitting = true; // Block further submissions
-                      });
+                  setState(() {
+                    buttonIsVisible = false;
+                  });
 
-                      // Get and format the name from the TextField
-                      String rawName = nameTextFieldKey
-                              .currentState?.nameController.text ??
-                          '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
-                      String formattedName = formatName(rawName);
+                  String rawName = nameTextFieldKey
+                          .currentState?.nameController.text ??
+                      '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+                  String formattedName = formatName(rawName);
 
-                      // Update the reservationInfo list with the actual values
-                      reservationInfo[0] = userDetails?.userID ?? -1;
-                      reservationInfo[1] =
-                          formattedName; // Name formatted by the utility function
-                      reservationInfo[2] = widget.club.clubName;
-                      reservationInfo[3] =
-                          personsTextFieldKey.currentState?.persons ??
-                              -1; // Persons
-                      reservationInfo[5] = counters['Απλή'];
-                      reservationInfo[6] = counters['Special'];
-                      reservationInfo[7] = counters['Premium'];
-                      reservationInfo[9] = _commentController.text; // Comment
+                  reservationInfo[0] = userDetails?.userID ?? -1;
+                  reservationInfo[1] = formattedName;
+                  reservationInfo[2] = widget.club.clubName;
+                  reservationInfo[3] =
+                      personsTextFieldKey.currentState?.persons ?? -1;
+                  reservationInfo[5] = counters['Απλή'];
+                  reservationInfo[6] = counters['Special'];
+                  reservationInfo[7] = counters['Premium'];
+                  reservationInfo[9] = _commentController.text;
 
-                      if (isDiscountApplied) {
-                        await _retractPoints(20);
-                        reservationInfo[10] = 20;
-                      } else {
-                        reservationInfo[10] = 0;
-                      }
+                  if (isDiscountApplied) {
+                    await _retractPoints(20);
+                    reservationInfo[10] = 20;
+                  } else {
+                    reservationInfo[10] = 0;
+                  }
 
-                      // Calculate the total price
-                      calculatePrice();
-                      String fourBitString =
-                          '${reservationInfo[5]}${reservationInfo[6]}${reservationInfo[7]}${reservationInfo[10] ~/ 10}';
+                  calculatePrice();
+                  String fourBitString =
+                      '${reservationInfo[5]}${reservationInfo[6]}${reservationInfo[7]}${reservationInfo[10] ~/ 10}';
 
-                      // Validate that reservationInfo[1] has the format: "string string"
-                      final RegExp namePattern =
-                          RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true);
+                  final RegExp namePattern =
+                      RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true);
 
-                      bool isNameValid =
-                          namePattern.hasMatch(reservationInfo[1]);
+                  bool isNameValid = namePattern.hasMatch(reservationInfo[1]);
 
-                      // Check if all required fields are filled and the name is valid
-                      bool allFieldsFilled = reservationInfo
-                              .sublist(1, 8)
-                              .every((element) =>
-                                  element != '' && element != -1) &&
-                          isNameValid;
+                  bool allFieldsFilled = reservationInfo
+                          .sublist(1, 8)
+                          .every((element) => element != '' && element != -1) &&
+                      isNameValid;
 
-                      if (isNameValid) {
-                        // Update the TextEditingController with the valid name
-                        nameTextFieldKey.currentState?.nameController.text =
-                            reservationInfo[1];
-                      }
+                  if (isNameValid) {
+                    nameTextFieldKey.currentState?.nameController.text =
+                        reservationInfo[1];
+                  }
 
-                      if (!allFieldsFilled) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-                            ..showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  isNameValid
-                                      ? 'Παρακαλώ συμπληρώστε όλα τα πεδία'
-                                      : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
-                                ),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                        }
-                      } else if (reservationInfo[4] == 0 ||
-                          reservationInfo[8].isEmpty ||
-                          fourBitString == '' ||
-                          fourBitString[0] == '0000') {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-                            ..showSnackBar(
-                              const SnackBar(
-                                content:
-                                    Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
-                        }
-                      } else {
-                        // Proceed with form submission
-                        bool success = await _bookingService.submitForm(
-                          reservationInfo[1],
-                          reservationInfo[2], // Club name
-                          fourBitString, // 4-bit string for selected packages and discount
-                          reservationInfo[8], // Date
-                          reservationInfo[3].toString(), // Number of persons
-                          reservationInfo[9], // Comment
+                  if (!allFieldsFilled) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              isNameValid
+                                  ? 'Παρακαλώ συμπληρώστε όλα τα πεδία'
+                                  : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
+                            ),
+                            duration: const Duration(seconds: 2),
+                          ),
                         );
-                        print(fourBitString);
-                        if (!mounted) return;
-
-                        if (success) {
-                          printReservationInfo(reservationInfo);
-                          showDialog(
-                            context: context,
-                            barrierDismissible:
-                                false, // Prevent closing by tapping outside
-                            builder: (BuildContext context) {
-                              return ConfirmationDialog(
-                                  reservationInfo: reservationInfo);
-                            },
-                          );
-                        } else {
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-                            ..showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                    'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.'),
-                                duration: Duration(seconds: 3),
-                              ),
-                            );
-                        }
-                      }
-
                       setState(() {
-                        isSubmitting = false; // Allow submissions again
+                        buttonIsVisible = true;
                       });
-                    },
-              child: const Text(
-                'Κράτηση',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w600,
+                    }
+                  } else if (reservationInfo[4] == 0 ||
+                      reservationInfo[8].isEmpty ||
+                      fourBitString == '' ||
+                      fourBitString[0] == '0000') {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          const SnackBar(
+                            content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                    }
+                    setState(() {
+                      buttonIsVisible = true;
+                    });
+                  } else {
+                    bool success = await _bookingService.submitForm(
+                      reservationInfo[1],
+                      reservationInfo[2],
+                      fourBitString,
+                      reservationInfo[8],
+                      reservationInfo[3].toString(),
+                      reservationInfo[9],
+                    );
+                    print(fourBitString);
+                    if (!mounted) return;
+
+                    if (success) {
+                      printReservationInfo(reservationInfo);
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext context) {
+                          return ConfirmationDialog(
+                              reservationInfo: reservationInfo);
+                        },
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.'),
+                            duration: Duration(seconds: 3),
+                          ),
+                        );
+                    }
+                    setState(() {
+                      buttonIsVisible = true;
+                    });
+                  }
+                },
+                child: const Text(
+                  'Κράτηση',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),
-          ),
           const SizedBox(height: 80),
         ],
       ),

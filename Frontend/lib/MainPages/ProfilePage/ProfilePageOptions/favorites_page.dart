@@ -31,7 +31,7 @@ class FavoritesPageState extends State<FavoritesPage> {
         onBackPressed(context);
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromARGB(192, 37, 37, 37),
         body: ListView(
           children: [
             Padding(

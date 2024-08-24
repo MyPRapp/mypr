@@ -20,6 +20,9 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
+    // ClubProvider clubProvider = context.read<ClubProvider>();
+    // AutoRouter.of(context)
+    //     .push(ReservationRoute(club: clubProvider.getClubByName('Syko')));
   }
 
   Future<void> _refresh() async {
@@ -48,84 +51,87 @@ class _HomePageState extends State<HomePage> {
             children: [
               Container(
                 height: constraints.maxHeight,
-                decoration: const BoxDecoration(
-                  image: DecorationImage(
-                    image:
-                        AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                color: const Color.fromARGB(197, 40, 40, 40),
+                // decoration: const BoxDecoration(
+                //   image: DecorationImage(
+                //     image:
+                //         AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
+                //     fit: BoxFit.cover,
+                //   ),
+                // ),
               ),
               RefreshIndicator(
                 onRefresh: _refresh,
                 child: ListView(
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsets.only(top: 20, left: 10, bottom: 10),
-                      child: Text(
-                        'Καλησπέρα!',
-                        style: textStyle1(),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        tabsRouter.setActiveIndex(1);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                            top: 15, left: 10, right: 10, bottom: 15),
-                        child: Container(
-                          height: 70,
-                          decoration: BoxDecoration(
-                            color: Colors.black,
-                            border: Border.all(
-                                width: 0.4, color: const Color(0xFF9C0C04)),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.only(left: 10, right: 10),
-                          child: const TextField(
-                            enabled: false,
-                            style: TextStyle(color: Colors.white),
-                            decoration: InputDecoration(
-                              hintText: 'Search for clubs',
-                              hintStyle: TextStyle(color: Colors.grey),
-                              filled: true,
-                              fillColor: Colors.black,
-                              border: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(8)),
-                                borderSide: BorderSide.none,
-                              ),
-                              prefixIcon:
-                                  Icon(Icons.search, color: Colors.grey),
+                      padding: const EdgeInsets.only(
+                          top: 20, left: 10, right: 10, bottom: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            width: 170,
+                            alignment: Alignment.topLeft,
+                            child: Image.asset(
+                              'assets/otherPhotos/Logo_v2.2-removebg(cropped).png', // Replace with your logo asset path
+                              height: 40,
                             ),
                           ),
-                        ),
+                          GestureDetector(
+                            onTap: () {
+                              tabsRouter.setActiveIndex(1);
+                            },
+                            child: Container(
+                              height: 70,
+                              width:
+                                  260, // Set a width to align the search bar properly
+                              alignment: Alignment.center,
+                              padding:
+                                  const EdgeInsets.only(left: 10, right: 10),
+                              child: const TextField(
+                                enabled: false,
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: 'Αναζήτηση',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  filled: true,
+                                  fillColor: Color.fromARGB(255, 0, 0, 0),
+                                  border: OutlineInputBorder(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(8)),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  prefixIcon:
+                                      Icon(Icons.search, color: Colors.grey),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Padding(
-                      padding:
-                          const EdgeInsets.only(left: 20, top: 15, bottom: 10),
-                      child: Text(
-                        'Επιλογές κοντά σου',
-                        style: textStyle1(),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 200,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: clubProvider.allClubs.length,
-                        itemBuilder: (context, index) {
-                          final club = clubProvider.allClubs[index];
-                          return SmallClubCard(
-                            club: club,
-                          );
-                        },
-                      ),
-                    ),
+                    // Padding(
+                    //   padding:
+                    //       const EdgeInsets.only(left: 20, top: 15, bottom: 10),
+                    //   child: Text(
+                    //     'Επιλογές κοντά σου',
+                    //     style: textStyle1(),
+                    //   ),
+                    // ),
+                    // SizedBox(
+                    //   height: 200,
+                    //   child: ListView.builder(
+                    //     scrollDirection: Axis.horizontal,
+                    //     itemCount: clubProvider.allClubs.length,
+                    //     itemBuilder: (context, index) {
+                    //       final club = clubProvider.allClubs[index];
+                    //       return SmallClubCard(
+                    //         club: club,
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                     Padding(
                       padding:
                           const EdgeInsets.only(left: 20, top: 10, bottom: 10),

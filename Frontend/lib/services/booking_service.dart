@@ -22,30 +22,37 @@ class BookingService {
       return false;
     }
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/bookings/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-      body: jsonEncode({
-        'reservation_name': reservationName,
-        'club_name': clubName,
-        'booking_type': type,
-        'booked_at': time,
-        'number_of_people': numberOfPeople,
-        'comments': comments,
-      }),
-    );
+    try {
+      final response = await http
+          .post(
+        Uri.parse('$baseUrl/bookings/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'reservation_name': reservationName,
+          'club_name': clubName,
+          'booking_type': type,
+          'booked_at': time,
+          'number_of_people': numberOfPeople,
+          'comments': comments,
+        }),
+      )
+          .timeout(const Duration(seconds: 10), onTimeout: () {
+        print("Can't connect to server. Request timed out.");
+        return http.Response('Error: Timeout', 408); // 408 Request Timeout
+      });
 
-    // print('Submit form response status: ${response.statusCode}');
-    // print('Submit form response body: ${utf8.decode(response.bodyBytes)}');
-
-    if (response.statusCode == 201) {
-      print('Booking successful');
-      return true;
-    } else {
-      print('Booking failed: ${response.body}');
+      if (response.statusCode == 201) {
+        print('Booking successful');
+        return true;
+      } else {
+        print('Booking failed: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print("Booking failed: $e");
       return false;
     }
   }
@@ -58,22 +65,27 @@ class BookingService {
       return null;
     }
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/bookings/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/bookings/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        print("Can't connect to server. Request timed out.");
+        return http.Response('Error: Timeout', 408); // 408 Request Timeout
+      });
 
-    // print('Submit form response status: ${response.statusCode}');
-    // print('Submit form response body: ${response.body}');
-
-    if (response.statusCode == 200) {
-      print('Booking retrieval successful');
-      return jsonDecode(response.body) as List<dynamic>;
-    } else {
-      print('Booking retrieval failed: ${response.body}');
+      if (response.statusCode == 200) {
+        print('Booking retrieval successful');
+        return jsonDecode(response.body) as List<dynamic>;
+      } else {
+        print('Booking retrieval failed: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print("Booking retrieval failed: $e");
       return null;
     }
   }

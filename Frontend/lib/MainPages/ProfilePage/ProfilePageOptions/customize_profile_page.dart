@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
@@ -8,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @RoutePage()
 class CustomizeProfilePage extends StatelessWidget {
   const CustomizeProfilePage({super.key});
+
   void _signOut(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('saved_email');
@@ -15,6 +18,19 @@ class CustomizeProfilePage extends StatelessWidget {
 
     if (context.mounted) {
       context.router.replaceAll([const LoginRoute()]);
+    }
+  }
+
+  Future<ImageProvider> _loadUserPhoto(String photoPath) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? base64Photo = prefs.getString('user_photo');
+      if (base64Photo != null) {
+        return MemoryImage(base64Decode(base64Photo));
+      }
+      return NetworkImage('http://$validatedIp:8000/$photoPath');
+    } catch (e) {
+      return const AssetImage('assets/images/default_user_image.png');
     }
   }
 
@@ -79,22 +95,35 @@ class CustomizeProfilePage extends StatelessWidget {
                             ),
                             Row(
                               children: [
-                                if (userDetails.photo != '')
+                                if (userDetails.photo.isNotEmpty)
                                   Container(
-                                      padding: const EdgeInsets.only(top: 35),
-                                      child: SizedBox(
-                                        height: 130,
-                                        width: 130,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(300),
-                                          child: Image.network(
-                                            'http://$validatedIp:8000/${userDetails.photo}',
-                                            fit: BoxFit.cover,
-                                          ),
+                                    padding: const EdgeInsets.only(top: 35),
+                                    child: SizedBox(
+                                      height: 130,
+                                      width: 130,
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(300),
+                                        child: FutureBuilder<ImageProvider>(
+                                          future:
+                                              _loadUserPhoto(userDetails.photo),
+                                          builder: (context, snapshot) {
+                                            if (snapshot.connectionState ==
+                                                    ConnectionState.done &&
+                                                snapshot.hasData) {
+                                              return Image(
+                                                image: snapshot.data!,
+                                                fit: BoxFit.cover,
+                                              );
+                                            } else {
+                                              return const CircularProgressIndicator();
+                                            }
+                                          },
                                         ),
-                                      )),
-                                if (userDetails.photo == '')
+                                      ),
+                                    ),
+                                  ),
+                                if (userDetails.photo.isEmpty)
                                   Container(
                                     padding: const EdgeInsets.only(top: 35),
                                     child: SizedBox(
@@ -108,8 +137,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                           child: const Icon(
                                             Icons.person,
                                             color: Colors.black,
-                                            size:
-                                                100, // Adjust the size to fit well within the container
+                                            size: 100,
                                           ),
                                         ),
                                       ),
@@ -181,7 +209,7 @@ class CustomizeProfilePage extends StatelessWidget {
                               trailing: const Icon(Icons.chevron_right,
                                   color: Colors.white),
                               onTap: () {
-                                // Handle change email
+                                // Handle change photo
                               },
                             ),
                           ),
