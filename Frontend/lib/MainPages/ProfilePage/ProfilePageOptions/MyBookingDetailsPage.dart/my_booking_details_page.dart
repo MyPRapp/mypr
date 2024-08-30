@@ -93,7 +93,6 @@ class BookingDetailsPage extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
-                    height: screenHeight - 100,
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
