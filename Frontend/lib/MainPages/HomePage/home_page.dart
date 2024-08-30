@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                             child: Container(
                               height: 70,
                               width:
-                                  260, // Set a width to align the search bar properly
+                                  200, // Set a width to align the search bar properly
                               alignment: Alignment.center,
                               padding:
                                   const EdgeInsets.only(left: 10, right: 10),

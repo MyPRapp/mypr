@@ -6,17 +6,29 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-String validatedIp = '192.168.1.9';
-
 class GlobalState with ChangeNotifier {
+  static final GlobalState _instance = GlobalState._internal();
+  String _validatedIp = '192.168.1.93';
   bool _dataLoaded = false;
+
+  GlobalState._internal();
+
+  factory GlobalState() {
+    return _instance;
+  }
+
+  String get validatedIp => _validatedIp;
+
+  set validatedIp(String value) {
+    _validatedIp = value;
+    notifyListeners();
+  }
 
   bool get dataLoaded => _dataLoaded;
 
   void setDataLoaded(bool value) {
     _dataLoaded = value;
     notifyListeners();
-    print('Connecting to server at: http://$validatedIp:8000/');
   }
 }
 
@@ -241,7 +253,7 @@ class ClubProvider with ChangeNotifier {
   ////MAIN FUNCTION FOR CLUBS' AND CATALOGUES' LISTS FETCHING
   Future<void> fetchClubsAndCatalogues() async {
     var url =
-        'http://$validatedIp:8000/api/clubs/print/'; // Replace with your API URL
+        'http://${GlobalState().validatedIp}:8000/api/clubs/print/'; // Replace with your API URL
     try {
       final response = await http.get(Uri.parse(url));
       final decodedBody = utf8.decode(response.bodyBytes);
@@ -348,8 +360,8 @@ class ClubProvider with ChangeNotifier {
       return;
     }
 
-    final url =
-        'http://$validatedIp:8000/api/clubs/${club.clubID}/catalogue'; // Replace with your API URL
+    String url =
+        'http://${GlobalState().validatedIp}:8000/api/clubs/${club.clubID}/catalogue'; // Replace with your API URL
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -609,7 +621,7 @@ class UserProvider with ChangeNotifier {
       // Fetch and save the user's photo as a base64 string if it exists
       if (_userDetails!.photo.isNotEmpty) {
         String base64Photo = await imageToBase64(
-            'http://$validatedIp:8000/${_userDetails!.photo}');
+            'http://${GlobalState().validatedIp}:8000/${_userDetails!.photo}');
         if (base64Photo.isNotEmpty) {
           await prefs.setString('user_photo', base64Photo);
         } else {
@@ -646,7 +658,7 @@ class UserProvider with ChangeNotifier {
 
     if (token != null) {
       final response = await http.get(
-        Uri.parse('http://$validatedIp:8000/api/user/print'),
+        Uri.parse('http://${GlobalState().validatedIp}:8000/api/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       );
 

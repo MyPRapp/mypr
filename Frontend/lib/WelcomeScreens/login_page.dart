@@ -18,7 +18,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  // final TextEditingController _serverController = TextEditingController();
+  final TextEditingController _serverController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _obscureText = true;
   bool? _loginFailed;
@@ -134,7 +134,9 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     // Display the gradient background with a red loading indicator in the middle
-    if (_loginFailed == false || _loginFailed == null) {
+    if (_loginFailed == null) {
+      _startTimeout();
+      _loginFailed == false;
       return Scaffold(
         body: Container(
           height: screenHeight,
@@ -157,17 +159,17 @@ class _LoginPageState extends State<LoginPage> {
     // If login fails, show the login form
     else {
       return Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            height: screenHeight,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.black, Color(0xFF9C0C04)],
-                begin: Alignment.center,
-                end: Alignment.bottomCenter,
-              ),
+        body: Container(
+          height: screenHeight,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.black, Color(0xFF9C0C04)],
+              begin: Alignment.center,
+              end: Alignment.bottomCenter,
             ),
-            child: Column(
+          ),
+          child: ListView(children: [
+            Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 SizedBox(
@@ -357,79 +359,83 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    // Padding(
-                    //   padding: const EdgeInsets.only(top: 10),
-                    //   child: SizedBox(
-                    //     width: 350,
-                    //     child: Column(
-                    //       children: [
-                    //         TextField(
-                    //           controller: _serverController,
-                    //           style: const TextStyle(
-                    //             fontSize: 20,
-                    //             fontWeight: FontWeight.bold,
-                    //             color: Colors.white,
-                    //           ),
-                    //           decoration: const InputDecoration(
-                    //             hintText: 'Enter server\'s IP',
-                    //             hintStyle: TextStyle(color: Colors.black),
-                    //             border: InputBorder.none,
-                    //           ),
-                    //         ),
-                    //         const Padding(
-                    //           padding: EdgeInsets.only(bottom: 10),
-                    //           child: Divider(
-                    //             height: 10,
-                    //             color: Color.fromARGB(204, 156, 12, 4),
-                    //             thickness: 7,
-                    //           ),
-                    //         ),
-                    // ElevatedButton(
-                    //   style: ElevatedButton.styleFrom(
-                    //     padding: const EdgeInsets.symmetric(
-                    //         horizontal: 13, vertical: 14),
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(20),
-                    //       side: const BorderSide(
-                    //           color: Color(0xFF9C0C04)),
-                    //     ),
-                    //     backgroundColor: Colors.black,
-                    //   ),
-                    //   onPressed: () {
-                    //     String serverIp = _serverController.text.trim();
-                    //     if (serverIp != '' && serverIp != ' ') {
-                    //       validatedIp = serverIp;
-                    //     }
-                    //     print(
-                    //         'Connecting to server at: http://$validatedIp:8000/');
-                    //     ScaffoldMessenger.of(context)
-                    //       ..hideCurrentSnackBar()
-                    //       ..showSnackBar(
-                    //         SnackBar(
-                    //           duration: const Duration(seconds: 2),
-                    //           content: Text(
-                    //               'Connecting to server at: http://$validatedIp:8000/'),
-                    //         ),
-                    //       );
-                    //   },
-                    //   child: const Text(
-                    //     'Connect to server',
-                    //     style: TextStyle(
-                    //       color: Colors.white,
-                    //       fontSize: 19,
-                    //       fontWeight: FontWeight.bold,
-                    //     ),
-                    //   ),
-                    // ),
-                    // ],
-                    // ),
-                    // ),
-                    // ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: SizedBox(
+                        width: 350,
+                        child: Column(
+                          children: [
+                            TextField(
+                              controller: _serverController,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                              decoration: const InputDecoration(
+                                hintText: 'Enter server\'s IP',
+                                hintStyle: TextStyle(color: Colors.black),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.only(bottom: 10),
+                              child: Divider(
+                                height: 10,
+                                color: Color.fromARGB(204, 156, 12, 4),
+                                thickness: 7,
+                              ),
+                            ),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 13, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  side: const BorderSide(
+                                      color: Color(0xFF9C0C04)),
+                                ),
+                                backgroundColor: Colors.black,
+                              ),
+                              onPressed: () {
+                                String serverIp = _serverController.text.trim();
+                                if (serverIp != '' && serverIp != ' ') {
+                                  final globalState =
+                                      context.read<GlobalState>();
+                                  globalState.validatedIp = serverIp;
+                                  _initialize();
+                                }
+                                print(
+                                    'Connecting to server at: http://${GlobalState().validatedIp}:8000/');
+                                ScaffoldMessenger.of(context)
+                                  ..hideCurrentSnackBar()
+                                  ..showSnackBar(
+                                    SnackBar(
+                                      duration: const Duration(seconds: 2),
+                                      content: Text(
+                                          'Connecting to server at: http://${GlobalState().validatedIp}:8000/'),
+                                    ),
+                                  );
+                              },
+                              child: const Text(
+                                'Connect to server',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 19,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 80),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
-          ),
+          ]),
         ),
       );
     }

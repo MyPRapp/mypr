@@ -28,7 +28,8 @@ class CustomizeProfilePage extends StatelessWidget {
       if (base64Photo != null) {
         return MemoryImage(base64Decode(base64Photo));
       }
-      return NetworkImage('http://$validatedIp:8000/$photoPath');
+      return NetworkImage(
+          'http://${GlobalState().validatedIp}:8000/$photoPath');
     } catch (e) {
       return const AssetImage('assets/images/default_user_image.png');
     }

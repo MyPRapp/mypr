@@ -5,8 +5,8 @@ import 'package:mypr/OtherPages/global_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingService {
-  final String baseUrl =
-      'http://$validatedIp:8000/api'; // or your local network IP
+  String get baseUrl =>
+      'http://${GlobalState().validatedIp}:8000/api'; // Dynamically generate baseUrl
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

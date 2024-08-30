@@ -28,7 +28,8 @@ class _ProfilePageState extends State<ProfilePage> {
         return MemoryImage(bytes);
       }
       // Fallback to loading the image from the network
-      return NetworkImage('http://$validatedIp:8000/$photoPath');
+      return NetworkImage(
+          'http://${GlobalState().validatedIp}:8000/$photoPath');
     } catch (e) {
       // Fallback to a default asset if an error occurs
       return const AssetImage('assets/images/default_user_image.png');
