@@ -149,14 +149,15 @@ class BookingDetailsPage extends StatelessWidget {
                             BuildRichText(
                                 label: 'Σχόλια:', value: booking.comments),
                             const SizedBox(height: 20),
-                            Text(
-                              'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
-                              style: const TextStyle(
-                                color: Color(0xFF9C0C04),
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
+                            if (booking.status != 2)
+                              Text(
+                                'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
+                                style: const TextStyle(
+                                  color: Color(0xFF9C0C04),
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                         Column(

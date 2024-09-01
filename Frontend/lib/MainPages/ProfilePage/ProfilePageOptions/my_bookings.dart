@@ -47,6 +47,15 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           bookings.clear(); // Clear existing bookings if any
           bookings.addAll(bookingsData.map<BookingInfoStruct>((bookingData) {
             final userDetails = context.read<UserProvider>().userDetails;
+
+            // Initialize catalogues and unpack the result
+            final catalogues = context
+                .read<ClubProvider>()
+                .initializeCatalogues(bookingData['club']);
+            final regularCatalogue = catalogues[0];
+            final specialCatalogue = catalogues[1];
+            final premiumCatalogue = catalogues[2];
+
             return BookingInfoStruct(
               bookingID: bookingData['id'],
               userID: bookingData['user'],
@@ -55,13 +64,15 @@ class _MyBookingsPageState extends State<MyBookingsPage>
               date: DateTime.parse(bookingData['booked_at']),
               persons: bookingData['number_of_people'],
               fourbitString: bookingData['booking_type'],
-              price: calculatePrice(
+              price: _calculatePrice(
                 bookingData['booking_type'],
-                bookingData['club'],
-              ), // Generating random price
+                regularCatalogue,
+                specialCatalogue,
+                premiumCatalogue,
+              ),
               status: _determineStatus(
                   bookingData['status'], bookingData['booked_at']),
-              comments: _generateRandomComment(), // Generating random comments
+              comments: _generateRandomComment(),
             );
           }).toList());
 
@@ -130,28 +141,37 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 
   void initializeCatalogues(int clubID) {
     ClubProvider clubProvider = context.read<ClubProvider>();
-    final catalogues = clubProvider.getCataloguesByClubID(clubID);
+    // final catalogues = clubProvider.getCataloguesByClubID(clubID);
 
-    regularCatalogue = clubProvider.getCatalogue(
-        catalogues, clubProvider.getClubByID(clubID), 'Regular');
-    specialCatalogue = clubProvider.getCatalogue(catalogues,
-        clubProvider.getClubByID(clubID), 'Single'); // Έτσι λεγεται πλεον
+    // Directly use the club instance (widget.club) instead of passing the entire catalogues list.
+    regularCatalogue =
+        clubProvider.getCatalogue(clubProvider.getClubByID(clubID), 'Regular');
+
+    specialCatalogue =
+        clubProvider.getCatalogue(clubProvider.getClubByID(clubID), 'Single');
+
+    // If the price of the 'Special' catalogue is less than or equal to 'Regular', switch to the 'Special' type
     if ((double.parse(specialCatalogue.price)).toInt() <=
         (double.parse(regularCatalogue.price)).toInt()) {
       specialCatalogue = clubProvider.getCatalogue(
-          catalogues, clubProvider.getClubByID(clubID), 'Special');
-    } // Έτσι λεγοταν παλια και μερικα club εχουν αυτη την τιμη
-    premiumCatalogue = clubProvider.getCatalogue(
-        catalogues, clubProvider.getClubByID(clubID), 'Premium');
+          clubProvider.getClubByID(clubID), 'Special');
+    }
+
+    premiumCatalogue =
+        clubProvider.getCatalogue(clubProvider.getClubByID(clubID), 'Premium');
   }
 
-  double calculatePrice(String fourbitString, int clubID) {
-    initializeCatalogues(clubID);
+  double _calculatePrice(
+    String fourbitString,
+    CatalogueInfoStruct regularCatalogue,
+    CatalogueInfoStruct specialCatalogue,
+    CatalogueInfoStruct premiumCatalogue,
+  ) {
     double price = (int.parse(fourbitString[0]) *
             double.parse(regularCatalogue.price)) +
         (int.parse(fourbitString[1]) * double.parse(specialCatalogue.price)) +
         (int.parse(fourbitString[2]) * double.parse(premiumCatalogue.price));
-    return price = price * (1 - (int.parse(fourbitString[3]) / 100));
+    return price * (1 - (int.parse(fourbitString[3]) / 100));
   }
 
   String _generateRandomComment() {
@@ -250,19 +270,15 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       }
     }).toList();
 
-    return Column(
-      children: [
-        ListView.builder(
-          itemCount: filteredBookings.length,
-          itemBuilder: (context, index) {
-            final booking = filteredBookings[index];
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 15),
-              child: BookingCard(booking: booking),
-            );
-          },
-        ),
-      ],
+    return ListView.builder(
+      itemCount: filteredBookings.length,
+      itemBuilder: (context, index) {
+        final booking = filteredBookings[index];
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 15),
+          child: BookingCard(booking: booking),
+        );
+      },
     );
   }
 }
@@ -372,13 +388,14 @@ class BookingCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
-                      '${booking.price.toStringAsFixed(2)} €',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
+                    if (booking.status != 2)
+                      Text(
+                        '${booking.price.toStringAsFixed(2)} €',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
                   ],
                 ),
               ),

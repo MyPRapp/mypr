@@ -47,7 +47,6 @@ class UserProvider with ChangeNotifier {
         // _userDetails!.photo = base64Encode(bytes); // Save photo as a base64 string
         _userDetails!.photo = userPhotoBase64;
       }
-
       notifyListeners();
     }
   }
@@ -63,7 +62,6 @@ class UserProvider with ChangeNotifier {
             'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       );
-
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
 

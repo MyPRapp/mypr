@@ -23,19 +23,7 @@ class ReservationPage extends StatefulWidget {
 }
 
 class _ReservationPageState extends State<ReservationPage> {
-  List<dynamic> reservationInfo = [
-    -1,
-    '',
-    '',
-    -1,
-    0.0,
-    -1,
-    -1,
-    -1,
-    '',
-    '',
-    0,
-  ];
+  List<dynamic> reservationInfo = [-1, '', '', -1, 0.0, -1, -1, -1, '', '', 0];
 
   final BookingService _bookingService = BookingService();
   final GlobalKey<NameTextFieldState> nameTextFieldKey =
@@ -48,42 +36,53 @@ class _ReservationPageState extends State<ReservationPage> {
   bool isDiscountApplied = false;
   bool buttonIsVisible = true;
 
-  Map<String, int> counters = {
-    'Απλή': 0,
-    'Special': 0,
-    'Premium': 0,
-  };
+  Map<String, int> counters = {'Απλή': 0, 'Special': 0, 'Premium': 0};
 
-  late CatalogueInfoStruct regularCatalogue;
-  late CatalogueInfoStruct specialCatalogue;
-  late CatalogueInfoStruct premiumCatalogue;
+  // Initialize the catalogues with default values
+  CatalogueInfoStruct regularCatalogue = CatalogueInfoStruct(
+      clubID: -1, serviceType: 'Regular', price: '0', maxPersons: 0);
 
+  CatalogueInfoStruct specialCatalogue = CatalogueInfoStruct(
+      clubID: -1, serviceType: 'Special', price: '0', maxPersons: 0);
+
+  CatalogueInfoStruct premiumCatalogue = CatalogueInfoStruct(
+      clubID: -1, serviceType: 'Premium', price: '0', maxPersons: 0);
   @override
   void initState() {
     super.initState();
-    initializeCatalogues();
+    ClubProvider clubProvider = context.read<ClubProvider>();
+    // Initialize catalogues and unpack the result
+    final catalogues = clubProvider.initializeCatalogues(widget.club.clubID);
+    regularCatalogue = catalogues[0];
+    specialCatalogue = catalogues[1];
+    premiumCatalogue = catalogues[2];
     updateMaxPersons();
     _loadInitialData();
-    _toggleNavBarVisibility(); // Set initial visibility based on buttonIsVisible
+    // Defer the call to _toggleNavBarVisibility to avoid build-time errors
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _toggleNavBarVisibility(); // Set initial visibility based on buttonIsVisible
+    });
   }
 
   Future<void> _loadInitialData() async {
     final userDetails = context.read<UserProvider>().userDetails;
-    setState(() {
-      reservationInfo = [
-        userDetails?.userID ?? -1,
-        '',
-        '',
-        -1,
-        0.0,
-        -1,
-        -1,
-        -1,
-        '',
-        '',
-        0,
-      ];
-    });
+    setState(
+      () {
+        reservationInfo = [
+          userDetails?.userID ?? -1,
+          '',
+          '',
+          -1,
+          0.0,
+          -1,
+          -1,
+          -1,
+          '',
+          '',
+          0
+        ];
+      },
+    );
   }
 
   int _currentPoints = 0;
@@ -126,23 +125,6 @@ class _ReservationPageState extends State<ReservationPage> {
     print('Discount(%): ${reservationInfo[10]}');
   }
 
-  void initializeCatalogues() {
-    ClubProvider clubProvider = context.read<ClubProvider>();
-    final catalogues = clubProvider.getCataloguesByClubID(widget.club.clubID);
-
-    regularCatalogue =
-        clubProvider.getCatalogue(catalogues, widget.club, 'Regular');
-    specialCatalogue =
-        clubProvider.getCatalogue(catalogues, widget.club, 'Single');
-    if ((double.parse(specialCatalogue.price)).toInt() <=
-        (double.parse(regularCatalogue.price)).toInt()) {
-      specialCatalogue =
-          clubProvider.getCatalogue(catalogues, widget.club, 'Special');
-    }
-    premiumCatalogue =
-        clubProvider.getCatalogue(catalogues, widget.club, 'Premium');
-  }
-
   void updateMaxPersons() {
     setState(() {
       maxPersons = regularCatalogue.maxPersons * counters['Απλή']! +
@@ -176,7 +158,11 @@ class _ReservationPageState extends State<ReservationPage> {
   Future<void> _refresh() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
     await clubProvider.fetchCatalogues(widget.club);
-    initializeCatalogues();
+    // Initialize catalogues and unpack the result
+    final catalogues = clubProvider.initializeCatalogues(widget.club.clubID);
+    regularCatalogue = catalogues[0];
+    specialCatalogue = catalogues[1];
+    premiumCatalogue = catalogues[2];
     updateMaxPersons();
     setState(() {});
     print('Page refreshed');
@@ -234,8 +220,7 @@ class _ReservationPageState extends State<ReservationPage> {
                 padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
                 child: IconButton(
                   onPressed: () {
-                    Navigator.pop(context);
-                    AutoRouter.of(context).popUntilRoot();
+                    AutoRouter.of(context).back();
                   },
                   icon: const Icon(
                     Icons.chevron_left,
