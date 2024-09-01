@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../Providers/user_provider.dart';
 
 @RoutePage()
 class CustomizeProfilePage extends StatelessWidget {
@@ -29,7 +31,7 @@ class CustomizeProfilePage extends StatelessWidget {
         return MemoryImage(base64Decode(base64Photo));
       }
       return NetworkImage(
-          'http://${GlobalState().validatedIp}:8000/$photoPath');
+          'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
     } catch (e) {
       return const AssetImage('assets/images/default_user_image.png');
     }

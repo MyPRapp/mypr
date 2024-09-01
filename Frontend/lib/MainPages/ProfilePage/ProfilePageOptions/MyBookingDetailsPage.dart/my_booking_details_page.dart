@@ -4,16 +4,17 @@ import 'dart:typed_data';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../Providers/club_provider.dart';
 import '../../../../Widgets/booking_card_widgets.dart';
+import '../../../../global_.components.dart';
 import '../../../../routes/app_router.gr.dart';
 
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
-  final Booking booking;
+  final BookingInfoStruct booking;
   final String title;
   final bool isHistory;
 

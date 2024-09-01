@@ -10,6 +10,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
+import 'package:mypr/global_.components.dart' as _i18;
 import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
 import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
     as _i12;
@@ -29,7 +30,6 @@ import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i2;
 import 'package:mypr/Navigation/home_navigation.dart' as _i6;
 import 'package:mypr/Navigation/profile_navigation.dart' as _i10;
 import 'package:mypr/Navigation/search_navigation.dart' as _i13;
-import 'package:mypr/OtherPages/global_state.dart' as _i18;
 import 'package:mypr/WelcomeScreens/login_page.dart' as _i8;
 import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i15;
 
@@ -146,7 +146,7 @@ abstract class $AppRouter extends _i16.RootStackRouter {
 class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
   BookingDetailsRoute({
     _i17.Key? key,
-    required _i18.Booking booking,
+    required _i18.BookingInfoStruct booking,
     required String title,
     bool isHistory = false,
     List<_i16.PageRouteInfo>? children,
@@ -177,7 +177,7 @@ class BookingDetailsRouteArgs {
 
   final _i17.Key? key;
 
-  final _i18.Booking booking;
+  final _i18.BookingInfoStruct booking;
 
   final String title;
 

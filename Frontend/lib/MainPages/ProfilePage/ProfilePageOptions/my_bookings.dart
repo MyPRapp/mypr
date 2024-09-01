@@ -5,15 +5,17 @@ import 'dart:typed_data';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Providers/club_provider.dart';
+import '../../../Providers/user_provider.dart';
+import '../../../global_.components.dart';
 import '../../../services/booking_service.dart';
 
 // Your custom bookings list
-final List<Booking> bookings = [];
+final List<BookingInfoStruct> bookings = [];
 
 @RoutePage()
 class MyBookingsPage extends StatefulWidget {
@@ -43,9 +45,9 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       if (bookingsData != null) {
         setState(() {
           bookings.clear(); // Clear existing bookings if any
-          bookings.addAll(bookingsData.map<Booking>((bookingData) {
+          bookings.addAll(bookingsData.map<BookingInfoStruct>((bookingData) {
             final userDetails = context.read<UserProvider>().userDetails;
-            return Booking(
+            return BookingInfoStruct(
               bookingID: bookingData['id'],
               userID: bookingData['user'],
               clubID: bookingData['club'],
@@ -78,7 +80,8 @@ class _MyBookingsPageState extends State<MyBookingsPage>
     }
   }
 
-  Future<void> _saveBookingsToPreferences(List<Booking> bookings) async {
+  Future<void> _saveBookingsToPreferences(
+      List<BookingInfoStruct> bookings) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String bookingsJson =
         jsonEncode(bookings.map((booking) => booking.toJson()).toList());
@@ -94,8 +97,8 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 
       setState(() {
         bookings.clear();
-        bookings.addAll(bookingsList.map<Booking>((bookingData) {
-          return Booking.fromJson(bookingData);
+        bookings.addAll(bookingsList.map<BookingInfoStruct>((bookingData) {
+          return BookingInfoStruct.fromJson(bookingData);
         }).toList());
       });
     } else {
@@ -265,7 +268,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 }
 
 class BookingCard extends StatelessWidget {
-  final Booking booking;
+  final BookingInfoStruct booking;
 
   const BookingCard({super.key, required this.booking});
   Future<ImageProvider> _loadClubPhoto(int clubID, String photoUrl) async {

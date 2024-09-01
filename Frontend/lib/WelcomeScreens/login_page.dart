@@ -1,10 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Providers/club_provider.dart';
+import '../Providers/user_provider.dart';
+import '../global_.components.dart';
 import '../services/auth_service.dart';
 
 @RoutePage()
@@ -59,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _checkAndFetchClubs() async {
-    final globalState = context.read<GlobalState>();
+    final globalState = context.read<GlobalStateProvider>();
     if (!globalState.dataLoaded) {
       await _fetchClubsAndCatalogues();
       if (mounted) {
@@ -79,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
       _loginFailed = null; // Reset the login status to trigger the indicator
     });
     _startTimeout(); // Start the timeout again
-    final globalState = context.read<GlobalState>();
+    final globalState = context.read<GlobalStateProvider>();
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     bool success = await _authService.login(email, password);
@@ -406,19 +409,19 @@ class _LoginPageState extends State<LoginPage> {
                                 String serverIp = _serverController.text.trim();
                                 if (serverIp != '' && serverIp != ' ') {
                                   final globalState =
-                                      context.read<GlobalState>();
+                                      context.read<GlobalStateProvider>();
                                   globalState.validatedIp = serverIp;
                                   _initialize();
                                 }
                                 print(
-                                    'Connecting to server at: http://${GlobalState().validatedIp}:8000/');
+                                    'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/');
                                 ScaffoldMessenger.of(context)
                                   ..hideCurrentSnackBar()
                                   ..showSnackBar(
                                     SnackBar(
                                       duration: const Duration(seconds: 2),
                                       content: Text(
-                                          'Connecting to server at: http://${GlobalState().validatedIp}:8000/'),
+                                          'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/'),
                                     ),
                                   );
                               },

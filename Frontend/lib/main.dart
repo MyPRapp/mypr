@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart'; // Import for localization
-import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.dart';
 import 'package:provider/provider.dart';
+
+import 'Providers/club_provider.dart';
+import 'Providers/user_provider.dart';
+import 'global_.components.dart';
 
 void main() {
   runApp(
@@ -11,7 +15,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => ClubProvider()),
         ChangeNotifierProvider(create: (_) => BottomNavBarVisibility()),
-        ChangeNotifierProvider(create: (_) => GlobalState()),
+        ChangeNotifierProvider(create: (_) => GlobalStateProvider()),
       ],
       child: const MyPR(),
     ),

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PointsService {
   String get apiUrl =>
-      'http://${GlobalState().validatedIp}:8000/api/reduce-points/'; // Dynamically generate apiUrl
+      'http://${GlobalStateProvider().validatedIp}:8000/api/reduce-points/'; // Dynamically generate apiUrl
 
   Future<String?> getAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

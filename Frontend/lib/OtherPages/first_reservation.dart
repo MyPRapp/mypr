@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
+import 'package:mypr/global_.components.dart';
 import 'package:provider/provider.dart';
 
 class PresentationPage extends StatefulWidget {

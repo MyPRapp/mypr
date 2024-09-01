@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/Widgets/reservation_page_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Providers/club_provider.dart';
+import '../../../Providers/user_provider.dart';
+import '../../../global_.components.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/points_service.dart';
 

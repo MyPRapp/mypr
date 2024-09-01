@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../global_.components.dart';
 
 class SmallClubCard extends StatelessWidget {
   const SmallClubCard({

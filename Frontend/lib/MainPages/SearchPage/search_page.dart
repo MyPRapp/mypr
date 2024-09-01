@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
 
+import '../../Providers/club_provider.dart';
 import '../../routes/app_router.gr.dart';
 
 @RoutePage()

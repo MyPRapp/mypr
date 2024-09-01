@@ -1,8 +1,10 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
+
+import '../Providers/user_provider.dart';
+import '../global_.components.dart';
 
 class ConfirmationDialog extends StatelessWidget {
   final List<dynamic> reservationInfo;

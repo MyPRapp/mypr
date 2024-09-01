@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:mypr/OtherPages/global_state.dart';
 import 'package:provider/provider.dart';
+
+import '../Providers/club_provider.dart';
+import '../global_.components.dart';
 
 class LikeButton extends StatefulWidget {
   const LikeButton({
