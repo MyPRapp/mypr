@@ -69,7 +69,7 @@ class BookingDetailsPage extends StatelessWidget {
             size: 30,
           ),
           onPressed: () {
-            context.router.back();
+            AutoRouter.of(context).back();
           },
         ),
       ),
@@ -183,6 +183,7 @@ class BookingDetailsPage extends StatelessWidget {
                               _buildHistoryBottomSection(context)
                             else
                               _buildRegularBottomSection(context),
+                            const SizedBox(height: 80),
                           ],
                         ),
                       ],

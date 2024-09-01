@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:mypr/OtherPages/global_state.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/Widgets/reservation_page_widgets.dart';
-import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,7 +44,7 @@ class _ReservationPageState extends State<ReservationPage> {
   int? selectedPrice;
   int maxPersons = 0;
   bool isDiscountApplied = false;
-  bool buttonIsVisible = true; // Add a flag to track submission status
+  bool buttonIsVisible = true;
 
   Map<String, int> counters = {
     'Απλή': 0,
@@ -56,15 +55,14 @@ class _ReservationPageState extends State<ReservationPage> {
   late CatalogueInfoStruct regularCatalogue;
   late CatalogueInfoStruct specialCatalogue;
   late CatalogueInfoStruct premiumCatalogue;
+
   @override
   void initState() {
     super.initState();
-    initializeCatalogues(); // Ensure this doesn't depend on asynchronous calls
+    initializeCatalogues();
     updateMaxPersons();
-    _loadInitialData(); // Use an async method to load initial data
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().hide();
-    });
+    _loadInitialData();
+    _toggleNavBarVisibility(); // Set initial visibility based on buttonIsVisible
   }
 
   Future<void> _loadInitialData() async {
@@ -102,6 +100,15 @@ class _ReservationPageState extends State<ReservationPage> {
     }
   }
 
+  void _toggleNavBarVisibility() {
+    final bottomNavBarVisibility = context.read<BottomNavBarVisibility>();
+    if (buttonIsVisible) {
+      bottomNavBarVisibility.show();
+    } else {
+      bottomNavBarVisibility.hide();
+    }
+  }
+
   void printReservationInfo(List<dynamic> reservationInfo) {
     print('Reservation Info:');
     print('UserID: ${reservationInfo[0]}');
@@ -123,13 +130,13 @@ class _ReservationPageState extends State<ReservationPage> {
 
     regularCatalogue =
         clubProvider.getCatalogue(catalogues, widget.club, 'Regular');
-    specialCatalogue = clubProvider.getCatalogue(
-        catalogues, widget.club, 'Single'); //Έτσι λεγεται πλεον
+    specialCatalogue =
+        clubProvider.getCatalogue(catalogues, widget.club, 'Single');
     if ((double.parse(specialCatalogue.price)).toInt() <=
         (double.parse(regularCatalogue.price)).toInt()) {
       specialCatalogue =
           clubProvider.getCatalogue(catalogues, widget.club, 'Special');
-    } //Έτσι λεγοταν παλια και μερικα club εχουν αυτη την τιμη
+    }
     premiumCatalogue =
         clubProvider.getCatalogue(catalogues, widget.club, 'Premium');
   }
@@ -139,12 +146,6 @@ class _ReservationPageState extends State<ReservationPage> {
       maxPersons = regularCatalogue.maxPersons * counters['Απλή']! +
           specialCatalogue.maxPersons * counters['Special']! +
           premiumCatalogue.maxPersons * counters['Premium']!;
-    });
-  }
-
-  void onBackPressed(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().show();
     });
   }
 
@@ -173,9 +174,9 @@ class _ReservationPageState extends State<ReservationPage> {
   Future<void> _refresh() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
     await clubProvider.fetchCatalogues(widget.club);
-    initializeCatalogues(); // Reinitialize catalogues with the updated data
-    updateMaxPersons(); // Update maxPersons with the refreshed catalogues
-    setState(() {}); // Trigger a rebuild to reflect the changes
+    initializeCatalogues();
+    updateMaxPersons();
+    setState(() {});
     print('Page refreshed');
   }
 
@@ -195,9 +196,7 @@ class _ReservationPageState extends State<ReservationPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      onPopInvoked: (bool isPopInvoked) {
-        onBackPressed(context);
-      },
+      canPop: buttonIsVisible,
       child: Scaffold(
         backgroundColor: Colors.black,
         body: RefreshIndicator(
@@ -211,8 +210,6 @@ class _ReservationPageState extends State<ReservationPage> {
             ),
             child: ListView(
               children: [
-                ElevatedButton(
-                    onPressed: _refresh, child: const Text('REFRESH PAGE')),
                 buildHeader(context),
                 buildContent(),
               ],
@@ -235,8 +232,8 @@ class _ReservationPageState extends State<ReservationPage> {
                 padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
                 child: IconButton(
                   onPressed: () {
-                    onBackPressed(context);
-                    AutoRouter.of(context).push(const HomeRoute());
+                    Navigator.pop(context);
+                    AutoRouter.of(context).popUntilRoot();
                   },
                   icon: const Icon(
                     Icons.chevron_left,
@@ -346,6 +343,7 @@ class _ReservationPageState extends State<ReservationPage> {
               onDateSelected: (selectedDate) {
                 reservationInfo[8] = selectedDate.toString();
               },
+              days: widget.club.clubAvailability,
             ),
           ),
           const SizedBox(height: 25),
@@ -441,6 +439,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
                   setState(() {
                     buttonIsVisible = false;
+                    _toggleNavBarVisibility(); // Hide the nav bar when button is not visible
                   });
 
                   String rawName = nameTextFieldKey
@@ -500,6 +499,7 @@ class _ReservationPageState extends State<ReservationPage> {
                         );
                       setState(() {
                         buttonIsVisible = true;
+                        _toggleNavBarVisibility(); // Show the nav bar when button is visible
                       });
                     }
                   } else if (reservationInfo[4] == 0 ||
@@ -518,6 +518,7 @@ class _ReservationPageState extends State<ReservationPage> {
                     }
                     setState(() {
                       buttonIsVisible = true;
+                      _toggleNavBarVisibility(); // Show the nav bar when button is visible
                     });
                   } else {
                     bool success = await _bookingService.submitForm(
@@ -554,6 +555,7 @@ class _ReservationPageState extends State<ReservationPage> {
                     }
                     setState(() {
                       buttonIsVisible = true;
+                      _toggleNavBarVisibility(); // Show the nav bar when button is visible
                     });
                   }
                 },
@@ -566,7 +568,7 @@ class _ReservationPageState extends State<ReservationPage> {
                 ),
               ),
             ),
-          const SizedBox(height: 80),
+          const SizedBox(height: 120),
         ],
       ),
     );

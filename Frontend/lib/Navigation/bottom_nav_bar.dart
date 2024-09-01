@@ -17,13 +17,14 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
   Widget build(BuildContext context) {
     return AutoTabsRouter(
       routes: const [
-        HomeRoute(),
-        SearchRoute(),
-        ProfileRoute(),
+        HomeNavigation(),
+        SearchNavigation(),
+        ProfileNavigation(),
       ],
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         final bottomNavBarVisibility = context.watch<BottomNavBarVisibility>();
+        final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
         void onTap(int index) {
           if (tabsRouter.activeIndex == index) {
@@ -40,7 +41,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           body: Stack(
             children: [
               child,
-              if (bottomNavBarVisibility.isVisible)
+              if (bottomNavBarVisibility.isVisible && !isKeyboardVisible)
                 Positioned(
                   left: 40,
                   right: 40,
@@ -58,9 +59,13 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                         unselectedItemColor: Colors.white,
                         backgroundColor: Colors.black,
                         unselectedLabelStyle: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.bold),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                         selectedLabelStyle: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.bold),
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
                         items: const [
                           BottomNavigationBarItem(
                             icon: Icon(Icons.home),

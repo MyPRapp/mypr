@@ -16,24 +16,24 @@ class AppRouter extends $AppRouter {
               children: [
                 AutoRoute(page: HomeRoute.page, initial: true),
                 AutoRoute(page: ReservationRoute.page),
-                AutoRoute(page: SearchRoute.page),
               ],
             ),
-            AutoRoute(page: SearchRoute.page),
+            AutoRoute(page: SearchNavigation.page, children: [
+              AutoRoute(page: SearchRoute.page, initial: true),
+              AutoRoute(page: ReservationRoute.page)
+            ]),
             AutoRoute(
               page: ProfileNavigation.page,
-              initial: false,
               children: [
-                AutoRoute(page: ProfileRoute.page),
+                AutoRoute(page: ProfileRoute.page, initial: true),
                 AutoRoute(page: CustomizeProfileRoute.page),
-                AutoRoute(page: MyBookingsRoute.page, initial: false),
+                AutoRoute(page: MyBookingsRoute.page),
                 AutoRoute(
                     page: BookingDetailsRoute
                         .page), // Handle booking details here
                 AutoRoute(page: FavoritesRoute.page),
                 AutoRoute(page: ContactUsRoute.page),
                 AutoRoute(page: ReservationRoute.page),
-                AutoRoute(page: HomeRoute.page),
               ],
             ),
           ],

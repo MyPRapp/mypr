@@ -1,7 +1,5 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/OtherPages/global_state.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 @RoutePage()
@@ -33,10 +31,6 @@ class ContactUsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().hide();
-    });
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Container(
@@ -49,7 +43,7 @@ class ContactUsPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(top: 50),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Row(
                 children: [
@@ -57,10 +51,7 @@ class ContactUsPage extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 5),
                     child: IconButton(
                       onPressed: () {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          context.read<BottomNavBarVisibility>().show();
-                        });
-                        context.router.back();
+                        AutoRouter.of(context).back();
                       },
                       icon: const Icon(
                         Icons.chevron_left,
@@ -87,7 +78,7 @@ class ContactUsPage extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.only(left: 20),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
@@ -161,7 +152,7 @@ class ContactUsPage extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.all(40),
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
@@ -198,19 +189,18 @@ class ContactUsPage extends StatelessWidget {
                               ),
                             ),
                           ),
+                          Container(
+                            alignment: Alignment.centerRight,
+                            child: Image.asset(
+                              'assets/otherPhotos/Logo_v2.2-removebg.png', // Replace with your logo asset path
+                              height: 140,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
                 ],
-              ),
-              const SizedBox(height: 30),
-              Container(
-                alignment: Alignment.bottomRight,
-                child: Image.asset(
-                  'assets/otherPhotos/Logo_v2.2-removebg.png', // Replace with your logo asset path
-                  height: 140,
-                ),
               ),
             ],
           ),

@@ -31,8 +31,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
-    _checkAndFetchClubs();
     _login();
+    _checkAndFetchClubs();
   }
 
   void _startTimeout() {
@@ -74,6 +74,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
+    // context.router.replaceAll([const BottomNavBarRoute()]);
     setState(() {
       _loginFailed = null; // Reset the login status to trigger the indicator
     });
@@ -134,28 +135,32 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     // Display the gradient background with a red loading indicator in the middle
-    if (_loginFailed == null) {
-      _startTimeout();
-      _loginFailed == false;
-      return Scaffold(
-        body: Container(
-          height: screenHeight,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.black, Color(0xFF9C0C04)],
-              begin: Alignment.center,
-              end: Alignment.bottomCenter,
+    if (_loginFailed == null || _loginFailed == false) {
+      if (_loginFailed != false) {
+        _startTimeout();
+        _loginFailed == true;
+      }
+      return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: Container(
+            height: screenHeight,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black, Color(0xFF9C0C04)],
+                begin: Alignment.center,
+                end: Alignment.bottomCenter,
+              ),
             ),
-          ),
-          child: const Center(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+            child: const Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+              ),
             ),
           ),
         ),
       );
     }
-
     // If login fails, show the login form
     else {
       return Scaffold(

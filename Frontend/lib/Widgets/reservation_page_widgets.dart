@@ -77,7 +77,7 @@ class ConfirmationDialog extends StatelessWidget {
                 onPressed: () {
                   // Close the confirmation dialog
                   Navigator.pop(context);
-                  context.router.back();
+                  AutoRouter.of(context).back();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF9C0C04),
@@ -731,9 +731,11 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
 }
 
 class BookingDatePicker extends StatefulWidget {
-  const BookingDatePicker({super.key, required this.onDateSelected});
+  const BookingDatePicker(
+      {super.key, required this.onDateSelected, required this.days});
 
   final ValueChanged<DateTime> onDateSelected;
+  final String days;
 
   @override
   State<BookingDatePicker> createState() => _BookingDatePickerState();
@@ -742,15 +744,27 @@ class BookingDatePicker extends StatefulWidget {
 class _BookingDatePickerState extends State<BookingDatePicker> {
   DateTime? _selectedDate;
 
+  bool _isDayOpen(DateTime date) {
+    int dayIndex = date.weekday - 1; // Monday = 0, Sunday = 6
+    return widget.days[dayIndex] == '1';
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
+        DateTime now = DateTime.now();
+        DateTime lastDate = now.add(const Duration(days: 30));
+
         DateTime? pickedDate = await showDatePicker(
           context: context,
-          initialDate: _selectedDate ?? DateTime.now(),
-          firstDate: DateTime.now(),
-          lastDate: DateTime(2025),
+          initialDate: _selectedDate ?? now,
+          firstDate: now,
+          lastDate: lastDate,
+          selectableDayPredicate: (DateTime date) {
+            return _isDayOpen(date);
+          },
+          locale: const Locale('el', 'GR'), // Set the locale to Greek
           builder: (BuildContext context, Widget? child) {
             return Theme(
               data: ThemeData.dark().copyWith(
@@ -761,6 +775,11 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
                   onSurface: Colors.white,
                 ),
                 dialogBackgroundColor: Colors.black,
+                textTheme: const TextTheme(
+                  bodySmall: TextStyle(
+                    fontSize: 16, // Adjust font size to make year smaller
+                  ),
+                ),
               ),
               child: child!,
             );
@@ -789,7 +808,8 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
         ),
         child: Text(
           _selectedDate != null
-              ? DateFormat('dd MMMM, yyyy').format(_selectedDate!)
+              ? DateFormat('dd MMMM, yyyy', 'el')
+                  .format(_selectedDate!) // Greek format
               : 'Επιλέξτε ημερομηνία',
           style: const TextStyle(color: Colors.white, fontSize: 16),
         ),

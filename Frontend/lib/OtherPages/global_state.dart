@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class GlobalState with ChangeNotifier {
   static final GlobalState _instance = GlobalState._internal();
-  String _validatedIp = '192.168.1.93';
+  String _validatedIp = '192.168.1.9';
   bool _dataLoaded = false;
 
   GlobalState._internal();

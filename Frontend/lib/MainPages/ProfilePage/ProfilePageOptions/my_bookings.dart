@@ -30,9 +30,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().hide();
-    });
 
     _tabController = TabController(length: 3, vsync: this);
     // Fetch bookings when the page initializes
@@ -178,69 +175,59 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      onPopInvoked: (bool isPopInvoked) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          context.read<BottomNavBarVisibility>().show();
-        });
-      },
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
         backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          leading:
-              Container(), // This replaces the default back button with an empty container
-          flexibleSpace: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        context.read<BottomNavBarVisibility>().show();
-                      });
-                      context.router.back();
-                    },
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      color: Color(0xFF9C0C04),
-                      size: 40,
-                    ),
+        elevation: 0,
+        leading:
+            Container(), // This replaces the default back button with an empty container
+        flexibleSpace: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    AutoRouter.of(context).back();
+                  },
+                  icon: const Icon(
+                    Icons.chevron_left,
+                    color: Color(0xFF9C0C04),
+                    size: 40,
                   ),
-                  const Text(
-                    'ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                ),
+                const Text(
+                  'ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          bottom: TabBar(
-            controller: _tabController,
-            indicatorColor: const Color(0xFF9C0C04),
-            tabs: const [
-              Tab(text: 'Ενεργείς'),
-              Tab(text: 'Εκκρεμείς'),
-              Tab(text: 'Ιστορικό'),
-            ],
-          ),
         ),
-        body: Container(
-          padding: const EdgeInsets.only(top: 20),
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildBookingList(context, 0), // Active bookings
-              _buildBookingList(context, 1), // Pending bookings
-              _buildBookingList(context, 2), // History bookings
-            ],
-          ),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: const Color(0xFF9C0C04),
+          tabs: const [
+            Tab(text: 'Ενεργείς'),
+            Tab(text: 'Εκκρεμείς'),
+            Tab(text: 'Ιστορικό'),
+          ],
+        ),
+      ),
+      body: Container(
+        padding: const EdgeInsets.only(top: 20),
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            _buildBookingList(context, 0), // Active bookings
+            _buildBookingList(context, 1), // Pending bookings
+            _buildBookingList(context, 2), // History bookings
+          ],
         ),
       ),
     );
@@ -260,15 +247,19 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       }
     }).toList();
 
-    return ListView.builder(
-      itemCount: filteredBookings.length,
-      itemBuilder: (context, index) {
-        final booking = filteredBookings[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: BookingCard(booking: booking),
-        );
-      },
+    return Column(
+      children: [
+        ListView.builder(
+          itemCount: filteredBookings.length,
+          itemBuilder: (context, index) {
+            final booking = filteredBookings[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: BookingCard(booking: booking),
+            );
+          },
+        ),
+      ],
     );
   }
 }
@@ -305,7 +296,7 @@ class BookingCard extends StatelessWidget {
             booking.date
                 .isBefore(DateTime.now().subtract(const Duration(days: 1)));
 
-        context.router.push(
+        AutoRouter.of(context).push(
           BookingDetailsRoute(
             booking: booking,
             title: 'ΠΛΗΡΟΦΟΡΙΕΣ ΚΡΑΤΗΣΗΣ',
