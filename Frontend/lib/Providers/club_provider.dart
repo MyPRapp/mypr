@@ -17,10 +17,14 @@ class ClubProvider with ChangeNotifier {
   late final ClubFetcher _clubFetcher;
 
   ClubProvider() {
-    _clubManager = ClubManager(_clubs, _catalogues, _likedClubIDs);
-    _clubLoader = ClubLoader(_clubs, _catalogues, _likedClubIDs);
-    _clubPersistence = ClubPersistence(_clubs, _catalogues, _likedClubIDs);
-    _clubFetcher = ClubFetcher(_clubManager, _clubPersistence);
+    _clubManager =
+        ClubManager(_clubs, _catalogues, _likedClubIDs, notifyListeners);
+
+    _clubLoader =
+        ClubLoader(_clubs, _catalogues, _likedClubIDs, notifyListeners);
+    _clubPersistence =
+        ClubPersistence(_clubs, _catalogues, _likedClubIDs, notifyListeners);
+    _clubFetcher = ClubFetcher(_clubManager, _clubPersistence, notifyListeners);
     _initializeData();
   }
 

@@ -6,8 +6,10 @@ class ClubManager with ChangeNotifier {
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
+  final VoidCallback _notifyListeners;
 
-  ClubManager(this._clubs, this._catalogues, this._likedClubIDs);
+  ClubManager(
+      this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
 
   // GETTERS
   List<ClubInfoStruct> get allClubs => _clubs;
@@ -27,13 +29,13 @@ class ClubManager with ChangeNotifier {
     } else {
       _clubs.add(club);
     }
-    notifyListeners();
+    _notifyListeners();
   }
 
   void removeClub(int clubID) {
     _clubs.removeWhere((club) => club.clubID == clubID);
     _catalogues.removeWhere((catalogue) => catalogue.clubID == clubID);
-    notifyListeners();
+    _notifyListeners();
   }
 
   // CATALOGUE MANAGEMENT
@@ -67,7 +69,7 @@ class ClubManager with ChangeNotifier {
     } else {
       _catalogues.add(catalogue);
     }
-    notifyListeners();
+    _notifyListeners();
   }
 
   CatalogueInfoStruct getCatalogue(ClubInfoStruct club, String serviceType) {
@@ -90,7 +92,7 @@ class ClubManager with ChangeNotifier {
     } else {
       _likedClubIDs.add(clubID);
     }
-    notifyListeners();
+    _notifyListeners();
   }
 
   bool isLiked(int clubID) {
@@ -99,7 +101,7 @@ class ClubManager with ChangeNotifier {
 
   Future<void> deleteAllLiked() async {
     _likedClubIDs.clear();
-    notifyListeners();
+    _notifyListeners();
   }
 
   // UTILITY / HELPER FUNCTIONS

@@ -10,8 +10,10 @@ class ClubPersistence {
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
-
-  ClubPersistence(this._clubs, this._catalogues, this._likedClubIDs);
+  // ignore: unused_field
+  final VoidCallback _notifyListeners;
+  ClubPersistence(
+      this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
 
   // Save clubs to shared preferences
   Future<void> saveClubsToPreferences() async {
