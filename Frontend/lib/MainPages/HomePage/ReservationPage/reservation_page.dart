@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Providers/club_provider.dart';
 import '../../../Providers/user_provider.dart';
-import '../../../global_.components.dart';
+import '../../../global_components.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/points_service.dart';
 

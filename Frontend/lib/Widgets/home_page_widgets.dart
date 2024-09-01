@@ -6,7 +6,7 @@ import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../global_.components.dart';
+import '../global_components.dart';
 
 class SmallClubCard extends StatelessWidget {
   const SmallClubCard({

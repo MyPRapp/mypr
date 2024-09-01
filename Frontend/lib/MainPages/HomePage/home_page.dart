@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
-import 'package:mypr/global_.components.dart';
+import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/club_provider.dart';

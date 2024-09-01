@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/user_provider.dart';
-import '../global_.components.dart';
+import '../global_components.dart';
 
 class ConfirmationDialog extends StatelessWidget {
   final List<dynamic> reservationInfo;

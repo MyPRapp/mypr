@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../global_.components.dart';
+import '../global_components.dart';
 import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
@@ -27,7 +26,7 @@ class UserProvider with ChangeNotifier {
         if (base64Photo.isNotEmpty) {
           await prefs.setString('user_photo', base64Photo);
         } else {
-          print('User photo could not be saved as base64');
+          debugPrint('User photo could not be saved as base64');
         }
       }
     }
@@ -44,9 +43,9 @@ class UserProvider with ChangeNotifier {
 
       // If a photo is saved, convert it back from base64 and assign it to the user details
       if (userPhotoBase64 != null && _userDetails != null) {
-        final Uint8List bytes = base64Decode(userPhotoBase64);
-        _userDetails!.photo =
-            base64Encode(bytes); // Save photo as a base64 string
+        // final Uint8List bytes = base64Decode(userPhotoBase64);
+        // _userDetails!.photo = base64Encode(bytes); // Save photo as a base64 string
+        _userDetails!.photo = userPhotoBase64;
       }
 
       notifyListeners();
@@ -82,10 +81,14 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // Sync user details by loading from preferences and fetching from the server
+  // Sync user details by first fetching from the server and falling back to loading from preferences if fetching fails
   Future<void> syncUserDetails() async {
-    await loadUserDetailsFromPreferences();
-    await fetchUserDetailsFromServer();
-    notifyListeners();
+    try {
+      await fetchUserDetailsFromServer(); // Try fetching from the server
+    } catch (e) {
+      debugPrint('Failed to fetch from server, loading from preferences: $e');
+      await loadUserDetailsFromPreferences(); // If it fails, load from preferences
+    }
+    notifyListeners(); // Notify listeners regardless of where the data came from
   }
 }

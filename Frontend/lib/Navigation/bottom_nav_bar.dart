@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
-import '../global_.components.dart';
+import '../global_components.dart';
 
 @RoutePage()
 class BottomNavBarPage extends StatefulWidget {

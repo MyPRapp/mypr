@@ -5,7 +5,7 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/user_provider.dart';
-import '../global_.components.dart';
+import '../global_components.dart';
 import '../services/auth_service.dart';
 
 class NoEmojisTextInputFormatter extends TextInputFormatter {

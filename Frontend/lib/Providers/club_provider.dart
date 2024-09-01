@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../global_.components.dart';
+import '../global_components.dart';
 import 'global_state_provider.dart';
 
 class ClubProvider with ChangeNotifier {

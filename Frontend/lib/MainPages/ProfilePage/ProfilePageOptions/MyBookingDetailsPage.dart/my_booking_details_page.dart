@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../Providers/club_provider.dart';
 import '../../../../Widgets/booking_card_widgets.dart';
-import '../../../../global_.components.dart';
+import '../../../../global_components.dart';
 import '../../../../routes/app_router.gr.dart';
 
 @RoutePage()

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
 class ClubInfoStruct {
   int clubID;
@@ -274,15 +274,13 @@ Future<String> imageToBase64(String imageUrl) async {
     } else {
       throw Exception('Failed to load image: ${response.statusCode}');
     }
-  } catch (e) {
+  } catch (e, stackTrace) {
     print('Error in imageToBase64: $e');
-    // Return a placeholder or an empty string in case of error
-    return '';
+    print('StackTrace: $stackTrace'); // Log the stack trace
+    return ''; // Consider returning a default image or error code
   }
 }
 
-Future<bool> isConnectedToNetwork() async {
-  var connectivityResult = await (Connectivity().checkConnectivity());
-  // ignore: unrelated_type_equality_checks
-  return connectivityResult != ConnectivityResult.none;
+Future<bool> hasInternetAccess() async {
+  return await InternetConnectionChecker().hasConnection;
 }
