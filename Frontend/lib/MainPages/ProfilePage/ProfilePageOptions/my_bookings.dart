@@ -1,21 +1,12 @@
-import 'dart:convert';
-import 'dart:math';
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
-import '../../../Providers/user_provider.dart';
 import '../../../global_components.dart';
-import '../../../services/booking_service.dart';
-
-// Your custom bookings list
-final List<BookingInfoStruct> bookings = [];
+import '../../../routes/app_router.gr.dart';
 
 @RoutePage()
 class MyBookingsPage extends StatefulWidget {
@@ -32,162 +23,16 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   @override
   void initState() {
     super.initState();
-
     _tabController = TabController(length: 3, vsync: this);
-    // Fetch bookings when the page initializes
-    _fetchBookings();
+
+    // Delay fetchBookings until after the first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchBookings();
+    });
   }
 
   Future<void> _fetchBookings() async {
-    try {
-      final bookingsData = await BookingService().getBookings();
-
-      if (bookingsData != null) {
-        setState(() {
-          bookings.clear(); // Clear existing bookings if any
-          bookings.addAll(bookingsData.map<BookingInfoStruct>((bookingData) {
-            final userDetails = context.read<UserProvider>().userDetails;
-
-            // Initialize catalogues and unpack the result
-            final catalogues = context
-                .read<ClubProvider>()
-                .initializeCatalogues(bookingData['club']);
-            final regularCatalogue = catalogues[0];
-            final specialCatalogue = catalogues[1];
-            final premiumCatalogue = catalogues[2];
-
-            return BookingInfoStruct(
-              bookingID: bookingData['id'],
-              userID: bookingData['user'],
-              clubID: bookingData['club'],
-              bookingName: userDetails!.username,
-              date: DateTime.parse(bookingData['booked_at']),
-              persons: bookingData['number_of_people'],
-              fourbitString: bookingData['booking_type'],
-              price: _calculatePrice(
-                bookingData['booking_type'],
-                regularCatalogue,
-                specialCatalogue,
-                premiumCatalogue,
-              ),
-              status: _determineStatus(
-                  bookingData['status'], bookingData['booked_at']),
-              comments: _generateRandomComment(),
-            );
-          }).toList());
-
-          // Save bookings to shared preferences
-          _saveBookingsToPreferences(bookings);
-        });
-      } else {
-        print('No bookings available or failed to fetch bookings.');
-        // Load bookings from shared preferences if no data from server
-        _loadBookingsFromPreferences();
-      }
-    } catch (e) {
-      print('Failed to load bookings: $e');
-      // Load bookings from shared preferences if there's an error
-      _loadBookingsFromPreferences();
-    }
-  }
-
-  Future<void> _saveBookingsToPreferences(
-      List<BookingInfoStruct> bookings) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String bookingsJson =
-        jsonEncode(bookings.map((booking) => booking.toJson()).toList());
-    await prefs.setString('bookings', bookingsJson);
-  }
-
-  Future<void> _loadBookingsFromPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? bookingsJson = prefs.getString('bookings');
-
-    if (bookingsJson != null) {
-      final List<dynamic> bookingsList = jsonDecode(bookingsJson);
-
-      setState(() {
-        bookings.clear();
-        bookings.addAll(bookingsList.map<BookingInfoStruct>((bookingData) {
-          return BookingInfoStruct.fromJson(bookingData);
-        }).toList());
-      });
-    } else {
-      print('No bookings found in shared preferences.');
-    }
-  }
-
-  int _determineStatus(String status, String bookedAt) {
-    final DateTime bookingDate = DateTime.parse(bookedAt);
-
-    if (bookingDate
-        .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
-      return 2; // History (Ιστορικό)
-    } else {
-      if (status == 'Pending') {
-        return 1; // Pending (Εκκρεμείς)
-      } else if (status == 'Done') {
-        return 0; // Active (Ενεργείς)
-      } else {
-        print('Error: Status is $status');
-        return 3; // Undefined or error status, not displayed
-      }
-    }
-  }
-
-  late CatalogueInfoStruct regularCatalogue;
-  late CatalogueInfoStruct specialCatalogue;
-  late CatalogueInfoStruct premiumCatalogue;
-
-  void initializeCatalogues(int clubID) {
-    ClubProvider clubProvider = context.read<ClubProvider>();
-    // final catalogues = clubProvider.getCataloguesByClubID(clubID);
-
-    // Directly use the club instance (widget.club) instead of passing the entire catalogues list.
-    regularCatalogue =
-        clubProvider.getCatalogue(clubProvider.getClubByID(clubID), 'Regular');
-
-    specialCatalogue =
-        clubProvider.getCatalogue(clubProvider.getClubByID(clubID), 'Single');
-
-    // If the price of the 'Special' catalogue is less than or equal to 'Regular', switch to the 'Special' type
-    if ((double.parse(specialCatalogue.price)).toInt() <=
-        (double.parse(regularCatalogue.price)).toInt()) {
-      specialCatalogue = clubProvider.getCatalogue(
-          clubProvider.getClubByID(clubID), 'Special');
-    }
-
-    premiumCatalogue =
-        clubProvider.getCatalogue(clubProvider.getClubByID(clubID), 'Premium');
-  }
-
-  double _calculatePrice(
-    String fourbitString,
-    CatalogueInfoStruct regularCatalogue,
-    CatalogueInfoStruct specialCatalogue,
-    CatalogueInfoStruct premiumCatalogue,
-  ) {
-    double price = (int.parse(fourbitString[0]) *
-            double.parse(regularCatalogue.price)) +
-        (int.parse(fourbitString[1]) * double.parse(specialCatalogue.price)) +
-        (int.parse(fourbitString[2]) * double.parse(premiumCatalogue.price));
-    return price * (1 - (int.parse(fourbitString[3]) / 100));
-  }
-
-  String _generateRandomComment() {
-    // Generate a random comment
-    final List<String> comments = [
-      'Great service!',
-      'Looking forward to it!',
-      'Please confirm my booking soon.',
-      'Amazing experience!',
-      'Not as expected.',
-      'Fantastic night!',
-      'Excited for the event!',
-      'Looking forward to confirmation.',
-      'Please make sure we have a good table.',
-    ];
-    return comments[Random().nextInt(comments.length)];
+    await context.read<BookingProvider>().fetchBookings(context);
   }
 
   @override
@@ -203,8 +48,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        leading:
-            Container(), // This replaces the default back button with an empty container
+        leading: Container(), // This replaces the default back button
         flexibleSpace: SafeArea(
           child: Padding(
             padding: const EdgeInsets.only(top: 5),
@@ -257,26 +101,65 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   }
 
   Widget _buildBookingList(BuildContext context, int status) {
-    // Filter bookings based on status
-    final filteredBookings = bookings.where((booking) {
-      if (status == 0) {
-        return booking.status == 0; // Active (Ενεργείς)
-      } else if (status == 1) {
-        return booking.status == 1; // Pending (Εκκρεμείς)
-      } else if (status == 2) {
-        return booking.status == 2; // History (Ιστορικό)
-      } else {
-        return false; // Exclude bookings with status 3 (Error or undefined)
-      }
-    }).toList();
+    return Consumer<BookingProvider>(
+      builder: (context, bookingProvider, _) {
+        if (bookingProvider.isLoading) {
+          // Show a loading indicator while fetching data
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF9C0C04),
+            ),
+          );
+        }
 
-    return ListView.builder(
-      itemCount: filteredBookings.length,
-      itemBuilder: (context, index) {
-        final booking = filteredBookings[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: BookingCard(booking: booking),
+        final filteredBookings = bookingProvider.bookings.where((booking) {
+          if (status == 0) {
+            return booking.status == 0; // Active (Ενεργείς)
+          } else if (status == 1) {
+            return booking.status == 1; // Pending (Εκκρεμείς)
+          } else if (status == 2) {
+            return booking.status == 2; // History (Ιστορικό)
+          } else {
+            return false; // Exclude bookings with status 3 (Error or undefined)
+          }
+        }).toList();
+
+        if (filteredBookings.isEmpty) {
+          if (status == 0) {
+            return const Center(
+              child: Text(
+                'Δεν βρέθηκε καμία ενεργή κράτηση.',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+          if (status == 1) {
+            return const Center(
+              child: Text(
+                'Δεν βρέθηκε καμία εκκρεμής κράτηση.',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+          if (status == 2) {
+            return const Center(
+              child: Text(
+                'Δεν βρέθηκε καμία κράτηση στο ιστορικό.',
+                style: TextStyle(color: Colors.white),
+              ),
+            );
+          }
+        }
+
+        return ListView.builder(
+          itemCount: filteredBookings.length,
+          itemBuilder: (context, index) {
+            final booking = filteredBookings[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: BookingCard(booking: booking),
+            );
+          },
         );
       },
     );
@@ -287,27 +170,11 @@ class BookingCard extends StatelessWidget {
   final BookingInfoStruct booking;
 
   const BookingCard({super.key, required this.booking});
-  Future<ImageProvider> _loadClubPhoto(int clubID, String photoUrl) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? base64Image = prefs.getString('club_image_$clubID');
-      if (base64Image != null) {
-        final Uint8List bytes = base64Decode(base64Image);
-        return MemoryImage(bytes);
-      } else {
-        // Fallback to loading from the network if the image isn't in preferences
-        return NetworkImage(photoUrl);
-      }
-    } catch (e) {
-      // Fallback to a default asset image in case of an error
-      return const AssetImage('assets/images/default_club_image.png');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('dd/MM').format(booking.date);
-    ClubProvider clubProvider = context.read<ClubProvider>();
+    final clubProvider = context.read<ClubProvider>();
 
     return GestureDetector(
       onTap: () {
@@ -338,10 +205,8 @@ class BookingCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: FutureBuilder<ImageProvider>(
-                  future: _loadClubPhoto(
-                    booking.clubID,
-                    clubProvider.getClubByID(booking.clubID).clubPhoto,
-                  ),
+                  future: ImageLoader.loadClubPhoto(booking.clubID,
+                      clubProvider.getClubByID(booking.clubID).clubPhoto),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done &&
                         snapshot.hasData) {

@@ -5,10 +5,8 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Providers/club_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
-import '../services/auth_service.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -22,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _serverController = TextEditingController();
-  final AuthService _authService = AuthService();
+
   bool _obscureText = true;
   bool? _loginFailed;
 
@@ -34,18 +32,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
-    _login();
-    await _checkAndFetchClubs();
-  }
-
-  void _startTimeout() {
-    Future.delayed(const Duration(seconds: 3), () {
-      if (_loginFailed == null) {
-        setState(() {
-          _loginFailed = true;
-        });
-      }
-    });
+    await _login();
   }
 
   Future<void> _loadSavedUserCredentials() async {
@@ -61,70 +48,58 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _checkAndFetchClubs() async {
-    final globalState = context.read<GlobalStateProvider>();
-    if (!globalState.dataLoaded) {
-      await _fetchClubsAndCatalogues();
-      if (mounted) {
-        globalState.setDataLoaded(true);
-      }
-    }
-  }
-
-  Future<void> _fetchClubsAndCatalogues() async {
-    ClubProvider clubProvider = context.read<ClubProvider>();
-    await clubProvider.fetchClubsAndCatalogues();
-  }
-
   Future<void> _login() async {
-    // context.router.replaceAll([const BottomNavBarRoute()]);
     setState(() {
       _loginFailed = null; // Reset the login status to trigger the indicator
     });
     _startTimeout(); // Start the timeout again
-    final globalState = context.read<GlobalStateProvider>();
+
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
-    bool success = await _authService.login(email, password);
+
+    bool success =
+        await context.read<UserProvider>().login(context, email, password);
 
     if (mounted) {
       setState(() {
         _loginFailed = !success;
       });
       if (success) {
-        await context.read<UserProvider>().syncUserDetails();
-        if (globalState.dataLoaded) {
-          await _fetchClubsAndCatalogues();
-        }
-        if (mounted) {
-          context.router.replaceAll([const BottomNavBarRoute()]);
-        }
+        context.router.replaceAll([const BottomNavBarRoute()]);
       } else {
-        if (_emailController.text.isNotEmpty &&
-            _passwordController.text.isNotEmpty) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                duration: Duration(seconds: 4),
-                content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
-              ),
-            );
-        }
+        _handleLoginFailure();
       }
     }
+  }
+
+  void _handleLoginFailure() {
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            duration: Duration(seconds: 4),
+            content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
+          ),
+        );
+    }
+  }
+
+  void _startTimeout() {
+    Future.delayed(const Duration(seconds: 5), () {
+      if (_loginFailed == null) {
+        setState(() {
+          _loginFailed = true;
+        });
+      }
+    });
   }
 
   void _togglePasswordVisibility() {
     setState(() {
       _obscureText = !_obscureText;
     });
-  }
-
-  void _navigateToSignUpPage() {
-    if (mounted) {
-      context.router.replaceAll([const SignUpRoute()]);
-    }
   }
 
   @override
@@ -327,7 +302,10 @@ class _LoginPageState extends State<LoginPage> {
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: TextButton(
-                                onPressed: _navigateToSignUpPage,
+                                onPressed: () {
+                                  context.router
+                                      .replaceAll([const SignUpRoute()]);
+                                },
                                 child: const Text(
                                   'Δημιουργία λογαριασμού',
                                   style: TextStyle(
@@ -407,10 +385,11 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               onPressed: () {
                                 String serverIp = _serverController.text.trim();
-                                if (serverIp != '' && serverIp != ' ') {
+                                if (serverIp.isNotEmpty) {
                                   final globalState =
                                       context.read<GlobalStateProvider>();
                                   globalState.validatedIp = serverIp;
+                                  // Trigger data fetching if necessary
                                   _initialize();
                                 }
                                 print(

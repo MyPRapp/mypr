@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClubInfoStruct {
   int clubID;
@@ -64,7 +66,6 @@ class ClubInfoStruct {
 class UserInfoStruct {
   int userID, points;
   String username;
-  String password;
   String firstName;
   String lastName;
   String email;
@@ -74,7 +75,6 @@ class UserInfoStruct {
   UserInfoStruct({
     required this.userID,
     this.username = '',
-    this.password = '',
     this.firstName = '',
     this.lastName = '',
     this.email = '',
@@ -87,7 +87,6 @@ class UserInfoStruct {
     return UserInfoStruct(
         userID: json['id'] ?? -1,
         username: json['username'] ?? '',
-        password: json['password'] ?? '',
         firstName: json['first_name'] ?? '',
         lastName: json['last_name'] ?? '',
         email: json['email'] ?? '',
@@ -100,7 +99,6 @@ class UserInfoStruct {
     return {
       'id': userID,
       'username': username,
-      'password': password,
       'first_name': firstName,
       'last_name': lastName,
       'email': email,
@@ -281,6 +279,26 @@ Future<String> imageToBase64(String imageUrl) async {
   }
 }
 
+class ImageLoader {
+  /// Loads an image from SharedPreferences or falls back to a network image or default image.
+  static Future<ImageProvider> loadClubPhoto(
+      int clubID, String photoUrl) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final base64Image = prefs.getString('club_image_$clubID');
+      if (base64Image != null) {
+        final bytes = base64Decode(base64Image);
+        return MemoryImage(bytes);
+      } else {
+        return NetworkImage(photoUrl);
+      }
+    } catch (e) {
+      debugPrint('Error loading club photo: $e');
+      return const AssetImage('assets/images/default_club_image.png');
+    }
+  }
+}
+
 TextStyle textStyle1() {
   return const TextStyle(
     fontSize: 20,
@@ -299,4 +317,22 @@ TextStyle textStyle2() {
 
 Future<bool> hasInternetAccess() async {
   return await InternetConnectionChecker().hasConnection;
+}
+
+Future<ImageProvider?> loadUserPhoto(String photoPath) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? base64Photo = prefs.getString('user_photo');
+    if (base64Photo != null) {
+      final Uint8List bytes = base64Decode(base64Photo);
+      return MemoryImage(bytes);
+    }
+
+    // Attempt to load from network
+    return NetworkImage(
+        'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
+  } catch (e) {
+    // Return null to indicate an error
+    return null;
+  }
 }

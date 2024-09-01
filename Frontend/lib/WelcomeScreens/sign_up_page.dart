@@ -3,27 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Providers/club_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
 import '../services/auth_service.dart';
-
-class NoEmojisTextInputFormatter extends TextInputFormatter {
-  // RegExp to allow Greek and English letters, numbers, and specific symbols without emojis and whitespace (spaces, tabs, etc.)
-  final RegExp _allowedCharacters =
-      RegExp(r'^[\p{L}\p{N}\p{P}!@#$%^&*(){}]+$', unicode: true);
-
-  @override
-  TextEditingValue formatEditUpdate(
-      TextEditingValue oldValue, TextEditingValue newValue) {
-    // If the new value is empty or only contains allowed characters (no spaces or disallowed characters)
-    if (newValue.text.isEmpty || _allowedCharacters.hasMatch(newValue.text)) {
-      return newValue;
-    }
-    // If the new value contains restricted characters, including spaces, return the old value
-    return oldValue;
-  }
-}
 
 @RoutePage()
 class SignUpPage extends StatefulWidget {
@@ -45,6 +30,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _obscureText = true;
   bool _obscureText2 = true;
+  bool _isRegistering = false;
+  bool _showLoadingIndicator = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -72,20 +59,40 @@ class _SignUpPageState extends State<SignUpPage> {
           AutoRouter.of(context).replaceAll([const BottomNavBarRoute()]);
         }
       } else {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-          ..showSnackBar(
-            const SnackBar(
-              duration: Duration(seconds: 4),
-              content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
-            ),
-          );
+        _showErrorSnackBar('Λάθος email/τηλέφωνο ή κωδικός');
+        setState(() {
+          _isRegistering = false; // Re-enable the register button
+        });
       }
     }
   }
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isRegistering = true;
+      });
+
+      // Show loading indicator after 5 seconds if still registering
+      Future.delayed(const Duration(seconds: 3), () {
+        if (mounted && _isRegistering) {
+          setState(() {
+            _showLoadingIndicator = true;
+          });
+        }
+      });
+
+      // Time out registration after 10 seconds if no response
+      Future.delayed(const Duration(seconds: 10), () {
+        if (mounted && _isRegistering) {
+          setState(() {
+            _isRegistering = false;
+            _showLoadingIndicator = false;
+          });
+          _showErrorSnackBar('Προέκυψε πρόβλημα, δοκιμάστε ξανά.');
+        }
+      });
+
       String firstName = _firstNameController.text.trim();
       String lastName = _lastNameController.text.trim();
       String username = "$firstName$lastName";
@@ -93,39 +100,65 @@ class _SignUpPageState extends State<SignUpPage> {
       String password = _passwordController.text.trim();
       String phone = _phoneController.text.trim();
       int points = 20;
+
       bool registerSuccess = await _authService.register(
-          username, password, firstName, lastName, email, phone, points);
+        username,
+        password,
+        firstName,
+        lastName,
+        email,
+        phone,
+        points,
+      );
 
       if (!mounted) return;
 
       if (registerSuccess) {
-        _login();
+        // Clear preferences after successful registration
+        await _clearPreferences();
+
+        // Proceed with login after clearing preferences
+        await _login();
       } else {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-          ..showSnackBar(
-            const SnackBar(
-              duration: Duration(seconds: 4),
-              content: Text('Υπήρξε κάποιο πρόβλημα κατά την εγγραφή'),
-            ),
-          );
+        _showErrorSnackBar('Υπήρξε κάποιο πρόβλημα κατά την εγγραφή');
+        setState(() {
+          _isRegistering = false; // Re-enable the register button
+          _showLoadingIndicator = false; // Hide the loading indicator
+        });
       }
     } else {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Παρακαλώ συμπληρώστε όλα τα πεδία'),
-            duration: Duration(seconds: 4),
-          ),
-        );
+      _showErrorSnackBar('Παρακαλώ συμπληρώστε όλα τα πεδία');
     }
   }
 
-  void _navigateToEmailLoginPage() {
+  Future<void> _clearPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Delete liked clubs
     if (mounted) {
-      AutoRouter.of(context).replaceAll([const LoginRoute()]);
+      ClubProvider clubProvider = context.read<ClubProvider>();
+      await clubProvider.deleteAllLiked();
     }
+
+    // Remove user-related preferences
+    await prefs.remove('saved_email');
+    await prefs.remove('saved_password');
+    await prefs.remove('user_details');
+    await prefs.remove('user_photo');
+
+    // Remove booking-related preferences
+    await prefs.remove('bookings');
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
+      ..showSnackBar(
+        SnackBar(
+          content: Text(message),
+          duration: const Duration(seconds: 4),
+        ),
+      );
   }
 
   @override
@@ -542,7 +575,10 @@ class _SignUpPageState extends State<SignUpPage> {
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: _navigateToEmailLoginPage,
+                                  onPressed: () {
+                                    AutoRouter.of(context)
+                                        .replaceAll([const LoginRoute()]);
+                                  },
                                   child: const Text(
                                     'Συνδέσου',
                                     style: TextStyle(
@@ -561,28 +597,36 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 30),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                          side: const BorderSide(color: Color(0xFF9C0C04)),
-                        ),
-                        backgroundColor: Colors.transparent,
-                      ),
-                      onPressed: () {
-                        _register();
-                      },
-                      child: const Text(
-                        'Εγγραφή',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    child: _isRegistering
+                        ? _showLoadingIndicator
+                            ? const CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    Color(0xFF9C0C04)),
+                              )
+                            : const SizedBox(
+                                height: 50, // Placeholder to maintain layout
+                              )
+                        : ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side:
+                                    const BorderSide(color: Color(0xFF9C0C04)),
+                              ),
+                              backgroundColor: Colors.transparent,
+                            ),
+                            onPressed: _register,
+                            child: const Text(
+                              'Εγγραφή',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                   ),
                 ],
               ),

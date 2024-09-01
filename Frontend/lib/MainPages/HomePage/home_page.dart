@@ -23,13 +23,18 @@ class _HomePageState extends State<HomePage> {
       context.read<BottomNavBarVisibility>().show();
     });
     _syncClubs();
+    _syncUserDetails();
+  }
+
+  // ignore: unused_element
+  Future<void> _syncUserDetails() async {
+    UserProvider userProvider = context.read<UserProvider>();
+    userProvider.syncUserDetails();
   }
 
   Future<void> _syncClubs() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
-    UserProvider userProvider = context.read<UserProvider>();
     await clubProvider.syncClubs();
-    userProvider.syncUserDetails();
   }
 
   void navigateToSearchTab(BuildContext context) {
@@ -106,6 +111,30 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
+                      // Padding(
+                      //   padding: const EdgeInsets.only(
+                      //       left: 20, top: 15, bottom: 10),
+                      //   child: Text(
+                      //     'Επιλογές κοντά σου',
+                      //     style: textStyle1(),
+                      //   ),
+                      // ),
+                      // Consumer<ClubProvider>(
+                      //     builder: (context, clubProvider, _) {
+                      //   return SizedBox(
+                      //     height: 200,
+                      //     child: ListView.builder(
+                      //       scrollDirection: Axis.horizontal,
+                      //       itemCount: clubProvider.allClubs.length,
+                      //       itemBuilder: (context, index) {
+                      //         final club = clubProvider.allClubs[index];
+                      //         return SmallClubCard(
+                      //           club: club,
+                      //         );
+                      //       },
+                      //     ),
+                      //   );
+                      // }),
                       Padding(
                         padding: const EdgeInsets.only(
                             left: 20, top: 10, bottom: 10),

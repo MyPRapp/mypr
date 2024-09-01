@@ -21,7 +21,8 @@ class LikeButton extends StatefulWidget {
   LikeButtonState createState() => LikeButtonState();
 }
 
-class LikeButtonState extends State<LikeButton> {
+class LikeButtonState extends State<LikeButton>
+    with SingleTickerProviderStateMixin {
   bool tapped = false;
 
   @override
@@ -33,14 +34,14 @@ class LikeButtonState extends State<LikeButton> {
 
     return GestureDetector(
       onTap: () {
-        clubProvider.toggleLike(widget.club.clubID);
         setState(() {
           tapped = true;
         });
 
+        clubProvider.toggleLike(widget.club.clubID);
+
         // Show SnackBar based on like status
         if (isLiked) {
-          // If it was liked, show removal message
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
@@ -50,7 +51,6 @@ class LikeButtonState extends State<LikeButton> {
               ),
             );
         } else {
-          // If it was not liked, show added message
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
@@ -64,12 +64,14 @@ class LikeButtonState extends State<LikeButton> {
         // If onRemove is provided and the club is no longer liked, trigger the callback
         if (widget.onRemove != null &&
             !clubProvider.isLiked(widget.club.clubID)) {
-          tapped = false;
           widget.onRemove!();
         }
 
-        setState(() {
-          tapped = false;
+        // Reset tapped state after the animation completes
+        Future.delayed(const Duration(milliseconds: 800), () {
+          setState(() {
+            tapped = false;
+          });
         });
       },
       child: SizedBox(

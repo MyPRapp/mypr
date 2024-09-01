@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../global_components.dart';
+import '../services/auth_service.dart';
 import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
@@ -89,5 +90,20 @@ class UserProvider with ChangeNotifier {
       await loadUserDetailsFromPreferences(); // If it fails, load from preferences
     }
     notifyListeners(); // Notify listeners regardless of where the data came from
+  }
+
+  // Moved login function to UserProvider
+  Future<bool> login(
+      BuildContext context, String email, String password) async {
+    final AuthService authService = AuthService();
+    bool success = await authService.login(email, password);
+
+    if (success) {
+      await syncUserDetails();
+      return true;
+    } else {
+      await loadUserDetailsFromPreferences(); // Load from preferences if login fails
+      return false;
+    }
   }
 }

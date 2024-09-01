@@ -16,14 +16,19 @@ class SearchPage extends StatefulWidget {
 class SearchPageState extends State<SearchPage> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  late List<String> _clubs;
   List<String> _filteredClubs = [];
   bool _isDropdownVisible = false;
 
   @override
   void initState() {
     super.initState();
+    _clubs = context
+        .read<ClubProvider>()
+        .allClubs
+        .map((club) => club.clubName)
+        .toList();
 
-    // Listen to controller changes
     _controller.addListener(() {
       filterClubs(_controller.text);
     });
@@ -37,15 +42,19 @@ class SearchPageState extends State<SearchPage> {
   }
 
   void filterClubs(String query) {
-    final clubProvider = context.read<ClubProvider>();
-    final List<String> clubs =
-        clubProvider.allClubs.map((club) => club.clubName).toList();
+    if (_clubs.isEmpty) {
+      setState(() {
+        _filteredClubs = [];
+        _isDropdownVisible = false;
+      });
+      return;
+    }
 
     setState(() {
       if (query.isEmpty) {
-        _filteredClubs = clubs; // Show all clubs if the query is empty
+        _filteredClubs = _clubs;
       } else {
-        _filteredClubs = clubs
+        _filteredClubs = _clubs
             .where((club) => club.toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
@@ -63,7 +72,7 @@ class SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
-            FocusScope.of(context).unfocus(); // Close the keyboard
+            FocusScope.of(context).unfocus();
             setState(() {
               _isDropdownVisible = false;
             });
@@ -86,15 +95,24 @@ class SearchPageState extends State<SearchPage> {
                     controller: _controller,
                     focusNode: _focusNode,
                     style: const TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: 'Τι ψάχνεις;',
-                      hintStyle:
-                          TextStyle(color: Color.fromARGB(255, 182, 176, 176)),
-                      border: OutlineInputBorder(
+                      hintStyle: const TextStyle(
+                          color: Color.fromARGB(255, 182, 176, 176)),
+                      border: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(8)),
                         borderSide: BorderSide.none,
                       ),
-                      prefixIcon: Icon(Icons.search, color: Colors.grey),
+                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                      suffixIcon: _controller.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, color: Colors.grey),
+                              onPressed: () {
+                                _controller.clear();
+                                filterClubs('');
+                              },
+                            )
+                          : null,
                     ),
                   ),
                   if (_isDropdownVisible)
@@ -106,9 +124,9 @@ class SearchPageState extends State<SearchPage> {
                             const BorderRadius.all(Radius.circular(8)),
                       ),
                       child: SizedBox(
-                        height: 350, // Limit the dropdown height to 200 pixels
+                        height: 350,
                         child: ListView.builder(
-                          padding: EdgeInsets.zero, // Remove padding
+                          padding: EdgeInsets.zero,
                           shrinkWrap: true,
                           itemCount: _filteredClubs.length,
                           itemBuilder: (context, index) {
@@ -120,15 +138,15 @@ class SearchPageState extends State<SearchPage> {
                                 style: const TextStyle(color: Colors.white),
                               ),
                               onTap: () {
+                                setState(() {
+                                  _isDropdownVisible = false;
+                                });
                                 AutoRouter.of(context).push(ReservationRoute(
                                   club: context
                                       .read<ClubProvider>()
                                       .getClubByName(clubName),
                                 ));
-                                setState(() {
-                                  _isDropdownVisible = false;
-                                  _controller.clear();
-                                });
+                                _controller.clear();
                               },
                             );
                           },
