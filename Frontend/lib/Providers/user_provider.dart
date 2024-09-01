@@ -84,7 +84,8 @@ class UserProvider with ChangeNotifier {
     try {
       await fetchUserDetailsFromServer(); // Try fetching from the server
     } catch (e) {
-      debugPrint('Failed to fetch from server, loading from preferences: $e');
+      debugPrint(
+          'Failed to fetch user data from server, loading from preferences: $e');
       await loadUserDetailsFromPreferences(); // If it fails, load from preferences
     }
     notifyListeners(); // Notify listeners regardless of where the data came from

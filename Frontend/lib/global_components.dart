@@ -281,6 +281,22 @@ Future<String> imageToBase64(String imageUrl) async {
   }
 }
 
+TextStyle textStyle1() {
+  return const TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+  );
+}
+
+TextStyle textStyle2() {
+  return const TextStyle(
+    fontSize: 18,
+    fontWeight: FontWeight.bold,
+    color: Color(0xFF9C0C04),
+  );
+}
+
 Future<bool> hasInternetAccess() async {
   return await InternetConnectionChecker().hasConnection;
 }

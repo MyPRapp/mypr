@@ -47,7 +47,8 @@ class ClubLoader {
             ),
           );
 
-          clubStruct.clubMinPrice = int.tryParse(regularCatalogue.price) ?? 0;
+          clubStruct.clubMinPrice =
+              (double.parse(regularCatalogue.price)).toInt();
           clubStruct.clubMaxPersons = regularCatalogue.maxPersons;
 
           _clubs.add(clubStruct);
@@ -65,6 +66,7 @@ class ClubLoader {
     if (cataloguesJson != null) {
       try {
         final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
+
         _catalogues.clear();
         for (var catalogue in cataloguesList) {
           _catalogues.add(CatalogueInfoStruct.fromJson(catalogue));

@@ -25,13 +25,24 @@ class ClubProvider with ChangeNotifier {
     _clubPersistence =
         ClubPersistence(_clubs, _catalogues, _likedClubIDs, notifyListeners);
     _clubFetcher = ClubFetcher(_clubManager, _clubPersistence, notifyListeners);
-    _initializeData();
   }
 
-  Future<void> _initializeData() async {
-    await _clubLoader.loadClubsFromPreferences();
-    await _clubLoader.loadCataloguesFromPreferences();
+  Future<void> syncClubs() async {
+    try {
+      // Attempt to fetch clubs and catalogues from the network
+      await _clubFetcher.fetchClubsAndCatalogues();
+    } catch (e) {
+      // If there's an error, load clubs and catalogues from local storage
+      print('Error fetching club data, loading from preferences: $e');
+      await _clubLoader.loadClubsFromPreferences();
+      await _clubLoader.loadCataloguesFromPreferences();
+    }
+
+    // Load liked clubs from preferences regardless of the outcome
     await _clubLoader.loadLikedClubsFromPreferences();
+
+    // Notify listeners that the data has been initialized
+    notifyListeners();
   }
 
   Future<void> fetchClubsAndCatalogues() async {

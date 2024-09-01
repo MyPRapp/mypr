@@ -35,7 +35,7 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _initialize() async {
     await _loadSavedUserCredentials();
     _login();
-    _checkAndFetchClubs();
+    await _checkAndFetchClubs();
   }
 
   void _startTimeout() {

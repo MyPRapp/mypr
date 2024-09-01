@@ -5,6 +5,7 @@ import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/club_provider.dart';
+import '../../Providers/user_provider.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
@@ -21,12 +22,14 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
+    _syncClubs();
   }
 
-  Future<void> _refresh() async {
+  Future<void> _syncClubs() async {
     ClubProvider clubProvider = context.read<ClubProvider>();
-    await clubProvider.fetchClubsAndCatalogues();
-    print('Page refreshed');
+    UserProvider userProvider = context.read<UserProvider>();
+    await clubProvider.syncClubs();
+    userProvider.syncUserDetails();
   }
 
   void navigateToSearchTab(BuildContext context) {
@@ -36,15 +39,10 @@ class _HomePageState extends State<HomePage> {
     if (tabsRouter.activeIndex != 1) {
       tabsRouter.setActiveIndex(1);
     }
-
-    // Ensure SearchRoute is pushed on the SearchNavigation stack
-    // AutoRouter.of(context).push(const SearchNavigation());
   }
 
   @override
   Widget build(BuildContext context) {
-    ClubProvider clubProvider = context.watch<ClubProvider>();
-
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -56,16 +54,9 @@ class _HomePageState extends State<HomePage> {
                 Container(
                   height: constraints.maxHeight,
                   color: const Color.fromARGB(197, 40, 40, 40),
-                  // decoration: const BoxDecoration(
-                  //   image: DecorationImage(
-                  //     image:
-                  //         AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
-                  //     fit: BoxFit.cover,
-                  //   ),
-                  // ),
                 ),
                 RefreshIndicator(
-                  onRefresh: _refresh,
+                  onRefresh: _syncClubs,
                   child: ListView(
                     children: [
                       Padding(
@@ -115,27 +106,6 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
-                      // Padding(
-                      //   padding:
-                      //       const EdgeInsets.only(left: 20, top: 15, bottom: 10),
-                      //   child: Text(
-                      //     'Επιλογές κοντά σου',
-                      //     style: textStyle1(),
-                      //   ),
-                      // ),
-                      // SizedBox(
-                      //   height: 200,
-                      //   child: ListView.builder(
-                      //     scrollDirection: Axis.horizontal,
-                      //     itemCount: clubProvider.allClubs.length,
-                      //     itemBuilder: (context, index) {
-                      //       final club = clubProvider.allClubs[index];
-                      //       return SmallClubCard(
-                      //         club: club,
-                      //       );
-                      //     },
-                      //   ),
-                      // ),
                       Padding(
                         padding: const EdgeInsets.only(
                             left: 20, top: 10, bottom: 10),
@@ -144,14 +114,18 @@ class _HomePageState extends State<HomePage> {
                           style: textStyle1(),
                         ),
                       ),
-                      ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: clubProvider.allClubs.length,
-                        itemBuilder: (context, index) {
-                          final club = clubProvider.allClubs[index];
-                          return BigClubCard(
-                            club: club,
+                      Consumer<ClubProvider>(
+                        builder: (context, clubProvider, _) {
+                          return ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: clubProvider.allClubs.length,
+                            itemBuilder: (context, index) {
+                              final club = clubProvider.allClubs[index];
+                              return BigClubCard(
+                                club: club,
+                              );
+                            },
                           );
                         },
                       ),
@@ -164,22 +138,6 @@ class _HomePageState extends State<HomePage> {
           },
         ),
       ),
-    );
-  }
-
-  TextStyle textStyle1() {
-    return const TextStyle(
-      fontSize: 20,
-      fontWeight: FontWeight.bold,
-      color: Colors.white,
-    );
-  }
-
-  TextStyle textStyle2() {
-    return const TextStyle(
-      fontSize: 18,
-      fontWeight: FontWeight.bold,
-      color: Color(0xFF9C0C04),
     );
   }
 }

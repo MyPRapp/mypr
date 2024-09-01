@@ -220,7 +220,9 @@ class _ReservationPageState extends State<ReservationPage> {
                 padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
                 child: IconButton(
                   onPressed: () {
-                    AutoRouter.of(context).back();
+                    if (buttonIsVisible) {
+                      AutoRouter.of(context).back();
+                    }
                   },
                   icon: const Icon(
                     Icons.chevron_left,

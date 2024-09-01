@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:ui';
 
@@ -13,13 +14,15 @@ class ClubFetcher {
   final ClubPersistence _clubPersistence;
   // ignore: unused_field
   final VoidCallback _notifyListeners;
+
   ClubFetcher(this._clubManager, this._clubPersistence, this._notifyListeners);
 
   Future<void> fetchClubsAndCatalogues() async {
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
     try {
-      final response = await http.get(Uri.parse(url));
+      final response =
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final List<dynamic> data = jsonDecode(decodedBody);
@@ -45,10 +48,15 @@ class ClubFetcher {
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
+    } on http.ClientException catch (e) {
+      print('ClientException while fetching clubs: $e');
+      rethrow; // Rethrow the exception to allow the calling function to handle it
+    } on TimeoutException catch (e) {
+      print('TimeoutException while fetching clubs: $e');
+      rethrow; // Rethrow the exception to allow the calling function to handle it
     } catch (e) {
-      // Handle the error more gracefully, possibly by notifying the UI
       print('Error fetching clubs: $e');
-      // Optionally rethrow or handle the error in a way that doesn't crash the app
+      rethrow; // Rethrow the exception to allow the calling function to handle it
     }
   }
 
@@ -67,7 +75,8 @@ class ClubFetcher {
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/${club.clubID}/catalogue';
     try {
-      final response = await http.get(Uri.parse(url));
+      final response =
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
         if (data.isNotEmpty) {
@@ -76,7 +85,8 @@ class ClubFetcher {
             _clubManager.addOrUpdateCatalogue(catalogue);
 
             if (catalogue.serviceType == 'Regular') {
-              club.clubMinPrice = int.tryParse(catalogue.price) ?? 0;
+              club.clubMinPrice =
+                  (double.tryParse(catalogue.price)?.toInt() ?? 0);
               club.clubMaxPersons = catalogue.maxPersons;
               _clubManager.addOrUpdateClub(club);
             }
@@ -85,9 +95,15 @@ class ClubFetcher {
       } else {
         throw Exception('Failed to load catalogues: ${response.reasonPhrase}');
       }
+    } on http.ClientException catch (e) {
+      print('ClientException while fetching catalogues: $e');
+      rethrow; // Rethrow the exception to allow the calling function to handle it
+    } on TimeoutException catch (e) {
+      print('TimeoutException while fetching catalogues: $e');
+      rethrow; // Rethrow the exception to allow the calling function to handle it
     } catch (e) {
       print('Error fetching catalogues: $e');
-      // Handle or rethrow the exception if needed
+      rethrow; // Rethrow the exception to allow the calling function to handle it
     }
   }
 }

@@ -47,7 +47,7 @@ class BookingDetailsPage extends StatelessWidget {
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
     final earnedPoints = (booking.price * 0.1).toInt();
     final discountPercentage =
-        (int.tryParse(booking.fourbitString[3]) ?? 0) * 10;
+        (double.tryParse(booking.fourbitString[3])?.toInt())! * 10;
     ClubProvider clubProvider = context.read<ClubProvider>();
 
     return Scaffold(
