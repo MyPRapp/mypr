@@ -56,7 +56,7 @@ class ClubProvider with ChangeNotifier {
   // Club Manager Functions
   List<ClubInfoStruct> get allClubs => _clubManager.allClubs;
   List<CatalogueInfoStruct> get allCatalogues => _clubManager.allCatalogues;
-  List<ClubInfoStruct> get likedClubs => _clubManager.likedClubs;
+  List<ClubInfoStruct> get likedClubs => _clubManager.allLikedClubs;
 
   List<CatalogueInfoStruct> initializeCatalogues(int clubID) {
     return _clubManager.initializeCatalogues(clubID);

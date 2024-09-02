@@ -16,7 +16,6 @@ class ClubInfoStruct {
   String clubLocation;
   double clubRating;
   String clubAvailability;
-  bool clubIsLiked;
   String clubPhoto;
 
   ClubInfoStruct({
@@ -28,7 +27,6 @@ class ClubInfoStruct {
     this.clubLocation = '',
     this.clubRating = -1,
     this.clubAvailability = '',
-    this.clubIsLiked = false,
     this.clubPhoto = '',
   });
 

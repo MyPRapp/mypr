@@ -4,6 +4,7 @@ import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Providers/club_provider.dart';
+import '../../../global_components.dart';
 
 @RoutePage()
 class FavoritesPage extends StatefulWidget {
@@ -16,7 +17,6 @@ class FavoritesPage extends StatefulWidget {
 class FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
-    ClubProvider clubProvider = context.watch<ClubProvider>();
     return Scaffold(
       backgroundColor: const Color.fromARGB(192, 37, 37, 37),
       body: ListView(
@@ -59,7 +59,7 @@ class FavoritesPageState extends State<FavoritesPage> {
                           ),
                           backgroundColor: const Color(0xFF9C0C04),
                         ),
-                        onPressed: clubProvider.deleteAllLiked,
+                        onPressed: context.read<ClubProvider>().deleteAllLiked,
                         child: const Text(
                           'Αφαίρεση όλων',
                           style: TextStyle(
@@ -73,9 +73,9 @@ class FavoritesPageState extends State<FavoritesPage> {
               ],
             ),
           ),
-          Consumer<ClubProvider>(
-            builder: (context, clubProvider, child) {
-              final likedClubs = clubProvider.likedClubs;
+          Selector<ClubProvider, List<ClubInfoStruct>>(
+            selector: (context, clubProvider) => clubProvider.likedClubs,
+            builder: (context, likedClubs, child) {
               return SizedBox(
                 height: likedClubs.length * 200,
                 child: ListView.builder(
@@ -84,6 +84,7 @@ class FavoritesPageState extends State<FavoritesPage> {
                   itemBuilder: (context, index) {
                     final club = likedClubs[index];
                     return BigClubCard(
+                      key: ValueKey(club.clubID), // Assign a unique key
                       club: club,
                     );
                   },

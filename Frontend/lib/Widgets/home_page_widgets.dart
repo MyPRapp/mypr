@@ -125,8 +125,14 @@ class _BigClubCardState extends State<BigClubCard> {
   @override
   void initState() {
     super.initState();
-    _imageFuture =
-        ImageLoader.loadClubPhoto(widget.club.clubID, widget.club.clubPhoto);
+    _loadImage(); // Load the image when the widget is initialized
+  }
+
+  void _loadImage() {
+    setState(() {
+      _imageFuture =
+          ImageLoader.loadClubPhoto(widget.club.clubID, widget.club.clubPhoto);
+    });
   }
 
   List<bool> _daysOpen(String availabilityInBytes) {
