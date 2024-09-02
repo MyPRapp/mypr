@@ -85,16 +85,6 @@ class _ProfilePageState extends State<ProfilePage> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ElevatedButton(
-                        onPressed: _refresh,
-                        child: const Text('REFRESH ME'),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
                       const Padding(
                         padding: EdgeInsets.only(top: 25),
                         child: Divider(
