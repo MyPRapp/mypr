@@ -11,6 +11,7 @@ class ClubLoader {
   final List<int> _likedClubIDs;
   // ignore: unused_field
   final VoidCallback _notifyListeners;
+
   ClubLoader(
       this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
 
@@ -21,6 +22,7 @@ class ClubLoader {
 
     if (clubsJson != null && cataloguesJson != null) {
       try {
+        print('Loading clubs from preferences');
         final List<dynamic> clubsList = jsonDecode(clubsJson);
         final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
 
@@ -52,11 +54,14 @@ class ClubLoader {
           clubStruct.clubMaxPersons = regularCatalogue.maxPersons;
 
           _clubs.add(clubStruct);
+          print(
+              'Loaded club: ${clubStruct.clubName} with ID: ${clubStruct.clubID}');
         }
       } catch (e) {
         print('Error loading clubs from preferences: $e');
-        // Handle or log the error without crashing the app
       }
+    } else {
+      print('No clubs or catalogues found in preferences');
     }
   }
 
@@ -65,16 +70,19 @@ class ClubLoader {
     final String? cataloguesJson = prefs.getString('catalogues');
     if (cataloguesJson != null) {
       try {
+        print('Loading catalogues from preferences');
         final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
 
         _catalogues.clear();
         for (var catalogue in cataloguesList) {
           _catalogues.add(CatalogueInfoStruct.fromJson(catalogue));
+          print('Loaded catalogue for club ID: ${catalogue.clubID}');
         }
       } catch (e) {
         print('Error loading catalogues from preferences: $e');
-        // Handle or log the error without crashing the app
       }
+    } else {
+      print('No catalogues found in preferences');
     }
   }
 
@@ -83,8 +91,12 @@ class ClubLoader {
     List<String>? likedClubsStringList = prefs.getStringList('likedClubs');
 
     if (likedClubsStringList != null) {
+      print('Loading liked clubs from preferences');
       _likedClubIDs.clear();
       _likedClubIDs.addAll(likedClubsStringList.map((id) => int.parse(id)));
+      print('Loaded liked clubs: $_likedClubIDs');
+    } else {
+      print('No liked clubs found in preferences');
     }
   }
 }

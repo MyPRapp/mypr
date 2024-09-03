@@ -22,8 +22,8 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
     });
-    _syncClubs();
-    _syncUserDetails();
+    // _syncClubs();
+    // _syncUserDetails();
   }
 
   // ignore: unused_element

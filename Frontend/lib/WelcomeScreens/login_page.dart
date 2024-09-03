@@ -5,6 +5,7 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Providers/club_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
 
@@ -27,12 +28,32 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _initialize();
+    _startSyncingClubs();
+    _startSyncingUser();
   }
 
-  Future<void> _initialize() async {
-    await _loadSavedUserCredentials();
-    await _login();
+  Future<void> _startSyncingClubs() async {
+    final globalState = context.read<GlobalStateProvider>();
+    if (!globalState.clubsLoaded) {
+      final clubProvider = context.read<ClubProvider>();
+      await clubProvider.syncClubs();
+      globalState.setClubsLoaded(true);
+    }
+  }
+
+  Future<void> _startSyncingUser() async {
+    final globalState = context.read<GlobalStateProvider>();
+
+    if (await hasInternetAccess()) {
+      await _loadSavedUserCredentials();
+      await _login();
+    } else if (globalState.isAuthenticated) {
+      if (mounted) {
+        await context.read<UserProvider>().loadUserDetailsFromPreferences();
+        // ignore: use_build_context_synchronously
+        context.router.replaceAll([const BottomNavBarRoute()]);
+      }
+    }
   }
 
   Future<void> _loadSavedUserCredentials() async {
@@ -53,7 +74,6 @@ class _LoginPageState extends State<LoginPage> {
       _loginFailed = null; // Reset the login status to trigger the indicator
     });
     _startTimeout(); // Start the timeout again
-
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
 
@@ -61,8 +81,10 @@ class _LoginPageState extends State<LoginPage> {
         await context.read<UserProvider>().login(context, email, password);
 
     if (mounted) {
+      final globalState = context.read<GlobalStateProvider>();
       setState(() {
         _loginFailed = !success;
+        globalState.isAuthenticated = success; // Set authentication status
       });
       if (success) {
         context.router.replaceAll([const BottomNavBarRoute()]);
@@ -390,7 +412,7 @@ class _LoginPageState extends State<LoginPage> {
                                       context.read<GlobalStateProvider>();
                                   globalState.validatedIp = serverIp;
                                   // Trigger data fetching if necessary
-                                  _initialize();
+                                  _startSyncingUser();
                                 }
                                 print(
                                     'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/');

@@ -133,7 +133,7 @@ class BookingDetailsPage extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
       child: FutureBuilder<ImageProvider>(
-        future: ImageLoader.loadClubPhoto(clubID, clubPhoto),
+        future: loadClubPhoto(clubID, clubPhoto),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done &&
               snapshot.hasData) {

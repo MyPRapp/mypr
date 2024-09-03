@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,6 +56,11 @@ class _SignUpPageState extends State<SignUpPage> {
     if (mounted) {
       if (success) {
         await context.read<UserProvider>().syncUserDetails();
+        if (mounted) {
+          final globalState = context.read<GlobalStateProvider>();
+          globalState.isAuthenticated = true; // Set isAuthenticated to true
+        }
+
         if (mounted) {
           AutoRouter.of(context).replaceAll([const BottomNavBarRoute()]);
         }

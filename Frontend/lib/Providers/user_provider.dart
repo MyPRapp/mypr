@@ -19,6 +19,7 @@ class UserProvider with ChangeNotifier {
     if (_userDetails != null) {
       // Save user details
       await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
+      print('User details saved to preferences: ${_userDetails!.toJson()}');
 
       // Fetch and save the user's photo as a base64 string if it exists
       if (_userDetails!.photo.isNotEmpty) {
@@ -26,10 +27,13 @@ class UserProvider with ChangeNotifier {
             'http://${GlobalStateProvider().validatedIp}:8000/${_userDetails!.photo}');
         if (base64Photo.isNotEmpty) {
           await prefs.setString('user_photo', base64Photo);
+          print('User photo saved to preferences as base64');
         } else {
           debugPrint('User photo could not be saved as base64');
         }
       }
+    } else {
+      print('No user details to save');
     }
   }
 
@@ -41,14 +45,16 @@ class UserProvider with ChangeNotifier {
 
     if (userDetailsString != null) {
       _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
+      print('User details loaded from preferences: $_userDetails');
 
       // If a photo is saved, convert it back from base64 and assign it to the user details
       if (userPhotoBase64 != null && _userDetails != null) {
-        // final Uint8List bytes = base64Decode(userPhotoBase64);
-        // _userDetails!.photo = base64Encode(bytes); // Save photo as a base64 string
         _userDetails!.photo = userPhotoBase64;
+        print('User photo loaded from preferences');
       }
       notifyListeners();
+    } else {
+      print('No user details found in preferences');
     }
   }
 
@@ -58,24 +64,28 @@ class UserProvider with ChangeNotifier {
     String? token = prefs.getString('access_token');
 
     if (token != null) {
+      print('Fetching user details from server...');
       final response = await http.get(
         Uri.parse(
             'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       );
+
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
-
         _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
 
         // Save user details and photo to shared preferences
         await saveUserDetailsToPreferences();
-
+        print('User details fetched and saved: $_userDetails');
         notifyListeners();
       } else {
+        print(
+            'Failed to load user details from server: ${response.statusCode}');
         throw Exception('Failed to load user details');
       }
     } else {
+      print('No access token found');
       throw Exception('No access token found');
     }
   }
@@ -84,10 +94,12 @@ class UserProvider with ChangeNotifier {
   Future<void> syncUserDetails() async {
     try {
       await fetchUserDetailsFromServer(); // Try fetching from the server
+      print('User details synced from server');
     } catch (e) {
       debugPrint(
           'Failed to fetch user data from server, loading from preferences: $e');
       await loadUserDetailsFromPreferences(); // If it fails, load from preferences
+      print('User details synced from preferences');
     }
     notifyListeners(); // Notify listeners regardless of where the data came from
   }
@@ -96,12 +108,15 @@ class UserProvider with ChangeNotifier {
   Future<bool> login(
       BuildContext context, String email, String password) async {
     final AuthService authService = AuthService();
+    print('Attempting to log in with email: $email');
     bool success = await authService.login(email, password);
 
     if (success) {
+      print('Login successful, syncing user details');
       await syncUserDetails();
       return true;
     } else {
+      print('Login failed, loading user details from preferences');
       await loadUserDetailsFromPreferences(); // Load from preferences if login fails
       return false;
     }

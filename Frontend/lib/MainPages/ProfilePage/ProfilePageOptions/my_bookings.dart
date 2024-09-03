@@ -205,7 +205,7 @@ class BookingCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: FutureBuilder<ImageProvider>(
-                  future: ImageLoader.loadClubPhoto(booking.clubID,
+                  future: loadClubPhoto(booking.clubID,
                       clubProvider.getClubByID(booking.clubID).clubPhoto),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done &&

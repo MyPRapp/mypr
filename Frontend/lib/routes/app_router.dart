@@ -31,7 +31,9 @@ class AppRouter extends $AppRouter {
                 AutoRoute(
                     page: BookingDetailsRoute
                         .page), // Handle booking details here
-                AutoRoute(page: FavoritesRoute.page),
+                AutoRoute(
+                  page: FavoritesRoute.page,
+                ),
                 AutoRoute(page: ContactUsRoute.page),
                 AutoRoute(page: ReservationRoute.page),
               ],

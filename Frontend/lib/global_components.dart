@@ -252,13 +252,13 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
 }
 
 String formatName(String name) {
-  // Trim leading and trailing spaces
-  String trimmedName = name.trim();
-
-  // Replace multiple spaces between words with a single space
-  String formattedName = trimmedName.replaceAll(RegExp(r'\s+'), ' ');
-
-  return formattedName;
+  // Trim any leading/trailing spaces and replace multiple spaces with a single space
+  return name.trim().replaceAll(RegExp(r'\s+'), ' ').split(' ').map((word) {
+    if (word.isNotEmpty) {
+      return '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}';
+    }
+    return word;
+  }).join(' ');
 }
 
 Future<String> imageToBase64(String imageUrl) async {
@@ -277,23 +277,38 @@ Future<String> imageToBase64(String imageUrl) async {
   }
 }
 
-class ImageLoader {
-  /// Loads an image from SharedPreferences or falls back to a network image or default image.
-  static Future<ImageProvider> loadClubPhoto(
-      int clubID, String photoUrl) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final base64Image = prefs.getString('club_image_$clubID');
-      if (base64Image != null) {
-        final bytes = base64Decode(base64Image);
-        return MemoryImage(bytes);
-      } else {
-        return NetworkImage(photoUrl);
-      }
-    } catch (e) {
-      debugPrint('Error loading club photo: $e');
-      return const AssetImage('assets/images/default_club_image.png');
+Future<ImageProvider?> loadUserPhoto(String photoPath) async {
+  try {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? base64Photo = prefs.getString('user_photo');
+    if (base64Photo != null) {
+      final Uint8List bytes = base64Decode(base64Photo);
+      return MemoryImage(bytes);
     }
+
+    // Attempt to load from network
+    return NetworkImage(
+        'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
+  } catch (e) {
+    // Return null to indicate an error
+    return null;
+  }
+}
+
+/// Loads an image from SharedPreferences or falls back to a network image or default image.
+Future<ImageProvider> loadClubPhoto(int clubID, String photoUrl) async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final base64Image = prefs.getString('club_image_$clubID');
+    if (base64Image != null) {
+      final bytes = base64Decode(base64Image);
+      return MemoryImage(bytes);
+    } else {
+      return NetworkImage(photoUrl);
+    }
+  } catch (e) {
+    debugPrint('Error loading club photo: $e');
+    return const AssetImage('assets/images/default_club_image.png');
   }
 }
 
@@ -317,20 +332,17 @@ Future<bool> hasInternetAccess() async {
   return await InternetConnectionChecker().hasConnection;
 }
 
-Future<ImageProvider?> loadUserPhoto(String photoPath) async {
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? base64Photo = prefs.getString('user_photo');
-    if (base64Photo != null) {
-      final Uint8List bytes = base64Decode(base64Photo);
-      return MemoryImage(bytes);
-    }
-
-    // Attempt to load from network
-    return NetworkImage(
-        'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
-  } catch (e) {
-    // Return null to indicate an error
-    return null;
-  }
+void printReservationInfo(List<dynamic> reservationInfo) {
+  print('Reservation Info:');
+  print('UserID: ${reservationInfo[0]}');
+  print('ReservationName: ${reservationInfo[1]}');
+  print('ClubName: ${reservationInfo[2]}');
+  print('Persons: ${reservationInfo[3]}');
+  print('Price: ${reservationInfo[4]}');
+  print('Regular: ${reservationInfo[5]}');
+  print('Special: ${reservationInfo[6]}');
+  print('Premium: ${reservationInfo[7]}');
+  print('Date: ${reservationInfo[8]}');
+  print('Comment: ${reservationInfo[9]}');
+  print('Discount(%): ${reservationInfo[10]}');
 }

@@ -14,19 +14,24 @@ class CustomizeProfilePage extends StatelessWidget {
 
   void _signOut(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    // Clear all shared preferences except for validatedIp
+    final String? validatedIp = prefs.getString('validatedIp');
+    await prefs.clear();
+    if (validatedIp != null) {
+      await prefs.setString('validatedIp', validatedIp);
+    }
+
+    // Set isAuthenticated to false
+    await prefs.setBool('isAuthenticated', false);
+
+    // Clear liked clubs
     if (context.mounted) {
       ClubProvider clubProvider = context.read<ClubProvider>();
       clubProvider.deleteAllLiked();
     }
-    // Remove user-related preferences
-    await prefs.remove('saved_email');
-    await prefs.remove('saved_password');
-    await prefs.remove('user_details');
-    await prefs.remove('user_photo');
 
-    // Remove booking-related preferences
-    await prefs.remove('bookings');
-
+    // Navigate to the Login page
     if (context.mounted) {
       AutoRouter.of(context).replaceAll([const LoginRoute()]);
     }

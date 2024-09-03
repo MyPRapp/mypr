@@ -21,7 +21,9 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     UserProvider userProvider = context.read<UserProvider>();
-    userProvider.loadUserDetailsFromPreferences();
+    if (userProvider.userDetails!.userID < 0) {
+      userProvider.syncUserDetails();
+    }
   }
 
   Future<void> _refresh() async {

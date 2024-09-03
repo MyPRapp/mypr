@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../Providers/reservation_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
 
@@ -13,15 +14,9 @@ class ConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Format the date to 'dd/MM'
-    String formattedDate = '';
-    if (reservationInfo[8].isNotEmpty) {
-      DateTime date = DateTime.parse(reservationInfo[8]);
-      formattedDate = DateFormat('dd/MM').format(date);
-    }
-
-    // Format the price to 2 decimal places
-    String formattedPrice = reservationInfo[4].toStringAsFixed(2);
+    // Format the date and price
+    final formattedDate = _formatDate(reservationInfo[8]);
+    final formattedPrice = reservationInfo[4].toStringAsFixed(2);
 
     return Center(
       child: Material(
@@ -50,11 +45,11 @@ class ConfirmationDialog extends StatelessWidget {
               _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
               _buildInfoRow('Μαγαζί:', reservationInfo[2]),
               _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
-              Padding(
-                padding: const EdgeInsets.only(top: 10),
-                child: Container(
+              const Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Align(
                   alignment: Alignment.centerLeft,
-                  child: const Text(
+                  child: Text(
                     'Φιάλες',
                     style: TextStyle(
                       color: Colors.white,
@@ -71,13 +66,13 @@ class ConfirmationDialog extends StatelessWidget {
               if (reservationInfo[7] > 0)
                 _buildInfoRow('      Premium:', reservationInfo[7].toString()),
               _buildInfoRow('Ημερομηνία:', formattedDate),
-              if (reservationInfo[9] != '')
+              if (reservationInfo[9].isNotEmpty)
                 _buildCommentSection(reservationInfo[9]),
               _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Close the confirmation dialog
+                  // Close the confirmation dialog and go back to the previous screen
                   Navigator.pop(context);
                   AutoRouter.of(context).back();
                 },
@@ -100,6 +95,13 @@ class ConfirmationDialog extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(String date) {
+    if (date.isNotEmpty) {
+      return DateFormat('dd/MM').format(DateTime.parse(date));
+    }
+    return '';
   }
 
   Widget _buildInfoRow(String label, String value) {
@@ -133,46 +135,168 @@ class ConfirmationDialog extends StatelessWidget {
 
   Widget _buildCommentSection(String comment) {
     return Padding(
-        padding: const EdgeInsets.only(top: 10),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Σχόλια κράτησης:',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Σχόλια κράτησης:',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ..._splitCommentIntoLines(
-                      comment, 20), // Call the function here
-                  const SizedBox(height: 5),
-                ],
-              )
-            ]));
+            children: _splitCommentIntoLines(comment, 20),
+          ),
+        ],
+      ),
+    );
   }
 
   List<Widget> _splitCommentIntoLines(String comment, int maxLength) {
-    List<Widget> lines = [];
-    for (int i = 0; i < comment.length; i += maxLength) {
-      String part = comment.substring(
-          i, i + maxLength > comment.length ? comment.length : i + maxLength);
-      lines.add(
-        Text(
-          part,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
+    return List<Widget>.generate(
+      (comment.length / maxLength).ceil(),
+      (i) => Text(
+        comment.substring(i * maxLength,
+            (i * maxLength + maxLength).clamp(0, comment.length)),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+      ),
+    );
+  }
+}
+
+class ProceedConfirmationDialog extends StatelessWidget {
+  final List<dynamic> reservationInfo;
+  final VoidCallback onConfirm;
+  final VoidCallback onCancel;
+
+  const ProceedConfirmationDialog({
+    super.key,
+    required this.reservationInfo,
+    required this.onConfirm,
+    required this.onCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final formattedDate = _formatDate(reservationInfo[8]);
+    final formattedPrice = reservationInfo[4].toStringAsFixed(2);
+
+    return Center(
+      child: Material(
+        color: Colors.black.withOpacity(0.8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF9C0C04), width: 4),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Επιβεβαίωση Κράτησης',
+                style: TextStyle(
+                  color: Color(0xFF9C0C04),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
+              _buildInfoRow('Μαγαζί:', reservationInfo[2]),
+              _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
+              _buildInfoRow('Ημερομηνία:', formattedDate),
+              _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: onCancel,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Άκυρο',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9C0C04),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Επιβεβαίωση',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-      );
+      ),
+    );
+  }
+
+  String _formatDate(String date) {
+    if (date.isNotEmpty) {
+      return DateFormat('dd/MM').format(DateTime.parse(date));
     }
-    return lines;
+    return '';
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -236,7 +360,7 @@ class PackagesInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10),
       child: Card(
         color: const Color(0xFF9c0c04),
         child: Padding(
@@ -244,50 +368,58 @@ class PackagesInfo extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                flex: 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      package,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '$maxPersons άτομα',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '$minPrice €',
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildPackageDetails(),
+              _buildPriceDetails(),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPackageDetails() {
+    return Expanded(
+      flex: 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            package,
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '$maxPersons άτομα',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceDetails() {
+    return Expanded(
+      flex: 1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            '$minPrice €',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -303,24 +435,73 @@ class NameTextField extends StatefulWidget {
 class NameTextFieldState extends State<NameTextField> {
   late TextEditingController nameController;
   late FocusNode focusNode;
+  late ReservationProvider reservationProvider;
 
   @override
   void initState() {
     super.initState();
+
+    // Access the provider
+    reservationProvider = context.read<ReservationProvider>();
+
+    // Initialize the text controller with the user's name from the provider
     final userDetails = context.read<UserProvider>().userDetails;
+    String initialName =
+        '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+
+    // Set the initial name in the provider if not already set
+    if (reservationProvider.getInfo(1).isEmpty) {
+      // Directly set the provider's info without calling setState
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        reservationProvider.setInfo(1, formatName(initialName));
+        nameController.text = formatName(initialName);
+      });
+    }
+
     nameController = TextEditingController(
-      text: '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}',
+      text: reservationProvider.getInfo(1),
     );
+
     focusNode = FocusNode();
 
+    // Listen to focus changes and update the provider when focus is lost
     focusNode.addListener(() {
       if (!focusNode.hasFocus) {
-        if (nameController.text.trim().isEmpty) {
-          nameController.text =
-              '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
-        }
+        _updateReservationProvider();
       }
     });
+
+    // Listen to changes in the reservation info for the name (index 1)
+    reservationProvider.addListener(_updateTextController);
+  }
+
+  /// Method to set the text in the TextField
+  void setNameText(String name) {
+    nameController.text = name;
+    _updateReservationProvider();
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    focusNode.dispose();
+    reservationProvider.removeListener(_updateTextController);
+    super.dispose();
+  }
+
+  void _updateReservationProvider() {
+    // Update the provider with the formatted name when the focus is lost
+    String formattedName = formatName(nameController.text);
+    reservationProvider.setInfo(1, formattedName);
+    nameController.text = formattedName;
+  }
+
+  void _updateTextController() {
+    // Update the text controller if the name in the provider changes externally
+    String currentName = reservationProvider.getInfo(1);
+    if (nameController.text != currentName) {
+      nameController.text = currentName;
+    }
   }
 
   @override
@@ -344,126 +525,31 @@ class NameTextFieldState extends State<NameTextField> {
       style: const TextStyle(color: Colors.white),
     );
   }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    focusNode.dispose();
-    super.dispose();
-  }
 }
 
-class PersonsTextField extends StatefulWidget {
-  final int maxPersons; // Accept maxPersons as an argument
-  final Map<String, int> counters; // Passed from ReservationPage
-  const PersonsTextField({
-    super.key,
-    required this.maxPersons,
-    required this.counters,
-  });
-
-  @override
-  PersonsTextFieldState createState() => PersonsTextFieldState();
-}
-
-class PersonsTextFieldState extends State<PersonsTextField> {
-  int persons = 1; // Initialize your persons value to the minimum of 1
-  TextEditingController personsController = TextEditingController();
-  FocusNode textFieldFocusNode = FocusNode();
-
-  @override
-  void initState() {
-    super.initState();
-    personsController.text = persons.toString();
-    textFieldFocusNode.addListener(_handleFocusChange);
-  }
-
-  @override
-  void didUpdateWidget(PersonsTextField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Adjust persons to ensure it's between 1 and maxPersons
-    if (widget.maxPersons < persons) {
-      setState(() {
-        persons = widget.maxPersons > 0 ? widget.maxPersons : 1;
-        personsController.text = persons.toString();
-      });
-    }
-  }
-
-  void _handleFocusChange() {
-    if (!textFieldFocusNode.hasFocus && persons > widget.maxPersons) {
-      setState(() {
-        persons = widget.maxPersons > 0 ? widget.maxPersons : 1;
-        personsController.text = persons.toString();
-      });
-    }
-  }
-
-  void increment() {
-    if (persons < widget.maxPersons) {
-      setState(() {
-        persons++;
-        personsController.text = persons.toString();
-        textFieldFocusNode.requestFocus();
-      });
-    } else {
-      if (widget.counters['Απλή'] == 0 &&
-          widget.counters['Special'] == 0 &&
-          widget.counters['Premium'] == 0) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-          ..showSnackBar(const SnackBar(
-            content: Text(
-              'Παρακαλώ επιλέξτε φιάλη',
-            ),
-            duration: Duration(seconds: 3),
-          ));
-      } else {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-          ..showSnackBar(
-            const SnackBar(
-              content: Text(
-                'Μέγιστος αριθμός ατόμων! Για διαφορετικό πακέτο επικοινωνήστε μαζί μας.',
-              ),
-              duration: Duration(seconds: 3),
-            ),
-          );
-      }
-    }
-  }
-
-  void decrement() {
-    if (persons > 1) {
-      setState(() {
-        persons--;
-        personsController.text = persons.toString();
-        textFieldFocusNode.requestFocus();
-      });
-    }
-  }
+class PersonsTextField extends StatelessWidget {
+  const PersonsTextField({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final reservationProvider = Provider.of<ReservationProvider>(context);
+    final maxPersons = reservationProvider.maxPersons;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: TextField(
-        focusNode: textFieldFocusNode,
         readOnly: true,
-        controller: personsController,
+        controller: TextEditingController(
+            text: reservationProvider
+                .getInfo(3)
+                .toString()), // Persons at index 3
         decoration: InputDecoration(
           suffix: Row(
             mainAxisAlignment: MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
-              IconButton(
-                onPressed: decrement,
-                icon: const Icon(Icons.remove, color: Colors.white),
-              ),
-              IconButton(
-                onPressed: increment,
-                icon: const Icon(Icons.add, color: Colors.white),
-              ),
+              _buildRemoveButton(reservationProvider),
+              _buildAddButton(reservationProvider, maxPersons, context),
             ],
           ),
           labelText: 'Αριθμός ατόμων',
@@ -482,12 +568,59 @@ class PersonsTextFieldState extends State<PersonsTextField> {
     );
   }
 
-  @override
-  void dispose() {
-    personsController.dispose();
-    textFieldFocusNode.removeListener(_handleFocusChange);
-    textFieldFocusNode.dispose();
-    super.dispose();
+  Widget _buildRemoveButton(ReservationProvider reservationProvider) {
+    return IconButton(
+      onPressed: () {
+        int persons = reservationProvider.getInfo(3);
+        if (persons > 1) {
+          reservationProvider.setInfo(3, persons - 1);
+        }
+      },
+      icon: const Icon(Icons.remove, color: Colors.white),
+    );
+  }
+
+  Widget _buildAddButton(ReservationProvider reservationProvider,
+      int maxPersons, BuildContext context) {
+    return IconButton(
+      onPressed: () {
+        if (_validateBeforeAdding(reservationProvider, context)) {
+          int persons = reservationProvider.getInfo(3);
+          if (persons < maxPersons) {
+            reservationProvider.setInfo(3, persons + 1);
+          } else if (persons == maxPersons) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text(
+                      'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινωνήστε μαζί μας.'),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+          }
+        }
+      },
+      icon: const Icon(Icons.add, color: Colors.white),
+    );
+  }
+
+  bool _validateBeforeAdding(
+      ReservationProvider reservationProvider, BuildContext context) {
+    if (reservationProvider.getInfo(5) == 0 &&
+        reservationProvider.getInfo(6) == 0 &&
+        reservationProvider.getInfo(7) == 0) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content: Text('Παρακαλώ επιλέξτε φιάλη πρώτα'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      return false;
+    }
+    return true;
   }
 }
 
@@ -495,7 +628,6 @@ class CategoriesTextField extends StatefulWidget {
   final CatalogueInfoStruct regularCatalogue;
   final CatalogueInfoStruct specialCatalogue;
   final CatalogueInfoStruct premiumCatalogue;
-  final Map<String, int> counters;
   final VoidCallback onCountersChanged;
   final bool isDiscountApplied;
   final int discount;
@@ -505,7 +637,6 @@ class CategoriesTextField extends StatefulWidget {
     required this.regularCatalogue,
     required this.specialCatalogue,
     required this.premiumCatalogue,
-    required this.counters,
     required this.onCountersChanged,
     required this.isDiscountApplied,
     required this.discount,
@@ -517,30 +648,47 @@ class CategoriesTextField extends StatefulWidget {
 
 class CategoriesTextFieldState extends State<CategoriesTextField>
     with SingleTickerProviderStateMixin {
-  int price = 0;
-  String selectedText = '';
-  TextEditingController priceController = TextEditingController();
+  late TextEditingController priceController;
   late AnimationController _controller;
   late Animation<double> _heightFactor;
+  late ReservationProvider reservationProvider;
   bool _isExpanded = false;
 
   @override
   void initState() {
     super.initState();
+    priceController = TextEditingController();
+
+    // Set up the animation controller
     _controller = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
     _heightFactor = _controller.drive(CurveTween(curve: Curves.easeInOut));
-    updateSelectedText();
+
+    // Access the provider directly and store it
+    reservationProvider = context.read<ReservationProvider>();
+
+    // Listen to changes in reservationInfo[4] (price) and update the text controller
+    reservationProvider.addListener(_updatePriceText);
+    _updatePriceText(); // Initial update
   }
 
   @override
-  void didUpdateWidget(CategoriesTextField oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.isDiscountApplied != widget.isDiscountApplied ||
-        oldWidget.discount != widget.discount) {
-      updateSelectedText();
+  void dispose() {
+    // Safely remove the listener before calling super.dispose
+    reservationProvider.removeListener(_updatePriceText);
+    _controller.dispose();
+    priceController.dispose();
+    super.dispose();
+  }
+
+  void _updatePriceText() {
+    if (mounted) {
+      double price = reservationProvider.getInfo(4);
+      setState(() {
+        priceController.text = 'Τιμή: ${price.toStringAsFixed(2)} €';
+      });
     }
   }
 
@@ -555,66 +703,32 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     });
   }
 
-  void increment(String category) {
-    setState(() {
-      if (widget.counters[category]! < 9) {
-        int incrementValue = _getCategoryPrice(category);
-        widget.counters[category] = (widget.counters[category] ?? 0) + 1;
-        price += incrementValue;
-        updateSelectedText();
+  void increment(int index) {
+    if (reservationProvider.reservationInfo[index] < 9) {
+      setState(() {
+        reservationProvider.reservationInfo[index]++;
         widget.onCountersChanged();
-      } else {
-        // Show SnackBar when the limit is reached
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-          ..showSnackBar(
-            const SnackBar(
-              content:
-                  Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας.'),
-              duration: Duration(seconds: 3),
-            ),
-          );
-      }
-    });
-  }
-
-  void decrement(String category) {
-    setState(() {
-      if (widget.counters[category]! > 0) {
-        int decrementValue = _getCategoryPrice(category);
-        widget.counters[category] = widget.counters[category]! - 1;
-        price -= decrementValue;
-        updateSelectedText();
-        widget.onCountersChanged();
-      }
-    });
-  }
-
-  int _getCategoryPrice(String category) {
-    switch (category) {
-      case 'Απλή':
-        return double.parse(widget.regularCatalogue.price).toInt();
-      case 'Special':
-        return double.parse(widget.specialCatalogue.price).toInt();
-      case 'Premium':
-        return double.parse(widget.premiumCatalogue.price).toInt();
-      default:
-        return 0;
-    }
-  }
-
-  void updateSelectedText() {
-    double finalPrice = price.toDouble();
-    if (widget.isDiscountApplied) {
-      finalPrice = finalPrice * (1 - (widget.discount / 100));
-    }
-
-    if (finalPrice > 0) {
-      selectedText = 'Τιμή: ${finalPrice.toStringAsFixed(2)} €';
+      });
     } else {
-      selectedText = '';
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(
+            content:
+                Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
     }
-    priceController.text = selectedText;
+  }
+
+  void decrement(int index) {
+    if (reservationProvider.reservationInfo[index] > 0) {
+      setState(() {
+        reservationProvider.reservationInfo[index]--;
+        widget.onCountersChanged();
+      });
+    }
   }
 
   @override
@@ -643,20 +757,9 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                 borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
-              errorBorder: OutlineInputBorder(
-                borderSide: BorderSide(
-                  color: Color.fromARGB(76, 156, 12, 4),
-                  width: 4,
-                ),
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-              ),
             ),
             child: Text(
-              selectedText,
+              priceController.text,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -679,41 +782,11 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                 ),
                 child: SingleChildScrollView(
                   child: Column(
-                    children: widget.counters.keys.map((key) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 15),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              key,
-                              style: const TextStyle(
-                                  color: Colors.white, fontSize: 16),
-                            ),
-                            Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () => decrement(key),
-                                  icon: const Icon(Icons.remove,
-                                      color: Colors.white),
-                                ),
-                                Text(
-                                  widget.counters[key].toString(),
-                                  style: const TextStyle(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                                IconButton(
-                                  onPressed: () => increment(key),
-                                  icon: const Icon(Icons.add,
-                                      color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                    children: [
+                      buildCounterRow('Απλή', 5),
+                      buildCounterRow('Special', 6),
+                      buildCounterRow('Premium', 7),
+                    ],
                   ),
                 ),
               ),
@@ -724,17 +797,44 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     );
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    priceController.dispose();
-    super.dispose();
+  Widget buildCounterRow(String label, int index) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => decrement(index),
+                icon: const Icon(Icons.remove, color: Colors.white),
+              ),
+              Text(
+                reservationProvider.reservationInfo[index].toString(),
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+              IconButton(
+                onPressed: () => increment(index),
+                icon: const Icon(Icons.add, color: Colors.white),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
 
 class BookingDatePicker extends StatefulWidget {
-  const BookingDatePicker(
-      {super.key, required this.onDateSelected, required this.days});
+  const BookingDatePicker({
+    super.key,
+    required this.onDateSelected,
+    required this.days,
+  });
 
   final ValueChanged<DateTime> onDateSelected;
   final String days;
@@ -755,17 +855,15 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        DateTime now = DateTime.now();
-        DateTime lastDate = now.add(const Duration(days: 30));
+        final now = DateTime.now();
+        final lastDate = now.add(const Duration(days: 30));
 
         DateTime? pickedDate = await showDatePicker(
           context: context,
           initialDate: _selectedDate ?? now,
           firstDate: now,
           lastDate: lastDate,
-          selectableDayPredicate: (DateTime date) {
-            return _isDayOpen(date);
-          },
+          selectableDayPredicate: _isDayOpen,
           locale: const Locale('el', 'GR'), // Set the locale to Greek
           builder: (BuildContext context, Widget? child) {
             return Theme(
