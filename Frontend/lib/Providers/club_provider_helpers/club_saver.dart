@@ -6,14 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
 
-class ClubPersistence {
+class ClubSaver {
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
   // ignore: unused_field
   final VoidCallback _notifyListeners;
 
-  ClubPersistence(
+  ClubSaver(
       this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
 
   // Save clubs to shared preferences

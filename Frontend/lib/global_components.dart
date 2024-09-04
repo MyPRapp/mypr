@@ -31,19 +31,25 @@ class ClubInfoStruct {
   });
 
   factory ClubInfoStruct.fromJson(Map<String, dynamic> json) {
-    return ClubInfoStruct(
-      clubID: json['id'] ?? -1,
-      clubName: json['club_name'] ?? '',
-      clubMinPrice: json['min_price'] ?? -1,
-      clubMaxPersons: json['max_persons'] ?? -1,
-      clubPhone: json['phone'] ?? '',
-      clubLocation: json['location'] ?? '',
-      clubRating: json['rating'] != null
-          ? double.tryParse(json['rating'].toString()) ?? -1
-          : -1,
-      clubAvailability: json['availability'] ?? '',
-      clubPhoto: json['photo'] ?? '',
-    );
+    try {
+      return ClubInfoStruct(
+        clubID: json['id'] ?? -1,
+        clubName: json['club_name'] ?? '',
+        clubMinPrice: json['min_price'] ?? -1,
+        clubMaxPersons: json['max_persons'] ?? -1,
+        clubPhone: json['phone'] ?? '',
+        clubLocation: json['location'] ?? '',
+        clubRating: json['rating'] != null
+            ? double.tryParse(json['rating'].toString()) ?? -1
+            : -1,
+        clubAvailability: json['availability'] ?? '',
+        clubPhoto: json['photo'] ?? '',
+      );
+    } catch (e) {
+      print('Error parsing ClubInfoStruct: $e');
+      return ClubInfoStruct(
+          clubID: -1); // Return a default object with clubID -1
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -82,7 +88,8 @@ class UserInfoStruct {
   });
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
-    return UserInfoStruct(
+    try {
+      return UserInfoStruct(
         userID: json['id'] ?? -1,
         username: json['username'] ?? '',
         firstName: json['first_name'] ?? '',
@@ -90,7 +97,13 @@ class UserInfoStruct {
         email: json['email'] ?? '',
         phone: json['phone'] ?? '',
         points: json['points'] ?? -1,
-        photo: json['photo'] ?? ''); // Photo might be a base64 string
+        photo: json['photo'] ?? '',
+      );
+    } catch (e) {
+      print('Error parsing UserInfoStruct: $e');
+      return UserInfoStruct(
+          userID: -1); // Return a default object with userID -1
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -102,7 +115,7 @@ class UserInfoStruct {
       'email': email,
       'phone': phone,
       'points': points,
-      'photo': photo, // Store the base64 string
+      'photo': photo,
     };
   }
 }
@@ -121,12 +134,21 @@ class CatalogueInfoStruct {
   });
 
   factory CatalogueInfoStruct.fromJson(Map<String, dynamic> json) {
-    return CatalogueInfoStruct(
-      clubID: json['club'] ?? -1,
-      serviceType: json['service_type'] ?? '',
-      price: json['price'] ?? '',
-      maxPersons: json['max_person'] ?? -1,
-    );
+    try {
+      return CatalogueInfoStruct(
+        clubID: json['club'] ?? -1,
+        serviceType: json['service_type'] ?? '',
+        price: json['price'] ?? '',
+        maxPersons: json['max_person'] ?? -1,
+      );
+    } catch (e) {
+      print('Error parsing CatalogueInfoStruct: $e');
+      return CatalogueInfoStruct(
+          clubID: -1,
+          serviceType: '',
+          price: '0',
+          maxPersons: 0); // Return default object
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -165,18 +187,36 @@ class BookingInfoStruct {
   });
 
   factory BookingInfoStruct.fromJson(Map<String, dynamic> json) {
-    return BookingInfoStruct(
-      bookingID: json['bookingID'],
-      userID: json['userID'],
-      clubID: json['clubID'],
-      bookingName: json['bookingName'],
-      date: DateTime.parse(json['date']),
-      persons: json['persons'],
-      fourbitString: json['fourbitString'],
-      price: json['price'],
-      comments: json['comments'],
-      status: json['status'],
-    );
+    try {
+      return BookingInfoStruct(
+        bookingID: json['bookingID'] ?? -1,
+        userID: json['userID'] ?? -1,
+        clubID: json['clubID'] ?? -1,
+        bookingName: json['bookingName'] ?? '',
+        date: DateTime.tryParse(json['date']) ?? DateTime.now(),
+        persons: json['persons'] ?? 0,
+        fourbitString: json['fourbitString'] ?? '',
+        price: json['price'] != null
+            ? double.tryParse(json['price'].toString()) ?? 0
+            : 0,
+        comments: json['comments'] ?? '',
+        status: json['status'] ?? 0,
+      );
+    } catch (e) {
+      print('Error parsing BookingInfoStruct: $e');
+      return BookingInfoStruct(
+        bookingID: -1,
+        userID: -1,
+        clubID: -1,
+        bookingName: '',
+        date: DateTime.now(),
+        persons: 0,
+        fourbitString: '',
+        price: 0,
+        comments: '',
+        status: 0,
+      ); // Return a default object with bookingID -1
+    }
   }
 
   Map<String, dynamic> toJson() {

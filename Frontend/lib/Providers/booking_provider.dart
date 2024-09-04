@@ -35,7 +35,7 @@ class BookingProvider with ChangeNotifier {
           // Initialize catalogues from ClubProvider
           final catalogues = context
               .read<ClubProvider>()
-              .initializeCatalogues(bookingData['club']);
+              .getAllCatalogues(bookingData['club']);
 
           // Ensure the catalogues list has the expected elements
           final regularCatalogue = catalogues.isNotEmpty
@@ -52,7 +52,8 @@ class BookingProvider with ChangeNotifier {
             bookingID: bookingData['id'],
             userID: bookingData['user'],
             clubID: bookingData['club'],
-            bookingName: userDetails?.username ?? 'Unknown User',
+            bookingName: userDetails?.username ??
+                'Unknown User', //TODO change username to actual server's booking name
             date: DateTime.parse(bookingData['booked_at']),
             persons: bookingData['number_of_people'],
             fourbitString: bookingData['booking_type'],

@@ -8,6 +8,9 @@ import '../../../../Widgets/booking_card_widgets.dart';
 import '../../../../global_components.dart';
 import '../../../../routes/app_router.gr.dart';
 
+//TODO Show to user number of bottles, divide page in 2 parts(column with MainAxisAlignment.spaceBetween)
+//TODO fix photo's space from being empty when page loads
+
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
   final BookingInfoStruct booking;

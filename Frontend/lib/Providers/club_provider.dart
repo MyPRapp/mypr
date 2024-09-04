@@ -4,7 +4,7 @@ import '../global_components.dart';
 import 'club_provider_helpers/club_fetcher.dart';
 import 'club_provider_helpers/club_loader.dart';
 import 'club_provider_helpers/club_manager.dart';
-import 'club_provider_helpers/club_persistence.dart';
+import 'club_provider_helpers/club_saver.dart';
 
 class ClubProvider with ChangeNotifier {
   final List<ClubInfoStruct> _clubs = [];
@@ -13,7 +13,7 @@ class ClubProvider with ChangeNotifier {
 
   late final ClubManager _clubManager;
   late final ClubLoader _clubLoader;
-  late final ClubPersistence _clubPersistence;
+  late final ClubSaver _clubSaver;
   late final ClubFetcher _clubFetcher;
 
   ClubProvider() {
@@ -22,9 +22,8 @@ class ClubProvider with ChangeNotifier {
 
     _clubLoader =
         ClubLoader(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-    _clubPersistence =
-        ClubPersistence(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-    _clubFetcher = ClubFetcher(_clubManager, _clubPersistence, notifyListeners);
+    _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs, notifyListeners);
+    _clubFetcher = ClubFetcher(_clubManager, _clubSaver, notifyListeners);
   }
 
   Future<void> syncClubs() async {
@@ -58,8 +57,8 @@ class ClubProvider with ChangeNotifier {
   List<CatalogueInfoStruct> get allCatalogues => _clubManager.allCatalogues;
   List<ClubInfoStruct> get likedClubs => _clubManager.allLikedClubs;
 
-  List<CatalogueInfoStruct> initializeCatalogues(int clubID) {
-    return _clubManager.initializeCatalogues(clubID);
+  List<CatalogueInfoStruct> getAllCatalogues(int clubID) {
+    return _clubManager.getAllCatalogues(clubID);
   }
 
   void addOrUpdateClub(ClubInfoStruct club) {
@@ -85,7 +84,7 @@ class ClubProvider with ChangeNotifier {
   // Liked Clubs Management
   void toggleLike(int clubID) {
     _clubManager.toggleLike(clubID);
-    _clubPersistence.saveLikedClubsToPreferences();
+    _clubSaver.saveLikedClubsToPreferences();
   }
 
   bool isLiked(int clubID) {
@@ -94,28 +93,28 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> deleteAllLiked() async {
     await _clubManager.deleteAllLiked();
-    await _clubPersistence.saveLikedClubsToPreferences();
+    await _clubSaver.saveLikedClubsToPreferences();
   }
 
   // Persistence Functions
   Future<void> saveClubsToPreferences() async {
-    await _clubPersistence.saveClubsToPreferences();
+    await _clubSaver.saveClubsToPreferences();
   }
 
   Future<void> saveCataloguesToPreferences() async {
-    await _clubPersistence.saveCataloguesToPreferences();
+    await _clubSaver.saveCataloguesToPreferences();
   }
 
   Future<void> saveLikedClubsToPreferences() async {
-    await _clubPersistence.saveLikedClubsToPreferences();
+    await _clubSaver.saveLikedClubsToPreferences();
   }
 
   Future<void> saveImageToPreferences(String key, String base64Image) async {
-    await _clubPersistence.saveImageToPreferences(key, base64Image);
+    await _clubSaver.saveImageToPreferences(key, base64Image);
   }
 
   Future<Image> loadImageFromPreferences(String key) async {
-    return await _clubPersistence.loadImageFromPreferences(key);
+    return await _clubSaver.loadImageFromPreferences(key);
   }
 
   // Utility / Helper Functions

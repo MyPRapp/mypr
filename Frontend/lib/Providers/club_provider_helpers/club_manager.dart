@@ -41,13 +41,14 @@ class ClubManager with ChangeNotifier {
   // CATALOGUE MANAGEMENT
 
   // Method to initialize catalogues based on club ID and update the provided CatalogueInfoStruct variables
-  List<CatalogueInfoStruct> initializeCatalogues(int clubID) {
+  List<CatalogueInfoStruct> getAllCatalogues(int clubID) {
     ClubInfoStruct club = getClubByID(clubID);
 
     // Initialize and update the CatalogueInfoStruct variables
     CatalogueInfoStruct regularCatalogue = getCatalogue(club, 'Regular');
     CatalogueInfoStruct specialCatalogue = getCatalogue(club, 'Single');
 
+    //TODO delete the signle catalogue option
     if ((double.parse(specialCatalogue.price)).toInt() <=
         (double.parse(regularCatalogue.price)).toInt()) {
       specialCatalogue = getCatalogue(club, 'Special');

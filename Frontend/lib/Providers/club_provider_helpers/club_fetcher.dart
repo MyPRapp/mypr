@@ -7,15 +7,15 @@ import 'package:http/http.dart' as http;
 import '../../global_components.dart';
 import '../club_provider_helpers/club_manager.dart';
 import '../global_state_provider.dart';
-import 'club_persistence.dart';
+import 'club_saver.dart';
 
 class ClubFetcher {
   final ClubManager _clubManager;
-  final ClubPersistence _clubPersistence;
+  final ClubSaver _clubSaver;
   // ignore: unused_field
   final VoidCallback _notifyListeners;
 
-  ClubFetcher(this._clubManager, this._clubPersistence, this._notifyListeners);
+  ClubFetcher(this._clubManager, this._clubSaver, this._notifyListeners);
 
   Future<void> fetchClubsAndCatalogues() async {
     final url =
@@ -31,20 +31,20 @@ class ClubFetcher {
           final club = ClubInfoStruct.fromJson(item);
           if (club.clubID >= 0) {
             final base64Image = await imageToBase64(club.clubPhoto);
-            await _clubPersistence.saveImageToPreferences(
+            await _clubSaver.saveImageToPreferences(
                 'club_image_${club.clubID}', base64Image);
             _clubManager.addOrUpdateClub(club);
           }
         }
 
         // Save clubs to shared preferences
-        await _clubPersistence.saveClubsToPreferences();
+        await _clubSaver.saveClubsToPreferences();
 
         // Fetch and update catalogues
         await fetchAndSaveCatalogues();
 
         // Save catalogues to shared preferences
-        await _clubPersistence.saveCataloguesToPreferences();
+        await _clubSaver.saveCataloguesToPreferences();
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }

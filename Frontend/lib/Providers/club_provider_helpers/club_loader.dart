@@ -68,15 +68,24 @@ class ClubLoader {
   Future<void> loadCataloguesFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? cataloguesJson = prefs.getString('catalogues');
+
     if (cataloguesJson != null) {
       try {
         print('Loading catalogues from preferences');
         final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
 
         _catalogues.clear();
-        for (var catalogue in cataloguesList) {
-          _catalogues.add(CatalogueInfoStruct.fromJson(catalogue));
-          print('Loaded catalogue for club ID: ${catalogue.clubID}');
+
+        for (var catalogueJson in cataloguesList) {
+          final catalogue = CatalogueInfoStruct.fromJson(catalogueJson);
+          _catalogues.add(catalogue);
+
+          // Safely access clubID
+          if (catalogue.clubID != -1) {
+            print('Loaded catalogue for club ID: ${catalogue.clubID}');
+          } else {
+            print('Warning: Catalogue has an invalid clubID');
+          }
         }
       } catch (e) {
         print('Error loading catalogues from preferences: $e');

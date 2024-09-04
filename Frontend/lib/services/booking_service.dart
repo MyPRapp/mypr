@@ -2,21 +2,27 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mypr/services/auth_service.dart';
 
 class BookingService {
-  String get baseUrl =>
-      'http://${GlobalStateProvider().validatedIp}:8000/api'; // Dynamically generate baseUrl
+  final AuthService _authService =
+      AuthService(); // Create instance of AuthService
+  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}:8000/api';
 
-  Future<String?> getAccessToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
+  Future<void> _ensureTokenIsValid() async {
+    try {
+      await _authService.refreshAccessToken(); // Ensure token is refreshed
+    } catch (e) {
+      print("Failed to refresh access token: $e");
+      throw Exception('Token refresh failed');
+    }
   }
 
   Future<bool> submitForm(String reservationName, String clubName, String type,
       String time, String numberOfPeople, String comments) async {
-    String? accessToken = await getAccessToken();
+    await _ensureTokenIsValid(); // Refresh token before making API call
 
+    String? accessToken = await _authService.getAccessToken();
     if (accessToken == null) {
       print('Access token is null. User is not authenticated.');
       return false;
@@ -58,8 +64,9 @@ class BookingService {
   }
 
   Future<List<dynamic>?> getBookings() async {
-    String? accessToken = await getAccessToken();
+    await _ensureTokenIsValid(); // Refresh token before fetching bookings
 
+    String? accessToken = await _authService.getAccessToken();
     if (accessToken == null) {
       print('Access token is null. User is not authenticated.');
       return null;

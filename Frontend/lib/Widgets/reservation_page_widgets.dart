@@ -8,15 +8,18 @@ import '../Providers/user_provider.dart';
 import '../global_components.dart';
 
 class ConfirmationDialog extends StatelessWidget {
-  final List<dynamic> reservationInfo;
-
-  const ConfirmationDialog({super.key, required this.reservationInfo});
+  const ConfirmationDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
+    List<dynamic> reservationInfo =
+        context.read<ReservationProvider>().reservationInfo;
     // Format the date and price
-    final formattedDate = _formatDate(reservationInfo[8]);
-    final formattedPrice = reservationInfo[4].toStringAsFixed(2);
+    String date = context.read<ReservationProvider>().reservationInfo[8];
+    final price = context.read<ReservationProvider>().reservationInfo[4];
+
+    final formattedDate = _formatDate(date);
+    final formattedPrice = price.toStringAsFixed(2);
 
     return Center(
       child: Material(
@@ -42,7 +45,8 @@ class ConfirmationDialog extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
+              _buildInfoRow('Όνομα κράτησης:',
+                  context.read<ReservationProvider>().reservationInfo[1]),
               _buildInfoRow('Μαγαζί:', reservationInfo[2]),
               _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
               const Padding(
@@ -167,134 +171,6 @@ class ConfirmationDialog extends StatelessWidget {
           color: Colors.white,
           fontSize: 16,
         ),
-      ),
-    );
-  }
-}
-
-class ProceedConfirmationDialog extends StatelessWidget {
-  final List<dynamic> reservationInfo;
-  final VoidCallback onConfirm;
-  final VoidCallback onCancel;
-
-  const ProceedConfirmationDialog({
-    super.key,
-    required this.reservationInfo,
-    required this.onConfirm,
-    required this.onCancel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final formattedDate = _formatDate(reservationInfo[8]);
-    final formattedPrice = reservationInfo[4].toStringAsFixed(2);
-
-    return Center(
-      child: Material(
-        color: Colors.black.withOpacity(0.8),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.symmetric(horizontal: 30),
-          decoration: BoxDecoration(
-            color: Colors.black,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF9C0C04), width: 4),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Επιβεβαίωση Κράτησης',
-                style: TextStyle(
-                  color: Color(0xFF9C0C04),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              _buildInfoRow('Όνομα κράτησης:', reservationInfo[1]),
-              _buildInfoRow('Μαγαζί:', reservationInfo[2]),
-              _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
-              _buildInfoRow('Ημερομηνία:', formattedDate),
-              _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: onCancel,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text(
-                      'Άκυρο',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: onConfirm,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF9C0C04),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text(
-                      'Επιβεβαίωση',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(String date) {
-    if (date.isNotEmpty) {
-      return DateFormat('dd/MM').format(DateTime.parse(date));
-    }
-    return '';
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -629,8 +505,6 @@ class CategoriesTextField extends StatefulWidget {
   final CatalogueInfoStruct specialCatalogue;
   final CatalogueInfoStruct premiumCatalogue;
   final VoidCallback onCountersChanged;
-  final bool isDiscountApplied;
-  final int discount;
 
   const CategoriesTextField({
     super.key,
@@ -638,8 +512,6 @@ class CategoriesTextField extends StatefulWidget {
     required this.specialCatalogue,
     required this.premiumCatalogue,
     required this.onCountersChanged,
-    required this.isDiscountApplied,
-    required this.discount,
   });
 
   @override
@@ -832,11 +704,9 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
 class BookingDatePicker extends StatefulWidget {
   const BookingDatePicker({
     super.key,
-    required this.onDateSelected,
     required this.days,
   });
 
-  final ValueChanged<DateTime> onDateSelected;
   final String days;
 
   @override
@@ -890,7 +760,12 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           setState(() {
             _selectedDate = pickedDate;
           });
-          widget.onDateSelected(_selectedDate!);
+
+          if (!mounted) return;
+          // ignore: use_build_context_synchronously
+          context
+              .read<ReservationProvider>()
+              .setInfo(8, _selectedDate.toString());
         }
       },
       child: InputDecorator(

@@ -11,6 +11,8 @@ import '../Providers/user_provider.dart';
 import '../global_components.dart';
 import '../services/auth_service.dart';
 
+//TODO Fix big text fields that disappear when their text is too long and make their height responsive
+//TODO Add exception error handling and print messaged to user if error is catched
 @RoutePage()
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});

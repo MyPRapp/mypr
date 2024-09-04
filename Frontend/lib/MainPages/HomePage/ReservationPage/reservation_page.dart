@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Providers/booking_provider.dart';
@@ -9,6 +10,7 @@ import '../../../Providers/user_provider.dart';
 import '../../../Widgets/club_card_widgets.dart';
 import '../../../Widgets/reservation_page_widgets.dart';
 import '../../../global_components.dart';
+import '../../../services/auth_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/points_service.dart';
 
@@ -22,11 +24,13 @@ class ReservationPage extends StatefulWidget {
 }
 
 class _ReservationPageState extends State<ReservationPage> {
-  // State variables for the reservation page
-  bool isDiscountApplied = false;
-  bool buttonIsVisible = true;
+  final AuthService _authService = AuthService(); // Create AuthService instance
 
-  // Catalogues for different types of services
+  // State variables for managing the page
+  bool isDiscountApplied = false; // Flag to check if discount is applied
+  bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
+
+  // Catalogues for different types of services in the club
   CatalogueInfoStruct regularCatalogue = CatalogueInfoStruct(
     clubID: -1,
     serviceType: 'Regular',
@@ -48,45 +52,50 @@ class _ReservationPageState extends State<ReservationPage> {
     maxPersons: 0,
   );
 
-  // Controllers and keys for managing state
+  // Controllers and keys for managing form inputs
   final TextEditingController _commentController = TextEditingController();
   final GlobalKey<NameTextFieldState> nameTextFieldKey =
       GlobalKey<NameTextFieldState>();
   final GlobalKey<CategoriesTextFieldState> categoriesTextFieldKey =
       GlobalKey<CategoriesTextFieldState>();
-  final PointsService _pointsService = PointsService();
+  final PointsService _pointsService =
+      PointsService(); // Service for points management
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize the page after the build phase
+    // Initialize the page after the build phase completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePage();
     });
   }
 
-  /// Initializes the page with the club's catalogues and resets any previous data.
+  /// Initializes the reservation page by setting the club's catalogues and resetting form data.
   void _initializePage() {
     final reservationProvider = context.read<ReservationProvider>();
-    reservationProvider.resetInfo();
-    reservationProvider.setInfo(2, widget.club.clubName);
     final userDetails = context.read<UserProvider>().userDetails;
-    reservationProvider.setInfo(0, userDetails?.userID);
 
-    // Initialize catalogues for the current club
+    // Reset reservation data
+    reservationProvider.resetInfo();
+    reservationProvider.setInfo(2, widget.club.clubName); // Set club name
+    reservationProvider.setInfo(0, userDetails?.userID); // Set user ID
+
     final clubProvider = context.read<ClubProvider>();
-    final catalogues = clubProvider.initializeCatalogues(widget.club.clubID);
+    // Fetch and initialize catalogues for the selected club
+    final catalogues = clubProvider.getAllCatalogues(widget.club.clubID);
 
     setState(() {
       regularCatalogue = catalogues[0];
       specialCatalogue = catalogues[1];
       premiumCatalogue = catalogues[2];
+
+      // Update the max persons and calculate the total price for the reservation
       updateMaxPersons();
       calculatePrice();
     });
 
-    // Set the initial name and surname using the new setNameText method
+    // Set the user's name in the form if available
     if (userDetails != null && reservationProvider.getInfo(1).isEmpty) {
       String initialName = '${userDetails.firstName} ${userDetails.lastName}';
       reservationProvider.setInfo(1, formatName(initialName));
@@ -97,13 +106,15 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Safely retracts points for the discount and updates the provider.
   Future<void> _retractPoints(int pointsToRetract) async {
     try {
+      await _authService
+          .refreshAccessToken(); // Ensure token is valid before retracting points
       await _pointsService.retractPoints(pointsToRetract);
     } catch (error) {
       print("Failed to retract points: $error");
     }
   }
 
-  /// Updates the maximum number of persons based on the selected bottles.
+  /// Updates the maximum number of persons allowed based on selected services (bottles).
   void updateMaxPersons() {
     final reservationProvider = context.read<ReservationProvider>();
 
@@ -113,16 +124,19 @@ class _ReservationPageState extends State<ReservationPage> {
                 premiumCatalogue.maxPersons * reservationProvider.getInfo(7))
             .toInt();
 
+    // Ensure at least one person is allowed for the reservation
     maxPersons = maxPersons > 0 ? maxPersons : 1;
 
+    // Update max persons in the provider
     reservationProvider.setMaxPersons(maxPersons);
 
+    // Adjust persons in the reservation if it exceeds the max
     if (reservationProvider.getInfo(3) > maxPersons) {
       reservationProvider.setInfo(3, maxPersons);
     }
   }
 
-  /// Calculates the total price based on the selected services and applies any discounts.
+  /// Calculates the total price based on the selected services and applies any discount.
   void calculatePrice() {
     final reservationProvider = context.read<ReservationProvider>();
 
@@ -131,32 +145,41 @@ class _ReservationPageState extends State<ReservationPage> {
         (reservationProvider.getInfo(6) * safeParse(specialCatalogue.price)) +
         (reservationProvider.getInfo(7) * safeParse(premiumCatalogue.price));
 
+    // Apply discount if applicable
     if (isDiscountApplied) {
       price *= (1 - (reservationProvider.getInfo(10) / 100));
     }
 
+    // Update the calculated price in the provider
     reservationProvider.setInfo(4, price);
   }
 
-  /// Converts a string to a double safely, returning 0.0 if the string is not a valid number.
+  /// Safely parses a string to a double, returning 0.0 if the string is invalid.
   double safeParse(String value) {
     return double.tryParse(value) ?? 0.0;
   }
 
-  /// Refreshes the page and updates the catalogues.
+  /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
     final clubProvider = context.read<ClubProvider>();
-    await clubProvider.fetchCatalogues(widget.club);
-    final catalogues = clubProvider.initializeCatalogues(widget.club.clubID);
 
-    if (mounted) {
-      setState(() {
-        regularCatalogue = catalogues[0];
-        specialCatalogue = catalogues[1];
-        premiumCatalogue = catalogues[2];
-        updateMaxPersons();
-        calculatePrice();
-      });
+    try {
+      // Fetch updated catalogues
+      await clubProvider.fetchCatalogues(widget.club);
+      final catalogues = clubProvider.getAllCatalogues(widget.club.clubID);
+
+      if (mounted) {
+        setState(() {
+          regularCatalogue = catalogues[0];
+          specialCatalogue = catalogues[1];
+          premiumCatalogue = catalogues[2];
+          updateMaxPersons();
+          calculatePrice();
+        });
+      }
+    } catch (error) {
+      // Log error without additional snack bars
+      print("Failed to refresh catalogues: $error");
     }
   }
 
@@ -172,21 +195,19 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   void dispose() {
-    // Dispose of controllers to free up resources
+    // Clean up the controllers to free up resources
     _commentController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final reservationProvider = context.read<ReservationProvider>();
-    final userDetails = context.read<UserProvider>().userDetails;
     return PopScope(
-      canPop: reservationProvider.getInfo(3) > 0,
+      canPop: buttonIsVisible, // Restrict pop action based on button visibility
       child: Scaffold(
         backgroundColor: Colors.black,
         body: RefreshIndicator(
-          onRefresh: _refresh,
+          onRefresh: _refresh, // Handle refresh action
           child: Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -196,8 +217,8 @@ class _ReservationPageState extends State<ReservationPage> {
             ),
             child: ListView(
               children: [
-                buildHeader(context),
-                buildContent(context, reservationProvider, userDetails),
+                buildHeader(), // Build page header with club name
+                buildContent(), // Build form content and input fields
               ],
             ),
           ),
@@ -206,8 +227,8 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
-  /// Builds the header section of the page with the club name and back button.
-  Widget buildHeader(BuildContext context) {
+  /// Builds the header section with the club name and back button.
+  Widget buildHeader() {
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Row(
@@ -220,7 +241,7 @@ class _ReservationPageState extends State<ReservationPage> {
                 child: IconButton(
                   onPressed: () {
                     if (buttonIsVisible) {
-                      AutoRouter.of(context).back();
+                      AutoRouter.of(context).back(); // Navigate back
                     }
                   },
                   icon: const Icon(
@@ -252,27 +273,26 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
-  /// Builds the main content of the page, including forms and input fields.
-  Widget buildContent(BuildContext context,
-      ReservationProvider reservationProvider, UserInfoStruct? userDetails) {
+  /// Builds the content section with form fields for reservation details.
+  Widget buildContent() {
     return Container(
       padding: const EdgeInsets.all(15),
       child: Column(
         children: [
-          buildClubImage(),
+          buildClubImage(), // Display club image
           const SizedBox(height: 50),
-          buildTitle('Φιάλες και Τιμές'),
+          buildTitle('Φιάλες και Τιμές'), // Display packages
           buildPackageInfo(),
           const SizedBox(height: 40),
-          buildTitle('Κάνε κράτηση'),
+          buildTitle('Κάνε κράτηση'), // Display booking form
           const SizedBox(height: 50),
-          buildReservationForm(context, reservationProvider, userDetails),
+          buildReservationForm(), // Build reservation form
         ],
       ),
     );
   }
 
-  /// Builds the club image with a placeholder in case of an error.
+  /// Builds the club image or a placeholder in case of an error.
   Widget buildClubImage() {
     return Padding(
       padding: const EdgeInsets.all(15),
@@ -294,7 +314,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   );
                 }
               }
-              return const CircularProgressIndicator();
+              return const CircularProgressIndicator(); // Show a loading spinner
             },
           ),
         ),
@@ -314,10 +334,12 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
-  /// Builds the package information section.
+  /// Builds the package information section with available services.
   Widget buildPackageInfo() {
     return Column(
       children: [
+        ElevatedButton(onPressed: _refresh, child: const Text('REFRESH')),
+        const SizedBox(height: 25),
         PackagesInfo(
           package: 'Απλή',
           maxPersons: regularCatalogue.maxPersons,
@@ -337,9 +359,8 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
-  /// Builds the reservation form, including name, date, categories, and persons input.
-  Widget buildReservationForm(BuildContext context,
-      ReservationProvider reservationProvider, UserInfoStruct? userDetails) {
+  /// Builds the reservation form with various input fields.
+  Widget buildReservationForm() {
     return Column(
       children: [
         SizedBox(
@@ -350,9 +371,6 @@ class _ReservationPageState extends State<ReservationPage> {
         SizedBox(
           height: 70,
           child: BookingDatePicker(
-            onDateSelected: (selectedDate) {
-              reservationProvider.setInfo(8, selectedDate.toString());
-            },
             days: widget.club.clubAvailability,
           ),
         ),
@@ -363,41 +381,39 @@ class _ReservationPageState extends State<ReservationPage> {
           specialCatalogue: specialCatalogue,
           premiumCatalogue: premiumCatalogue,
           onCountersChanged: () {
-            updateMaxPersons();
-            calculatePrice();
+            updateMaxPersons(); // Update max persons based on selected services
+            calculatePrice(); // Recalculate total price
           },
-          isDiscountApplied: isDiscountApplied,
-          discount: reservationProvider.getInfo(10),
         ),
         const SizedBox(height: 25),
         const SizedBox(
           height: 70,
           child: PersonsTextField(),
         ),
-        CommentSection(commentController: _commentController),
+        CommentSection(
+            commentController: _commentController), // Optional comment field
         const SizedBox(height: 25),
-        buildDiscountCheckbox(context, reservationProvider, userDetails!),
+        buildDiscountCheckbox(), // Discount checkbox
         const SizedBox(height: 25),
-        if (buttonIsVisible) buildSubmitButton(context, reservationProvider),
+        if (buttonIsVisible) buildSubmitButton(), // Submit button
         const SizedBox(height: 120),
       ],
     );
   }
 
-  /// Builds the checkbox for applying a discount if the user has enough points.
-  Widget buildDiscountCheckbox(BuildContext context,
-      ReservationProvider reservationProvider, UserInfoStruct userDetails) {
-    return userDetails.points >= 20
+  /// Builds the discount checkbox if the user has enough points.
+  Widget buildDiscountCheckbox() {
+    final userDetails = context.read<UserProvider>().userDetails;
+    return userDetails!.points >= 20 && buttonIsVisible
         ? Row(
             children: [
               GestureDetector(
-                onTap: () => _toggleDiscount(reservationProvider),
+                onTap: () => _toggleDiscount(), // Toggle discount application
                 child: Row(
                   children: [
                     Checkbox(
                       value: isDiscountApplied,
-                      onChanged: (value) =>
-                          _toggleDiscount(reservationProvider),
+                      onChanged: (value) => _toggleDiscount(),
                       activeColor: const Color(0xFF9C0C04),
                     ),
                     const Text(
@@ -409,21 +425,22 @@ class _ReservationPageState extends State<ReservationPage> {
               ),
             ],
           )
-        : const SizedBox.shrink();
+        : const SizedBox.shrink(); // Do not show if points are insufficient
   }
 
-  /// Toggles the discount and updates the price accordingly.
-  void _toggleDiscount(ReservationProvider reservationProvider) {
+  /// Toggles the discount and recalculates the total price.
+  void _toggleDiscount() {
     setState(() {
       isDiscountApplied = !isDiscountApplied;
-      reservationProvider.setInfo(10, isDiscountApplied ? 20 : 0);
-      calculatePrice();
+      context
+          .read<ReservationProvider>()
+          .setInfo(10, isDiscountApplied ? 20 : 0);
+      calculatePrice(); // Recalculate price with the discount
     });
   }
 
   /// Builds the submit button for the reservation form.
-  Widget buildSubmitButton(
-      BuildContext context, ReservationProvider reservationProvider) {
+  Widget buildSubmitButton() {
     return Container(
       alignment: Alignment.center,
       width: double.infinity,
@@ -436,7 +453,7 @@ class _ReservationPageState extends State<ReservationPage> {
           foregroundColor: Colors.white,
           backgroundColor: const Color(0xFF9C0C04),
         ),
-        onPressed: () async => _handleSubmit(context, reservationProvider),
+        onPressed: () async => _handleSubmit(), // Handle form submission
         child: const Text(
           'Κράτηση',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
@@ -446,85 +463,244 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Handles the form submission process, including validation and API calls.
-  Future<void> _handleSubmit(
-      BuildContext context, ReservationProvider reservationProvider) async {
-    // Hide the button while processing the submission
+  Future<void> _handleSubmit() async {
     setState(() {
       buttonIsVisible = false;
       _toggleNavBarVisibility();
     });
 
-    // Get the raw name and format it
     String rawName = nameTextFieldKey.currentState?.nameController.text ?? '';
     String formattedName = formatName(rawName);
+    context.read<ReservationProvider>().setInfo(1, formattedName);
 
-    // Update the provider with the formatted name
-    reservationProvider.setInfo(1, formattedName);
+    // Printing log statement for catalog fetch start
+    print('Refreshing catalogues from server');
 
-    // Validate the form inputs
-    if (!_validateForm(reservationProvider, formattedName)) {
-      _showValidationError(context, reservationProvider, formattedName);
+    // Fetching catalogues, wrapped in a try-catch for error handling
+    await ClubProvider().fetchCatalogues(widget.club);
+
+    print('Finished refreshing catalogues from server');
+
+    if (!_validateForm(formattedName)) {
+      _showValidationError(formattedName);
       return;
     }
 
-    // Show the confirmation dialog
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return ProceedConfirmationDialog(
-          reservationInfo: reservationProvider.reservationInfo,
-          onConfirm: () async {
-            Navigator.of(context).pop(); // Close the dialog
+    if (context.mounted) {
+      // Show the confirmation dialog
+      showDialog(
+        // ignore: use_build_context_synchronously
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return proceedConfirmationDialog();
+        },
+      );
+    } else {
+      setState(() {
+        buttonIsVisible = true;
+        _toggleNavBarVisibility();
+      });
+    }
+  }
 
-            // Retract points if a discount is applied
-            if (isDiscountApplied) {
-              await _retractPoints(20);
-              if (!mounted) return;
-            }
-            // printReservationInfo(reservationProvider.reservationInfo);
-            // Submit the reservation form
-            bool success = await BookingService().submitForm(
-              reservationProvider.getInfo(1),
-              reservationProvider.getInfo(2),
-              _generateFourBitString(reservationProvider),
-              reservationProvider.getInfo(8),
-              reservationProvider.getInfo(3).toString(),
-              reservationProvider.getInfo(9),
-            );
+  Widget proceedConfirmationDialog() {
+    ReservationProvider reservationProvider =
+        context.read<ReservationProvider>();
+    void onConfirm() async {
+      Navigator.of(context, rootNavigator: true).pop();
+      try {
+        // Call the refreshAccessToken method on the instance
+        await _authService
+            .refreshAccessToken(); // Ensure token is valid before submission
+      } catch (e) {
+        print("Failed to refresh access token: $e");
+        setState(() {
+          buttonIsVisible = true;
+          _toggleNavBarVisibility();
+        });
+        try {
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.',
+                  ),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+          }
+        } catch (e) {
+          print("Failed to show SnackBar: $e");
+        }
 
-            if (!mounted) return;
+        // Log error or handle failure in a way without more snack bars
+        print("Booking submission failed.");
+        return;
+      }
+      // Retract points if a discount is applied
+      if (isDiscountApplied) {
+        await _retractPoints(20);
+      }
+      // Submit the reservation form
+      bool success = await BookingService().submitForm(
+        reservationProvider.getInfo(1),
+        reservationProvider.getInfo(2),
+        _generateFourBitString(),
+        reservationProvider.getInfo(8),
+        reservationProvider.getInfo(3).toString(),
+        reservationProvider.getInfo(9),
+      );
+      printReservationInfo(reservationProvider.reservationInfo);
+      _handleSubmissionResponse(success);
+    }
 
-            // ignore: use_build_context_synchronously
-            _handleSubmissionResponse(context, success, reservationProvider);
-          },
-          onCancel: () {
-            Navigator.of(context).pop(); // Close the dialog
-            // Show the button and nav bar again
-            setState(() {
-              buttonIsVisible = true;
-              _toggleNavBarVisibility();
-            });
-          },
-        );
-      },
+    onCancel() {
+      // Hide the dialog without navigating back
+      Navigator.of(context, rootNavigator: true).pop();
+
+      // Show the button and nav bar again
+      setState(() {
+        buttonIsVisible = true;
+        _toggleNavBarVisibility();
+      });
+    }
+
+    String date = reservationProvider.reservationInfo[8];
+    final price = reservationProvider.reservationInfo[4];
+
+    final formattedDate = _formatDate(date);
+    final formattedPrice = price.toStringAsFixed(2);
+
+    return Center(
+      child: Material(
+        color: Colors.black.withOpacity(0.8),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          margin: const EdgeInsets.symmetric(horizontal: 30),
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF9C0C04), width: 4),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Επιβεβαίωση Κράτησης',
+                style: TextStyle(
+                  color: Color(0xFF9C0C04),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 20),
+              _buildInfoRow(
+                  'Όνομα κράτησης:', reservationProvider.reservationInfo[1]),
+              _buildInfoRow('Μαγαζί:', reservationProvider.reservationInfo[2]),
+              _buildInfoRow('Αριθμός ατόμων:',
+                  reservationProvider.reservationInfo[3].toString()),
+              _buildInfoRow('Ημερομηνία:', formattedDate),
+              _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: onCancel,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Άκυρο',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF9C0C04),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text(
+                      'Επιβεβαίωση',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String date) {
+    if (date.isNotEmpty) {
+      return DateFormat('dd/MM').format(DateTime.parse(date));
+    }
+    return '';
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Flexible(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   /// Validates the form inputs before submission.
-  bool _validateForm(
-      ReservationProvider reservationProvider, String formattedName) {
+  bool _validateForm(String formattedName) {
     final RegExp namePattern =
         RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true);
+    final reservationProvider = context.read<ReservationProvider>();
 
+    // Validate name and check if all required fields are filled
     bool isNameValid = namePattern.hasMatch(formattedName);
     bool allFieldsFilled = reservationProvider.reservationInfo
             .sublist(1, 8)
             .every((element) => element != '' && element != -1) &&
         isNameValid;
 
-    String fourBitString = _generateFourBitString(reservationProvider);
-    printReservationInfo(reservationProvider.reservationInfo);
+    String fourBitString = _generateFourBitString();
+
     return allFieldsFilled &&
         reservationProvider.getInfo(4) > 0 &&
         reservationProvider.getInfo(8).isNotEmpty &&
@@ -532,12 +708,12 @@ class _ReservationPageState extends State<ReservationPage> {
         fourBitString != '0000';
   }
 
-  /// Shows a validation error message if the form inputs are invalid.
-  void _showValidationError(BuildContext context,
-      ReservationProvider reservationProvider, String formattedName) {
+  /// Shows an error message if the form validation fails.
+  void _showValidationError(String formattedName) {
     final bool isNameValid = RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true)
         .hasMatch(formattedName);
 
+    // Display a snack bar error message based on validation results
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
@@ -553,63 +729,41 @@ class _ReservationPageState extends State<ReservationPage> {
 
     setState(() {
       buttonIsVisible = true;
-      _toggleNavBarVisibility(); // Show the nav bar when button is visible
+      _toggleNavBarVisibility(); // Show the nav bar again when button is visible
     });
   }
 
-  /// Handles the submission response and displays appropriate feedback.
-  void _handleSubmissionResponse(BuildContext context, bool success,
-      ReservationProvider reservationProvider) async {
-    if (!mounted) return; // Ensure the widget is still mounted
-
+  /// Handles the submission response and shows appropriate feedback.
+  void _handleSubmissionResponse(bool success) async {
     if (success) {
       // Fetch bookings after a successful reservation
       await context.read<BookingProvider>().fetchBookings(context);
 
-      if (!mounted) return; // Check again before showing the dialog
-
-      // Show the confirmation dialog
+      // Show the confirmation dialog after successful booking
       showDialog(
         // ignore: use_build_context_synchronously
         context: context,
         barrierDismissible: false,
         builder: (BuildContext dialogContext) {
           if (!mounted) {
-            return Container(); // Prevent showing the dialog if unmounted
+            return Container(); // Prevent showing the dialog if the widget is unmounted
           }
-          return ConfirmationDialog(
-            reservationInfo: reservationProvider.reservationInfo,
-          );
+          return const ConfirmationDialog();
         },
       );
     }
-    //else {
-    //   try {
-    //     ScaffoldMessenger.of(context)
-    //       ..hideCurrentSnackBar()
-    //       ..showSnackBar(
-    //         const SnackBar(
-    //           content: Text(
-    //             'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.',
-    //           ),
-    //           duration: Duration(seconds: 3),
-    //         ),
-    //       );
-    //   } catch (e) {
-    //     print("Failed to show SnackBar: $e");
-    //   }
-    // }
 
     if (mounted) {
       setState(() {
         buttonIsVisible = true;
-        _toggleNavBarVisibility(); // Show the nav bar when button is visible
+        _toggleNavBarVisibility(); // Show the nav bar again when button is visible
       });
     }
   }
 
-  /// Generates the four-bit string required for the form submission.
-  String _generateFourBitString(ReservationProvider reservationProvider) {
+  /// Generates a four-bit string required for form submission.
+  String _generateFourBitString() {
+    final reservationProvider = context.read<ReservationProvider>();
     return '${reservationProvider.getInfo(5)}${reservationProvider.getInfo(6)}${reservationProvider.getInfo(7)}${reservationProvider.getInfo(10) ~/ 10}';
   }
 }

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../global_components.dart';
@@ -37,8 +39,8 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // Load user details including the photo from shared preferences
-  Future<void> loadUserDetailsFromPreferences() async {
+// Load user details including the photo from shared preferences
+  Future<bool> loadUserDetailsFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDetailsString = prefs.getString('user_details');
     String? userPhotoBase64 = prefs.getString('user_photo');
@@ -53,8 +55,10 @@ class UserProvider with ChangeNotifier {
         print('User photo loaded from preferences');
       }
       notifyListeners();
+      return true; // Successfully loaded user details
     } else {
       print('No user details found in preferences');
+      return false; // No user details found in preferences
     }
   }
 
@@ -64,25 +68,36 @@ class UserProvider with ChangeNotifier {
     String? token = prefs.getString('access_token');
 
     if (token != null) {
-      print('Fetching user details from server...');
-      final response = await http.get(
-        Uri.parse(
-            'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
+      try {
+        print('Fetching user details from server...');
 
-      if (response.statusCode == 200) {
-        final decodedBody = utf8.decode(response.bodyBytes);
-        _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
+        final response = await http.get(
+          Uri.parse(
+              'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
+          headers: {'Authorization': 'Bearer $token'},
+        ).timeout(const Duration(seconds: 5)); // Add a 5-second timeout
 
-        // Save user details and photo to shared preferences
-        await saveUserDetailsToPreferences();
-        print('User details fetched and saved: $_userDetails');
-        notifyListeners();
-      } else {
-        print(
-            'Failed to load user details from server: ${response.statusCode}');
-        throw Exception('Failed to load user details');
+        if (response.statusCode == 200) {
+          final decodedBody = utf8.decode(response.bodyBytes);
+          _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
+
+          // Save user details and photo to shared preferences
+          await saveUserDetailsToPreferences();
+          print('User details fetched and saved: $_userDetails');
+          notifyListeners();
+        } else {
+          print(
+              'Failed to load user details from server: ${response.statusCode}');
+          throw Exception('Failed to load user details');
+        }
+      } on TimeoutException catch (e) {
+        print('Request to server timed out: $e');
+        await loadUserDetailsFromPreferences();
+        throw Exception('Request timed out, using saved preferences');
+      } catch (e) {
+        print('Server unreachable, falling back to saved preferences: $e');
+        await loadUserDetailsFromPreferences();
+        throw Exception('Server unreachable, using saved preferences');
       }
     } else {
       print('No access token found');
@@ -108,17 +123,37 @@ class UserProvider with ChangeNotifier {
   Future<bool> login(
       BuildContext context, String email, String password) async {
     final AuthService authService = AuthService();
+    final globalState = context.read<GlobalStateProvider>();
     print('Attempting to log in with email: $email');
-    bool success = await authService.login(email, password);
+    bool success = false;
 
-    if (success) {
-      print('Login successful, syncing user details');
-      await syncUserDetails();
-      return true;
-    } else {
-      print('Login failed, loading user details from preferences');
-      await loadUserDetailsFromPreferences(); // Load from preferences if login fails
-      return false;
+    try {
+      success = await authService.login(email, password);
+      if (success) {
+        print('Login successful, syncing user details');
+        await syncUserDetails();
+        globalState.isAuthenticated = true;
+      }
+    } catch (e) {
+      print('Server unreachable during login: $e');
     }
+
+    if (!success) {
+      print(
+          'Login failed or server unreachable, loading user details from preferences');
+      bool preferencesLoaded =
+          await loadUserDetailsFromPreferences(); // Load from preferences if login fails
+
+      if (!preferencesLoaded) {
+        print('No user details in preferences, staying on login page');
+        return false; // Stay on login page if preferences are empty
+      }
+
+      globalState.isAuthenticated = false; // Set as not authenticated
+      success = true; // Allow fallback to homepage
+    }
+
+    notifyListeners();
+    return success;
   }
 }
