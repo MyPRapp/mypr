@@ -23,9 +23,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.read<GlobalStateProvider>().isAuthenticated) {
+        context.read<BottomNavBarVisibility>().hide();
         context.router.replaceAll([const LoginRoute()]);
+      } else {
+        context.read<BottomNavBarVisibility>().show();
       }
-      context.read<BottomNavBarVisibility>().show();
     });
     // _syncClubs();
     // _syncUserDetails();

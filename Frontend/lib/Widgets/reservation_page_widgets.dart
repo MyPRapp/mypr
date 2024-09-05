@@ -78,6 +78,7 @@ class ConfirmationDialog extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Close the confirmation dialog and go back to the previous screen
+                  context.read<BottomNavBarVisibility>().show();
                   Navigator.pop(context);
                   AutoRouter.of(context).back();
                 },
