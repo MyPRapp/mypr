@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
@@ -84,9 +85,11 @@ class _LoginPageState extends State<LoginPage> {
           // If no credentials, load user details from preferences
           await userProvider.loadUserDetailsFromPreferences();
         }
+
         if (mounted) {
           context.read<BookingProvider>().fetchBookings(context);
         }
+
         // Navigate to the BottomNavBarRoute after syncing
         if (mounted) {
           await context.router.replaceAll([const BottomNavBarRoute()]);
@@ -158,14 +161,10 @@ class _LoginPageState extends State<LoginPage> {
   void _handleLoginFailure() {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            duration: Duration(seconds: 4),
-            content: Text('Λάθος email/τηλέφωνο ή κωδικός'),
-          ),
-        );
+      floatingSnackBar(
+          message: 'Λάθος email/τηλέφωνο ή κωδικός',
+          context: context,
+          duration: const Duration(milliseconds: 4000));
     }
   }
 
@@ -336,15 +335,12 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextButton(
                               onPressed: () {
-                                ScaffoldMessenger.of(context)
-                                  ..hideCurrentSnackBar()
-                                  ..showSnackBar(
-                                    const SnackBar(
-                                      duration: Duration(seconds: 2),
-                                      content: Text(
-                                          'Στάλθηκε email για επαναφορά κωδικού'),
-                                    ),
-                                  );
+                                floatingSnackBar(
+                                    message:
+                                        'Στάλθηκε email για επαναφορά κωδικού',
+                                    context: context,
+                                    duration:
+                                        const Duration(milliseconds: 1500));
                               },
                               child: const Text(
                                 'Επαναφορά κωδικού',
@@ -458,15 +454,11 @@ class _LoginPageState extends State<LoginPage> {
                             }
                             print(
                                 'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/');
-                            ScaffoldMessenger.of(context)
-                              ..hideCurrentSnackBar()
-                              ..showSnackBar(
-                                SnackBar(
-                                  duration: const Duration(seconds: 2),
-                                  content: Text(
-                                      'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/'),
-                                ),
-                              );
+                          
+                              floatingSnackBar(
+              message:  'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/',
+              context: context,
+              duration: const Duration(milliseconds: 1500));
                           },
                           child: const Text(
                             'Connect to server',

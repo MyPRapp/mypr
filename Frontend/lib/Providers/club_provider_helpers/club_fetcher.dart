@@ -93,6 +93,8 @@ class ClubFetcher {
         }
         print('Fetched catalogues for \'${club.clubName}\' from server');
       } else {
+        print(
+            'Error while fetching catalogues for \'${club.clubName}\' from server');
         throw Exception(
             'Failed to load catalogues for \'${club.clubName}\': ${response.reasonPhrase}');
       }

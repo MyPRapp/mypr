@@ -1,3 +1,4 @@
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
@@ -42,23 +43,15 @@ class LikeButtonState extends State<LikeButton>
 
         // Show SnackBar based on like status
         if (isLiked) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                duration: Duration(milliseconds: 1500),
-                content: Text('Αφαιρέθηκε από τα αγαπημένα'),
-              ),
-            );
+          floatingSnackBar(
+              message: 'Αφαιρέθηκε από τα αγαπημένα',
+              context: context,
+              duration: const Duration(milliseconds: 1500));
         } else {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(
-                duration: Duration(milliseconds: 1500),
-                content: Text('Προστέθηκε στα αγαπημένα'),
-              ),
-            );
+          floatingSnackBar(
+              message: 'Προστέθηκε στα αγαπημένα',
+              context: context,
+              duration: const Duration(milliseconds: 1500));
         }
 
         // If onRemove is provided and the club is no longer liked, trigger the callback

@@ -6,6 +6,7 @@ import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Providers/booking_provider.dart';
 import '../../../Providers/user_provider.dart';
 import '../../../routes/app_router.gr.dart';
 
@@ -18,30 +19,66 @@ class CustomizeProfilePage extends StatelessWidget {
     final userDetails = context.watch<UserProvider>().userDetails;
 
     void signOut(BuildContext context) async {
-      // Step 1: Clear Shared Preferences
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      try {
+        print('Signing out...');
 
-      // Clear all shared preferences except for validatedIp
-      final String? validatedIp = prefs.getString('validatedIp');
-      await prefs.clear();
-      if (validatedIp != null) {
-        await prefs.setString('validatedIp', validatedIp);
-      }
+        // Step 1: Clear Shared Preferences
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        print('Clearing shared preferences...');
 
-      // Step 2: Set isAuthenticated to false
-      if (context.mounted) {
-        context.read<GlobalStateProvider>().isAuthenticated = false;
-      }
+        // Clear all shared preferences except for validatedIp
+        final String? validatedIp = prefs.getString('validatedIp');
+        await prefs.clear();
+        print('Shared preferences cleared.');
 
-      // Step 3: Clear liked clubs asynchronously
-      if (context.mounted) {
-        ClubProvider clubProvider = context.read<ClubProvider>();
-        await clubProvider.deleteAllLiked(); // Await this as it might be async
-      }
+        if (validatedIp != null) {
+          await prefs.setString('validatedIp', validatedIp);
+          print('Retained validatedIp: $validatedIp');
+        }
 
-      // Step 4: Navigate to the Login page
-      if (context.mounted) {
-        AutoRouter.of(context).replaceAll([const LoginRoute()]);
+        // Step 2: Set isAuthenticated to false
+        if (context.mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = false;
+          print('User is authenticated flag set to false.');
+        }
+
+        // Step 3: Clear liked clubs asynchronously
+        if (context.mounted) {
+          try {
+            print('Clearing liked clubs...');
+            ClubProvider clubProvider = context.read<ClubProvider>();
+            await clubProvider
+                .deleteAllLiked(); // Await this as it might be async
+            print('Liked clubs cleared.');
+          } catch (e) {
+            print('Error clearing liked clubs: $e');
+          }
+        }
+
+        // Step 4: Clear bookings and reset flags
+        if (context.mounted) {
+          try {
+            print('Clearing bookings and resetting flags...');
+            BookingProvider bookingProvider = context.read<BookingProvider>();
+            bookingProvider.bookings.clear(); // Clear bookings list
+            bookingProvider
+                .setLoaded(false); // Set bookingsLoaded flag to false
+            bookingProvider
+                .setLoading(false); // Set bookingsLoading flag to false
+            print('Bookings cleared, flags reset.');
+          } catch (e) {
+            print('Error clearing bookings or resetting flags: $e');
+          }
+        }
+
+        // Step 5: Navigate to the Login page
+        if (context.mounted) {
+          print('Navigating to the login page...');
+          AutoRouter.of(context).replaceAll([const LoginRoute()]);
+          print('Navigation to login page successful.');
+        }
+      } catch (e) {
+        print('Error during sign out: $e');
       }
     }
 

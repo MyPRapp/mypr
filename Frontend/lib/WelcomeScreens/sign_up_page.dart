@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
@@ -159,14 +160,10 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar() // Hide the current SnackBar if it exists
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          duration: const Duration(seconds: 4),
-        ),
-      );
+    floatingSnackBar(
+        message: message,
+        context: context,
+        duration: const Duration(milliseconds: 4000));
   }
 
   @override

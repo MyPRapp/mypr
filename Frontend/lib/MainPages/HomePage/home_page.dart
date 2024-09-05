@@ -163,6 +163,17 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                       ),
+                      Container(
+                          alignment: Alignment.topCenter,
+                          height: 50,
+                          child: const Text(
+                            'Περισσότερα club έρχονται σύντομα...',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )),
                       const SizedBox(height: 100)
                     ],
                   ),

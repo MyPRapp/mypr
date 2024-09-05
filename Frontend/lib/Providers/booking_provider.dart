@@ -16,45 +16,51 @@ class BookingProvider with ChangeNotifier {
   bool _isLoading = false;
 
   List<BookingInfoStruct> get bookings => _bookings;
+  bool get bookingsLoaded => _bookingsLoaded;
   bool get isLoading => _isLoading;
 
   // Fetch bookings from server or preferences if already loaded
   Future<void> fetchBookings(BuildContext context) async {
-    if (_bookingsLoaded) return; // Avoid unnecessary loading if already loaded
+    if (_bookingsLoaded) {
+      print('Bookings already loaded');
+      return; // Avoid unnecessary loading if already loaded
+    }
+    print('Fetching bookings');
 
-    _setLoading(true);
+    setLoading(true);
 
     try {
+      // Fetch the required data from UserProvider and ClubProvider beforehand
+      final UserInfoStruct? userDetails =
+          context.read<UserProvider>().userDetails;
+      final ClubProvider clubProvider = context.read<ClubProvider>();
+
       final bookingsData = await BookingService().getBookings();
-      if (bookingsData != null) {
-        if (context.mounted) {
-          await _processFetchedBookings(bookingsData, context);
-        }
+      if (bookingsData != null && bookingsData.isNotEmpty) {
+        print('Processing fetched bookings...');
+        await _processFetchedBookings(bookingsData, userDetails, clubProvider);
         _bookingsLoaded = true;
+        print('Bookings loaded and processed successfully');
       } else {
         print('No bookings from server. Loading from preferences...');
         await _loadBookingsFromPreferences();
       }
     } catch (e) {
       print('Error fetching bookings: $e');
-      print('Loading bookings from preferences...');
       await _loadBookingsFromPreferences();
     } finally {
-      _setLoading(false);
+      setLoading(false);
     }
   }
 
-  // Process fetched bookings and update UI
-  Future<void> _processFetchedBookings(
-      List<dynamic> bookingsData, BuildContext context) async {
+// Process fetched bookings and update UI
+  Future<void> _processFetchedBookings(List<dynamic> bookingsData,
+      UserInfoStruct? userDetails, ClubProvider clubProvider) async {
     _bookings.clear();
 
     for (var bookingData in bookingsData) {
-      final userDetails = context.read<UserProvider>().userDetails;
-
       // Get or default catalogues from ClubProvider
-      final catalogues =
-          context.read<ClubProvider>().getAllCatalogues(bookingData['club']);
+      final catalogues = clubProvider.getAllCatalogues(bookingData['club']);
 
       final regularCatalogue =
           _getCatalogue(catalogues, 0, bookingData['club'], 'Regular');
@@ -132,6 +138,7 @@ class BookingProvider with ChangeNotifier {
       final String bookingsJson =
           jsonEncode(bookings.map((booking) => booking.toJson()).toList());
       await prefs.setString('bookings', bookingsJson);
+      print('Saved booking to preferences');
     } catch (e) {
       print('Error saving bookings to preferences: $e');
     }
@@ -139,23 +146,26 @@ class BookingProvider with ChangeNotifier {
 
   // Load bookings from shared preferences
   Future<void> _loadBookingsFromPreferences() async {
+    print('Attempting to load bookings from shared preferences...');
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? bookingsJson = prefs.getString('bookings');
 
       if (bookingsJson != null) {
         final List<dynamic> bookingsList = jsonDecode(bookingsJson);
+
         _bookings.clear();
         _bookings.addAll(
-          bookingsList
-              .map<BookingInfoStruct>(
-                  (bookingData) => BookingInfoStruct.fromJson(bookingData))
-              .toList(),
+          bookingsList.map<BookingInfoStruct>((bookingData) {
+            return BookingInfoStruct.fromJson(bookingData);
+          }).toList(),
         );
+
         _bookingsLoaded = true;
+        print('Bookings successfully loaded from preferences.');
         notifyListeners(); // Notify listeners to update UI
       } else {
-        print('No bookings found in preferences.');
+        print('No bookings found in shared preferences.');
       }
     } catch (e) {
       print('Error loading bookings from preferences: $e');
@@ -193,8 +203,13 @@ class BookingProvider with ChangeNotifier {
   }
 
   // Helper method to toggle loading state
-  void _setLoading(bool value) {
+  void setLoading(bool value) {
     _isLoading = value;
+    notifyListeners(); // Notify listeners to update UI
+  }
+
+  void setLoaded(bool value) {
+    _bookingsLoaded = value;
     notifyListeners(); // Notify listeners to update UI
   }
 }

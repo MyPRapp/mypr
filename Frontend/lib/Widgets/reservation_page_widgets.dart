@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -465,15 +466,11 @@ class PersonsTextField extends StatelessWidget {
           if (persons < maxPersons) {
             reservationProvider.setInfo(3, persons + 1);
           } else if (persons == maxPersons) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(
-                  content: Text(
-                      'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινωνήστε μαζί μας.'),
-                  duration: Duration(seconds: 3),
-                ),
-              );
+            floatingSnackBar(
+                message:
+                    'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινωνήστε μαζί μας.',
+                context: context,
+                duration: const Duration(milliseconds: 3000));
           }
         }
       },
@@ -486,14 +483,10 @@ class PersonsTextField extends StatelessWidget {
     if (reservationProvider.getInfo(5) == 0 &&
         reservationProvider.getInfo(6) == 0 &&
         reservationProvider.getInfo(7) == 0) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content: Text('Παρακαλώ επιλέξτε φιάλη πρώτα'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+      floatingSnackBar(
+          message: 'Παρακαλώ επιλέξτε φιάλη πρώτα',
+          context: context,
+          duration: const Duration(milliseconds: 3000));
       return false;
     }
     return true;
@@ -582,15 +575,10 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
         widget.onCountersChanged();
       });
     } else {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          const SnackBar(
-            content:
-                Text('Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας.'),
-            duration: Duration(seconds: 3),
-          ),
-        );
+      floatingSnackBar(
+          message: 'Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας.',
+          context: context,
+          duration: const Duration(milliseconds: 3000));
     }
   }
 

@@ -1,4 +1,5 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -68,6 +69,7 @@ class _ReservationPageState extends State<ReservationPage> {
     // Initialize the page after the build phase completes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePage();
+      context.read<BottomNavBarVisibility>().hide();
     });
   }
 
@@ -183,16 +185,6 @@ class _ReservationPageState extends State<ReservationPage> {
     }
   }
 
-  /// Toggles the visibility of the bottom navigation bar.
-  void _toggleNavBarVisibility() {
-    final bottomNavBarVisibility = context.read<BottomNavBarVisibility>();
-    if (buttonIsVisible) {
-      bottomNavBarVisibility.show();
-    } else {
-      bottomNavBarVisibility.hide();
-    }
-  }
-
   @override
   void dispose() {
     // Clean up the controllers to free up resources
@@ -203,7 +195,12 @@ class _ReservationPageState extends State<ReservationPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: buttonIsVisible, // Restrict pop action based on button visibility
+      canPop: buttonIsVisible,
+      onPopInvokedWithResult: (didPop, result) {
+        if (buttonIsVisible) {
+          context.read<BottomNavBarVisibility>().show();
+        }
+      }, // Restrict pop action based on button visibility
       child: Scaffold(
         backgroundColor: Colors.black,
         body: RefreshIndicator(
@@ -241,7 +238,8 @@ class _ReservationPageState extends State<ReservationPage> {
                 child: IconButton(
                   onPressed: () {
                     if (buttonIsVisible) {
-                      AutoRouter.of(context).back(); // Navigate back
+                      context.read<BottomNavBarVisibility>().show();
+                      Navigator.pop(context);
                     }
                   },
                   icon: const Icon(
@@ -338,7 +336,6 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget buildPackageInfo() {
     return Column(
       children: [
-        ElevatedButton(onPressed: _refresh, child: const Text('REFRESH')),
         const SizedBox(height: 25),
         PackagesInfo(
           package: 'Απλή',
@@ -464,28 +461,18 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Handles the form submission process, including validation and API calls.
   Future<void> _handleSubmit() async {
-    setState(() {
-      buttonIsVisible = false;
-      _toggleNavBarVisibility();
-    });
-
     String rawName = nameTextFieldKey.currentState?.nameController.text ?? '';
     String formattedName = formatName(rawName);
     context.read<ReservationProvider>().setInfo(1, formattedName);
-
-    // Printing log statement for catalog fetch start
-    print('Refreshing catalogues from server');
-
-    // Fetching catalogues, wrapped in a try-catch for error handling
-    await ClubProvider().fetchCatalogues(widget.club);
-
-    print('Finished refreshing catalogues from server');
 
     if (!_validateForm(formattedName)) {
       _showValidationError(formattedName);
       return;
     }
 
+    setState(() {
+      buttonIsVisible = false;
+    });
     if (context.mounted) {
       // Show the confirmation dialog
       showDialog(
@@ -499,7 +486,6 @@ class _ReservationPageState extends State<ReservationPage> {
     } else {
       setState(() {
         buttonIsVisible = true;
-        _toggleNavBarVisibility();
       });
     }
   }
@@ -513,24 +499,21 @@ class _ReservationPageState extends State<ReservationPage> {
         // Call the refreshAccessToken method on the instance
         await _authService
             .refreshAccessToken(); // Ensure token is valid before submission
+
+        // Fetching catalogues, wrapped in a try-catch for error handling
+        await ClubProvider().fetchCatalogues(widget.club);
       } catch (e) {
         print("Failed to refresh access token: $e");
         setState(() {
           buttonIsVisible = true;
-          _toggleNavBarVisibility();
         });
         try {
           if (mounted) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας.',
-                  ),
-                  duration: Duration(seconds: 3),
-                ),
-              );
+            floatingSnackBar(
+                message:
+                    'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας',
+                context: context,
+                duration: const Duration(milliseconds: 1500));
           }
         } catch (e) {
           print("Failed to show SnackBar: $e");
@@ -564,7 +547,6 @@ class _ReservationPageState extends State<ReservationPage> {
       // Show the button and nav bar again
       setState(() {
         buttonIsVisible = true;
-        _toggleNavBarVisibility();
       });
     }
 
@@ -714,22 +696,16 @@ class _ReservationPageState extends State<ReservationPage> {
         .hasMatch(formattedName);
 
     // Display a snack bar error message based on validation results
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            isNameValid
-                ? 'Παρακαλώ συμπληρώστε όλα τα πεδία'
-                : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
-          ),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+    floatingSnackBar(
+        message: isNameValid
+            ? 'Παρακαλώ συμπληρώστε όλα τα πεδία'
+            : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
+        context: context,
+        duration: const Duration(milliseconds: 2000));
 
     setState(() {
       buttonIsVisible = true;
-      _toggleNavBarVisibility(); // Show the nav bar again when button is visible
+      // Show the nav bar again when button is visible
     });
   }
 
@@ -737,26 +713,30 @@ class _ReservationPageState extends State<ReservationPage> {
   void _handleSubmissionResponse(bool success) async {
     if (success) {
       // Fetch bookings after a successful reservation
-      await context.read<BookingProvider>().fetchBookings(context);
+      if (mounted) {
+        await context.read<BookingProvider>().fetchBookings(context);
+      }
 
-      // Show the confirmation dialog after successful booking
-      showDialog(
-        // ignore: use_build_context_synchronously
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext dialogContext) {
-          if (!mounted) {
-            return Container(); // Prevent showing the dialog if the widget is unmounted
-          }
-          return const ConfirmationDialog();
-        },
-      );
+      if (mounted) {
+        // Show the confirmation dialog after successful booking
+        showDialog(
+          // ignore: use_build_context_synchronously
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext dialogContext) {
+            if (!mounted) {
+              return Container(); // Prevent showing the dialog if the widget is unmounted
+            }
+            return const ConfirmationDialog();
+          },
+        );
+      }
     }
 
     if (mounted) {
       setState(() {
         buttonIsVisible = true;
-        _toggleNavBarVisibility(); // Show the nav bar again when button is visible
+        // Show the nav bar again when button is visible
       });
     }
   }
