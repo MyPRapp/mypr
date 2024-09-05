@@ -42,7 +42,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   Widget build(BuildContext context) {
     context.watch<BookingProvider>().bookings;
     return PopScope(
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
@@ -59,7 +59,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
                   IconButton(
                     onPressed: () {
                       context.read<BottomNavBarVisibility>().show();
-                      AutoRouter.of(context).back();
+                      Navigator.pop(context);
                     },
                     icon: const Icon(
                       Icons.chevron_left,

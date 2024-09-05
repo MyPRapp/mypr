@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/club_provider.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,34 +13,37 @@ import '../../../routes/app_router.gr.dart';
 class CustomizeProfilePage extends StatelessWidget {
   const CustomizeProfilePage({super.key});
 
-  void _signOut(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    // Clear all shared preferences except for validatedIp
-    final String? validatedIp = prefs.getString('validatedIp');
-    await prefs.clear();
-    if (validatedIp != null) {
-      await prefs.setString('validatedIp', validatedIp);
-    }
-
-    // Set isAuthenticated to false
-    await prefs.setBool('isAuthenticated', false);
-
-    // Clear liked clubs
-    if (context.mounted) {
-      ClubProvider clubProvider = context.read<ClubProvider>();
-      clubProvider.deleteAllLiked();
-    }
-
-    // Navigate to the Login page
-    if (context.mounted) {
-      AutoRouter.of(context).replaceAll([const LoginRoute()]);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final userDetails = context.watch<UserProvider>().userDetails;
+
+    void signOut(BuildContext context) async {
+      // Step 1: Clear Shared Preferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Clear all shared preferences except for validatedIp
+      final String? validatedIp = prefs.getString('validatedIp');
+      await prefs.clear();
+      if (validatedIp != null) {
+        await prefs.setString('validatedIp', validatedIp);
+      }
+
+      // Step 2: Set isAuthenticated to false
+      if (context.mounted) {
+        context.read<GlobalStateProvider>().isAuthenticated = false;
+      }
+
+      // Step 3: Clear liked clubs asynchronously
+      if (context.mounted) {
+        ClubProvider clubProvider = context.read<ClubProvider>();
+        await clubProvider.deleteAllLiked(); // Await this as it might be async
+      }
+
+      // Step 4: Navigate to the Login page
+      if (context.mounted) {
+        AutoRouter.of(context).replaceAll([const LoginRoute()]);
+      }
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFF1D2428),
@@ -195,7 +199,7 @@ class CustomizeProfilePage extends StatelessWidget {
                             backgroundColor: Colors.black,
                           ),
                           onPressed: () {
-                            _signOut(context);
+                            signOut(context);
                           },
                           child: const Text(
                             'Αποσύνδεση',

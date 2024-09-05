@@ -20,19 +20,36 @@ class ClubManager with ChangeNotifier {
   // CLUB MANAGEMENT
   void addOrUpdateClub(ClubInfoStruct club) {
     if (club.clubID <= 0) {
+      print('AddOrUpdateClub: Invalid clubID: ${club.clubID}');
       return;
     }
 
-    int index = _clubs.indexWhere((c) => c.clubID == club.clubID);
-    if (index != -1) {
-      _clubs[index] = club;
-    } else {
-      _clubs.add(club);
+    try {
+      // Try to find if the club already exists in the list by its clubID
+      int index = _clubs.indexWhere((c) => c.clubID == club.clubID);
+
+      if (index != -1) {
+        // Club exists, update the existing entry
+        _clubs[index] = club;
+        print('Club with clubID ${club.clubID} updated.');
+      } else {
+        // Club does not exist, add it to the list
+        _clubs.add(club);
+        print('New club with clubID ${club.clubID} added.');
+      }
+
+      _notifyListeners(); // Notify listeners that the club data has changed
+    } catch (e) {
+      // Catch any unexpected errors
+      print('Error in addOrUpdateClub for clubID ${club.clubID}: $e');
     }
-    _notifyListeners();
   }
 
-  void removeClub(int clubID) {
+  void removeClubWithClubCatalogues(int clubID) {
+    if (clubID <= 0) {
+      print('RemoveClubWithClubCatalogues: Invalid clubID:: $clubID');
+      return;
+    }
     _clubs.removeWhere((club) => club.clubID == clubID);
     _catalogues.removeWhere((catalogue) => catalogue.clubID == clubID);
     _notifyListeners();
@@ -61,16 +78,33 @@ class ClubManager with ChangeNotifier {
 
   void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
     if (catalogue.clubID <= 0) {
+      print('AddOrUpdateCatalogue: Invalid clubID: ${catalogue.clubID}');
       return;
     }
-    int index = _catalogues.indexWhere((c) =>
-        c.clubID == catalogue.clubID && c.serviceType == catalogue.serviceType);
-    if (index != -1) {
-      _catalogues[index] = catalogue;
-    } else {
-      _catalogues.add(catalogue);
+
+    try {
+      // Try to find if the catalogue for the specific clubID and serviceType already exists
+      int index = _catalogues.indexWhere((c) =>
+          c.clubID == catalogue.clubID &&
+          c.serviceType == catalogue.serviceType);
+
+      if (index != -1) {
+        // Catalogue exists, update the existing entry
+        _catalogues[index] = catalogue;
+        print(
+            'Catalogue for clubID ${catalogue.clubID} and serviceType ${catalogue.serviceType} updated.');
+      } else {
+        // Catalogue does not exist, add it to the list
+        _catalogues.add(catalogue);
+        print(
+            'New catalogue for clubID ${catalogue.clubID} and serviceType ${catalogue.serviceType} added.');
+      }
+
+      _notifyListeners(); // Notify listeners that the catalogues data has changed
+    } catch (e) {
+      // Catch any unexpected errors during the operation
+      print('Error in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
     }
-    _notifyListeners();
   }
 
   CatalogueInfoStruct getCatalogue(ClubInfoStruct club, String serviceType) {

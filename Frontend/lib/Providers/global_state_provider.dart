@@ -5,11 +5,12 @@ class GlobalStateProvider with ChangeNotifier {
   static final GlobalStateProvider _instance = GlobalStateProvider._internal();
 
   String _validatedIp = '192.168.1.9';
-  bool _clubsLoaded = false;
   bool _isAuthenticated = false;
+  bool _preferencesLoaded =
+      false; // Add this state to track if preferences are loaded
 
   GlobalStateProvider._internal() {
-    _loadFromPreferences(); // Load initial values from SharedPreferences
+    loadFromPreferences(); // Load initial values from SharedPreferences
   }
 
   factory GlobalStateProvider() {
@@ -18,18 +19,16 @@ class GlobalStateProvider with ChangeNotifier {
 
   // Getters
   String get validatedIp => _validatedIp;
-  bool get clubsLoaded => _clubsLoaded;
+
   bool get isAuthenticated => _isAuthenticated;
+
+  bool get preferencesLoaded =>
+      _preferencesLoaded; // New getter to check if preferences are loaded
 
   // Setters
   set validatedIp(String value) {
     _validatedIp = value;
     _saveToPreferences('validatedIp', value);
-    notifyListeners();
-  }
-
-  void setClubsLoaded(bool value) {
-    _clubsLoaded = value;
     notifyListeners();
   }
 
@@ -40,11 +39,14 @@ class GlobalStateProvider with ChangeNotifier {
   }
 
   // Load values from SharedPreferences
-  Future<void> _loadFromPreferences() async {
+  Future<void> loadFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     _validatedIp = prefs.getString('validatedIp') ?? '192.168.1.9';
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-    notifyListeners();
+
+    // Set the preferences loaded state to true
+    _preferencesLoaded = true;
+    notifyListeners(); // Notify that preferences have been loaded
   }
 
   // Save values to SharedPreferences

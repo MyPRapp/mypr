@@ -83,7 +83,7 @@ class UserProvider with ChangeNotifier {
 
           // Save user details and photo to shared preferences
           await saveUserDetailsToPreferences();
-          print('User details fetched and saved: $_userDetails');
+          print('User details fetched and saved');
           notifyListeners();
         } else {
           print(

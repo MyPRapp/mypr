@@ -1,7 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:mypr/global_components.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/club_provider.dart';
@@ -20,6 +22,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!context.read<GlobalStateProvider>().isAuthenticated) {
+        context.router.replaceAll([const LoginRoute()]);
+      }
       context.read<BottomNavBarVisibility>().show();
     });
     // _syncClubs();

@@ -13,16 +13,18 @@ class BookingService {
     try {
       await _authService.refreshAccessToken(); // Ensure token is refreshed
     } catch (e) {
-      print("Failed to refresh access token: $e");
       throw Exception('Token refresh failed');
     }
   }
 
+  Future<String?> _getAccessToken() async {
+    await _ensureTokenIsValid(); // Refresh token before making API call
+    return await _authService.getAccessToken();
+  }
+
   Future<bool> submitForm(String reservationName, String clubName, String type,
       String time, String numberOfPeople, String comments) async {
-    await _ensureTokenIsValid(); // Refresh token before making API call
-
-    String? accessToken = await _authService.getAccessToken();
+    String? accessToken = await _getAccessToken();
     if (accessToken == null) {
       print('Access token is null. User is not authenticated.');
       return false;
@@ -45,7 +47,7 @@ class BookingService {
           'comments': comments,
         }),
       )
-          .timeout(const Duration(seconds: 10), onTimeout: () {
+          .timeout(const Duration(seconds: 8), onTimeout: () {
         print("Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
@@ -64,9 +66,7 @@ class BookingService {
   }
 
   Future<List<dynamic>?> getBookings() async {
-    await _ensureTokenIsValid(); // Refresh token before fetching bookings
-
-    String? accessToken = await _authService.getAccessToken();
+    String? accessToken = await _getAccessToken();
     if (accessToken == null) {
       print('Access token is null. User is not authenticated.');
       return null;
@@ -79,7 +79,7 @@ class BookingService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-      ).timeout(const Duration(seconds: 10), onTimeout: () {
+      ).timeout(const Duration(seconds: 8), onTimeout: () {
         print("Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });

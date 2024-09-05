@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'dart:ui';
+import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
@@ -106,6 +107,22 @@ class ClubLoader {
       print('Loaded liked clubs: $_likedClubIDs');
     } else {
       print('No liked clubs found in preferences');
+    }
+  }
+
+  // Load image from shared preferences
+  Future<Image> loadImageFromPreferences(String key) async {
+    print('Loading image from preferences with key: $key');
+    final prefs = await SharedPreferences.getInstance();
+    final base64Image = prefs.getString(key);
+
+    if (base64Image != null) {
+      final Uint8List bytes = base64Decode(base64Image);
+      print('Loaded imgage from preferences with key: $key');
+      return Image.memory(bytes);
+    } else {
+      print('No image found in preferences with key: $key');
+      throw Exception('No image found in preferences');
     }
   }
 }

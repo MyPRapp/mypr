@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -366,10 +365,6 @@ TextStyle textStyle2() {
     fontWeight: FontWeight.bold,
     color: Color(0xFF9C0C04),
   );
-}
-
-Future<bool> hasInternetAccess() async {
-  return await InternetConnectionChecker().hasConnection;
 }
 
 void printReservationInfo(List<dynamic> reservationInfo) {

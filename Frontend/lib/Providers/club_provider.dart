@@ -19,7 +19,6 @@ class ClubProvider with ChangeNotifier {
   ClubProvider() {
     _clubManager =
         ClubManager(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-
     _clubLoader =
         ClubLoader(_clubs, _catalogues, _likedClubIDs, notifyListeners);
     _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs, notifyListeners);
@@ -32,7 +31,6 @@ class ClubProvider with ChangeNotifier {
       await _clubFetcher.fetchClubsAndCatalogues();
     } catch (e) {
       // If there's an error, load clubs and catalogues from local storage
-      print('Error fetching club data, loading from preferences: $e');
       await _clubLoader.loadClubsFromPreferences();
       await _clubLoader.loadCataloguesFromPreferences();
     }
@@ -44,15 +42,39 @@ class ClubProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  //// Fetch From Server Functions
   Future<void> fetchClubsAndCatalogues() async {
     await _clubFetcher.fetchClubsAndCatalogues();
   }
 
+  //Fetches catalogues of one club each time
   Future<void> fetchCatalogues(ClubInfoStruct club) async {
     await _clubFetcher.fetchCatalogues(club);
   }
 
-  // Club Manager Functions
+  //Fetches one club each time without updating is minPrice and maxPersons
+  Future<void> fetchClub(int clubID) async {
+    await _clubFetcher.fetchClub(clubID);
+  }
+
+  //Load From Preferences Functions
+  Future<void> loadClubsFromPreferences() async {
+    await _clubLoader.loadClubsFromPreferences();
+  }
+
+  Future<void> loadCataloguesFromPreferences() async {
+    await _clubLoader.loadCataloguesFromPreferences();
+  }
+
+  Future<void> loadLikedClubsFromPreferences() async {
+    await _clubLoader.loadLikedClubsFromPreferences();
+  }
+
+  Future<Image> loadImageFromPreferences(String key) async {
+    return await _clubLoader.loadImageFromPreferences(key);
+  }
+
+  //// Club Manager Functions
   List<ClubInfoStruct> get allClubs => _clubManager.allClubs;
   List<CatalogueInfoStruct> get allCatalogues => _clubManager.allCatalogues;
   List<ClubInfoStruct> get likedClubs => _clubManager.allLikedClubs;
@@ -65,8 +87,8 @@ class ClubProvider with ChangeNotifier {
     _clubManager.addOrUpdateClub(club);
   }
 
-  void removeClub(int clubID) {
-    _clubManager.removeClub(clubID);
+  void removeClubWithClubCatalogues(int clubID) {
+    _clubManager.removeClubWithClubCatalogues(clubID);
   }
 
   void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
@@ -81,7 +103,7 @@ class ClubProvider with ChangeNotifier {
     return _clubManager.getCataloguesByClubID(clubID);
   }
 
-  // Liked Clubs Management
+  //// Liked Clubs Management
   void toggleLike(int clubID) {
     _clubManager.toggleLike(clubID);
     _clubSaver.saveLikedClubsToPreferences();
@@ -96,7 +118,7 @@ class ClubProvider with ChangeNotifier {
     await _clubSaver.saveLikedClubsToPreferences();
   }
 
-  // Persistence Functions
+  //// Saving To Preferences Functions
   Future<void> saveClubsToPreferences() async {
     await _clubSaver.saveClubsToPreferences();
   }
@@ -113,11 +135,7 @@ class ClubProvider with ChangeNotifier {
     await _clubSaver.saveImageToPreferences(key, base64Image);
   }
 
-  Future<Image> loadImageFromPreferences(String key) async {
-    return await _clubSaver.loadImageFromPreferences(key);
-  }
-
-  // Utility / Helper Functions
+  //// Utility / Helper Functions
   String getClubAvailability(String clubName) {
     return _clubManager.getClubAvailability(clubName);
   }
@@ -138,7 +156,7 @@ class ClubProvider with ChangeNotifier {
     return _clubManager.getClubNameByID(clubID);
   }
 
-  // Print Functions for Debugging
+  //// Print Functions for Debugging
   void printAllClubs() {
     _clubManager.printAllClubs();
   }

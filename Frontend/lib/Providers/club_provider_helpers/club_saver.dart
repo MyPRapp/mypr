@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,49 +17,38 @@ class ClubSaver {
 
   // Save clubs to shared preferences
   Future<void> saveClubsToPreferences() async {
+    print('Saving clubs to preferences');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String clubsJson =
         jsonEncode(_clubs.map((club) => club.toJson()).toList());
     await prefs.setString('clubs', clubsJson);
-    print('Clubs saved to preferences');
+    print('Saved clubs to preferences');
   }
 
   // Save catalogues to shared preferences
   Future<void> saveCataloguesToPreferences() async {
+    print('Saving catalogues to preferences');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String cataloguesJson =
         jsonEncode(_catalogues.map((catalogue) => catalogue.toJson()).toList());
     await prefs.setString('catalogues', cataloguesJson);
-    print('Catalogues saved to preferences');
+    print('Saved catalogues to preferences');
   }
 
   // Save liked clubs to shared preferences
   Future<void> saveLikedClubsToPreferences() async {
+    print('Saving liked clubs to preferences');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
         'likedClubs', _likedClubIDs.map((id) => id.toString()).toList());
-    print('Liked clubs saved to preferences');
+    print('Saved liked clubs to preferences');
   }
 
   // Save image to shared preferences
   Future<void> saveImageToPreferences(String key, String base64Image) async {
+    print('Saving image with key $key to preferences');
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(key, base64Image);
-    print('Image saved to preferences with key: $key');
-  }
-
-  // Load image from shared preferences
-  Future<Image> loadImageFromPreferences(String key) async {
-    final prefs = await SharedPreferences.getInstance();
-    final base64Image = prefs.getString(key);
-
-    if (base64Image != null) {
-      final Uint8List bytes = base64Decode(base64Image);
-      print('Image loaded from preferences with key: $key');
-      return Image.memory(bytes);
-    } else {
-      print('No image found in preferences with key: $key');
-      throw Exception('No image found in preferences');
-    }
+    print('Saved image with key $key to preferences');
   }
 }

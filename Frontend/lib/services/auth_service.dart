@@ -16,7 +16,7 @@ class AuthService {
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'username': username, 'password': password}),
           )
-          .timeout(const Duration(seconds: 4)); // Adding a 5-second timeout
+          .timeout(const Duration(seconds: 5)); // Adding a 5-second timeout
 
       // Check if the response is successful
       if (response.statusCode == 200) {
@@ -33,20 +33,6 @@ class AuthService {
           await prefs.setString('refresh_token', refreshToken);
           await prefs.setString('saved_email', username);
           await prefs.setString('saved_password', password);
-
-          // Fetch and save user details
-          final userResponse = await http.get(
-            Uri.parse('$baseUrl/user/print'),
-            headers: {'Authorization': 'Bearer $accessToken'},
-          );
-
-          if (userResponse.statusCode == 200) {
-            print('User details fetched successfully');
-            var userDetails = jsonDecode(userResponse.body);
-            await prefs.setString('user_details', jsonEncode(userDetails));
-          } else {
-            print('Failed to fetch user details: ${userResponse.statusCode}');
-          }
 
           return true;
         } else {
@@ -137,11 +123,16 @@ class AuthService {
     }
 
     try {
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('$baseUrl/token/refresh/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh': refreshToken}),
-      );
+      )
+          .timeout(const Duration(seconds: 8), onTimeout: () {
+        print("Can't connect to server. Refresh token request timed out.");
+        return http.Response('Error: Timeout', 408); // 408 Request Timeout
+      });
 
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
@@ -154,7 +145,6 @@ class AuthService {
           throw Exception('Failed to refresh access token');
         }
       } else {
-        print('Failed to refresh access token: ${response.body}');
         throw Exception('Failed to refresh access token');
       }
     } catch (e) {
