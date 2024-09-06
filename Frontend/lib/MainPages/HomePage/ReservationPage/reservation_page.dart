@@ -511,7 +511,7 @@ class _ReservationPageState extends State<ReservationPage> {
           if (mounted) {
             floatingSnackBar(
                 message:
-                    'Υπήρξε κάποιο σφάλμα στην κράτησή σας. Παρακαλώ προσπαθήστε ξανά ή επικοινωνήστε μαζί μας',
+                    'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
                 context: context,
                 duration: const Duration(milliseconds: 1500));
           }
@@ -600,7 +600,7 @@ class _ReservationPageState extends State<ReservationPage> {
                       ),
                     ),
                     child: const Text(
-                      'Άκυρο',
+                      'Ακύρωση',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -698,7 +698,7 @@ class _ReservationPageState extends State<ReservationPage> {
     // Display a snack bar error message based on validation results
     floatingSnackBar(
         message: isNameValid
-            ? 'Παρακαλώ συμπληρώστε όλα τα πεδία'
+            ? 'Παρακαλώ συμπλήρωσε όλα τα πεδία'
             : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
         context: context,
         duration: const Duration(milliseconds: 2000));

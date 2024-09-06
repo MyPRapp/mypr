@@ -36,9 +36,9 @@ class ConfirmationDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Ευχαριστούμε για την κράτηση!\nΘα λάβετε σύντομα email επιβεβαίωσης.',
-                style: TextStyle(
+              Text(
+                'Ευχαριστούμε για την κράτηση ${reservationInfo[1]}!\nΘα λάβεις σύντομα email επιβεβαίωσης.',
+                style: const TextStyle(
                   color: Color(0xFF9C0C04),
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -209,7 +209,7 @@ class CommentSection extends StatelessWidget {
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white.withOpacity(0.2),
-            hintText: 'Γράψτε τα σχόλια σας εδώ...',
+            hintText: 'Γράψε τα σχόλια σου εδώ...',
             hintStyle: const TextStyle(color: Colors.white54),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -469,7 +469,7 @@ class PersonsTextField extends StatelessWidget {
           } else if (persons == maxPersons) {
             floatingSnackBar(
                 message:
-                    'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινωνήστε μαζί μας.',
+                    'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινώνησε μαζί μας.',
                 context: context,
                 duration: const Duration(milliseconds: 3000));
           }
@@ -485,7 +485,7 @@ class PersonsTextField extends StatelessWidget {
         reservationProvider.getInfo(6) == 0 &&
         reservationProvider.getInfo(7) == 0) {
       floatingSnackBar(
-          message: 'Παρακαλώ επιλέξτε φιάλη πρώτα',
+          message: 'Παρακαλώ επίλεξε φιάλη πρώτα',
           context: context,
           duration: const Duration(milliseconds: 3000));
       return false;
@@ -577,7 +577,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
       });
     } else {
       floatingSnackBar(
-          message: 'Για παραπάνω φιάλες παρακαλώ επικοινωνήστε μαζί μας.',
+          message: 'Για παραπάνω φιάλες παρακαλώ επικοινώνησε μαζί μας.',
           context: context,
           duration: const Duration(milliseconds: 3000));
     }
@@ -774,7 +774,7 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           _selectedDate != null
               ? DateFormat('dd MMMM, yyyy', 'el')
                   .format(_selectedDate!) // Greek format
-              : 'Επιλέξτε ημερομηνία',
+              : 'Επίλεξε ημερομηνία',
           style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),

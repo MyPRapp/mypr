@@ -62,8 +62,6 @@ class CustomizeProfilePage extends StatelessWidget {
             BookingProvider bookingProvider = context.read<BookingProvider>();
             bookingProvider.bookings.clear(); // Clear bookings list
             bookingProvider
-                .setLoaded(false); // Set bookingsLoaded flag to false
-            bookingProvider
                 .setLoading(false); // Set bookingsLoading flag to false
             print('Bookings cleared, flags reset.');
           } catch (e) {
@@ -201,6 +199,23 @@ class CustomizeProfilePage extends StatelessWidget {
                               color: Colors.white),
                           onTap: () {
                             // Handle change photo
+                          },
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF14181B),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
+                          title: const Text('Αλλαγή ονόματος',
+                              style: TextStyle(color: Colors.white)),
+                          trailing: const Icon(Icons.chevron_right,
+                              color: Colors.white),
+                          onTap: () {
+                            // Handle change password
                           },
                         ),
                       ),

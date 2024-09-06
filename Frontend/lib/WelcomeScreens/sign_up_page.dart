@@ -13,7 +13,7 @@ import '../global_components.dart';
 import '../services/auth_service.dart';
 
 //TODO Fix big text fields that disappear when their text is too long and make their height responsive
-//TODO Add exception error handling and print messaged to user if error is catched
+//TODO Add exception error handling and print message to user if error is catched
 @RoutePage()
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -98,7 +98,7 @@ class _SignUpPageState extends State<SignUpPage> {
             _isRegistering = false;
             _showLoadingIndicator = false;
           });
-          _showErrorSnackBar('Προέκυψε πρόβλημα, δοκιμάστε ξανά.');
+          _showErrorSnackBar('Προέκυψε πρόβλημα, δοκίμασε ξανά.');
         }
       });
 
@@ -136,7 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
         });
       }
     } else {
-      _showErrorSnackBar('Παρακαλώ συμπληρώστε όλα τα πεδία');
+      _showErrorSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία');
     }
   }
 
@@ -368,7 +368,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       value.isEmpty ||
                                       value.length < 7 ||
                                       value.length > 15) {
-                                    return 'Εισαγάγετε έγκυρο αριθμό';
+                                    return 'Μη έγκυρος αριθμός';
                                   }
                                   return null;
                                 },
@@ -416,7 +416,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                       value.isEmpty ||
                                       !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
                                           .hasMatch(value)) {
-                                    return 'Εισαγάγετε έγκυρο email';
+                                    return 'Μη έγκυρο email';
                                   }
                                   return null;
                                 },

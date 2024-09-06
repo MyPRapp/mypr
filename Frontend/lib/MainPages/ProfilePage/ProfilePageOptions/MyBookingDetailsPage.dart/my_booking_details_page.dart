@@ -214,7 +214,7 @@ class BookingDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Για οποιαδήποτε αλλαγή ή απορία σχετικά με την κράτηση, παρακαλώ επικοινωνήστε μαζί μας.',
+          'Για οποιαδήποτε αλλαγή ή απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -248,7 +248,7 @@ class BookingDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Για οποιαδήποτε απορία σχετικά με την κράτηση, παρακαλώ επικοινωνήστε μαζί μας.',
+          'Για οποιαδήποτε απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,

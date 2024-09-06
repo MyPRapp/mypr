@@ -61,7 +61,7 @@ class ContactUsPage extends StatelessWidget {
                     ),
                   ),
                   const Text(
-                    'ΕΠΙΚΟΙΝΩΝΗΣΤΕ ΜΑΖΙ ΜΑΣ',
+                    'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 22,
@@ -116,7 +116,7 @@ class ContactUsPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 50),
                           const Text(
-                            'Κάνε ένα follow',
+                            'Στείλε μας στο instagram',
                             style: TextStyle(
                               color: Color(0xFF9C0C04),
                               fontSize: 17,

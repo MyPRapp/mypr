@@ -12,19 +12,13 @@ import '../services/booking_service.dart';
 
 class BookingProvider with ChangeNotifier {
   final List<BookingInfoStruct> _bookings = [];
-  bool _bookingsLoaded = false; // Flag to track if bookings have been loaded
   bool _isLoading = false;
 
   List<BookingInfoStruct> get bookings => _bookings;
-  bool get bookingsLoaded => _bookingsLoaded;
   bool get isLoading => _isLoading;
 
   // Fetch bookings from server or preferences if already loaded
   Future<void> fetchBookings(BuildContext context) async {
-    if (_bookingsLoaded) {
-      print('Bookings already loaded');
-      return; // Avoid unnecessary loading if already loaded
-    }
     print('Fetching bookings');
 
     setLoading(true);
@@ -39,7 +33,6 @@ class BookingProvider with ChangeNotifier {
       if (bookingsData != null && bookingsData.isNotEmpty) {
         print('Processing fetched bookings...');
         await _processFetchedBookings(bookingsData, userDetails, clubProvider);
-        _bookingsLoaded = true;
         print('Bookings loaded and processed successfully');
       } else {
         print('No bookings from server. Loading from preferences...');
@@ -138,7 +131,7 @@ class BookingProvider with ChangeNotifier {
       final String bookingsJson =
           jsonEncode(bookings.map((booking) => booking.toJson()).toList());
       await prefs.setString('bookings', bookingsJson);
-      print('Saved booking to preferences');
+      print('Saved bookings to preferences');
     } catch (e) {
       print('Error saving bookings to preferences: $e');
     }
@@ -161,7 +154,6 @@ class BookingProvider with ChangeNotifier {
           }).toList(),
         );
 
-        _bookingsLoaded = true;
         print('Bookings successfully loaded from preferences.');
         notifyListeners(); // Notify listeners to update UI
       } else {
@@ -205,11 +197,6 @@ class BookingProvider with ChangeNotifier {
   // Helper method to toggle loading state
   void setLoading(bool value) {
     _isLoading = value;
-    notifyListeners(); // Notify listeners to update UI
-  }
-
-  void setLoaded(bool value) {
-    _bookingsLoaded = value;
     notifyListeners(); // Notify listeners to update UI
   }
 }

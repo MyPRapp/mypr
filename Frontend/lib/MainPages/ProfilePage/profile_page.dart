@@ -146,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   .push(const ContactUsRoute());
                             },
                             child: const ProfileOptions(
-                              label: ' Επικοινωνήστε μαζί μας',
+                              label: ' Επικοινώνησε μαζί μας',
                               widgetIcon: ImageIcon(
                                 AssetImage("assets/icons/support_icon.png"),
                                 color: Color(0xFF9c0c04),

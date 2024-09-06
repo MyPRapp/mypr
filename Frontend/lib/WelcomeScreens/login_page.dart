@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Navigate to the BottomNavBarRoute after syncing
         if (mounted) {
-          await context.router.replaceAll([const BottomNavBarRoute()]);
+          await context.router.replaceAll([const MyBookingsRoute()]);
         }
       } else {
         print('USER NOT AUTHENTICATED');
@@ -126,7 +126,9 @@ class _LoginPageState extends State<LoginPage> {
         // Fetch user details from the server if login was successful
         await context.read<UserProvider>().fetchUserDetailsFromServer();
       }
-
+      if (mounted) {
+        context.read<BookingProvider>().fetchBookings(context);
+      }
       // Mark the user as authenticated if everything went well
       if (mounted) {
         context.read<GlobalStateProvider>().isAuthenticated = true;
