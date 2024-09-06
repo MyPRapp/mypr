@@ -463,10 +463,14 @@ class _ReservationPageState extends State<ReservationPage> {
   Future<void> _handleSubmit() async {
     String rawName = nameTextFieldKey.currentState?.nameController.text ?? '';
     String formattedName = formatName(rawName);
-    context.read<ReservationProvider>().setInfo(1, formattedName);
+    if (formattedName != '' &&
+        formattedName != ' ' &&
+        formattedName.isNotEmpty) {
+      context.read<ReservationProvider>().setInfo(1, formattedName);
+    }
 
-    if (!_validateForm(formattedName)) {
-      _showValidationError(formattedName);
+    if (!_validateForm()) {
+      _showValidationError();
       return;
     }
 
@@ -536,7 +540,6 @@ class _ReservationPageState extends State<ReservationPage> {
         reservationProvider.getInfo(3).toString(),
         reservationProvider.getInfo(9),
       );
-      printReservationInfo(reservationProvider.reservationInfo);
       _handleSubmissionResponse(success);
     }
 
@@ -669,20 +672,23 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Validates the form inputs before submission.
-  bool _validateForm(String formattedName) {
+  bool _validateForm() {
     final RegExp namePattern =
         RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true);
     final reservationProvider = context.read<ReservationProvider>();
 
+    // Add comment to reservation list
+    reservationProvider.setInfo(9, _commentController.text.trim());
+
     // Validate name and check if all required fields are filled
-    bool isNameValid = namePattern.hasMatch(formattedName);
+    bool isNameValid = namePattern.hasMatch(reservationProvider.getInfo(1));
     bool allFieldsFilled = reservationProvider.reservationInfo
-            .sublist(1, 8)
+            .sublist(0, 8)
             .every((element) => element != '' && element != -1) &&
         isNameValid;
 
     String fourBitString = _generateFourBitString();
-
+    printReservationInfo(reservationProvider.reservationInfo);
     return allFieldsFilled &&
         reservationProvider.getInfo(4) > 0 &&
         reservationProvider.getInfo(8).isNotEmpty &&
@@ -691,9 +697,9 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Shows an error message if the form validation fails.
-  void _showValidationError(String formattedName) {
+  void _showValidationError() {
     final bool isNameValid = RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true)
-        .hasMatch(formattedName);
+        .hasMatch(context.read<ReservationProvider>().getInfo(1));
 
     // Display a snack bar error message based on validation results
     floatingSnackBar(
@@ -709,35 +715,42 @@ class _ReservationPageState extends State<ReservationPage> {
     });
   }
 
+  Future<bool?> reservationReviewDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return const ReservationReview();
+      },
+    );
+  }
+
   /// Handles the submission response and shows appropriate feedback.
   void _handleSubmissionResponse(bool success) async {
     if (success) {
       // Fetch bookings after a successful reservation
       if (mounted) {
-        await context.read<BookingProvider>().fetchBookings(context);
+        await context.read<BookingProvider>().fetchBookings(
+            context.read<UserProvider>().userDetails,
+            context.read<ClubProvider>());
       }
 
-      if (mounted) {
-        // Show the confirmation dialog after successful booking
-        showDialog(
-          // ignore: use_build_context_synchronously
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext dialogContext) {
-            if (!mounted) {
-              return Container(); // Prevent showing the dialog if the widget is unmounted
-            }
-            return const ConfirmationDialog();
-          },
-        );
-      }
-    }
+      if (context.mounted) {
+        // Show the confirmation dialog and wait for the result
+        final bool? result = await reservationReviewDialog();
 
-    if (mounted) {
-      setState(() {
-        buttonIsVisible = true;
-        // Show the nav bar again when button is visible
-      });
+        // If the user confirmed (result == true), perform actions
+        if (result == true) {
+          if (mounted) {
+            context.read<BottomNavBarVisibility>().show();
+            Navigator.pop(context); // Navigate back to the previous page
+          }
+        } else {
+          setState(() {
+            buttonIsVisible = true; // Show the button again
+          });
+        }
+      }
     }
   }
 

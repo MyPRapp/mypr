@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/Widgets/profile_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     UserProvider userProvider = context.read<UserProvider>();
     if (userProvider.userDetails!.userID < 0) {
-      userProvider.syncUserDetails();
+      userProvider.fetchUserDetailsFromServer();
     }
   }
 
@@ -30,9 +31,10 @@ class _ProfilePageState extends State<ProfilePage> {
     UserProvider userProvider = context.read<UserProvider>();
     BookingProvider bookingProvider = context.read<BookingProvider>();
 
-    await userProvider.syncUserDetails();
+    await userProvider.fetchUserDetailsFromServer();
     if (mounted) {
-      await bookingProvider.fetchBookings(context);
+      await bookingProvider.fetchBookings(
+          userProvider.userDetails, context.read<ClubProvider>());
     }
   }
 

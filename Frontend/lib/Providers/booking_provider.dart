@@ -2,11 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:mypr/Providers/club_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Providers/club_provider.dart';
-import '../Providers/user_provider.dart';
 import '../global_components.dart';
 import '../services/booking_service.dart';
 
@@ -18,17 +16,13 @@ class BookingProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
 
   // Fetch bookings from server or preferences if already loaded
-  Future<void> fetchBookings(BuildContext context) async {
+  Future<void> fetchBookings(
+      UserInfoStruct? userDetails, ClubProvider clubProvider) async {
     print('Fetching bookings');
 
     setLoading(true);
 
     try {
-      // Fetch the required data from UserProvider and ClubProvider beforehand
-      final UserInfoStruct? userDetails =
-          context.read<UserProvider>().userDetails;
-      final ClubProvider clubProvider = context.read<ClubProvider>();
-
       final bookingsData = await BookingService().getBookings();
       if (bookingsData != null && bookingsData.isNotEmpty) {
         print('Processing fetched bookings...');
@@ -50,11 +44,9 @@ class BookingProvider with ChangeNotifier {
   Future<void> _processFetchedBookings(List<dynamic> bookingsData,
       UserInfoStruct? userDetails, ClubProvider clubProvider) async {
     _bookings.clear();
-
     for (var bookingData in bookingsData) {
-      // Get or default catalogues from ClubProvider
-      final catalogues = clubProvider.getAllCatalogues(bookingData['club']);
-
+      List<CatalogueInfoStruct> catalogues =
+          clubProvider.getAllCatalogues(bookingData['club']);
       final regularCatalogue =
           _getCatalogue(catalogues, 0, bookingData['club'], 'Regular');
       final specialCatalogue =

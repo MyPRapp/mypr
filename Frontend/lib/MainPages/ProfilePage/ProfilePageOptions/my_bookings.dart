@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Providers/booking_provider.dart';
@@ -27,7 +28,9 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 
     // Delay fetchBookings until after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BookingProvider>().fetchBookings(context);
+      context.read<BookingProvider>().fetchBookings(
+          context.read<UserProvider>().userDetails,
+          context.read<ClubProvider>());
       context.read<BottomNavBarVisibility>().hide();
     });
   }
@@ -165,7 +168,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           itemCount: filteredBookings.length,
           itemBuilder: (context, index) {
             final booking = filteredBookings[index];
-            print(booking.fourbitString);
             return Padding(
               padding: const EdgeInsets.only(bottom: 15),
               child: BookingCard(booking: booking),
@@ -195,9 +197,6 @@ class BookingCard extends StatelessWidget {
         final isHistory = booking.status == 2 ||
             booking.date
                 .isBefore(DateTime.now().subtract(const Duration(days: 1)));
-        print(simple);
-        print(special);
-        print(premium);
         AutoRouter.of(context).push(
           BookingDetailsRoute(
             booking: booking,
@@ -322,7 +321,7 @@ class BookingCard extends StatelessWidget {
                     const SizedBox(height: 5),
                     if (booking.status != 2)
                       Text(
-                        '${booking.price.toStringAsFixed(2)} €',
+                        '${(booking.price * (1 - ((double.parse(booking.fourbitString[3]).toInt()) / 10))).toStringAsFixed(2)} €',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,

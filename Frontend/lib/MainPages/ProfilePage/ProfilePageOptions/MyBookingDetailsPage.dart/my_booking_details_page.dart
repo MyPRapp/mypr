@@ -8,9 +8,6 @@ import '../../../../Widgets/booking_card_widgets.dart';
 import '../../../../global_components.dart';
 import '../../../../routes/app_router.gr.dart';
 
-//TODO Show to user number of bottles, divide page in 2 parts(column with MainAxisAlignment.spaceBetween)
-//TODO fix photo's space from being empty when page loads
-
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
   final BookingInfoStruct booking;
@@ -24,13 +21,27 @@ class BookingDetailsPage extends StatelessWidget {
     this.isHistory = false,
   });
 
+  List<int> extractThreeBits(String bitString) {
+    if (bitString.length < 3) {
+      throw ArgumentError("Input must be a string of 3 bits or more.");
+    }
+
+    // Convert each character in the string to an integer
+    return bitString
+        .substring(0, 3)
+        .split('')
+        .map((bit) => int.parse(bit))
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
     final earnedPoints = (booking.price * 0.1).toInt();
+
     final discountPercentage =
-        (double.tryParse(booking.fourbitString[3]) ?? 0) * 10;
+        (double.parse(booking.fourbitString[3])).toInt() * 10;
 
     // Caching club data to avoid multiple calls
     final clubProvider = context.read<ClubProvider>();
@@ -97,37 +108,44 @@ class BookingDetailsPage extends StatelessWidget {
       BuildContext context,
       String formattedDate,
       int earnedPoints,
-      double discountPercentage,
+      int discountPercentage,
       String clubName,
       String clubPhoto) {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              clubName,
-              style: const TextStyle(
-                color: Color(0xFF9C0C04),
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                clubName,
+                style: const TextStyle(
+                  color: Color(0xFF9C0C04),
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            const SizedBox(height: 15),
-            _buildClubPhoto(booking.clubID, clubPhoto),
-            const SizedBox(height: 20),
-            _buildBookingDetails(formattedDate),
-            const SizedBox(height: 20),
-            _buildPriceDetails(earnedPoints, discountPercentage),
-            const SizedBox(height: 20),
-            if (isHistory)
-              _buildHistoryBottomSection(context, clubName)
-            else
-              _buildRegularBottomSection(context),
-            const SizedBox(height: 80),
-          ],
-        ),
+              const SizedBox(height: 15),
+              _buildClubPhoto(booking.clubID, clubPhoto),
+              const SizedBox(height: 20),
+              _buildBookingDetails(formattedDate),
+            ],
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildPriceDetails(earnedPoints, discountPercentage),
+              const SizedBox(height: 20),
+              if (isHistory)
+                _buildHistoryBottomSection(context, clubName)
+              else
+                _buildRegularBottomSection(context),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -160,6 +178,11 @@ class BookingDetailsPage extends StatelessWidget {
   }
 
   Widget _buildBookingDetails(String formattedDate) {
+    List<int> fourbitIntegers = extractThreeBits(booking.fourbitString);
+    final simple = fourbitIntegers[0];
+    final special = fourbitIntegers[1];
+    final premium = fourbitIntegers[2];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -167,27 +190,124 @@ class BookingDetailsPage extends StatelessWidget {
         const SizedBox(height: 10),
         BuildRichText(label: 'Ημερομηνία:', value: formattedDate),
         const SizedBox(height: 10),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            const Text(
+              'Φιάλες: ',
+              style: TextStyle(
+                color: Color(0xFF9C0C04),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Row(
+                    children: [
+                      if (simple == 1)
+                        const Text(
+                          '1 Απλή',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      if (simple > 1)
+                        Text(
+                          '$simple Απλές',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      if (special > 0 &&
+                          simple <=
+                              0) // If no simple bottles and special is first
+                        Text(
+                          '$special Special',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      if (premium > 0 &&
+                          simple <= 0 &&
+                          special <= 0) // If premium is the first item
+                        Text(
+                          '$premium Premium',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (special > 0 &&
+                        (simple > 0)) // Special appears under simple
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          '$special Special',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    if (premium > 0 &&
+                        (simple > 0 ||
+                            special > 0)) // Premium appears under others
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 5),
+                        child: Text(
+                          '$premium Premium',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 5),
         BuildRichText(label: 'Άτομα:', value: booking.persons.toString()),
-        const SizedBox(height: 10),
-        BuildRichText(label: 'Σχόλια:', value: booking.comments),
+        if (booking.status != 2) ...[
+          const SizedBox(height: 10),
+          BuildRichText(label: 'Σχόλια:', value: booking.comments),
+        ],
+        if (booking.status != 2)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: Text(
+              'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
+              style: const TextStyle(
+                color: Color(0xFF9C0C04),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
       ],
     );
   }
 
-  Widget _buildPriceDetails(int earnedPoints, double discountPercentage) {
+  Widget _buildPriceDetails(int earnedPoints, int discountPercentage) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (booking.status != 2)
-          Text(
-            'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
-            style: const TextStyle(
-              color: Color(0xFF9C0C04),
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        const SizedBox(height: 20),
         Text(
           'Από την κράτηση σου κέρδισες $earnedPoints πόντους.',
           style: const TextStyle(
@@ -272,7 +392,7 @@ class BookingDetailsPage extends StatelessWidget {
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
           ),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 50),
         const Text(
           'Άφησε μία κριτική:',
           style: TextStyle(
@@ -286,7 +406,6 @@ class BookingDetailsPage extends StatelessWidget {
           clubName: clubName,
           initialStars: 0, // Replace with actual value if available
         ),
-        const SizedBox(height: 30),
       ],
     );
   }

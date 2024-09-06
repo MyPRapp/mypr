@@ -87,12 +87,13 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         if (mounted) {
-          context.read<BookingProvider>().fetchBookings(context);
+          context.read<BookingProvider>().fetchBookings(
+              userProvider.userDetails, context.read<ClubProvider>());
         }
 
         // Navigate to the BottomNavBarRoute after syncing
         if (mounted) {
-          await context.router.replaceAll([const MyBookingsRoute()]);
+          context.router.replaceAll([const HomeRoute()]);
         }
       } else {
         print('USER NOT AUTHENTICATED');
@@ -127,7 +128,9 @@ class _LoginPageState extends State<LoginPage> {
         await context.read<UserProvider>().fetchUserDetailsFromServer();
       }
       if (mounted) {
-        context.read<BookingProvider>().fetchBookings(context);
+        context.read<BookingProvider>().fetchBookings(
+            context.read<UserProvider>().userDetails,
+            context.read<ClubProvider>());
       }
       // Mark the user as authenticated if everything went well
       if (mounted) {

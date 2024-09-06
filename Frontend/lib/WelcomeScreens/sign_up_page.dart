@@ -58,7 +58,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (mounted) {
       if (success) {
-        await context.read<UserProvider>().syncUserDetails();
+        await context.read<UserProvider>().fetchUserDetailsFromServer();
         if (mounted) {
           final globalState = context.read<GlobalStateProvider>();
           globalState.isAuthenticated = true; // Set isAuthenticated to true

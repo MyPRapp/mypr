@@ -1,6 +1,6 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -8,8 +8,8 @@ import '../Providers/reservation_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
 
-class ConfirmationDialog extends StatelessWidget {
-  const ConfirmationDialog({super.key});
+class ReservationReview extends StatelessWidget {
+  const ReservationReview({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +36,9 @@ class ConfirmationDialog extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                'Ευχαριστούμε για την κράτηση ${reservationInfo[1]}!\nΘα λάβεις σύντομα email επιβεβαίωσης.',
-                style: const TextStyle(
+              const Text(
+                'Ευχαριστούμε για την κράτηση!\nΘα λάβεις σύντομα email επιβεβαίωσης.',
+                style: TextStyle(
                   color: Color(0xFF9C0C04),
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -77,10 +77,9 @@ class ConfirmationDialog extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Close the confirmation dialog and go back to the previous screen
-                  context.read<BottomNavBarVisibility>().show();
-                  Navigator.pop(context);
-                  AutoRouter.of(context).back();
+                  // Close the confirmation dialog and return `true` as a result
+                  Navigator.pop(context,
+                      true); // Notify ReservationPage that the button was pressed
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF9C0C04),
@@ -203,8 +202,12 @@ class CommentSection extends StatelessWidget {
         const SizedBox(height: 10),
         TextField(
           controller: commentController,
+          maxLength: 200,
           maxLines: 4,
-          inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
+          inputFormatters: [
+            AllowSpacesNoEmojisTextInputFormatter(),
+            MaxLinesAndLengthFormatter(maxLines: 4, maxLength: 200),
+          ],
           style: const TextStyle(color: Colors.white),
           decoration: InputDecoration(
             filled: true,
@@ -220,6 +223,30 @@ class CommentSection extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class MaxLinesAndLengthFormatter extends TextInputFormatter {
+  final int maxLines;
+  final int maxLength;
+
+  MaxLinesAndLengthFormatter({required this.maxLines, required this.maxLength});
+
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    // Limit by character count
+    if (newValue.text.length > maxLength) {
+      return oldValue;
+    }
+
+    // Limit by line count
+    int lines = '\n'.allMatches(newValue.text).length + 1;
+    if (lines > maxLines) {
+      return oldValue;
+    }
+
+    return newValue;
   }
 }
 

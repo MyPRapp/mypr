@@ -3,11 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../global_components.dart';
-import '../services/auth_service.dart';
 import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
@@ -103,57 +101,5 @@ class UserProvider with ChangeNotifier {
       print('No access token found');
       throw Exception('No access token found');
     }
-  }
-
-  // Sync user details by first fetching from the server and falling back to loading from preferences if fetching fails
-  Future<void> syncUserDetails() async {
-    try {
-      await fetchUserDetailsFromServer(); // Try fetching from the server
-      print('User details synced from server');
-    } catch (e) {
-      debugPrint(
-          'Failed to fetch user data from server, loading from preferences: $e');
-      await loadUserDetailsFromPreferences(); // If it fails, load from preferences
-      print('User details synced from preferences');
-    }
-    notifyListeners(); // Notify listeners regardless of where the data came from
-  }
-
-  // Moved login function to UserProvider
-  Future<bool> login(
-      BuildContext context, String email, String password) async {
-    final AuthService authService = AuthService();
-    final globalState = context.read<GlobalStateProvider>();
-    print('Attempting to log in with email: $email');
-    bool success = false;
-
-    try {
-      success = await authService.login(email, password);
-      if (success) {
-        print('Login successful, syncing user details');
-        await syncUserDetails();
-        globalState.isAuthenticated = true;
-      }
-    } catch (e) {
-      print('Server unreachable during login: $e');
-    }
-
-    if (!success) {
-      print(
-          'Login failed or server unreachable, loading user details from preferences');
-      bool preferencesLoaded =
-          await loadUserDetailsFromPreferences(); // Load from preferences if login fails
-
-      if (!preferencesLoaded) {
-        print('No user details in preferences, staying on login page');
-        return false; // Stay on login page if preferences are empty
-      }
-
-      globalState.isAuthenticated = false; // Set as not authenticated
-      success = true; // Allow fallback to homepage
-    }
-
-    notifyListeners();
-    return success;
   }
 }

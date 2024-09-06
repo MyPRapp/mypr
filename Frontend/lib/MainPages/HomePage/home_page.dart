@@ -36,7 +36,7 @@ class _HomePageState extends State<HomePage> {
   // ignore: unused_element
   Future<void> _syncUserDetails() async {
     UserProvider userProvider = context.read<UserProvider>();
-    userProvider.syncUserDetails();
+    userProvider.fetchUserDetailsFromServer();
   }
 
   Future<void> _syncClubs() async {
