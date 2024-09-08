@@ -310,6 +310,8 @@ class CustomizeProfilePage extends StatelessWidget {
         ),
       );
     } else {
+      //TODO loadUserPhoto used here
+
       // Attempt to load the photo; show a loading indicator if the result is null
       return FutureBuilder<ImageProvider?>(
         future: loadUserPhoto(photoPath),

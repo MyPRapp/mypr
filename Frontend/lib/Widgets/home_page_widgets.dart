@@ -25,6 +25,9 @@ class _SmallClubCardState extends State<SmallClubCard> {
   @override
   void initState() {
     super.initState();
+
+//TODO loadClubPhoto used here
+
     _imageFuture = loadClubPhoto(widget.club.clubID, widget.club.clubPhoto);
   }
 
@@ -129,6 +132,8 @@ class _BigClubCardState extends State<BigClubCard> {
 
   void _loadImage() {
     setState(() {
+//TODO loadClubPhoto used here
+
       _imageFuture = loadClubPhoto(widget.club.clubID, widget.club.clubPhoto);
     });
   }

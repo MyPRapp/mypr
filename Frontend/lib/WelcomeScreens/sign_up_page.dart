@@ -13,7 +13,7 @@ import '../global_components.dart';
 import '../services/auth_service.dart';
 
 //TODO Fix big text fields that disappear when their text is too long and make their height responsive
-//TODO Add exception error handling and print message to user if error is catched
+
 @RoutePage()
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -130,6 +130,8 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('saved_email');
     await prefs.remove('saved_password');
     await prefs.remove('user_details');
+
+    //TODO 'user_photo' from preferences removed here
     await prefs.remove('user_photo');
 
     // Remove booking-related preferences

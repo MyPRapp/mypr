@@ -218,6 +218,9 @@ class BookingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
+
+                //TODO loadClubPhoto used here
+
                 child: FutureBuilder<ImageProvider>(
                   future: loadClubPhoto(booking.clubID,
                       clubProvider.getClubByID(booking.clubID).clubPhoto),

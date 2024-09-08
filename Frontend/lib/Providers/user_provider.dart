@@ -21,6 +21,8 @@ class UserProvider with ChangeNotifier {
       await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
       print('User details saved to preferences: ${_userDetails!.toJson()}');
 
+//TODO imageToBase64 used here
+
       // Fetch and save the user's photo as a base64 string if it exists
       if (_userDetails!.photo.isNotEmpty) {
         String base64Photo = await imageToBase64(
@@ -36,6 +38,8 @@ class UserProvider with ChangeNotifier {
       print('No user details to save');
     }
   }
+
+//TODO 'user_photo' from preferences used here
 
 // Load user details including the photo from shared preferences
   Future<bool> loadUserDetailsFromPreferences() async {

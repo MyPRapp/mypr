@@ -31,6 +31,8 @@ class ClubFetcher {
         for (var item in data) {
           final club = ClubInfoStruct.fromJson(item);
           if (club.clubID >= 0) {
+//TODO imageToBase64 and saveClubPhotoToPreferences used here
+
             final base64Image = await imageToBase64(club.clubPhoto);
             await _clubSaver.saveClubPhotoToPreferences(
                 club.clubID, base64Image);
@@ -138,6 +140,9 @@ class ClubFetcher {
         if (clubData != null) {
           // Club found, process it
           final club = ClubInfoStruct.fromJson(clubData);
+
+//TODO imageToBase64 and saveClubPhotoToPreferences used here
+
           final base64Image = await imageToBase64(club.clubPhoto);
           await _clubSaver.saveClubPhotoToPreferences(club.clubID, base64Image);
 

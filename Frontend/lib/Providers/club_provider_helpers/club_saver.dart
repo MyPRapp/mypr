@@ -23,6 +23,9 @@ class ClubSaver {
         jsonEncode(_clubs.map((club) => club.toJson()).toList());
     await prefs.setString('clubs', clubsJson);
     print('Saved clubs to preferences');
+
+//TODO saveClubPhotoToPreferences used here
+
     // Save each club's photo individually
     for (var club in _clubs) {
       if (club.clubPhoto.isNotEmpty) {
@@ -50,6 +53,8 @@ class ClubSaver {
         'likedClubs', _likedClubIDs.map((id) => id.toString()).toList());
     print('Saved liked clubs to preferences');
   }
+
+//TODO saveClubPhotoToPreferences implemented here
 
   // Save individual club photo to shared preferences
   Future<void> saveClubPhotoToPreferences(

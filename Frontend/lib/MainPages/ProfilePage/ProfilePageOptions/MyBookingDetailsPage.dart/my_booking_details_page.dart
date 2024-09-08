@@ -153,6 +153,9 @@ class BookingDetailsPage extends StatelessWidget {
   Widget _buildClubPhoto(int clubID, String clubPhoto) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
+
+      //TODO loadClubPhoto used here
+
       child: FutureBuilder<ImageProvider>(
         future: loadClubPhoto(clubID, clubPhoto),
         builder: (context, snapshot) {

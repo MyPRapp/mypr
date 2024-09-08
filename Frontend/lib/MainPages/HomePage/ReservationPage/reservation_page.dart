@@ -299,6 +299,9 @@ class _ReservationPageState extends State<ReservationPage> {
         child: SizedBox(
           width: 520,
           height: 350,
+
+//TODO loadClubPhoto used here
+
           child: FutureBuilder<ImageProvider>(
             future: loadClubPhoto(widget.club.clubID, widget.club.clubPhoto),
             builder: (context, snapshot) {

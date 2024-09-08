@@ -53,6 +53,8 @@ class ClubLoader {
               (double.parse(regularCatalogue.price)).toInt();
           clubStruct.clubMaxPersons = regularCatalogue.maxPersons;
 
+//TODO loadClubPhotoFromPreferences used here
+
           // Load the club photo from preferences
           try {
             clubStruct.clubPhoto =
@@ -120,6 +122,9 @@ class ClubLoader {
   }
 
 //TODO We are saving in SP the photo url instead of the image itself. For best performance save photo to device's directory.
+
+//TODO loadClubPhotoFromPreferences implemented here
+
   // Helper method to load club photo from preferences based on club ID
   Future<String> loadClubPhotoFromPreferences(int clubID) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
