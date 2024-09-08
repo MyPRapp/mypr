@@ -33,114 +33,6 @@ import 'package:mypr/Navigation/search_navigation.dart' as _i13;
 import 'package:mypr/WelcomeScreens/login_page.dart' as _i8;
 import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i15;
 
-abstract class $AppRouter extends _i16.RootStackRouter {
-  $AppRouter({super.navigatorKey});
-
-  @override
-  final Map<String, _i16.PageFactory> pagesMap = {
-    BookingDetailsRoute.name: (routeData) {
-      final args = routeData.argsAs<BookingDetailsRouteArgs>();
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: _i1.BookingDetailsPage(
-          key: args.key,
-          booking: args.booking,
-          title: args.title,
-          isHistory: args.isHistory,
-        ),
-      );
-    },
-    BottomNavBarRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i2.BottomNavBarPage(),
-      );
-    },
-    ContactUsRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i3.ContactUsPage(),
-      );
-    },
-    CustomizeProfileRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i4.CustomizeProfilePage(),
-      );
-    },
-    FavoritesRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i5.FavoritesPage(),
-      );
-    },
-    HomeNavigation.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i6.HomeNavigation(),
-      );
-    },
-    HomeRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i7.HomePage(),
-      );
-    },
-    LoginRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i8.LoginPage(),
-      );
-    },
-    MyBookingsRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i9.MyBookingsPage(),
-      );
-    },
-    ProfileNavigation.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i10.ProfileNavigation(),
-      );
-    },
-    ProfileRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i11.ProfilePage(),
-      );
-    },
-    ReservationRoute.name: (routeData) {
-      final args = routeData.argsAs<ReservationRouteArgs>();
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: _i12.ReservationPage(
-          key: args.key,
-          club: args.club,
-        ),
-      );
-    },
-    SearchNavigation.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i13.SearchNavigation(),
-      );
-    },
-    SearchRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i14.SearchPage(),
-      );
-    },
-    SignUpRoute.name: (routeData) {
-      return _i16.AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const _i15.SignUpPage(),
-      );
-    },
-  };
-}
-
 /// generated route for
 /// [_i1.BookingDetailsPage]
 class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
@@ -163,8 +55,18 @@ class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
 
   static const String name = 'BookingDetailsRoute';
 
-  static const _i16.PageInfo<BookingDetailsRouteArgs> page =
-      _i16.PageInfo<BookingDetailsRouteArgs>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<BookingDetailsRouteArgs>();
+      return _i1.BookingDetailsPage(
+        key: args.key,
+        booking: args.booking,
+        title: args.title,
+        isHistory: args.isHistory,
+      );
+    },
+  );
 }
 
 class BookingDetailsRouteArgs {
@@ -200,7 +102,12 @@ class BottomNavBarRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'BottomNavBarRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i2.BottomNavBarPage();
+    },
+  );
 }
 
 /// generated route for
@@ -214,7 +121,12 @@ class ContactUsRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'ContactUsRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i3.ContactUsPage();
+    },
+  );
 }
 
 /// generated route for
@@ -228,7 +140,12 @@ class CustomizeProfileRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'CustomizeProfileRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i4.CustomizeProfilePage();
+    },
+  );
 }
 
 /// generated route for
@@ -242,7 +159,12 @@ class FavoritesRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'FavoritesRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i5.FavoritesPage();
+    },
+  );
 }
 
 /// generated route for
@@ -256,7 +178,12 @@ class HomeNavigation extends _i16.PageRouteInfo<void> {
 
   static const String name = 'HomeNavigation';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i6.HomeNavigation();
+    },
+  );
 }
 
 /// generated route for
@@ -270,7 +197,12 @@ class HomeRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'HomeRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i7.HomePage();
+    },
+  );
 }
 
 /// generated route for
@@ -284,7 +216,12 @@ class LoginRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'LoginRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i8.LoginPage();
+    },
+  );
 }
 
 /// generated route for
@@ -298,7 +235,12 @@ class MyBookingsRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'MyBookingsRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i9.MyBookingsPage();
+    },
+  );
 }
 
 /// generated route for
@@ -312,7 +254,12 @@ class ProfileNavigation extends _i16.PageRouteInfo<void> {
 
   static const String name = 'ProfileNavigation';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i10.ProfileNavigation();
+    },
+  );
 }
 
 /// generated route for
@@ -326,7 +273,12 @@ class ProfileRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'ProfileRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i11.ProfilePage();
+    },
+  );
 }
 
 /// generated route for
@@ -347,8 +299,16 @@ class ReservationRoute extends _i16.PageRouteInfo<ReservationRouteArgs> {
 
   static const String name = 'ReservationRoute';
 
-  static const _i16.PageInfo<ReservationRouteArgs> page =
-      _i16.PageInfo<ReservationRouteArgs>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      final args = data.argsAs<ReservationRouteArgs>();
+      return _i12.ReservationPage(
+        key: args.key,
+        club: args.club,
+      );
+    },
+  );
 }
 
 class ReservationRouteArgs {
@@ -378,7 +338,12 @@ class SearchNavigation extends _i16.PageRouteInfo<void> {
 
   static const String name = 'SearchNavigation';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i13.SearchNavigation();
+    },
+  );
 }
 
 /// generated route for
@@ -392,7 +357,12 @@ class SearchRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'SearchRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i14.SearchPage();
+    },
+  );
 }
 
 /// generated route for
@@ -406,5 +376,10 @@ class SignUpRoute extends _i16.PageRouteInfo<void> {
 
   static const String name = 'SignUpRoute';
 
-  static const _i16.PageInfo<void> page = _i16.PageInfo<void>(name);
+  static _i16.PageInfo page = _i16.PageInfo(
+    name,
+    builder: (data) {
+      return const _i15.SignUpPage();
+    },
+  );
 }
