@@ -579,9 +579,17 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
   void _updatePriceText() {
     if (mounted) {
       double price = reservationProvider.getInfo(4);
-      setState(() {
-        priceController.text = 'Τιμή: ${price.toStringAsFixed(2)} €';
-      });
+      int discount = reservationProvider.getInfo(10);
+      if (discount <= 0) {
+        setState(() {
+          priceController.text = '${price.toStringAsFixed(2)} €';
+        });
+      } else {
+        setState(() {
+          priceController.text =
+              '${(price / (1 - (discount / 100))).toStringAsFixed(2)} €';
+        });
+      }
     }
   }
 
@@ -646,13 +654,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                 borderRadius: BorderRadius.all(Radius.circular(8)),
               ),
             ),
-            child: Text(
-              priceController.text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-            ),
+            child: priceText(),
           ),
         ),
         const SizedBox(height: 10),
@@ -714,6 +716,58 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
         ],
       ),
     );
+  }
+
+  Widget priceText() {
+    if (reservationProvider.getInfo(4) > 0) {
+      return Row(
+        children: [
+          const Text(
+            'Τιμή: ',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+          reservationProvider.getInfo(10) <= 0
+              ? Text(
+                  priceController.text,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                )
+              : Row(
+                  children: [
+                    Text(
+                      priceController.text,
+                      style: const TextStyle(
+                          color: Color(0xFF9C0C04),
+                          decoration: TextDecoration.lineThrough,
+                          decorationColor: Colors.red,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800),
+                    ),
+                    Text(
+                      ' ${reservationProvider.getInfo(4).toStringAsFixed(2)} €',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                )
+        ],
+      );
+    } else {
+      return Text(
+        'Τιμή: ${priceController.text}',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+      );
+    }
   }
 }
 

@@ -80,7 +80,7 @@ class BookingService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-      ).timeout(const Duration(seconds: 8), onTimeout: () {
+      ).timeout(const Duration(seconds: 5), onTimeout: () {
         print("Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });

@@ -32,8 +32,8 @@ class ClubFetcher {
           final club = ClubInfoStruct.fromJson(item);
           if (club.clubID >= 0) {
             final base64Image = await imageToBase64(club.clubPhoto);
-            await _clubSaver.saveImageToPreferences(
-                'club_image_${club.clubID}', base64Image);
+            await _clubSaver.saveClubPhotoToPreferences(
+                club.clubID, base64Image);
 
             _clubManager.addOrUpdateClub(club);
           }
@@ -139,8 +139,7 @@ class ClubFetcher {
           // Club found, process it
           final club = ClubInfoStruct.fromJson(clubData);
           final base64Image = await imageToBase64(club.clubPhoto);
-          await _clubSaver.saveImageToPreferences(
-              'club_image_${club.clubID}', base64Image);
+          await _clubSaver.saveClubPhotoToPreferences(club.clubID, base64Image);
 
           // Add or update the club in the manager
           _clubManager.addOrUpdateClub(club);

@@ -29,7 +29,7 @@ class FavoritesPageState extends State<FavoritesPage> {
                   padding: const EdgeInsets.only(top: 5),
                   child: IconButton(
                     onPressed: () {
-                      AutoRouter.of(context).back();
+                      Navigator.pop(context);
                     },
                     icon: const Icon(
                       Icons.chevron_left,

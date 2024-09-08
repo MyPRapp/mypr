@@ -35,7 +35,6 @@ class _SignUpPageState extends State<SignUpPage> {
   bool _obscureText = true;
   bool _obscureText2 = true;
   bool _isRegistering = false;
-  bool _showLoadingIndicator = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -82,26 +81,6 @@ class _SignUpPageState extends State<SignUpPage> {
         _isRegistering = true;
       });
 
-      // Show loading indicator after 5 seconds if still registering
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted && _isRegistering) {
-          setState(() {
-            _showLoadingIndicator = true;
-          });
-        }
-      });
-
-      // Time out registration after 10 seconds if no response
-      Future.delayed(const Duration(seconds: 10), () {
-        if (mounted && _isRegistering) {
-          setState(() {
-            _isRegistering = false;
-            _showLoadingIndicator = false;
-          });
-          _showErrorSnackBar('Προέκυψε πρόβλημα, δοκίμασε ξανά.');
-        }
-      });
-
       String firstName = _firstNameController.text.trim();
       String lastName = _lastNameController.text.trim();
       String username = "$firstName$lastName";
@@ -120,8 +99,6 @@ class _SignUpPageState extends State<SignUpPage> {
         points,
       );
 
-      if (!mounted) return;
-
       if (registerSuccess) {
         // Clear preferences after successful registration
         await _clearPreferences();
@@ -129,11 +106,11 @@ class _SignUpPageState extends State<SignUpPage> {
         // Proceed with login after clearing preferences
         await _login();
       } else {
-        _showErrorSnackBar('Υπήρξε κάποιο πρόβλημα κατά την εγγραφή');
         setState(() {
           _isRegistering = false; // Re-enable the register button
-          _showLoadingIndicator = false; // Hide the loading indicator
         });
+        _showErrorSnackBar(
+            'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
       }
     } else {
       _showErrorSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία');
@@ -239,6 +216,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     height: screenHeight / 16,
                                     width: (screenWidth - 60) / 2 - 10,
                                     child: TextFormField(
+                                      readOnly: _isRegistering,
                                       controller: _firstNameController,
                                       style: const TextStyle(
                                         fontSize: 23,
@@ -286,6 +264,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     child: Padding(
                                       padding: const EdgeInsets.only(left: 5),
                                       child: TextFormField(
+                                        readOnly: _isRegistering,
                                         controller: _lastNameController,
                                         style: const TextStyle(
                                           fontSize: 23,
@@ -339,6 +318,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               height: screenHeight / 16,
                               width: screenWidth - 60,
                               child: TextFormField(
+                                readOnly: _isRegistering,
                                 controller: _phoneController,
                                 style: const TextStyle(
                                   fontSize: 23,
@@ -389,6 +369,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               height: screenHeight / 16,
                               width: screenWidth - 60,
                               child: TextFormField(
+                                readOnly: _isRegistering,
                                 controller: _emailController,
                                 style: const TextStyle(
                                   fontSize: 23,
@@ -444,6 +425,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     width: (screenWidth - 60) - 40,
                                     height: screenHeight / 16,
                                     child: TextFormField(
+                                      readOnly: _isRegistering,
                                       obscureText: _obscureText,
                                       controller: _passwordController,
                                       style: const TextStyle(
@@ -519,6 +501,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     width: (screenWidth - 60) - 40,
                                     height: screenHeight / 16,
                                     child: TextFormField(
+                                      readOnly: _isRegistering,
                                       obscureText: _obscureText2,
                                       controller: _confirmPasswordController,
                                       style: const TextStyle(
@@ -581,8 +564,10 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    AutoRouter.of(context)
-                                        .replaceAll([const LoginRoute()]);
+                                    if (!_isRegistering) {
+                                      AutoRouter.of(context)
+                                          .replaceAll([const LoginRoute()]);
+                                    }
                                   },
                                   child: const Text(
                                     'Συνδέσου',
@@ -603,14 +588,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 30),
                     child: _isRegistering
-                        ? _showLoadingIndicator
-                            ? const CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    Color(0xFF9C0C04)),
-                              )
-                            : const SizedBox(
-                                height: 50, // Placeholder to maintain layout
-                              )
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                Color(0xFF9C0C04)),
+                          )
                         : ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(

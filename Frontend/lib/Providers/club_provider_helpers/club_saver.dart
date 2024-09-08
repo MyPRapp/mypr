@@ -23,6 +23,13 @@ class ClubSaver {
         jsonEncode(_clubs.map((club) => club.toJson()).toList());
     await prefs.setString('clubs', clubsJson);
     print('Saved clubs to preferences');
+    // Save each club's photo individually
+    for (var club in _clubs) {
+      if (club.clubPhoto.isNotEmpty) {
+        // Saving club photo using clubID as a unique key
+        await saveClubPhotoToPreferences(club.clubID, club.clubPhoto);
+      }
+    }
   }
 
   // Save catalogues to shared preferences
@@ -44,11 +51,12 @@ class ClubSaver {
     print('Saved liked clubs to preferences');
   }
 
-  // Save image to shared preferences
-  Future<void> saveImageToPreferences(String key, String base64Image) async {
-    print('Saving image with key $key to preferences');
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, base64Image);
-    print('Saved image with key $key to preferences');
+  // Save individual club photo to shared preferences
+  Future<void> saveClubPhotoToPreferences(
+      int clubID, String base64Photo) async {
+    print('Saving photo for club ID $clubID to preferences');
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('club_photo_$clubID', base64Photo);
+    print('Saved photo for club ID $clubID to preferences');
   }
 }

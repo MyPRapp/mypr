@@ -111,42 +111,56 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
-    setState(() {
-      _isLoginPressed = true; // Start showing the loading indicator on button
-    });
-
-    try {
-      // Attempt to log in using the provided credentials
-      await AuthService().login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      // Check if the widget is still mounted before proceeding
-      if (mounted) {
-        // Fetch user details from the server if login was successful
-        await context.read<UserProvider>().fetchUserDetailsFromServer();
-      }
-      if (mounted) {
-        context.read<BookingProvider>().fetchBookings(
-            context.read<UserProvider>().userDetails,
-            context.read<ClubProvider>());
-      }
-      // Mark the user as authenticated if everything went well
-      if (mounted) {
-        context.read<GlobalStateProvider>().isAuthenticated = true;
-      }
-
-      if (mounted) {
-        await context.router.replaceAll([const BottomNavBarRoute()]);
-      }
-    } catch (e) {
-      print('Login failed: $e');
-      _handleLoginFailure();
-    } finally {
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
       setState(() {
-        _isLoginPressed = false; // Stop showing the loading indicator on button
+        _isLoginPressed = true; // Start showing the loading indicator on button
       });
+
+      try {
+        // Attempt to log in using the provided credentials
+        await AuthService().login(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+
+        // Check if the widget is still mounted before proceeding
+        if (mounted) {
+          // Fetch user details from the server if login was successful
+          await context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
+        // if (mounted) {
+        //   print('//////SYNCING CLUBS');
+        //   await context.read<ClubProvider>().syncClubs();
+        //   print('//////SYNCED CLUBS');
+        // }
+        if (mounted) {
+          context.read<BookingProvider>().fetchBookings(
+              context.read<UserProvider>().userDetails,
+              context.read<ClubProvider>());
+        }
+        // Mark the user as authenticated if everything went well
+        if (mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = true;
+        }
+
+        if (mounted) {
+          await context.router.replaceAll([const BottomNavBarRoute()]);
+        }
+      } catch (e) {
+        print('Login failed: $e');
+        _handleLoginFailure();
+      } finally {
+        setState(() {
+          _isLoginPressed =
+              false; // Stop showing the loading indicator on button
+        });
+      }
+    } else {
+      floatingSnackBar(
+          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
+          context: context,
+          duration: const Duration(milliseconds: 4000));
     }
   }
 
@@ -265,6 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                     Column(
                       children: [
                         TextField(
+                          readOnly: _isLoginPressed,
                           controller: _emailController,
                           inputFormatters: [NoEmojisTextInputFormatter()],
                           keyboardType: TextInputType.emailAddress,
@@ -292,6 +307,7 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Expanded(
                               child: TextField(
+                                readOnly: _isLoginPressed,
                                 controller: _passwordController,
                                 obscureText: _obscureText,
                                 keyboardType: TextInputType.text,
@@ -340,12 +356,14 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             TextButton(
                               onPressed: () {
-                                floatingSnackBar(
-                                    message:
-                                        'Στάλθηκε email για επαναφορά κωδικού',
-                                    context: context,
-                                    duration:
-                                        const Duration(milliseconds: 1500));
+                                if (!_isLoginPressed) {
+                                  floatingSnackBar(
+                                      message:
+                                          'Στάλθηκε email για επαναφορά κωδικού',
+                                      context: context,
+                                      duration:
+                                          const Duration(milliseconds: 1500));
+                                }
                               },
                               child: const Text(
                                 'Επαναφορά κωδικού',
@@ -362,7 +380,10 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.only(right: 10),
                           child: TextButton(
                             onPressed: () {
-                              context.router.replaceAll([const SignUpRoute()]);
+                              if (!_isLoginPressed) {
+                                context.router
+                                    .replaceAll([const SignUpRoute()]);
+                              }
                             },
                             child: const Text(
                               'Δημιουργία λογαριασμού',

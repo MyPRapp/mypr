@@ -392,7 +392,7 @@ class _ReservationPageState extends State<ReservationPage> {
         const SizedBox(height: 25),
         buildDiscountCheckbox(), // Discount checkbox
         const SizedBox(height: 25),
-        if (buttonIsVisible) buildSubmitButton(), // Submit button
+        buildSubmitButton(), // Submit button
         const SizedBox(height: 120),
       ],
     );
@@ -438,25 +438,31 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Builds the submit button for the reservation form.
   Widget buildSubmitButton() {
-    return Container(
-      alignment: Alignment.center,
-      width: double.infinity,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          foregroundColor: Colors.white,
-          backgroundColor: const Color(0xFF9C0C04),
-        ),
-        onPressed: () async => _handleSubmit(), // Handle form submission
-        child: const Text(
-          'Κράτηση',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
-        ),
-      ),
-    );
+    return buttonIsVisible
+        ? Container(
+            alignment: Alignment.center,
+            width: double.infinity,
+            child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  foregroundColor: Colors.white,
+                  backgroundColor: const Color(0xFF9C0C04),
+                ),
+                onPressed: () async =>
+                    _handleSubmit(), // Handle form submission
+                child: const Text(
+                  'Κράτηση',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                )))
+        : const Center(
+            child: CircularProgressIndicator(
+              color: Color(0xFF9C0C04),
+            ),
+          );
   }
 
   /// Handles the form submission process, including validation and API calls.
@@ -473,10 +479,8 @@ class _ReservationPageState extends State<ReservationPage> {
       _showValidationError();
       return;
     }
+    printReservationInfo(context.read<ReservationProvider>().reservationInfo);
 
-    setState(() {
-      buttonIsVisible = false;
-    });
     if (context.mounted) {
       // Show the confirmation dialog
       showDialog(
@@ -487,10 +491,6 @@ class _ReservationPageState extends State<ReservationPage> {
           return proceedConfirmationDialog();
         },
       );
-    } else {
-      setState(() {
-        buttonIsVisible = true;
-      });
     }
   }
 
@@ -499,6 +499,9 @@ class _ReservationPageState extends State<ReservationPage> {
         context.read<ReservationProvider>();
     void onConfirm() async {
       Navigator.of(context, rootNavigator: true).pop();
+      setState(() {
+        buttonIsVisible = false;
+      });
       try {
         // Call the refreshAccessToken method on the instance
         await _authService
@@ -507,7 +510,7 @@ class _ReservationPageState extends State<ReservationPage> {
         // Fetching catalogues, wrapped in a try-catch for error handling
         await ClubProvider().fetchCatalogues(widget.club);
       } catch (e) {
-        print("Failed to refresh access token: $e");
+        print("Failed to refresh access token or fetch catalogues");
         setState(() {
           buttonIsVisible = true;
         });
@@ -688,7 +691,7 @@ class _ReservationPageState extends State<ReservationPage> {
         isNameValid;
 
     String fourBitString = _generateFourBitString();
-    printReservationInfo(reservationProvider.reservationInfo);
+
     return allFieldsFilled &&
         reservationProvider.getInfo(4) > 0 &&
         reservationProvider.getInfo(8).isNotEmpty &&

@@ -22,21 +22,14 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!context.read<GlobalStateProvider>().isAuthenticated) {
+      if (!context.read<GlobalStateProvider>().isAuthenticated ||
+          context.read<UserProvider>().userDetails!.userID < 0) {
         context.read<BottomNavBarVisibility>().hide();
         context.router.replaceAll([const LoginRoute()]);
       } else {
         context.read<BottomNavBarVisibility>().show();
       }
     });
-    // _syncClubs();
-    // _syncUserDetails();
-  }
-
-  // ignore: unused_element
-  Future<void> _syncUserDetails() async {
-    UserProvider userProvider = context.read<UserProvider>();
-    userProvider.fetchUserDetailsFromServer();
   }
 
   Future<void> _syncClubs() async {

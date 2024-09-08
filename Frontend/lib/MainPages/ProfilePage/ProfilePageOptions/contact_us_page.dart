@@ -51,7 +51,7 @@ class ContactUsPage extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 5),
                     child: IconButton(
                       onPressed: () {
-                        AutoRouter.of(context).back();
+                        Navigator.of(context).pop();
                       },
                       icon: const Icon(
                         Icons.chevron_left,

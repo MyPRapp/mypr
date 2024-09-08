@@ -129,7 +129,7 @@ class AuthService {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh': refreshToken}),
       )
-          .timeout(const Duration(seconds: 8), onTimeout: () {
+          .timeout(const Duration(seconds: 10), onTimeout: () {
         print("Can't connect to server. Refresh token request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });

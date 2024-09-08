@@ -17,59 +17,84 @@ class CustomizeProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userDetails = context.watch<UserProvider>().userDetails;
-
     void signOut(BuildContext context) async {
       try {
         print('Signing out...');
 
-        // Step 1: Clear Shared Preferences
+        // Step 1: Get SharedPreferences instance
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        print('Clearing shared preferences...');
 
-        // Clear all shared preferences except for validatedIp
+        // Step 2: Retain specific keys and their values
         final String? validatedIp = prefs.getString('validatedIp');
+        final String? clubsJson = prefs.getString('clubs');
+        final String? cataloguesJson = prefs.getString('catalogues');
+
+        // Load and retain all image keys (assuming all keys for images start with 'image_')
+        final keysToRetain =
+            prefs.getKeys().where((key) => key.startsWith('image_')).toList();
+        final Map<String, String> imagesMap = {};
+        for (var key in keysToRetain) {
+          final imageString = prefs.getString(key);
+          if (imageString != null) {
+            imagesMap[key] = imageString; // Retain the image base64 string
+          }
+        }
+
+        // Step 3: Clear all preferences
         await prefs.clear();
         print('Shared preferences cleared.');
 
+        // Step 4: Restore the retained preferences
         if (validatedIp != null) {
           await prefs.setString('validatedIp', validatedIp);
           print('Retained validatedIp: $validatedIp');
         }
-
-        // Step 2: Set isAuthenticated to false
-        if (context.mounted) {
-          context.read<GlobalStateProvider>().isAuthenticated = false;
-          print('User is authenticated flag set to false.');
+        if (clubsJson != null) {
+          await prefs.setString('clubs', clubsJson);
+          print('Retained clubs data.');
+        }
+        if (cataloguesJson != null) {
+          await prefs.setString('catalogues', cataloguesJson);
+          print('Retained catalogues data.');
         }
 
-        // Step 3: Clear liked clubs asynchronously
+        // Restore images
+        for (var key in imagesMap.keys) {
+          await prefs.setString(key, imagesMap[key]!);
+          print('Retained image with key: $key');
+        }
+
+        // Step 5: Clear liked clubs asynchronously
         if (context.mounted) {
           try {
             print('Clearing liked clubs...');
             ClubProvider clubProvider = context.read<ClubProvider>();
-            await clubProvider
-                .deleteAllLiked(); // Await this as it might be async
+            await clubProvider.deleteAllLiked();
             print('Liked clubs cleared.');
           } catch (e) {
             print('Error clearing liked clubs: $e');
           }
         }
 
-        // Step 4: Clear bookings and reset flags
+        // Step 6: Clear bookings and reset flags
         if (context.mounted) {
           try {
             print('Clearing bookings and resetting flags...');
             BookingProvider bookingProvider = context.read<BookingProvider>();
-            bookingProvider.bookings.clear(); // Clear bookings list
-            bookingProvider
-                .setLoading(false); // Set bookingsLoading flag to false
+            bookingProvider.bookings.clear();
+            bookingProvider.setLoading(false);
             print('Bookings cleared, flags reset.');
           } catch (e) {
             print('Error clearing bookings or resetting flags: $e');
           }
         }
+        // Step 7: Set isAuthenticated to false
+        if (context.mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = false;
+          print('User is authenticated flag set to false.');
+        }
 
-        // Step 5: Navigate to the Login page
+        // Step 8: Navigate to the Login page
         if (context.mounted) {
           print('Navigating to the login page...');
           AutoRouter.of(context).replaceAll([const LoginRoute()]);
@@ -101,7 +126,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                 padding: const EdgeInsets.only(top: 5),
                                 child: IconButton(
                                   onPressed: () {
-                                    AutoRouter.of(context).back();
+                                    Navigator.pop(context);
                                   },
                                   icon: const Icon(
                                     Icons.chevron_left,
@@ -202,6 +227,7 @@ class CustomizeProfilePage extends StatelessWidget {
                           },
                         ),
                       ),
+                      const SizedBox(height: 10),
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFF14181B),

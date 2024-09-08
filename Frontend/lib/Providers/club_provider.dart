@@ -70,8 +70,8 @@ class ClubProvider with ChangeNotifier {
     await _clubLoader.loadLikedClubsFromPreferences();
   }
 
-  Future<Image> loadImageFromPreferences(String key) async {
-    return await _clubLoader.loadImageFromPreferences(key);
+  Future<String> loadClubPhotoFromPreferences(int clubID) async {
+    return await _clubLoader.loadClubPhotoFromPreferences(clubID);
   }
 
   //// Club Manager Functions
@@ -131,8 +131,9 @@ class ClubProvider with ChangeNotifier {
     await _clubSaver.saveLikedClubsToPreferences();
   }
 
-  Future<void> saveImageToPreferences(String key, String base64Image) async {
-    await _clubSaver.saveImageToPreferences(key, base64Image);
+  Future<void> saveClubPhotoToPreferences(
+      int clubID, String base64Photo) async {
+    await _clubSaver.saveClubPhotoToPreferences(clubID, base64Photo);
   }
 
   //// Utility / Helper Functions

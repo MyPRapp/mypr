@@ -84,7 +84,7 @@ class BookingDetailsPage extends StatelessWidget {
           size: 30,
         ),
         onPressed: () {
-          AutoRouter.of(context).back();
+          Navigator.of(context).pop();
         },
       ),
     );
@@ -182,7 +182,7 @@ class BookingDetailsPage extends StatelessWidget {
     final simple = fourbitIntegers[0];
     final special = fourbitIntegers[1];
     final premium = fourbitIntegers[2];
-
+    print(booking.price);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -289,17 +289,61 @@ class BookingDetailsPage extends StatelessWidget {
           BuildRichText(label: 'Σχόλια:', value: booking.comments),
         ],
         if (booking.status != 2)
-          Padding(
-            padding: const EdgeInsets.only(top: 10),
-            child: Text(
-              'Συνολική Τιμή: ${booking.price.toStringAsFixed(2)} €',
-              style: const TextStyle(
-                color: Color(0xFF9C0C04),
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Text 'Συνολική Τιμή'
+              const Padding(
+                padding: EdgeInsets.only(top: 10),
+                child: Text(
+                  'Συνολική Τιμή: ',
+                  style: TextStyle(
+                    color: Color(0xFF9C0C04),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ),
+
+              // Column to handle both the strike-through price and actual price
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (booking.fourbitString[3] != '0')
+                      // Strikethrough price
+                      Text(
+                        '${((booking.price) / (1 - (double.parse(booking.fourbitString[3]) / 10))).toStringAsFixed(2)} €',
+                        style: const TextStyle(
+                          decoration: TextDecoration.lineThrough,
+                          decorationColor: Colors.red,
+                          color: Color(0xFF9C0C04),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+
+                    // Actual price (displayed in both cases)
+                    Text(
+                      '${booking.price.toStringAsFixed(2)} €',
+                      style: booking.fourbitString[3] != '0'
+                          ? const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            )
+                          : const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          )
       ],
     );
   }

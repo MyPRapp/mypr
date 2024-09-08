@@ -191,7 +191,6 @@ class BookingCard extends StatelessWidget {
     int simple = double.parse(booking.fourbitString[0]).toInt();
     int special = double.parse(booking.fourbitString[1]).toInt();
     int premium = double.parse(booking.fourbitString[2]).toInt();
-
     return GestureDetector(
       onTap: () {
         final isHistory = booking.status == 2 ||
@@ -321,7 +320,7 @@ class BookingCard extends StatelessWidget {
                     const SizedBox(height: 5),
                     if (booking.status != 2)
                       Text(
-                        '${(booking.price * (1 - ((double.parse(booking.fourbitString[3]).toInt()) / 10))).toStringAsFixed(2)} €',
+                        '${(booking.price).toStringAsFixed(2)} €',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 14,

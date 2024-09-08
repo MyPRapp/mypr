@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,6 +53,16 @@ class ClubLoader {
               (double.parse(regularCatalogue.price)).toInt();
           clubStruct.clubMaxPersons = regularCatalogue.maxPersons;
 
+          // Load the club photo from preferences
+          try {
+            clubStruct.clubPhoto =
+                await loadClubPhotoFromPreferences(clubStruct.clubID);
+            print(
+                'Loaded photo for club: ${clubStruct.clubName} with ID: ${clubStruct.clubID}');
+          } catch (e) {
+            print(
+                'Error loading club photo for club ID: ${clubStruct.clubID}, error: $e');
+          }
           _clubs.add(clubStruct);
           print(
               'Loaded club: ${clubStruct.clubName} with ID: ${clubStruct.clubID}');
@@ -110,19 +119,16 @@ class ClubLoader {
     }
   }
 
-  // Load image from shared preferences
-  Future<Image> loadImageFromPreferences(String key) async {
-    print('Loading image from preferences with key: $key');
-    final prefs = await SharedPreferences.getInstance();
-    final base64Image = prefs.getString(key);
+//TODO We are saving in SP the photo url instead of the image itself. For best performance save photo to device's directory.
+  // Helper method to load club photo from preferences based on club ID
+  Future<String> loadClubPhotoFromPreferences(int clubID) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? base64Photo = prefs.getString('club_photo_$clubID');
 
-    if (base64Image != null) {
-      final Uint8List bytes = base64Decode(base64Image);
-      print('Loaded imgage from preferences with key: $key');
-      return Image.memory(bytes);
+    if (base64Photo != null) {
+      return base64Photo; // You can return the base64 string or convert it to an image if necessary
     } else {
-      print('No image found in preferences with key: $key');
-      throw Exception('No image found in preferences');
+      throw Exception('No photo found for club ID: $clubID');
     }
   }
 }

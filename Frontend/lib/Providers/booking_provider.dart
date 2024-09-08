@@ -163,11 +163,12 @@ class BookingProvider with ChangeNotifier {
     CatalogueInfoStruct specialCatalogue,
     CatalogueInfoStruct premiumCatalogue,
   ) {
-    double price = (int.parse(fourbitString[0]) *
+    double price = (double.parse(fourbitString[0]) *
             double.parse(regularCatalogue.price)) +
-        (int.parse(fourbitString[1]) * double.parse(specialCatalogue.price)) +
-        (int.parse(fourbitString[2]) * double.parse(premiumCatalogue.price));
-    return price * (1 - (int.parse(fourbitString[3]) / 100));
+        (double.parse(fourbitString[1]) *
+            double.parse(specialCatalogue.price)) +
+        (double.parse(fourbitString[2]) * double.parse(premiumCatalogue.price));
+    return price * (1 - (double.parse(fourbitString[3]) / 10));
   }
 
   // Generate a random comment for a booking
