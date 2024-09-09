@@ -334,44 +334,6 @@ Future<ImageProvider?> loadUserPhoto(String photoPath) async {
   }
 }
 
-/// Loads an image from a network URL, and if an error occurs, falls back to SharedPreferences.
-Future<ImageProvider> loadClubPhoto(int clubID, String photoUrl) async {
-  try {
-    // Attempt to load the image from the network URL
-    final response = await http.get(Uri.parse(photoUrl));
-
-    if (response.statusCode == 200) {
-      // If the network request is successful, return the network image
-      return NetworkImage(photoUrl);
-    } else {
-      // If the response is not successful, throw an error to trigger the fallback
-      throw Exception('Failed to load image from network');
-    }
-  } catch (e) {
-    debugPrint('Error loading network image for club ID $clubID: $e');
-
-    // Fallback: Try to load the image from SharedPreferences
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final base64Image = prefs.getString('club_image_$clubID');
-
-      if (base64Image != null) {
-        // Decode and return the image from memory (from SharedPreferences)
-        final Uint8List bytes = base64Decode(base64Image);
-        return MemoryImage(bytes);
-      } else {
-        // If no image is found in SharedPreferences, return a default image
-        return const AssetImage('assets/images/default_club_image.png');
-      }
-    } catch (prefsError) {
-      // Log any error that occurs during the fallback and return a default image
-      debugPrint(
-          'Error loading fallback image from SharedPreferences: $prefsError');
-      return const AssetImage('assets/images/default_club_image.png');
-    }
-  }
-}
-
 TextStyle textStyle1() {
   return const TextStyle(
     fontSize: 20,

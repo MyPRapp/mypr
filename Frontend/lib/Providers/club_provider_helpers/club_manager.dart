@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
 
@@ -135,7 +136,15 @@ class ClubManager with ChangeNotifier {
   }
 
   Future<void> deleteAllLiked() async {
-    _likedClubIDs.clear();
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.remove('likedClubs');
+      _likedClubIDs.clear();
+      notifyListeners();
+      print('Liked clubs cleared from SharedPreferences.');
+    } catch (e) {
+      print('Error clearing liked clubs: $e');
+    }
     _notifyListeners();
   }
 

@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
@@ -9,59 +11,46 @@ class ClubSaver {
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
-  // ignore: unused_field
-  final VoidCallback _notifyListeners;
+  ClubSaver(this._clubs, this._catalogues, this._likedClubIDs);
 
-  ClubSaver(
-      this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
-
-  // Save clubs to shared preferences
-  Future<void> saveClubsToPreferences() async {
-    print('Saving clubs to preferences');
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String clubsJson =
-        jsonEncode(_clubs.map((club) => club.toJson()).toList());
-    await prefs.setString('clubs', clubsJson);
-    print('Saved clubs to preferences');
-
-//TODO saveClubPhotoToPreferences used here
-
-    // Save each club's photo individually
-    for (var club in _clubs) {
-      if (club.clubPhoto.isNotEmpty) {
-        // Saving club photo using clubID as a unique key
-        await saveClubPhotoToPreferences(club.clubID, club.clubPhoto);
-      }
-    }
+  Future<String> _getFilePath(String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    return '${directory.path}/$fileName.json';
   }
 
-  // Save catalogues to shared preferences
-  Future<void> saveCataloguesToPreferences() async {
-    print('Saving catalogues to preferences');
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String cataloguesJson =
+  Future<void> saveClubsToFile() async {
+    String filePath = await _getFilePath('clubs');
+    File file = File(filePath);
+
+    // Convert clubs to JSON and save them to a file
+    String jsonClubs = jsonEncode(_clubs.map((club) => club.toJson()).toList());
+    await file.writeAsString(jsonClubs);
+    print('Clubs saved to $filePath');
+  }
+
+  Future<void> saveCataloguesToFile() async {
+    String filePath = await _getFilePath('catalogues');
+    File file = File(filePath);
+
+    // Convert catalogues to JSON and save them to a file
+    String jsonCatalogues =
         jsonEncode(_catalogues.map((catalogue) => catalogue.toJson()).toList());
-    await prefs.setString('catalogues', cataloguesJson);
-    print('Saved catalogues to preferences');
+    await file.writeAsString(jsonCatalogues);
+    print('Catalogues saved to $filePath');
   }
 
-  // Save liked clubs to shared preferences
+  Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/club_photo_$clubID.png';
+
+    File file = File(filePath);
+    await file.writeAsBytes(photoBytes);
+    print('Photo for club ID $clubID saved at $filePath');
+  }
+
   Future<void> saveLikedClubsToPreferences() async {
-    print('Saving liked clubs to preferences');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setStringList(
         'likedClubs', _likedClubIDs.map((id) => id.toString()).toList());
-    print('Saved liked clubs to preferences');
-  }
-
-//TODO saveClubPhotoToPreferences implemented here
-
-  // Save individual club photo to shared preferences
-  Future<void> saveClubPhotoToPreferences(
-      int clubID, String base64Photo) async {
-    print('Saving photo for club ID $clubID to preferences');
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('club_photo_$clubID', base64Photo);
-    print('Saved photo for club ID $clubID to preferences');
   }
 }

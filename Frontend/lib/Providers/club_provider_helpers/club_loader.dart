@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
@@ -9,131 +11,94 @@ class ClubLoader {
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
-  // ignore: unused_field
-  final VoidCallback _notifyListeners;
 
-  ClubLoader(
-      this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
+  ClubLoader(this._clubs, this._catalogues, this._likedClubIDs);
 
-  Future<void> loadClubsFromPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? clubsJson = prefs.getString('clubs');
-    final String? cataloguesJson = prefs.getString('catalogues');
+  Future<String> _getFilePath(String fileName) async {
+    final directory = await getApplicationDocumentsDirectory();
+    return '${directory.path}/$fileName.json';
+  }
 
-    if (clubsJson != null && cataloguesJson != null) {
-      try {
-        print('Loading clubs from preferences');
-        final List<dynamic> clubsList = jsonDecode(clubsJson);
-        final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
+  Future<void> loadClubsFromFile() async {
+    String filePath = await _getFilePath('clubs');
+    File file = File(filePath);
 
-        _clubs.clear();
-        _catalogues.clear();
+    if (await file.exists()) {
+      String jsonClubs = await file.readAsString();
+      List<dynamic> clubsList = jsonDecode(jsonClubs);
 
-        for (var catalogue in cataloguesList) {
-          _catalogues.add(CatalogueInfoStruct.fromJson(catalogue));
-        }
-
-        for (var club in clubsList) {
-          ClubInfoStruct clubStruct = ClubInfoStruct.fromJson(club);
-
-          // Update clubMinPrice and clubMaxPersons using the catalogues
-          final regularCatalogue = _catalogues.firstWhere(
-            (catalogue) =>
-                catalogue.clubID == clubStruct.clubID &&
-                catalogue.serviceType == 'Regular',
-            orElse: () => CatalogueInfoStruct(
-              clubID: clubStruct.clubID,
-              serviceType: 'Regular',
-              price: '0',
-              maxPersons: 0,
-            ),
-          );
-
-          clubStruct.clubMinPrice =
-              (double.parse(regularCatalogue.price)).toInt();
-          clubStruct.clubMaxPersons = regularCatalogue.maxPersons;
-
-//TODO loadClubPhotoFromPreferences used here
-
-          // Load the club photo from preferences
-          try {
-            clubStruct.clubPhoto =
-                await loadClubPhotoFromPreferences(clubStruct.clubID);
-            print(
-                'Loaded photo for club: ${clubStruct.clubName} with ID: ${clubStruct.clubID}');
-          } catch (e) {
-            print(
-                'Error loading club photo for club ID: ${clubStruct.clubID}, error: $e');
-          }
-          _clubs.add(clubStruct);
-          print(
-              'Loaded club: ${clubStruct.clubName} with ID: ${clubStruct.clubID}');
-        }
-      } catch (e) {
-        print('Error loading clubs from preferences: $e');
-      }
+      _clubs.clear();
+      _clubs.addAll(
+          clubsList.map((json) => ClubInfoStruct.fromJson(json)).toList());
+      print('Clubs loaded from $filePath');
     } else {
-      print('No clubs or catalogues found in preferences');
+      print('Clubs file does not exist');
     }
   }
 
-  Future<void> loadCataloguesFromPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? cataloguesJson = prefs.getString('catalogues');
+  Future<void> loadCataloguesFromFile() async {
+    String filePath = await _getFilePath('catalogues');
+    File file = File(filePath);
 
-    if (cataloguesJson != null) {
-      try {
-        print('Loading catalogues from preferences');
-        final List<dynamic> cataloguesList = jsonDecode(cataloguesJson);
+    if (await file.exists()) {
+      String jsonCatalogues = await file.readAsString();
+      List<dynamic> cataloguesList = jsonDecode(jsonCatalogues);
 
-        _catalogues.clear();
+      _catalogues.clear();
+      _catalogues.addAll(cataloguesList
+          .map((json) => CatalogueInfoStruct.fromJson(json))
+          .toList());
 
-        for (var catalogueJson in cataloguesList) {
-          final catalogue = CatalogueInfoStruct.fromJson(catalogueJson);
-          _catalogues.add(catalogue);
+      // Update each club with 'Regular' service type values
+      for (var club in _clubs) {
+        final regularCatalogue = _catalogues.firstWhere(
+          (catalogue) =>
+              catalogue.clubID == club.clubID &&
+              catalogue.serviceType == 'Regular',
+          orElse: () => CatalogueInfoStruct(
+            clubID: club.clubID,
+            serviceType: 'Regular',
+            price: '0', // default value in case no 'Regular' catalogue exists
+            maxPersons: 0,
+          ),
+        );
 
-          // Safely access clubID
-          if (catalogue.clubID != -1) {
-            print('Loaded catalogue for club ID: ${catalogue.clubID}');
-          } else {
-            print('Warning: Catalogue has an invalid clubID');
-          }
-        }
-      } catch (e) {
-        print('Error loading catalogues from preferences: $e');
+        // Update the club's min price and max persons based on the 'Regular' catalogue
+        club.clubMinPrice =
+            (double.tryParse(regularCatalogue.price) ?? 0).toInt();
+        club.clubMaxPersons = regularCatalogue.maxPersons;
       }
+
+      print('Catalogues loaded from $filePath and clubs updated.');
     } else {
-      print('No catalogues found in preferences');
+      print('Catalogues file does not exist');
+    }
+  }
+
+  Future<Uint8List?> loadClubPhotoFromFile(int clubID) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final filePath = '${directory.path}/club_photo_$clubID.png';
+
+    File file = File(filePath);
+
+    if (await file.exists()) {
+      return await file.readAsBytes();
+    } else {
+      print('Photo for club ID $clubID not found');
+      return null; // You can return a default image in this case
     }
   }
 
   Future<void> loadLikedClubsFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? likedClubsStringList = prefs.getStringList('likedClubs');
+    List<String>? likedClubIDs = prefs.getStringList('likedClubs');
 
-    if (likedClubsStringList != null) {
-      print('Loading liked clubs from preferences');
-      _likedClubIDs.clear();
-      _likedClubIDs.addAll(likedClubsStringList.map((id) => int.parse(id)));
-      print('Loaded liked clubs: $_likedClubIDs');
+    _likedClubIDs.clear();
+    if (likedClubIDs != null) {
+      _likedClubIDs.addAll(likedClubIDs.map((id) => int.parse(id)));
+      print('Liked clubs loaded from preferences.');
     } else {
-      print('No liked clubs found in preferences');
-    }
-  }
-
-//TODO We are saving in SP the photo url instead of the image itself. For best performance save photo to device's directory.
-
-//TODO loadClubPhotoFromPreferences implemented here
-
-  // Helper method to load club photo from preferences based on club ID
-  Future<String> loadClubPhotoFromPreferences(int clubID) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? base64Photo = prefs.getString('club_photo_$clubID');
-
-    if (base64Photo != null) {
-      return base64Photo; // You can return the base64 string or convert it to an image if necessary
-    } else {
-      throw Exception('No photo found for club ID: $clubID');
+      print('No liked clubs found in preferences.');
     }
   }
 }

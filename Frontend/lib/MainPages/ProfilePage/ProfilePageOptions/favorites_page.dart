@@ -18,7 +18,7 @@ class FavoritesPageState extends State<FavoritesPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromARGB(192, 37, 37, 37),
+      backgroundColor: Colors.black,
       body: ListView(
         children: [
           Padding(

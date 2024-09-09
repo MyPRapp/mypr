@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import '../global_components.dart';
@@ -19,26 +21,32 @@ class ClubProvider with ChangeNotifier {
   ClubProvider() {
     _clubManager =
         ClubManager(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-    _clubLoader =
-        ClubLoader(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-    _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-    _clubFetcher = ClubFetcher(_clubManager, _clubSaver, notifyListeners);
+    _clubLoader = ClubLoader(
+      _clubs,
+      _catalogues,
+      _likedClubIDs,
+    );
+    _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs);
+    _clubFetcher = ClubFetcher(
+      _clubManager,
+      _clubSaver,
+    );
   }
 
+  // Syncs clubs from the server, loads from file if fetch fails
   Future<void> syncClubs() async {
     try {
-      // Attempt to fetch clubs and catalogues from the network
-      await _clubFetcher.fetchClubsAndCatalogues();
+      await _clubFetcher.fetchClubsAndCatalogues(); // Fetch from server
     } catch (e) {
-      // If there's an error, load clubs and catalogues from local storage
-      await _clubLoader.loadClubsFromPreferences();
-      await _clubLoader.loadCataloguesFromPreferences();
+      // Load from device's directory in case of failure
+      await _clubLoader.loadClubsFromFile();
+      await _clubLoader.loadCataloguesFromFile();
     }
 
-    // Load liked clubs from preferences regardless of the outcome
+    // Load liked clubs from SharedPreferences
     await _clubLoader.loadLikedClubsFromPreferences();
 
-    // Notify listeners that the data has been initialized
+    // Notify listeners of data changes
     notifyListeners();
   }
 
@@ -47,31 +55,32 @@ class ClubProvider with ChangeNotifier {
     await _clubFetcher.fetchClubsAndCatalogues();
   }
 
-  //Fetches catalogues of one club each time
+  // Fetches catalogues of a single club
   Future<void> fetchCatalogues(ClubInfoStruct club) async {
     await _clubFetcher.fetchCatalogues(club);
   }
 
-  //Fetches one club each time without updating is minPrice and maxPersons
+  // Fetches one club by its ID
   Future<void> fetchClub(int clubID) async {
     await _clubFetcher.fetchClub(clubID);
   }
 
-  //Load From Preferences Functions
-  Future<void> loadClubsFromPreferences() async {
-    await _clubLoader.loadClubsFromPreferences();
+  //// Load From File Functions (Replaces SharedPreferences)
+  Future<void> loadClubsFromFile() async {
+    await _clubLoader.loadClubsFromFile();
   }
 
-  Future<void> loadCataloguesFromPreferences() async {
-    await _clubLoader.loadCataloguesFromPreferences();
+  Future<void> loadCataloguesFromFile() async {
+    await _clubLoader.loadCataloguesFromFile();
   }
 
   Future<void> loadLikedClubsFromPreferences() async {
     await _clubLoader.loadLikedClubsFromPreferences();
   }
 
-  Future<String> loadClubPhotoFromPreferences(int clubID) async {
-    return await _clubLoader.loadClubPhotoFromPreferences(clubID);
+  // Load club photo from the file system
+  Future<Uint8List?> loadClubPhotoFromFile(int clubID) async {
+    return await _clubLoader.loadClubPhotoFromFile(clubID);
   }
 
   //// Club Manager Functions
@@ -103,10 +112,10 @@ class ClubProvider with ChangeNotifier {
     return _clubManager.getCataloguesByClubID(clubID);
   }
 
-  //// Liked Clubs Management
+  //// Liked Clubs Management (Stored in SharedPreferences)
   void toggleLike(int clubID) {
     _clubManager.toggleLike(clubID);
-    _clubSaver.saveLikedClubsToPreferences();
+    _clubSaver.saveLikedClubsToPreferences(); // Save to SharedPreferences
   }
 
   bool isLiked(int clubID) {
@@ -115,25 +124,26 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> deleteAllLiked() async {
     await _clubManager.deleteAllLiked();
-    await _clubSaver.saveLikedClubsToPreferences();
   }
 
-  //// Saving To Preferences Functions
-  Future<void> saveClubsToPreferences() async {
-    await _clubSaver.saveClubsToPreferences();
+  //// Saving To File Functions
+  Future<void> saveClubsToFile() async {
+    await _clubSaver
+        .saveClubsToFile(); // Save club data to the device directory
   }
 
-  Future<void> saveCataloguesToPreferences() async {
-    await _clubSaver.saveCataloguesToPreferences();
+  Future<void> saveCataloguesToFile() async {
+    await _clubSaver
+        .saveCataloguesToFile(); // Save catalogues to the device directory
   }
 
   Future<void> saveLikedClubsToPreferences() async {
-    await _clubSaver.saveLikedClubsToPreferences();
+    await _clubSaver
+        .saveLikedClubsToPreferences(); // Save liked clubs in SharedPreferences
   }
 
-  Future<void> saveClubPhotoToPreferences(
-      int clubID, String base64Photo) async {
-    await _clubSaver.saveClubPhotoToPreferences(clubID, base64Photo);
+  Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {
+    await _clubSaver.saveClubPhotoToFile(clubID, photoBytes);
   }
 
   //// Utility / Helper Functions

@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
@@ -50,36 +51,13 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  Future<void> _login() async {
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-    bool success = await _authService.login(email, password);
-
-    if (mounted) {
-      if (success) {
-        await context.read<UserProvider>().fetchUserDetailsFromServer();
-        if (mounted) {
-          final globalState = context.read<GlobalStateProvider>();
-          globalState.isAuthenticated = true; // Set isAuthenticated to true
-        }
-
-        if (mounted) {
-          AutoRouter.of(context).replaceAll([const BottomNavBarRoute()]);
-        }
-      } else {
-        _showErrorSnackBar('Λάθος email/τηλέφωνο ή κωδικός');
-        setState(() {
-          _isRegistering = false; // Re-enable the register button
-        });
-      }
-    }
-  }
-
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isRegistering = true;
       });
+
+      //TODO Remove username from register
 
       String firstName = _firstNameController.text.trim();
       String lastName = _lastNameController.text.trim();
@@ -103,17 +81,19 @@ class _SignUpPageState extends State<SignUpPage> {
         // Clear preferences after successful registration
         await _clearPreferences();
 
+        _showSnackBar('Επιτυχής εγγραφή!');
+
         // Proceed with login after clearing preferences
         await _login();
       } else {
         setState(() {
           _isRegistering = false; // Re-enable the register button
         });
-        _showErrorSnackBar(
+        _showSnackBar(
             'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
       }
     } else {
-      _showErrorSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία');
+      _showSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία');
     }
   }
 
@@ -138,7 +118,43 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('bookings');
   }
 
-  void _showErrorSnackBar(String message) {
+  Future<void> _login() async {
+    try {
+      // Attempt to log in using the provided credentials
+      await AuthService().login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      // Check if the widget is still mounted before proceeding
+      if (mounted) {
+        // Fetch user details from the server if login was successful
+        await context.read<UserProvider>().fetchUserDetailsFromServer();
+      }
+      if (mounted) {
+        context.read<BookingProvider>().fetchBookings(
+            context.read<UserProvider>().userDetails,
+            context.read<ClubProvider>());
+      }
+      // Mark the user as authenticated if everything went well
+      if (mounted) {
+        context.read<GlobalStateProvider>().isAuthenticated = true;
+      }
+
+      if (mounted) {
+        await context.router.replaceAll([const BottomNavBarRoute()]);
+      }
+    } catch (e) {
+      print('Login failed: $e');
+      _showSnackBar('Υπήρξε κάποιο σφάλμα κατά την είσοδο στην εφαρμογή');
+    } finally {
+      setState(() {
+        _isRegistering = false; // Re-enable the register button
+      });
+    }
+  }
+
+  void _showSnackBar(String message) {
     floatingSnackBar(
         message: message,
         context: context,

@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/club_provider.dart';
-import 'package:mypr/Widgets/profile_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
@@ -50,10 +49,12 @@ class _ProfilePageState extends State<ProfilePage> {
       child: RefreshIndicator(
         onRefresh: _refresh,
         child: Scaffold(
+          //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
           backgroundColor: Colors.black,
           body: userDetails == null
               ? const Center(child: CircularProgressIndicator())
-              : SizedBox(
+              : Container(
+                  color: const Color.fromARGB(197, 40, 40, 40),
                   height: screenHeight,
                   child: Column(
                     children: [
@@ -83,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           '${userDetails.firstName} ${userDetails.lastName}',
                           style: const TextStyle(
                             fontSize: 20,
-                            color: Color(0xFF9c0c04),
+                            color: Colors.grey,
                             fontWeight: FontWeight.bold,
                           ),
                           textAlign: TextAlign.center,
@@ -93,67 +94,42 @@ class _ProfilePageState extends State<ProfilePage> {
                         padding: EdgeInsets.only(top: 25),
                         child: Divider(
                           height: 60,
-                          color: Color.fromARGB(255, 99, 11, 4),
+                          color: Color.fromARGB(255, 65, 65, 65),
                           thickness: 10,
                         ),
                       ),
                       Column(
                         children: [
-                          GestureDetector(
-                            onTap: () {
-                              AutoRouter.of(context)
-                                  .push(const CustomizeProfileRoute());
-                            },
-                            child: const ProfileOptions(
-                              label: ' Επεξεργασία Προφίλ',
-                              widgetIcon: ImageIcon(
+                          profileOptions(
+                            'Επεξεργασία Προφίλ',
+                            const ImageIcon(
                                 AssetImage("assets/icons/settings_icon.png"),
-                                color: Color(0xFF9c0c04),
-                              ),
-                            ),
+                                color: Colors.grey),
+                            const CustomizeProfileRoute(),
                           ),
-                          const SizedBox(height: 30),
-                          GestureDetector(
-                            onTap: () {
-                              AutoRouter.of(context)
-                                  .push(const MyBookingsRoute());
-                            },
-                            child: const ProfileOptions(
-                              label: ' Οι κρατήσεις μου',
-                              widgetIcon: ImageIcon(
-                                AssetImage("assets/icons/book_icon.png"),
-                                color: Color(0xFF9c0c04),
-                              ),
+                          profileOptions(
+                            'Οι κρατήσεις μου',
+                            const ImageIcon(
+                              AssetImage("assets/icons/book_icon.png"),
+                              color: Colors.grey,
                             ),
+                            const MyBookingsRoute(),
                           ),
-                          const SizedBox(height: 30),
-                          GestureDetector(
-                            onTap: () {
-                              AutoRouter.of(context)
-                                  .push(const FavoritesRoute());
-                            },
-                            child: const ProfileOptions(
-                              label: ' Αγαπημένα',
-                              widgetIcon: ImageIcon(
-                                AssetImage(
-                                    "assets/icons/heart(liked)_icon.png"),
-                                color: Color(0xFF9c0c04),
-                              ),
+                          profileOptions(
+                            'Αγαπημένα',
+                            const ImageIcon(
+                              AssetImage("assets/icons/heart(liked)_icon.png"),
+                              color: Colors.grey,
                             ),
+                            const FavoritesRoute(),
                           ),
-                          const SizedBox(height: 30),
-                          GestureDetector(
-                            onTap: () {
-                              AutoRouter.of(context)
-                                  .push(const ContactUsRoute());
-                            },
-                            child: const ProfileOptions(
-                              label: ' Επικοινώνησε μαζί μας',
-                              widgetIcon: ImageIcon(
-                                AssetImage("assets/icons/support_icon.png"),
-                                color: Color(0xFF9c0c04),
-                              ),
+                          profileOptions(
+                            'Επικοινώνησε μαζί μας',
+                            const ImageIcon(
+                              AssetImage("assets/icons/support_icon.png"),
+                              color: Colors.grey,
                             ),
+                            const ContactUsRoute(),
                           ),
                         ],
                       ),
@@ -170,7 +146,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (photoPath == null || photoPath.trim().isEmpty) {
       // Show the red person icon immediately if photoPath is empty or null
       return Container(
-        color: const Color(0xFF9C0C04),
+        color: Colors.grey,
         child: const Icon(
           Icons.person,
           color: Colors.black,
@@ -193,7 +169,7 @@ class _ProfilePageState extends State<ProfilePage> {
             } else {
               // If the photo couldn't be loaded, show the red person icon
               return Container(
-                color: const Color(0xFF9C0C04),
+                color: Colors.grey,
                 child: const Icon(
                   Icons.person,
                   color: Colors.black,
@@ -208,5 +184,41 @@ class _ProfilePageState extends State<ProfilePage> {
         },
       );
     }
+  }
+
+  Widget profileOptions(
+      String label, ImageIcon widgetIcon, PageRouteInfo route) {
+    return GestureDetector(
+      onTap: () {
+        AutoRouter.of(context).push(route);
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(top: 30),
+        child: Container(
+          padding: const EdgeInsets.only(left: 10),
+          margin: const EdgeInsets.only(left: 50, right: 50),
+          decoration: BoxDecoration(
+              boxShadow: [
+                // Light shadow for depth
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 10,
+                  offset: const Offset(2, 4),
+                ),
+              ],
+              border: Border.all(
+                  color: const Color.fromARGB(255, 65, 65, 65), width: 7),
+              borderRadius: const BorderRadius.all(Radius.circular(5))),
+          child: Row(children: [
+            SizedBox(height: 40, child: widgetIcon),
+            Text(' $label',
+                style: const TextStyle(
+                    fontSize: 20,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold))
+          ]),
+        ),
+      ),
+    );
   }
 }

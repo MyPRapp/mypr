@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -299,28 +301,39 @@ class _ReservationPageState extends State<ReservationPage> {
         child: SizedBox(
           width: 520,
           height: 350,
-
-//TODO loadClubPhoto used here
-
-          child: FutureBuilder<ImageProvider>(
-            future: loadClubPhoto(widget.club.clubID, widget.club.clubPhoto),
+          child: FutureBuilder<ImageProvider?>(
+            future: _loadImageFromFile(widget.club.clubID),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
                   return Image(image: snapshot.data!, fit: BoxFit.fill);
-                } else if (snapshot.hasError) {
+                } else if (snapshot.hasError || !snapshot.hasData) {
                   return const Image(
                     image: AssetImage('assets/images/default_club_image.png'),
                     fit: BoxFit.fill,
                   );
                 }
               }
-              return const CircularProgressIndicator(); // Show a loading spinner
+              return const Center(
+                child: CircularProgressIndicator(), // Show a loading spinner
+              );
             },
           ),
         ),
       ),
     );
+  }
+
+  Future<ImageProvider?> _loadImageFromFile(int clubID) async {
+    Uint8List? imageBytes =
+        await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
+
+    if (imageBytes != null) {
+      return MemoryImage(imageBytes);
+    } else {
+      // Return null to indicate no image found, so the FutureBuilder can handle the fallback
+      return const AssetImage('assets/images/default_club_image.png');
+    }
   }
 
   /// Builds a section title.

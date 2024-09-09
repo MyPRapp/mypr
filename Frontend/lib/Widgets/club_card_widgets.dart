@@ -1,6 +1,4 @@
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/club_provider.dart';
@@ -10,12 +8,10 @@ class LikeButton extends StatefulWidget {
   const LikeButton({
     super.key,
     required this.club,
-    this.onRemove,
     this.big = false,
   });
 
   final ClubInfoStruct club;
-  final VoidCallback? onRemove;
   final bool big;
 
   @override
@@ -28,7 +24,7 @@ class LikeButtonState extends State<LikeButton>
 
   @override
   Widget build(BuildContext context) {
-    final double size = widget.big ? 30 : 24;
+    final double size = widget.big ? 35 : 28;
     final clubProvider = context.watch<ClubProvider>();
 
     bool isLiked = clubProvider.isLiked(widget.club.clubID);
@@ -40,45 +36,15 @@ class LikeButtonState extends State<LikeButton>
         });
 
         clubProvider.toggleLike(widget.club.clubID);
-
-        // Show SnackBar based on like status
-        if (isLiked) {
-          floatingSnackBar(
-              message: 'Αφαιρέθηκε από τα αγαπημένα',
-              context: context,
-              duration: const Duration(milliseconds: 1500));
-        } else {
-          floatingSnackBar(
-              message: 'Προστέθηκε στα αγαπημένα',
-              context: context,
-              duration: const Duration(milliseconds: 1500));
-        }
-
-        // If onRemove is provided and the club is no longer liked, trigger the callback
-        if (widget.onRemove != null &&
-            !clubProvider.isLiked(widget.club.clubID)) {
-          widget.onRemove!();
-        }
-
-        // Reset tapped state after the animation completes
-        Future.delayed(const Duration(milliseconds: 800), () {
-          setState(() {
-            tapped = false;
-          });
-        });
       },
       child: SizedBox(
         height: 40,
         width: 40,
         child: isLiked
             ? Icon(Icons.favorite_rounded,
-                    size: size, color: const Color.fromARGB(199, 156, 12, 4))
-                .animate(target: tapped ? 1 : 0)
-                .scaleXY(duration: 400.ms, begin: 1.0, end: 1.1)
-                .then()
-                .scaleXY(duration: 400.ms, begin: 1.1, end: 1.0)
+                size: size, color: const Color.fromARGB(199, 156, 12, 4))
             : Icon(Icons.favorite_border_rounded,
-                size: size + 3, color: const Color.fromARGB(199, 156, 12, 4)),
+                size: size, color: const Color.fromARGB(199, 156, 12, 4)),
       ),
     );
   }

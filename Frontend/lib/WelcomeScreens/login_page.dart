@@ -129,11 +129,6 @@ class _LoginPageState extends State<LoginPage> {
           // Fetch user details from the server if login was successful
           await context.read<UserProvider>().fetchUserDetailsFromServer();
         }
-        // if (mounted) {
-        //   print('//////SYNCING CLUBS');
-        //   await context.read<ClubProvider>().syncClubs();
-        //   print('//////SYNCED CLUBS');
-        // }
         if (mounted) {
           context.read<BookingProvider>().fetchBookings(
               context.read<UserProvider>().userDetails,

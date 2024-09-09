@@ -21,50 +21,23 @@ class CustomizeProfilePage extends StatelessWidget {
       try {
         print('Signing out...');
 
-        // Step 1: Get SharedPreferences instance
+        // Step 1: Get SharedPreferences instance for key-value data
         SharedPreferences prefs = await SharedPreferences.getInstance();
 
-        // Step 2: Retain specific keys and their values
+        // Step 2: Retain specific keys and their values (excluding liked clubs)
         final String? validatedIp = prefs.getString('validatedIp');
-        final String? clubsJson = prefs.getString('clubs');
-        final String? cataloguesJson = prefs.getString('catalogues');
-
-        // Load and retain all image keys (assuming all keys for images start with 'image_')
-        final keysToRetain =
-            prefs.getKeys().where((key) => key.startsWith('image_')).toList();
-        final Map<String, String> imagesMap = {};
-        for (var key in keysToRetain) {
-          final imageString = prefs.getString(key);
-          if (imageString != null) {
-            imagesMap[key] = imageString; // Retain the image base64 string
-          }
-        }
 
         // Step 3: Clear all preferences
         await prefs.clear();
         print('Shared preferences cleared.');
 
-        // Step 4: Restore the retained preferences
+        // Step 4: Restore the retained preferences (excluding liked clubs)
         if (validatedIp != null) {
           await prefs.setString('validatedIp', validatedIp);
           print('Retained validatedIp: $validatedIp');
         }
-        if (clubsJson != null) {
-          await prefs.setString('clubs', clubsJson);
-          print('Retained clubs data.');
-        }
-        if (cataloguesJson != null) {
-          await prefs.setString('catalogues', cataloguesJson);
-          print('Retained catalogues data.');
-        }
 
-        // Restore images
-        for (var key in imagesMap.keys) {
-          await prefs.setString(key, imagesMap[key]!);
-          print('Retained image with key: $key');
-        }
-
-        // Step 5: Clear liked clubs asynchronously
+        // Step 5: Clear liked clubs
         if (context.mounted) {
           try {
             print('Clearing liked clubs...');
@@ -88,6 +61,7 @@ class CustomizeProfilePage extends StatelessWidget {
             print('Error clearing bookings or resetting flags: $e');
           }
         }
+
         // Step 7: Set isAuthenticated to false
         if (context.mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = false;
@@ -138,7 +112,7 @@ class CustomizeProfilePage extends StatelessWidget {
                               const Text(
                                 'ΠΡΟΦΙΛ',
                                 style: TextStyle(
-                                    color: Color(0xFF9C0C04),
+                                    color: Color.fromARGB(255, 90, 90, 90),
                                     fontSize: 36,
                                     fontWeight: FontWeight.bold),
                               )
@@ -175,7 +149,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                   Text(
                                     userDetails.phone,
                                     style: const TextStyle(
-                                        color: Color.fromARGB(255, 226, 16, 5),
+                                        color: Color.fromARGB(255, 90, 90, 90),
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -183,7 +157,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                   Text(
                                     userDetails.email,
                                     style: const TextStyle(
-                                        color: Color.fromARGB(255, 226, 16, 5),
+                                        color: Color.fromARGB(255, 90, 90, 90),
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold),
                                   ),
@@ -205,9 +179,9 @@ class CustomizeProfilePage extends StatelessWidget {
                       const Text(
                         'Ρυθμίσεις λογαριασμού',
                         style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 16,
-                        ),
+                            color: Colors.grey,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w400),
                       ),
                       const SizedBox(height: 20),
                       Container(

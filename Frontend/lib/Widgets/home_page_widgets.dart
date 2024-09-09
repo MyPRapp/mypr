@@ -1,7 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:provider/provider.dart';
 
 import '../global_components.dart';
 
@@ -9,26 +13,40 @@ class SmallClubCard extends StatefulWidget {
   const SmallClubCard({
     super.key,
     required this.club,
-    this.onRemove,
   });
 
   final ClubInfoStruct club;
-  final VoidCallback? onRemove;
 
   @override
   State<SmallClubCard> createState() => _SmallClubCardState();
 }
 
 class _SmallClubCardState extends State<SmallClubCard> {
-  late Future<ImageProvider> _imageFuture;
+  late Future<ImageProvider?> _imageFuture;
 
   @override
   void initState() {
     super.initState();
+    _loadImage();
+  }
 
-//TODO loadClubPhoto used here
+  void _loadImage() {
+    setState(() {
+      // Load club photo from file system instead of network
+      _imageFuture = _loadImageFromFile(widget.club.clubID);
+    });
+  }
 
-    _imageFuture = loadClubPhoto(widget.club.clubID, widget.club.clubPhoto);
+  Future<ImageProvider?> _loadImageFromFile(int clubID) async {
+    Uint8List? imageBytes =
+        await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
+
+    if (imageBytes != null) {
+      return MemoryImage(imageBytes);
+    } else {
+      // Return a default image or null if the image is not found
+      return const AssetImage('assets/images/default_club_image.png');
+    }
   }
 
   @override
@@ -52,7 +70,7 @@ class _SmallClubCardState extends State<SmallClubCard> {
               children: [
                 Column(
                   children: [
-                    FutureBuilder<ImageProvider>(
+                    FutureBuilder<ImageProvider?>(
                       future: _imageFuture,
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.done &&
@@ -96,7 +114,6 @@ class _SmallClubCardState extends State<SmallClubCard> {
                   ],
                 ),
                 LikeButton(
-                  onRemove: widget.onRemove,
                   club: widget.club,
                 ),
               ],
@@ -112,17 +129,15 @@ class BigClubCard extends StatefulWidget {
   const BigClubCard({
     super.key,
     required this.club,
-    this.onRemove,
   });
   final ClubInfoStruct club;
-  final VoidCallback? onRemove;
 
   @override
   State<BigClubCard> createState() => _BigClubCardState();
 }
 
 class _BigClubCardState extends State<BigClubCard> {
-  late Future<ImageProvider> _imageFuture;
+  late Future<ImageProvider?> _imageFuture;
 
   @override
   void initState() {
@@ -132,10 +147,21 @@ class _BigClubCardState extends State<BigClubCard> {
 
   void _loadImage() {
     setState(() {
-//TODO loadClubPhoto used here
-
-      _imageFuture = loadClubPhoto(widget.club.clubID, widget.club.clubPhoto);
+      // Load club photo from the file system
+      _imageFuture = _loadImageFromFile(widget.club.clubID);
     });
+  }
+
+  Future<ImageProvider?> _loadImageFromFile(int clubID) async {
+    Uint8List? imageBytes =
+        await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
+
+    if (imageBytes != null) {
+      return MemoryImage(imageBytes);
+    } else {
+      // Return a default image or null if the image is not found
+      return const AssetImage('assets/images/default_club_image.png');
+    }
   }
 
   List<bool> _daysOpen(String availabilityInBytes) {
@@ -171,7 +197,7 @@ class _BigClubCardState extends State<BigClubCard> {
                         borderRadius: const BorderRadius.all(
                           Radius.circular(4),
                         ),
-                        child: FutureBuilder<ImageProvider>(
+                        child: FutureBuilder<ImageProvider?>(
                           future: _imageFuture,
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
@@ -198,7 +224,6 @@ class _BigClubCardState extends State<BigClubCard> {
                       Container(
                         alignment: Alignment.topLeft,
                         child: LikeButton(
-                          onRemove: widget.onRemove,
                           club: widget.club,
                         ),
                       ),

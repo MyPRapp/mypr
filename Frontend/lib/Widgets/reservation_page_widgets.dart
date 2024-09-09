@@ -397,6 +397,12 @@ class NameTextFieldState extends State<NameTextField> {
   void _updateReservationProvider() {
     // Update the provider with the formatted name when the focus is lost
     String formattedName = formatName(nameController.text);
+
+    if (formattedName.isEmpty) {
+      final userDetails = context.read<UserProvider>().userDetails;
+      formattedName =
+          '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+    }
     reservationProvider.setInfo(1, formattedName);
     nameController.text = formattedName;
   }

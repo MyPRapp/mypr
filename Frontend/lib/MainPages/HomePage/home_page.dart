@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-        backgroundColor: const Color(0xFF000000),
+        backgroundColor: Colors.black,
         body: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return Stack(
