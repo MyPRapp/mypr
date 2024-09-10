@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img; // For image compression
 
 import '../../global_components.dart';
 import '../club_provider_helpers/club_manager.dart';
@@ -29,42 +30,52 @@ class ClubFetcher {
         for (var item in data) {
           final club = ClubInfoStruct.fromJson(item);
           if (club.clubID >= 0) {
-            // Download club photo and save it to the device directory
-            Uint8List? photoBytes = await downloadClubPhoto(club.clubPhoto);
+            // Fetch and compress club photo, save it locally
+            Uint8List? photoBytes =
+                await downloadAndCompressImage(club.clubPhoto, 512);
             if (photoBytes != null) {
-              await _clubSaver.saveClubPhotoToFile(club.clubID, photoBytes);
+              await _clubSaver.saveClubPhotoToFile(
+                  club.clubID, photoBytes); // Save photo locally
             }
 
-            fetchCatalogues(club);
-
-            // Add or update club in the manager
-            _clubManager.addOrUpdateClub(club);
+            await fetchCatalogues(club); // Fetch catalogues for the club
+            _clubManager.addOrUpdateClub(club); // Save club details
           }
         }
 
-        // Save clubs and catalogues to file (excluding photos)
+        // Save fetched clubs and catalogues locally for offline use
         await _clubSaver.saveClubsToFile();
         await _clubSaver.saveCataloguesToFile();
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error fetching clubs: $e');
-      rethrow;
+      print('Error fetching clubs from server, loading from local storage: $e');
+      throw Exception('Failed to load clubs');
     }
   }
 
-  // Download club photo as Uint8List
-  Future<Uint8List?> downloadClubPhoto(String imageUrl) async {
+  // Download and compress the image, then return as Uint8List
+  Future<Uint8List?> downloadAndCompressImage(
+      String imageUrl, int targetWidth) async {
     try {
       final response = await http.get(Uri.parse(imageUrl));
       if (response.statusCode == 200) {
-        return response.bodyBytes; // Return photo as binary data
+        Uint8List imageBytes = response.bodyBytes;
+
+        // Use the image package to compress the image
+        img.Image? image = img.decodeImage(imageBytes);
+        if (image == null) return null;
+
+        img.Image resizedImage =
+            img.copyResize(image, width: targetWidth); // Resize image
+        return Uint8List.fromList(
+            img.encodeJpg(resizedImage, quality: 85)); // Compress to JPEG
       } else {
         throw Exception('Failed to load image: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error downloading club photo: $e');
+      print('Error downloading or compressing image: $e');
       return null;
     }
   }
@@ -99,8 +110,7 @@ class ClubFetcher {
         throw Exception('Failed to load catalogues: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error fetching catalogues for ${club.clubName}: $e');
-      rethrow;
+      print('Error fetching catalogues, loading from local storage: $e');
     }
   }
 
@@ -113,7 +123,6 @@ class ClubFetcher {
     print('Fetching club with ID $clubID from server');
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
-
     try {
       final response =
           await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
@@ -146,8 +155,22 @@ class ClubFetcher {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error fetching club with ID $clubID: $e');
-      rethrow;
+      print('Error fetching club from server, loading from local storage: $e');
+    }
+  }
+
+  // Download club photo as Uint8List
+  Future<Uint8List?> downloadClubPhoto(String imageUrl) async {
+    try {
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode == 200) {
+        return response.bodyBytes; // Return photo as binary data
+      } else {
+        throw Exception('Failed to load image: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error downloading club photo, loading from local storage: $e');
+      return null;
     }
   }
 }

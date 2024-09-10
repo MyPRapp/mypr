@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 
 import '../../Providers/booking_provider.dart'; // Import the BookingProvider
 import '../../Providers/user_provider.dart';
-import '../../global_components.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -53,87 +52,92 @@ class _ProfilePageState extends State<ProfilePage> {
           backgroundColor: Colors.black,
           body: userDetails == null
               ? const Center(child: CircularProgressIndicator())
-              : Container(
-                  color: const Color.fromARGB(197, 40, 40, 40),
-                  height: screenHeight,
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 70,
-                        width: screenWidth,
-                        child: const Image(
-                          image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
-                          fit: BoxFit.fitWidth,
-                          alignment: Alignment(0, -0.3),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.only(top: 35),
-                        child: SizedBox(
-                          height: 130,
-                          width: 130,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(300),
-                            child: _buildProfileImage(userDetails.photo),
+              : SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Container(
+                    color: const Color.fromARGB(197, 40, 40, 40),
+                    height: screenHeight,
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 70,
+                          width: screenWidth,
+                          child: const Image(
+                            image:
+                                AssetImage('assets/otherPhotos/IMG_0041.jpg'),
+                            fit: BoxFit.fitWidth,
+                            alignment: Alignment(0, -0.3),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Text(
-                          '${userDetails.firstName} ${userDetails.lastName}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            color: Colors.grey,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsets.only(top: 25),
-                        child: Divider(
-                          height: 60,
-                          color: Color.fromARGB(255, 65, 65, 65),
-                          thickness: 10,
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          profileOptions(
-                            'Επεξεργασία Προφίλ',
-                            const ImageIcon(
-                                AssetImage("assets/icons/settings_icon.png"),
-                                color: Colors.grey),
-                            const CustomizeProfileRoute(),
-                          ),
-                          profileOptions(
-                            'Οι κρατήσεις μου',
-                            const ImageIcon(
-                              AssetImage("assets/icons/book_icon.png"),
-                              color: Colors.grey,
+                        Container(
+                          padding: const EdgeInsets.only(top: 35),
+                          child: SizedBox(
+                            height: 130,
+                            width: 130,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(300),
+                              child: _buildProfileImage(userDetails.photo),
                             ),
-                            const MyBookingsRoute(),
                           ),
-                          profileOptions(
-                            'Αγαπημένα',
-                            const ImageIcon(
-                              AssetImage("assets/icons/heart(liked)_icon.png"),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Text(
+                            '${userDetails.firstName} ${userDetails.lastName}',
+                            style: const TextStyle(
+                              fontSize: 20,
                               color: Colors.grey,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const FavoritesRoute(),
+                            textAlign: TextAlign.center,
                           ),
-                          profileOptions(
-                            'Επικοινώνησε μαζί μας',
-                            const ImageIcon(
-                              AssetImage("assets/icons/support_icon.png"),
-                              color: Colors.grey,
+                        ),
+                        const Padding(
+                          padding: EdgeInsets.only(top: 25),
+                          child: Divider(
+                            height: 60,
+                            color: Color.fromARGB(255, 65, 65, 65),
+                            thickness: 10,
+                          ),
+                        ),
+                        Column(
+                          children: [
+                            profileOptions(
+                              'Επεξεργασία Προφίλ',
+                              const ImageIcon(
+                                  AssetImage("assets/icons/settings_icon.png"),
+                                  color: Colors.grey),
+                              const CustomizeProfileRoute(),
                             ),
-                            const ContactUsRoute(),
-                          ),
-                        ],
-                      ),
-                    ],
+                            profileOptions(
+                              'Οι κρατήσεις μου',
+                              const ImageIcon(
+                                AssetImage("assets/icons/book_icon.png"),
+                                color: Colors.grey,
+                              ),
+                              const MyBookingsRoute(),
+                            ),
+                            profileOptions(
+                              'Αγαπημένα',
+                              const ImageIcon(
+                                AssetImage(
+                                    "assets/icons/heart(liked)_icon.png"),
+                                color: Colors.grey,
+                              ),
+                              const FavoritesRoute(),
+                            ),
+                            profileOptions(
+                              'Επικοινώνησε μαζί μας',
+                              const ImageIcon(
+                                AssetImage("assets/icons/support_icon.png"),
+                                color: Colors.grey,
+                              ),
+                              const ContactUsRoute(),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
         ),
@@ -154,11 +158,9 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       );
     } else {
-//TODO loadUserPhoto used here
-
       // Attempt to load the photo; show a loading indicator if the result is null
       return FutureBuilder<ImageProvider?>(
-        future: loadUserPhoto(photoPath),
+        future: context.read<UserProvider>().loadUserPhoto(photoPath),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasData && snapshot.data != null) {

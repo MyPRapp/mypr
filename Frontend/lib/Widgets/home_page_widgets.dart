@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/club_provider.dart';
@@ -32,21 +30,10 @@ class _SmallClubCardState extends State<SmallClubCard> {
 
   void _loadImage() {
     setState(() {
-      // Load club photo from file system instead of network
-      _imageFuture = _loadImageFromFile(widget.club.clubID);
+      // Load club photo from network first, then fallback to local storage if needed
+      _imageFuture = context.read<ClubProvider>().loadImageFromFileOrNetwork(
+          widget.club.clubID, widget.club.clubPhoto);
     });
-  }
-
-  Future<ImageProvider?> _loadImageFromFile(int clubID) async {
-    Uint8List? imageBytes =
-        await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
-
-    if (imageBytes != null) {
-      return MemoryImage(imageBytes);
-    } else {
-      // Return a default image or null if the image is not found
-      return const AssetImage('assets/images/default_club_image.png');
-    }
   }
 
   @override
@@ -147,21 +134,10 @@ class _BigClubCardState extends State<BigClubCard> {
 
   void _loadImage() {
     setState(() {
-      // Load club photo from the file system
-      _imageFuture = _loadImageFromFile(widget.club.clubID);
+      // Load club photo from the network first, fallback to local storage
+      _imageFuture = context.read<ClubProvider>().loadImageFromFileOrNetwork(
+          widget.club.clubID, widget.club.clubPhoto);
     });
-  }
-
-  Future<ImageProvider?> _loadImageFromFile(int clubID) async {
-    Uint8List? imageBytes =
-        await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
-
-    if (imageBytes != null) {
-      return MemoryImage(imageBytes);
-    } else {
-      // Return a default image or null if the image is not found
-      return const AssetImage('assets/images/default_club_image.png');
-    }
   }
 
   List<bool> _daysOpen(String availabilityInBytes) {

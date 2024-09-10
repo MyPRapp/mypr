@@ -22,7 +22,7 @@ class ClubSaver {
     String filePath = await _getFilePath('clubs');
     File file = File(filePath);
 
-    // Convert clubs to JSON and save them to a file
+    // Save club data as JSON in local storage
     String jsonClubs = jsonEncode(_clubs.map((club) => club.toJson()).toList());
     await file.writeAsString(jsonClubs);
     print('Clubs saved to $filePath');
@@ -32,7 +32,7 @@ class ClubSaver {
     String filePath = await _getFilePath('catalogues');
     File file = File(filePath);
 
-    // Convert catalogues to JSON and save them to a file
+    // Save catalogue data as JSON in local storage
     String jsonCatalogues =
         jsonEncode(_catalogues.map((catalogue) => catalogue.toJson()).toList());
     await file.writeAsString(jsonCatalogues);
@@ -44,7 +44,7 @@ class ClubSaver {
     final filePath = '${directory.path}/club_photo_$clubID.png';
 
     File file = File(filePath);
-    await file.writeAsBytes(photoBytes);
+    await file.writeAsBytes(photoBytes); // Save photo as binary data
     print('Photo for club ID $clubID saved at $filePath');
   }
 

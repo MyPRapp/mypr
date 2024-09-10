@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../global_components.dart';
 import 'club_provider_helpers/club_fetcher.dart';
@@ -38,16 +40,33 @@ class ClubProvider with ChangeNotifier {
     try {
       await _clubFetcher.fetchClubsAndCatalogues(); // Fetch from server
     } catch (e) {
-      // Load from device's directory in case of failure
+      // Load from local files if fetch fails (offline mode)
+      final directory = await getApplicationDocumentsDirectory();
+      print("Directory path: ${directory.path}");
+
       await _clubLoader.loadClubsFromFile();
       await _clubLoader.loadCataloguesFromFile();
     }
-
-    // Load liked clubs from SharedPreferences
-    await _clubLoader.loadLikedClubsFromPreferences();
-
-    // Notify listeners of data changes
+    await _clubLoader.loadLikedClubsFromPreferences(); // Load liked clubs
     notifyListeners();
+  }
+
+  // Loading club photo with offline-first approach
+  Future<ImageProvider?> loadImageFromFileOrNetwork(
+      int clubID, String clubPhotoUrl) async {
+    Uint8List? imageBytes = await loadClubPhotoFromFile(clubID);
+
+    if (imageBytes != null) {
+      return MemoryImage(imageBytes); // Load image from local storage
+    } else {
+      try {
+        // Try fetching from the network (if online)
+        return CachedNetworkImageProvider(clubPhotoUrl);
+      } catch (e) {
+        // If no internet, return a default placeholder
+        return const AssetImage('assets/images/default_club_image.png');
+      }
+    }
   }
 
   //// Fetch From Server Functions

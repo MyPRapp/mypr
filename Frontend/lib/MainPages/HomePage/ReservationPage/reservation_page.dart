@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -101,9 +99,10 @@ class _ReservationPageState extends State<ReservationPage> {
 
     // Set the user's name in the form if available
     if (userDetails != null && reservationProvider.getInfo(1).isEmpty) {
-      String initialName = '${userDetails.firstName} ${userDetails.lastName}';
-      reservationProvider.setInfo(1, formatName(initialName));
-      nameTextFieldKey.currentState?.setNameText(formatName(initialName));
+      String initialName =
+          formatName('${userDetails.firstName} ${userDetails.lastName}');
+      reservationProvider.setInfo(1, initialName);
+      nameTextFieldKey.currentState?.setNameText(initialName);
     }
   }
 
@@ -165,6 +164,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
+    print('aa');
     final clubProvider = context.read<ClubProvider>();
 
     try {
@@ -172,19 +172,28 @@ class _ReservationPageState extends State<ReservationPage> {
       await clubProvider.fetchCatalogues(widget.club);
       final catalogues = clubProvider.getAllCatalogues(widget.club.clubID);
 
-      if (mounted) {
-        setState(() {
-          regularCatalogue = catalogues[0];
-          specialCatalogue = catalogues[1];
-          premiumCatalogue = catalogues[2];
-          updateMaxPersons();
-          calculatePrice();
-        });
+      if (regularCatalogue.maxPersons != catalogues[0].maxPersons ||
+          regularCatalogue.price != catalogues[0].price ||
+          specialCatalogue.maxPersons != catalogues[1].maxPersons ||
+          specialCatalogue.price != catalogues[1].price ||
+          premiumCatalogue.maxPersons != catalogues[2].maxPersons ||
+          premiumCatalogue.price != catalogues[2].price) {
+        _updateCatalogues(catalogues);
       }
     } catch (error) {
       // Log error without additional snack bars
       print("Failed to refresh catalogues: $error");
     }
+  }
+
+  void _updateCatalogues(List<CatalogueInfoStruct> catalogues) {
+    setState(() {
+      regularCatalogue = catalogues[0];
+      specialCatalogue = catalogues[1];
+      premiumCatalogue = catalogues[2];
+      updateMaxPersons();
+      calculatePrice();
+    });
   }
 
   @override
@@ -302,38 +311,33 @@ class _ReservationPageState extends State<ReservationPage> {
           width: 520,
           height: 350,
           child: FutureBuilder<ImageProvider?>(
-            future: _loadImageFromFile(widget.club.clubID),
+            // Use the loadImageFromFileOrNetwork method from ClubProvider
+            future: context.read<ClubProvider>().loadImageFromFileOrNetwork(
+                  widget.club.clubID,
+                  widget.club.clubPhoto,
+                ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
+                  // Display the loaded image (either from the network or local storage)
                   return Image(image: snapshot.data!, fit: BoxFit.fill);
                 } else if (snapshot.hasError || !snapshot.hasData) {
+                  // Display a fallback image if there's an error or no data
                   return const Image(
                     image: AssetImage('assets/images/default_club_image.png'),
                     fit: BoxFit.fill,
                   );
                 }
               }
+              // Show a loading spinner while the image is being loaded
               return const Center(
-                child: CircularProgressIndicator(), // Show a loading spinner
+                child: CircularProgressIndicator(),
               );
             },
           ),
         ),
       ),
     );
-  }
-
-  Future<ImageProvider?> _loadImageFromFile(int clubID) async {
-    Uint8List? imageBytes =
-        await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
-
-    if (imageBytes != null) {
-      return MemoryImage(imageBytes);
-    } else {
-      // Return null to indicate no image found, so the FutureBuilder can handle the fallback
-      return const AssetImage('assets/images/default_club_image.png');
-    }
   }
 
   /// Builds a section title.
@@ -625,7 +629,7 @@ class _ReservationPageState extends State<ReservationPage> {
                       'Ακύρωση',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                       ),
                     ),
                   ),
@@ -641,7 +645,7 @@ class _ReservationPageState extends State<ReservationPage> {
                       'Επιβεβαίωση',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                       ),
                     ),
                   ),

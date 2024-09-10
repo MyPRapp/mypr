@@ -112,7 +112,7 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('user_details');
 
     //TODO 'user_photo' from preferences removed here
-    await prefs.remove('user_photo');
+    await prefs.remove('user_photo_path');
 
     // Remove booking-related preferences
     await prefs.remove('bookings');
@@ -125,6 +125,8 @@ class _SignUpPageState extends State<SignUpPage> {
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
+
+      _startSyncingClubs();
 
       // Check if the widget is still mounted before proceeding
       if (mounted) {
@@ -142,6 +144,7 @@ class _SignUpPageState extends State<SignUpPage> {
       }
 
       if (mounted) {
+        context.read<BottomNavBarVisibility>().show();
         await context.router.replaceAll([const BottomNavBarRoute()]);
       }
     } catch (e) {
@@ -152,6 +155,12 @@ class _SignUpPageState extends State<SignUpPage> {
         _isRegistering = false; // Re-enable the register button
       });
     }
+  }
+
+  Future<void> _startSyncingClubs() async {
+    print('//////SYNCING CLUBS');
+    await context.read<ClubProvider>().syncClubs();
+    print('//////SYNCED CLUBS');
   }
 
   void _showSnackBar(String message) {

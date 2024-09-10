@@ -797,6 +797,14 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
     return widget.days[dayIndex] == '1';
   }
 
+  DateTime _findNextOpenDay(DateTime date) {
+    // Ensure the initial date is an open day
+    while (!_isDayOpen(date)) {
+      date = date.add(const Duration(days: 1));
+    }
+    return date;
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -804,12 +812,15 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
         final now = DateTime.now();
         final lastDate = now.add(const Duration(days: 30));
 
+        // Find the next open day if today is closed
+        final initialDate = _selectedDate ?? _findNextOpenDay(now);
+
         DateTime? pickedDate = await showDatePicker(
           context: context,
-          initialDate: _selectedDate ?? now,
+          initialDate: initialDate,
           firstDate: now,
           lastDate: lastDate,
-          selectableDayPredicate: _isDayOpen,
+          selectableDayPredicate: _isDayOpen, // Only allow open days
           locale: const Locale('el', 'GR'), // Set the locale to Greek
           builder: (BuildContext context, Widget? child) {
             return Theme(
@@ -837,11 +848,12 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
             _selectedDate = pickedDate;
           });
 
-          if (!mounted) return;
-          // ignore: use_build_context_synchronously
-          context
-              .read<ReservationProvider>()
-              .setInfo(8, _selectedDate.toString());
+          if (context.mounted) {
+            // Update the selected date in the ReservationProvider
+            context
+                .read<ReservationProvider>()
+                .setInfo(8, _selectedDate.toString());
+          }
         }
       },
       child: InputDecorator(

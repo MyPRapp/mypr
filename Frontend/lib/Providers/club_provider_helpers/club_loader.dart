@@ -49,27 +49,7 @@ class ClubLoader {
           .map((json) => CatalogueInfoStruct.fromJson(json))
           .toList());
 
-      // Update each club with 'Regular' service type values
-      for (var club in _clubs) {
-        final regularCatalogue = _catalogues.firstWhere(
-          (catalogue) =>
-              catalogue.clubID == club.clubID &&
-              catalogue.serviceType == 'Regular',
-          orElse: () => CatalogueInfoStruct(
-            clubID: club.clubID,
-            serviceType: 'Regular',
-            price: '0', // default value in case no 'Regular' catalogue exists
-            maxPersons: 0,
-          ),
-        );
-
-        // Update the club's min price and max persons based on the 'Regular' catalogue
-        club.clubMinPrice =
-            (double.tryParse(regularCatalogue.price) ?? 0).toInt();
-        club.clubMaxPersons = regularCatalogue.maxPersons;
-      }
-
-      print('Catalogues loaded from $filePath and clubs updated.');
+      print('Catalogues loaded from $filePath');
     } else {
       print('Catalogues file does not exist');
     }
@@ -85,7 +65,7 @@ class ClubLoader {
       return await file.readAsBytes();
     } else {
       print('Photo for club ID $clubID not found');
-      return null; // You can return a default image in this case
+      return null;
     }
   }
 

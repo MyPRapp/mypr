@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
-import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +16,43 @@ class CustomizeProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userDetails = context.watch<UserProvider>().userDetails;
+
+    /// Builds the profile image widget based on whether the photo path is valid.
+    Widget buildProfileImage(String? photoPath) {
+      if (photoPath == null || photoPath.trim().isEmpty) {
+        // Show the red person icon immediately if photoPath is empty or null
+        return Container(
+          color: const Color(0xFF9C0C04),
+          child: const Icon(
+            Icons.person,
+            color: Colors.black,
+            size: 100,
+          ),
+        );
+      } else {
+        // Attempt to load the photo; show a loading indicator if the result is null
+        return FutureBuilder<ImageProvider?>(
+          future: context.read<UserProvider>().loadUserPhoto(photoPath),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              if (snapshot.hasData && snapshot.data != null) {
+                return Image(
+                  image: snapshot.data!,
+                  fit: BoxFit.cover,
+                );
+              } else {
+                // If the photo couldn't be loaded, show a loading indicator
+                return const CircularProgressIndicator();
+              }
+            } else {
+              // Show a loading indicator while the photo is being loaded
+              return const CircularProgressIndicator();
+            }
+          },
+        );
+      }
+    }
+
     void signOut(BuildContext context) async {
       try {
         print('Signing out...');
@@ -128,7 +164,7 @@ class CustomizeProfilePage extends StatelessWidget {
                                 width: 130,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(300),
-                                  child: _buildProfileImage(userDetails.photo),
+                                  child: buildProfileImage(userDetails.photo),
                                 ),
                               ),
                             ),
@@ -269,43 +305,5 @@ class CustomizeProfilePage extends StatelessWidget {
               ],
             ),
     );
-  }
-
-  /// Builds the profile image widget based on whether the photo path is valid.
-  Widget _buildProfileImage(String? photoPath) {
-    if (photoPath == null || photoPath.trim().isEmpty) {
-      // Show the red person icon immediately if photoPath is empty or null
-      return Container(
-        color: const Color(0xFF9C0C04),
-        child: const Icon(
-          Icons.person,
-          color: Colors.black,
-          size: 100,
-        ),
-      );
-    } else {
-      //TODO loadUserPhoto used here
-
-      // Attempt to load the photo; show a loading indicator if the result is null
-      return FutureBuilder<ImageProvider?>(
-        future: loadUserPhoto(photoPath),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData && snapshot.data != null) {
-              return Image(
-                image: snapshot.data!,
-                fit: BoxFit.cover,
-              );
-            } else {
-              // If the photo couldn't be loaded, show a loading indicator
-              return const CircularProgressIndicator();
-            }
-          } else {
-            // Show a loading indicator while the photo is being loaded
-            return const CircularProgressIndicator();
-          }
-        },
-      );
-    }
   }
 }

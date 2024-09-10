@@ -1,8 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image/image.dart' as img; // For image compression
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../global_components.dart';
@@ -10,100 +15,143 @@ import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
   UserInfoStruct? _userDetails;
+  bool _isFetching = false;
 
   UserInfoStruct? get userDetails => _userDetails;
+  bool get isFetching => _isFetching;
 
-  // Save user details including the photo to shared preferences
-  Future<void> saveUserDetailsToPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (_userDetails != null) {
-      // Save user details
-      await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
-      print('User details saved to preferences: ${_userDetails!.toJson()}');
-
-//TODO imageToBase64 used here
-
-      // Fetch and save the user's photo as a base64 string if it exists
-      if (_userDetails!.photo.isNotEmpty) {
-        String base64Photo = await imageToBase64(
-            'http://${GlobalStateProvider().validatedIp}:8000/${_userDetails!.photo}');
-        if (base64Photo.isNotEmpty) {
-          await prefs.setString('user_photo', base64Photo);
-          print('User photo saved to preferences as base64');
-        } else {
-          debugPrint('User photo could not be saved as base64');
-        }
-      }
-    } else {
-      print('No user details to save');
-    }
-  }
-
-//TODO 'user_photo' from preferences used here
-
-// Load user details including the photo from shared preferences
-  Future<bool> loadUserDetailsFromPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userDetailsString = prefs.getString('user_details');
-    String? userPhotoBase64 = prefs.getString('user_photo');
-
-    if (userDetailsString != null) {
-      _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
-      print('User details loaded from preferences: $_userDetails');
-
-      // If a photo is saved, convert it back from base64 and assign it to the user details
-      if (userPhotoBase64 != null && _userDetails != null) {
-        _userDetails!.photo = userPhotoBase64;
-        print('User photo loaded from preferences');
-      }
-      notifyListeners();
-      return true; // Successfully loaded user details
-    } else {
-      print('No user details found in preferences');
-      return false; // No user details found in preferences
-    }
-  }
-
-  // Fetch user details from the server and save them to shared preferences
+  // Fetch user details from the server, save to shared preferences, and notify listeners
   Future<void> fetchUserDetailsFromServer() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('access_token');
 
-    if (token != null) {
-      try {
-        print('Fetching user details from server...');
-
-        final response = await http.get(
-          Uri.parse(
-              'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
-          headers: {'Authorization': 'Bearer $token'},
-        ).timeout(const Duration(seconds: 5)); // Add a 5-second timeout
-
-        if (response.statusCode == 200) {
-          final decodedBody = utf8.decode(response.bodyBytes);
-          _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
-
-          // Save user details and photo to shared preferences
-          await saveUserDetailsToPreferences();
-          print('User details fetched and saved');
-          notifyListeners();
-        } else {
-          print(
-              'Failed to load user details from server: ${response.statusCode}');
-          throw Exception('Failed to load user details');
-        }
-      } on TimeoutException catch (e) {
-        print('Request to server timed out: $e');
-        await loadUserDetailsFromPreferences();
-        throw Exception('Request timed out, using saved preferences');
-      } catch (e) {
-        print('Server unreachable, falling back to saved preferences: $e');
-        await loadUserDetailsFromPreferences();
-        throw Exception('Server unreachable, using saved preferences');
-      }
-    } else {
-      print('No access token found');
+    if (token == null) {
       throw Exception('No access token found');
     }
+
+    try {
+      _isFetching = true;
+      notifyListeners();
+
+      final response = await http.get(
+        Uri.parse(
+            'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
+        headers: {'Authorization': 'Bearer $token'},
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        final decodedBody = utf8.decode(response.bodyBytes);
+        _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
+
+        // Save user details and photo asynchronously
+        await Future.wait([saveUserDetailsToPreferences(), _cacheUserPhoto()]);
+
+        notifyListeners();
+      } else {
+        throw Exception('Failed to load user details');
+      }
+    } on TimeoutException catch (_) {
+      // Fallback to cached data on timeout
+      await loadUserDetailsFromPreferences();
+      throw Exception('Request timed out, using cached data');
+    } catch (e) {
+      await loadUserDetailsFromPreferences();
+      throw Exception('Server unreachable, using cached data');
+    } finally {
+      _isFetching = false;
+      notifyListeners();
+    }
+  }
+
+  // Save user details and photo to shared preferences
+  Future<void> saveUserDetailsToPreferences() async {
+    if (_userDetails == null) return;
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
+  }
+
+  // Load user details and photo from shared preferences
+  Future<void> loadUserDetailsFromPreferences() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userDetailsString = prefs.getString('user_details');
+
+    if (userDetailsString != null) {
+      _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
+      await _loadCachedUserPhoto();
+      notifyListeners();
+    }
+  }
+
+  // Cache user photo for faster loading later
+  Future<void> _cacheUserPhoto() async {
+    if (_userDetails?.photo.isEmpty ?? true) return;
+
+    String photoUrl =
+        'http://${GlobalStateProvider().validatedIp}:8000/${_userDetails!.photo}';
+    try {
+      final photoFile = await _downloadAndCompressImage(photoUrl);
+      if (photoFile.isNotEmpty) {
+        final SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_photo_path', photoFile);
+      }
+    } catch (e) {
+      print('Error caching user photo: $e');
+    }
+  }
+
+  // Load cached user photo from local storage if available
+  Future<void> _loadCachedUserPhoto() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userPhotoPath = prefs.getString('user_photo_path');
+
+    if (userPhotoPath != null && _userDetails != null) {
+      File imageFile = File(userPhotoPath);
+      if (await imageFile.exists()) {
+        _userDetails!.photo = userPhotoPath;
+      }
+    }
+  }
+
+  // Download and compress the image, saving it to a file
+  Future<String> _downloadAndCompressImage(String imageUrl) async {
+    try {
+      final response = await http.get(Uri.parse(imageUrl));
+      if (response.statusCode != 200) return '';
+
+      Uint8List imageBytes = response.bodyBytes;
+      img.Image? image = img.decodeImage(imageBytes);
+      if (image == null) return '';
+
+      // Compress and resize the image
+      img.Image compressedImage = img.copyResize(image, width: 512);
+      List<int> jpegData = img.encodeJpg(compressedImage, quality: 85);
+
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = '${directory.path}/user_photo.jpg';
+      File file = File(filePath);
+      await file.writeAsBytes(jpegData);
+
+      return filePath;
+    } catch (e) {
+      print('Error downloading/compressing image: $e');
+      return '';
+    }
+  }
+
+  // Load user photo from the local cache or server if not available
+  Future<ImageProvider> loadUserPhoto(String photoPath) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedPhotoPath = prefs.getString('user_photo_path');
+
+    if (savedPhotoPath != null) {
+      File imageFile = File(savedPhotoPath);
+      if (await imageFile.exists()) {
+        return FileImage(imageFile);
+      }
+    }
+
+    return CachedNetworkImageProvider(
+        'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
   }
 }

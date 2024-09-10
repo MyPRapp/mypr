@@ -1,10 +1,5 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'package:mypr/Providers/global_state_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ClubInfoStruct {
   int clubID;
@@ -298,40 +293,6 @@ String formatName(String name) {
     }
     return word;
   }).join(' ');
-}
-
-Future<String> imageToBase64(String imageUrl) async {
-  try {
-    final response = await http.get(Uri.parse(imageUrl));
-    if (response.statusCode == 200) {
-      final bytes = response.bodyBytes;
-      return base64Encode(bytes);
-    } else {
-      throw Exception('Failed to load image: ${response.statusCode}');
-    }
-  } catch (e, stackTrace) {
-    print('Error in imageToBase64: $e');
-    print('StackTrace: $stackTrace'); // Log the stack trace
-    return ''; // Consider returning a default image or error code
-  }
-}
-
-Future<ImageProvider?> loadUserPhoto(String photoPath) async {
-  try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? base64Photo = prefs.getString('user_photo');
-    if (base64Photo != null) {
-      final Uint8List bytes = base64Decode(base64Photo);
-      return MemoryImage(bytes);
-    }
-
-    // Attempt to load from network
-    return NetworkImage(
-        'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
-  } catch (e) {
-    // Return null to indicate an error
-    return null;
-  }
 }
 
 TextStyle textStyle1() {

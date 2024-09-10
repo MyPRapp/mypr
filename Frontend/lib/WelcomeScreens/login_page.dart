@@ -124,6 +124,8 @@ class _LoginPageState extends State<LoginPage> {
           _passwordController.text.trim(),
         );
 
+        _startSyncingClubs();
+
         // Check if the widget is still mounted before proceeding
         if (mounted) {
           // Fetch user details from the server if login was successful
@@ -140,6 +142,7 @@ class _LoginPageState extends State<LoginPage> {
         }
 
         if (mounted) {
+          context.read<BottomNavBarVisibility>().show();
           await context.router.replaceAll([const BottomNavBarRoute()]);
         }
       } catch (e) {
