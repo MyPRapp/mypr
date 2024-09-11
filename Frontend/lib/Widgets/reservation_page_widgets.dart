@@ -397,7 +397,6 @@ class NameTextFieldState extends State<NameTextField> {
   void _updateReservationProvider() {
     // Update the provider with the formatted name when the focus is lost
     String formattedName = formatName(nameController.text);
-
     if (formattedName.isEmpty) {
       final userDetails = context.read<UserProvider>().userDetails;
       formattedName =
@@ -778,12 +777,11 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
 }
 
 class BookingDatePicker extends StatefulWidget {
-  const BookingDatePicker({
-    super.key,
-    required this.days,
-  });
+  const BookingDatePicker(
+      {super.key, required this.days, required this.unavailableDays});
 
   final String days;
+  final String unavailableDays;
 
   @override
   State<BookingDatePicker> createState() => _BookingDatePickerState();
@@ -794,12 +792,63 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
 
   bool _isDayOpen(DateTime date) {
     int dayIndex = date.weekday - 1; // Monday = 0, Sunday = 6
+
+    // Ensure that `days` has a valid value for each day (if not, consider it closed)
+    if (widget.days.isEmpty || dayIndex >= widget.days.length) {
+      return false; // If no info about the day, mark as unavailable
+    }
+
+    // Check if the day is open (represented as '1')
     return widget.days[dayIndex] == '1';
   }
 
+  bool _isDateUnavailable(DateTime date) {
+    // Clean the unavailableDays string by removing any extra characters (spaces, parentheses)
+    String cleanedUnavailableDays = widget.unavailableDays
+        .replaceAll(RegExp(r'[() ]'), '') // Remove parentheses and spaces
+        .replaceAll(' ', ''); // Ensure no stray spaces
+
+    // If there are no unavailable days, return false
+    if (cleanedUnavailableDays.isEmpty) {
+      return false;
+    }
+
+    // Split the cleaned string into pairs of "month,day"
+    List<String> unavailablePairs = cleanedUnavailableDays.split(',');
+
+    // Ensure we have pairs of month and day
+    if (unavailablePairs.length % 2 != 0) {
+      throw Exception(
+          'Invalid unavailableDays format: Each month must be paired with a day.');
+    }
+
+    // Iterate over pairs (every two values: month, day)
+    for (int i = 0; i < unavailablePairs.length; i += 2) {
+      try {
+        int unavailableDay = int.parse(unavailablePairs[i]);
+        int unavailableMonth = int.parse(unavailablePairs[i + 1]);
+
+        // If the date matches the unavailable day, return true
+        if (date.day == unavailableDay && date.month == unavailableMonth) {
+          return true;
+        }
+      } catch (e) {
+        throw Exception(
+            'Invalid unavailableDays data: Unable to parse month/day at index $i');
+      }
+    }
+
+    return false;
+  }
+
+  bool _isDaySelectable(DateTime date) {
+    // Check if the day is open and not marked as unavailable
+    return _isDayOpen(date) && !_isDateUnavailable(date);
+  }
+
   DateTime _findNextOpenDay(DateTime date) {
-    // Ensure the initial date is an open day
-    while (!_isDayOpen(date)) {
+    // Ensure the initial date is an open and available day
+    while (!_isDaySelectable(date)) {
       date = date.add(const Duration(days: 1));
     }
     return date;
@@ -809,10 +858,11 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
+        print(widget.unavailableDays);
         final now = DateTime.now();
         final lastDate = now.add(const Duration(days: 30));
 
-        // Find the next open day if today is closed
+        // Find the next open day if today is closed or unavailable
         final initialDate = _selectedDate ?? _findNextOpenDay(now);
 
         DateTime? pickedDate = await showDatePicker(
@@ -820,7 +870,8 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           initialDate: initialDate,
           firstDate: now,
           lastDate: lastDate,
-          selectableDayPredicate: _isDayOpen, // Only allow open days
+          selectableDayPredicate:
+              _isDaySelectable, // Only allow selectable days
           locale: const Locale('el', 'GR'), // Set the locale to Greek
           builder: (BuildContext context, Widget? child) {
             return Theme(

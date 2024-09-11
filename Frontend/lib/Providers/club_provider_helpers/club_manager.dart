@@ -64,14 +64,7 @@ class ClubManager with ChangeNotifier {
 
     // Initialize and update the CatalogueInfoStruct variables
     CatalogueInfoStruct regularCatalogue = getCatalogue(club, 'Regular');
-    CatalogueInfoStruct specialCatalogue = getCatalogue(club, 'Single');
-
-    //TODO delete the signle catalogue option
-    if ((double.parse(specialCatalogue.price)).toInt() <=
-        (double.parse(regularCatalogue.price)).toInt()) {
-      specialCatalogue = getCatalogue(club, 'Special');
-    }
-
+    CatalogueInfoStruct specialCatalogue = getCatalogue(club, 'Special');
     CatalogueInfoStruct premiumCatalogue = getCatalogue(club, 'Premium');
 
     return [regularCatalogue, specialCatalogue, premiumCatalogue];

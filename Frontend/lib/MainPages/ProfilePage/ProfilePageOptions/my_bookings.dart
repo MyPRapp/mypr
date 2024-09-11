@@ -59,7 +59,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
                 children: [
                   IconButton(
                     onPressed: () {
-                      context.read<BottomNavBarVisibility>().show();
                       Navigator.pop(context);
                     },
                     icon: const Icon(

@@ -47,7 +47,6 @@ class BookingService {
           'comments': comments,
         }),
       )
-          //TODO change database and or jsonEncode to send correctly reservation name and comments to db
           .timeout(const Duration(seconds: 8), onTimeout: () {
         print("Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout

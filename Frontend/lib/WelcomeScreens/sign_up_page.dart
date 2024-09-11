@@ -57,8 +57,6 @@ class _SignUpPageState extends State<SignUpPage> {
         _isRegistering = true;
       });
 
-      //TODO Remove username from register
-
       String firstName = _firstNameController.text.trim();
       String lastName = _lastNameController.text.trim();
       String username = "$firstName$lastName";
@@ -111,7 +109,6 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('saved_password');
     await prefs.remove('user_details');
 
-    //TODO 'user_photo' from preferences removed here
     await prefs.remove('user_photo_path');
 
     // Remove booking-related preferences

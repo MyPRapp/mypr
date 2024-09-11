@@ -388,8 +388,8 @@ class _ReservationPageState extends State<ReservationPage> {
         SizedBox(
           height: 70,
           child: BookingDatePicker(
-            days: widget.club.clubAvailability,
-          ),
+              days: widget.club.clubAvailability,
+              unavailableDays: widget.club.clubNotAvailable),
         ),
         const SizedBox(height: 25),
         CategoriesTextField(

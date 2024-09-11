@@ -20,9 +20,10 @@ class ClubFetcher {
     print('Fetching clubs from server');
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
+
     try {
       final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final List<dynamic> data = jsonDecode(decodedBody);

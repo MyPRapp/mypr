@@ -204,7 +204,6 @@ class _LoginPageState extends State<LoginPage> {
     if (_isLoading) {
       return Scaffold(
         body: Container(
-          height: screenHeight,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [Colors.black, Color(0xFF9C0C04)],
@@ -222,286 +221,289 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     return Scaffold(
-      body: Container(
-        height: screenHeight,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.black, Color(0xFF9C0C04)],
-            begin: Alignment.center,
-            end: Alignment.bottomCenter,
+      body: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.black, Color(0xFF9C0C04)],
+              begin: Alignment.center,
+              end: Alignment.bottomCenter,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: 70,
-              width: screenWidth,
-              child: const Image(
-                image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
-                fit: BoxFit.fitWidth,
-                alignment: Alignment(0, -0.3),
-              ),
-            ),
-            const SizedBox(height: 25),
-            const Image(
-              image: AssetImage(
-                  'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
-            ),
-            Container(
-              width: screenWidth - 50,
-              height: screenHeight / 2.5,
-              padding: const EdgeInsets.all(2), // Add padding for the border
-              decoration: BoxDecoration(
-                border: Border.all(
-                    color: const Color(0xFF9C0C04),
-                    width: 4), // Circular red border
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 30, top: 5),
-                      child: Text(
-                        'Είσοδος στην εφαρμογή',
-                        style: TextStyle(
-                          color: Color(0xFF9C0C04),
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    Column(
-                      children: [
-                        TextField(
-                          readOnly: _isLoginPressed,
-                          controller: _emailController,
-                          inputFormatters: [NoEmojisTextInputFormatter()],
-                          keyboardType: TextInputType.emailAddress,
-                          autofillHints: const [AutofillHints.email],
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                          decoration: const InputDecoration(
-                            hintText: 'Email/Τηλέφωνο(+30)',
-                            hintStyle: TextStyle(
-                              color: Color.fromARGB(132, 156, 12, 4),
-                            ),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                        const Divider(
-                          height: 10,
-                          color: Color.fromARGB(204, 156, 12, 4),
-                          thickness: 7,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: TextField(
-                                readOnly: _isLoginPressed,
-                                controller: _passwordController,
-                                obscureText: _obscureText,
-                                keyboardType: TextInputType.text,
-                                autofillHints: const [AutofillHints.password],
-                                inputFormatters: [NoEmojisTextInputFormatter()],
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                decoration: const InputDecoration(
-                                  hintText: 'Κωδικός',
-                                  hintStyle: TextStyle(
-                                    color: Color.fromARGB(132, 156, 12, 4),
-                                  ),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: _togglePasswordVisibility,
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility_off
-                                    : Icons.visibility,
-                                color: const Color(0xFF9C0C04),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Ξέχασες τον κωδικό;',
-                              style: TextStyle(
-                                color: Color(0xFF9C0C04),
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                if (!_isLoginPressed) {
-                                  floatingSnackBar(
-                                      message:
-                                          'Στάλθηκε email για επαναφορά κωδικού',
-                                      context: context,
-                                      duration:
-                                          const Duration(milliseconds: 1500));
-                                }
-                              },
-                              child: const Text(
-                                'Επαναφορά κωδικού',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 10),
-                          child: TextButton(
-                            onPressed: () {
-                              if (!_isLoginPressed) {
-                                context.router
-                                    .replaceAll([const SignUpRoute()]);
-                              }
-                            },
-                            child: const Text(
-                              'Δημιουργία λογαριασμού',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(
+                height: 70,
+                width: screenWidth,
+                child: const Image(
+                  image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
+                  fit: BoxFit.fitWidth,
+                  alignment: Alignment(0, -0.3),
                 ),
               ),
-            ),
-            const SizedBox(height: 50),
-            Column(
-              children: [
-                _isLoginPressed
-                    ? const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFF9C0C04)), // Red color indicator
-                      )
-                    : ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: const BorderSide(color: Color(0xFF9C0C04)),
-                          ),
-                          backgroundColor: const Color.fromARGB(139, 0, 0, 0),
-                        ),
-                        onPressed: _login,
-                        child: const Text(
-                          'Είσοδος',
+              const SizedBox(height: 25),
+              const Image(
+                image: AssetImage(
+                    'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
+              ),
+              Container(
+                width: screenWidth - 50,
+                height: screenHeight / 2.5,
+                padding: const EdgeInsets.all(2), // Add padding for the border
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: const Color(0xFF9C0C04),
+                      width: 4), // Circular red border
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 30, top: 5),
+                        child: Text(
+                          'Είσοδος στην εφαρμογή',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF9C0C04),
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                /* 
-                Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: SizedBox(
-                    width: 350,
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _serverController,
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                      Column(
+                        children: [
+                          TextField(
+                            readOnly: _isLoginPressed,
+                            controller: _emailController,
+                            inputFormatters: [NoEmojisTextInputFormatter()],
+                            keyboardType: TextInputType.emailAddress,
+                            autofillHints: const [AutofillHints.email],
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Email/Τηλέφωνο(+30)',
+                              hintStyle: TextStyle(
+                                color: Color.fromARGB(132, 156, 12, 4),
+                              ),
+                              border: InputBorder.none,
+                            ),
                           ),
-                          decoration: const InputDecoration(
-                            hintText: 'Enter server\'s IP',
-                            hintStyle: TextStyle(color: Colors.black),
-                            border: InputBorder.none,
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(bottom: 10),
-                          child: Divider(
+                          const Divider(
                             height: 10,
                             color: Color.fromARGB(204, 156, 12, 4),
                             thickness: 7,
                           ),
-                        ),
-                        ElevatedButton(
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  readOnly: _isLoginPressed,
+                                  controller: _passwordController,
+                                  obscureText: _obscureText,
+                                  keyboardType: TextInputType.text,
+                                  autofillHints: const [AutofillHints.password],
+                                  inputFormatters: [
+                                    NoEmojisTextInputFormatter()
+                                  ],
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    hintText: 'Κωδικός',
+                                    hintStyle: TextStyle(
+                                      color: Color.fromARGB(132, 156, 12, 4),
+                                    ),
+                                    border: InputBorder.none,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: _togglePasswordVisibility,
+                                icon: Icon(
+                                  _obscureText
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                  color: const Color(0xFF9C0C04),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          // Row(
+                          //   mainAxisAlignment: MainAxisAlignment.start,
+                          //   children: [
+                          //     const Text(
+                          //       'Ξέχασες τον κωδικό;',
+                          //       style: TextStyle(
+                          //         color: Color(0xFF9C0C04),
+                          //         fontSize: 14,
+                          //         fontWeight: FontWeight.bold,
+                          //       ),
+                          //     ),
+                          //     TextButton(
+                          //       onPressed: () {
+                          //         if (!_isLoginPressed) {
+                          //           floatingSnackBar(
+                          //               message:
+                          //                   'Στάλθηκε email για επαναφορά κωδικού',
+                          //               context: context,
+                          //               duration:
+                          //                   const Duration(milliseconds: 1500));
+                          //         }
+                          //       },
+                          //       child: const Text(
+                          //         'Επαναφορά κωδικού',
+                          //         style: TextStyle(
+                          //           color: Colors.white,
+                          //           fontSize: 14,
+                          //           fontWeight: FontWeight.w900,
+                          //         ),
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: TextButton(
+                              onPressed: () {
+                                if (!_isLoginPressed) {
+                                  context.router
+                                      .replaceAll([const SignUpRoute()]);
+                                }
+                              },
+                              child: const Text(
+                                'Δημιουργία λογαριασμού',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 50),
+              Column(
+                children: [
+                  _isLoginPressed
+                      ? const CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              Color(0xFF9C0C04)), // Red color indicator
+                        )
+                      : ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 13, vertical: 14),
+                                horizontal: 18, vertical: 15),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
-                              side:
-                                  const BorderSide(color: Color(0xFF9C0C04)),
+                              side: const BorderSide(color: Color(0xFF9C0C04)),
                             ),
-                            backgroundColor: Colors.black,
+                            backgroundColor: const Color.fromARGB(139, 0, 0, 0),
                           ),
-                          onPressed: () {
-                            String serverIp = _serverController.text.trim();
-                            if (serverIp.isNotEmpty) {
-                              final globalState =
-                                  context.read<GlobalStateProvider>();
-                              globalState.validatedIp = serverIp;
-                              // Trigger data fetching if necessary
-                              _startSyncingClubs();
-                              _startSyncingUser();
-                            }
-                            print(
-                                'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/');
-                          
-                              floatingSnackBar(
-              message:  'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/',
-              context: context,
-              duration: const Duration(milliseconds: 1500));
-                          },
+                          onPressed: _login,
                           child: const Text(
-                            'Connect to server',
+                            'Είσοδος',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 19,
+                              fontSize: 22,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        const SizedBox(height: 80),
-                      ],
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: SizedBox(
+                      width: 350,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: _serverController,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Enter server\'s IP',
+                              hintStyle: TextStyle(color: Colors.black),
+                              border: InputBorder.none,
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: Divider(
+                              height: 10,
+                              color: Color.fromARGB(204, 156, 12, 4),
+                              thickness: 7,
+                            ),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 13, vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                side:
+                                    const BorderSide(color: Color(0xFF9C0C04)),
+                              ),
+                              backgroundColor: Colors.black,
+                            ),
+                            onPressed: () {
+                              String serverIp = _serverController.text.trim();
+                              if (serverIp.isNotEmpty) {
+                                final globalState =
+                                    context.read<GlobalStateProvider>();
+                                globalState.validatedIp = serverIp;
+                                // Trigger data fetching if necessary
+                                _startSyncingClubs();
+                                _startSyncingUser();
+                              }
+                              print(
+                                  'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/');
+
+                              floatingSnackBar(
+                                  message:
+                                      'Connecting to server at: http://${GlobalStateProvider().validatedIp}:8000/',
+                                  context: context,
+                                  duration: const Duration(milliseconds: 1500));
+                            },
+                            child: const Text(
+                              'Connect to server',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 19,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 80),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              */
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

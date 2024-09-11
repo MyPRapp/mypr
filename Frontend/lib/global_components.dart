@@ -11,6 +11,7 @@ class ClubInfoStruct {
   double clubRating;
   String clubAvailability;
   String clubPhoto;
+  String clubNotAvailable;
 
   ClubInfoStruct({
     required this.clubID,
@@ -22,23 +23,24 @@ class ClubInfoStruct {
     this.clubRating = -1,
     this.clubAvailability = '',
     this.clubPhoto = '',
+    this.clubNotAvailable = '',
   });
 
   factory ClubInfoStruct.fromJson(Map<String, dynamic> json) {
     try {
       return ClubInfoStruct(
-        clubID: json['id'] ?? -1,
-        clubName: json['club_name'] ?? '',
-        clubMinPrice: json['min_price'] ?? -1,
-        clubMaxPersons: json['max_persons'] ?? -1,
-        clubPhone: json['phone'] ?? '',
-        clubLocation: json['location'] ?? '',
-        clubRating: json['rating'] != null
-            ? double.tryParse(json['rating'].toString()) ?? -1
-            : -1,
-        clubAvailability: json['availability'] ?? '',
-        clubPhoto: json['photo'] ?? '',
-      );
+          clubID: json['id'] ?? -1,
+          clubName: json['club_name'] ?? '',
+          clubMinPrice: json['min_price'] ?? -1,
+          clubMaxPersons: json['max_persons'] ?? -1,
+          clubPhone: json['phone'] ?? '',
+          clubLocation: json['location'] ?? '',
+          clubRating: json['rating'] != null
+              ? double.tryParse(json['rating'].toString()) ?? -1
+              : -1,
+          clubAvailability: json['availability'] ?? '',
+          clubPhoto: json['photo'] ?? '',
+          clubNotAvailable: json['not_available'] ?? '');
     } catch (e) {
       print('Error parsing ClubInfoStruct: $e');
       return ClubInfoStruct(
@@ -56,7 +58,8 @@ class ClubInfoStruct {
       'location': clubLocation,
       'rating': clubRating,
       'availability': clubAvailability,
-      'clubPhoto': clubPhoto
+      'clubPhoto': clubPhoto,
+      'not_available': clubNotAvailable
     };
   }
 }

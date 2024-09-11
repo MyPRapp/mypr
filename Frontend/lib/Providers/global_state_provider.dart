@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GlobalStateProvider with ChangeNotifier {
   static final GlobalStateProvider _instance = GlobalStateProvider._internal();
 
-  String _validatedIp = '192.168.1.9';
+  String _validatedIp = '192.168.189.81';
   bool _isAuthenticated = false;
   bool _preferencesLoaded =
       false; // Add this state to track if preferences are loaded
@@ -41,7 +41,7 @@ class GlobalStateProvider with ChangeNotifier {
   // Load values from SharedPreferences
   Future<void> loadFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    _validatedIp = prefs.getString('validatedIp') ?? '192.168.1.9';
+    _validatedIp = prefs.getString('validatedIp') ?? '192.168.189.81';
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
 
     // Set the preferences loaded state to true
