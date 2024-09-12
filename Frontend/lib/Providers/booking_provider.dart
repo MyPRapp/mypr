@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/club_provider.dart';
@@ -73,7 +72,7 @@ class BookingProvider with ChangeNotifier {
           bookingData['status'],
           bookingData['booked_at'],
         ),
-        comments: _generateRandomComment(),
+        comments: bookingData['comments'],
       ));
     }
 
@@ -169,22 +168,6 @@ class BookingProvider with ChangeNotifier {
             double.parse(specialCatalogue.price)) +
         (double.parse(fourbitString[2]) * double.parse(premiumCatalogue.price));
     return price * (1 - (double.parse(fourbitString[3]) / 10));
-  }
-
-  // Generate a random comment for a booking
-  String _generateRandomComment() {
-    const comments = [
-      'Great service!',
-      'Looking forward to it!',
-      'Please confirm my booking soon.',
-      'Amazing experience!',
-      'Not as expected.',
-      'Fantastic night!',
-      'Excited for the event!',
-      'Looking forward to confirmation.',
-      'Please make sure we have a good table.',
-    ];
-    return comments[Random().nextInt(comments.length)];
   }
 
   // Helper method to toggle loading state

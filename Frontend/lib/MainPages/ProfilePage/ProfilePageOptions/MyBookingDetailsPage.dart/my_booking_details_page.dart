@@ -266,7 +266,7 @@ class BookingDetailsPage extends StatelessWidget {
         ),
         SizedBox(height: screenHeight * 0.01),
         BuildRichText(label: 'Άτομα:', value: booking.persons.toString()),
-        if (booking.status != 2) ...[
+        if (booking.status != 2 && booking.comments.isNotEmpty) ...[
           SizedBox(height: screenHeight * 0.015),
           BuildRichText(label: 'Σχόλια:', value: booking.comments),
         ],
