@@ -12,8 +12,7 @@ import '../Providers/club_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
 import '../services/auth_service.dart';
-
-//TODO Fix big text fields that disappear when their text is too long and make their height responsive
+import 'login_page.dart';
 
 @RoutePage()
 class SignUpPage extends StatefulWidget {
@@ -76,16 +75,12 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
       if (registerSuccess) {
-        // Clear preferences after successful registration
         await _clearPreferences();
-
         _showSnackBar('Επιτυχής εγγραφή!');
-
-        // Proceed with login after clearing preferences
         await _login();
       } else {
         setState(() {
-          _isRegistering = false; // Re-enable the register button
+          _isRegistering = false;
         });
         _showSnackBar(
             'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
@@ -98,58 +93,51 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _clearPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    // Delete liked clubs
     if (mounted) {
       ClubProvider clubProvider = context.read<ClubProvider>();
       await clubProvider.deleteAllLiked();
     }
 
-    // Remove user-related preferences
     await prefs.remove('saved_email');
     await prefs.remove('saved_password');
     await prefs.remove('user_details');
-
     await prefs.remove('user_photo_path');
-
-    // Remove booking-related preferences
     await prefs.remove('bookings');
   }
 
   Future<void> _login() async {
     try {
-      // Attempt to log in using the provided credentials
-      await AuthService().login(
+      bool success = await AuthService().login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
       _startSyncingClubs();
 
-      // Check if the widget is still mounted before proceeding
-      if (mounted) {
-        // Fetch user details from the server if login was successful
-        await context.read<UserProvider>().fetchUserDetailsFromServer();
-      }
-      if (mounted) {
-        context.read<BookingProvider>().fetchBookings(
-            context.read<UserProvider>().userDetails,
-            context.read<ClubProvider>());
-      }
-      // Mark the user as authenticated if everything went well
-      if (mounted) {
-        context.read<GlobalStateProvider>().isAuthenticated = true;
-      }
-
-      if (mounted) {
-        context.read<BottomNavBarVisibility>().show();
-        await context.router.replaceAll([const BottomNavBarRoute()]);
+      if (success) {
+        if (mounted) {
+          await context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
+        if (mounted) {
+          context.read<BookingProvider>().fetchBookings(
+              context.read<UserProvider>().userDetails,
+              context.read<ClubProvider>());
+          context.read<GlobalStateProvider>().isAuthenticated = true;
+          context.read<BottomNavBarVisibility>().show();
+          await context.router.replaceAll([const BottomNavBarRoute()]);
+        }
+      } else {
+        if (mounted) {
+          context.read<BottomNavBarVisibility>().show();
+          await context.router.replaceAll([const LoginRoute()]);
+        }
       }
     } catch (e) {
       print('Login failed: $e');
       _showSnackBar('Υπήρξε κάποιο σφάλμα κατά την είσοδο στην εφαρμογή');
     } finally {
       setState(() {
-        _isRegistering = false; // Re-enable the register button
+        _isRegistering = false;
       });
     }
   }
@@ -181,468 +169,391 @@ class _SignUpPageState extends State<SignUpPage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
-        body: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
-            child: SizedBox(
-              width: screenWidth,
-              height: screenHeight,
+        body: SizedBox(
+          width: screenWidth,
+          height: screenHeight,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              // HEADER: TOP PICTURE AND LOGO PICTURE
+              LoginHeader(
+                  screenWidth: MediaQuery.of(context).size.width,
+                  screenHeight: MediaQuery.of(context).size.height),
+              LoginLogo(screenHeight: MediaQuery.of(context).size.height),
+              Expanded(
+                child: _SignUpForm(
+                  formKey: _formKey,
+                  firstNameController: _firstNameController,
+                  lastNameController: _lastNameController,
+                  phoneController: _phoneController,
+                  emailController: _emailController,
+                  passwordController: _passwordController,
+                  confirmPasswordController: _confirmPasswordController,
+                  isRegistering: _isRegistering,
+                  obscureText: _obscureText,
+                  obscureText2: _obscureText2,
+                  togglePasswordVisibility: _togglePasswordVisibility,
+                  togglePasswordVisibility2: _togglePasswordVisibility2,
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
+                  onRegister: _register,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SignUpForm extends StatelessWidget {
+  const _SignUpForm({
+    required this.formKey,
+    required this.firstNameController,
+    required this.lastNameController,
+    required this.phoneController,
+    required this.emailController,
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.isRegistering,
+    required this.obscureText,
+    required this.obscureText2,
+    required this.togglePasswordVisibility,
+    required this.togglePasswordVisibility2,
+    required this.screenHeight,
+    required this.screenWidth,
+    required this.onRegister,
+  });
+
+  final GlobalKey<FormState> formKey;
+  final TextEditingController firstNameController;
+  final TextEditingController lastNameController;
+  final TextEditingController phoneController;
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final double screenHeight;
+  final double screenWidth;
+  final bool isRegistering;
+  final bool obscureText;
+  final bool obscureText2;
+  final VoidCallback togglePasswordVisibility;
+  final VoidCallback togglePasswordVisibility2;
+  final VoidCallback onRegister;
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+
+    return SizedBox(
+      width: screenWidth * 0.8,
+      child: Form(
+        key: formKey,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // First and last name fields
+            SizedBox(
+              height: screenHeight / 2,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  SizedBox(
-                    height: 70,
-                    width: screenWidth,
-                    child: const Image(
-                      image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
-                      fit: BoxFit.cover,
-                      alignment: Alignment(0, -0.3),
-                    ),
+                  _TextFieldWidget(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    controller: firstNameController,
+                    hintText: 'Όνομα',
+                    isRegistering: isRegistering,
+                    inputFormatters: const [],
                   ),
-                  const SizedBox(
-                    height: 150,
-                    child: Image(
-                      image: AssetImage(
-                        'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png',
-                      ),
-                    ),
+
+                  _TextFieldWidget(
+                    controller: lastNameController,
+                    hintText: 'Επίθετο',
+                    isRegistering: isRegistering,
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 50),
-                    child: SizedBox(
-                      width: screenWidth - 60,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(
-                            height: 40,
-                            child: Text(
-                              'Δημιουργία λογαριασμού',
-                              style: TextStyle(
-                                color: Color(0xFF9c0c04),
-                                fontSize: 20,
-                                fontWeight: FontWeight.w900,
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: SizedBox(
-                              height: screenHeight / 16,
-                              width: screenWidth - 60,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    height: screenHeight / 16,
-                                    width: (screenWidth - 60) / 2 - 10,
-                                    child: TextFormField(
-                                      readOnly: _isRegistering,
-                                      controller: _firstNameController,
-                                      style: const TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                      decoration: const InputDecoration(
-                                        hintText: 'Όνομα',
-                                        hintStyle: TextStyle(
-                                          color:
-                                              Color.fromARGB(132, 156, 12, 4),
-                                        ),
-                                        border: InputBorder.none,
-                                        errorStyle: TextStyle(
-                                          color: Color(0xFF9C0C04),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      inputFormatters: [
-                                        NoEmojisTextInputFormatter(),
-                                      ],
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.isEmpty ||
-                                            !RegExp(r'^[\p{L}]+$',
-                                                    unicode: true)
-                                                .hasMatch(value)) {
-                                          return 'Μόνο γράμματα επιτρέπονται';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    width: 20,
-                                    child: VerticalDivider(
-                                      color: Color.fromARGB(204, 156, 12, 4),
-                                      thickness: 7,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: screenHeight / 16,
-                                    width: (screenWidth - 60) / 2 - 10,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(left: 5),
-                                      child: TextFormField(
-                                        readOnly: _isRegistering,
-                                        controller: _lastNameController,
-                                        style: const TextStyle(
-                                          fontSize: 23,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                        decoration: const InputDecoration(
-                                          hintText: 'Επίθετο',
-                                          hintStyle: TextStyle(
-                                            color:
-                                                Color.fromARGB(132, 156, 12, 4),
-                                          ),
-                                          border: InputBorder.none,
-                                          errorStyle: TextStyle(
-                                            color: Color(0xFF9C0C04),
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        inputFormatters: [
-                                          NoEmojisTextInputFormatter(),
-                                        ],
-                                        validator: (value) {
-                                          if (value == null ||
-                                              value.isEmpty ||
-                                              !RegExp(r'^[\p{L}]+$',
-                                                      unicode: true)
-                                                  .hasMatch(value)) {
-                                            return 'Μόνο γράμματα επιτρέπονται';
-                                          }
-                                          return null;
-                                        },
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: screenWidth - 60,
-                            child: const Divider(
-                              height: 5,
-                              color: Color.fromARGB(204, 156, 12, 4),
-                              thickness: 7,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: SizedBox(
-                              height: screenHeight / 16,
-                              width: screenWidth - 60,
-                              child: TextFormField(
-                                readOnly: _isRegistering,
-                                controller: _phoneController,
-                                style: const TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                decoration: const InputDecoration(
-                                  hintText: 'Τηλέφωνο(+30)',
-                                  hintStyle: TextStyle(
-                                    color: Color.fromARGB(132, 156, 12, 4),
-                                  ),
-                                  border: InputBorder.none,
-                                  errorStyle: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.phone,
-                                inputFormatters: [
-                                  NoEmojisTextInputFormatter(),
-                                  FilteringTextInputFormatter.digitsOnly,
-                                  LengthLimitingTextInputFormatter(15),
-                                ],
-                                validator: (value) {
-                                  if (value == null ||
-                                      value.isEmpty ||
-                                      value.length < 7 ||
-                                      value.length > 15) {
-                                    return 'Μη έγκυρος αριθμός';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: screenWidth - 60,
-                            child: const Divider(
-                              height: 5,
-                              color: Color.fromARGB(204, 156, 12, 4),
-                              thickness: 7,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: SizedBox(
-                              height: screenHeight / 16,
-                              width: screenWidth - 60,
-                              child: TextFormField(
-                                readOnly: _isRegistering,
-                                controller: _emailController,
-                                style: const TextStyle(
-                                  fontSize: 23,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                                decoration: const InputDecoration(
-                                  hintText: 'Email',
-                                  hintStyle: TextStyle(
-                                    color: Color.fromARGB(132, 156, 12, 4),
-                                  ),
-                                  border: InputBorder.none,
-                                  errorStyle: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                keyboardType: TextInputType.emailAddress,
-                                inputFormatters: [
-                                  NoEmojisTextInputFormatter(),
-                                ],
-                                validator: (value) {
-                                  if (value == null ||
-                                      value.isEmpty ||
-                                      !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                                          .hasMatch(value)) {
-                                    return 'Μη έγκυρο email';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: screenWidth - 60,
-                            child: const Divider(
-                              height: 5,
-                              color: Color.fromARGB(204, 156, 12, 4),
-                              thickness: 7,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: SizedBox(
-                              height: screenHeight / 16,
-                              width: screenWidth - 60,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: (screenWidth - 60) - 40,
-                                    height: screenHeight / 16,
-                                    child: TextFormField(
-                                      readOnly: _isRegistering,
-                                      obscureText: _obscureText,
-                                      controller: _passwordController,
-                                      style: const TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                      decoration: const InputDecoration(
-                                        hintText: 'Κωδικός',
-                                        hintStyle: TextStyle(
-                                          color:
-                                              Color.fromARGB(132, 156, 12, 4),
-                                        ),
-                                        border: InputBorder.none,
-                                        errorStyle: TextStyle(
-                                          color: Color(0xFF9C0C04),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      inputFormatters: [
-                                        NoEmojisTextInputFormatter(),
-                                        LengthLimitingTextInputFormatter(
-                                            20), // Optional: limit password length
-                                      ],
-                                      validator: (value) {
-                                        if (value == null ||
-                                            value.isEmpty ||
-                                            value.length < 6 ||
-                                            !RegExp(r'^[a-zA-Z0-9]+$')
-                                                .hasMatch(value) ||
-                                            !RegExp(r'[0-9]').hasMatch(value)) {
-                                          return 'Τουλάχιστον 6 χαρακτήρες(μόνο λατινικοί) και 1 αριθμός';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 40,
-                                    child: IconButton(
-                                      onPressed: _togglePasswordVisibility,
-                                      icon: Icon(
-                                        _obscureText
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                        color: const Color(0xFF9C0C04),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: screenWidth - 60,
-                            child: const Divider(
-                              height: 5,
-                              color: Color.fromARGB(204, 156, 12, 4),
-                              thickness: 7,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: SizedBox(
-                              height: screenHeight / 16,
-                              width: screenWidth - 60,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  SizedBox(
-                                    width: (screenWidth - 60) - 40,
-                                    height: screenHeight / 16,
-                                    child: TextFormField(
-                                      readOnly: _isRegistering,
-                                      obscureText: _obscureText2,
-                                      controller: _confirmPasswordController,
-                                      style: const TextStyle(
-                                        fontSize: 23,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                      decoration: const InputDecoration(
-                                        hintText: 'Επιβεβαίωση κωδικού',
-                                        hintStyle: TextStyle(
-                                          color:
-                                              Color.fromARGB(132, 156, 12, 4),
-                                        ),
-                                        border: InputBorder.none,
-                                        errorStyle: TextStyle(
-                                          color: Color(0xFF9C0C04),
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      inputFormatters: [
-                                        NoEmojisTextInputFormatter(),
-                                      ],
-                                      validator: (value) {
-                                        if (value != _passwordController.text) {
-                                          return 'Οι κωδικοί δεν ταιριάζουν';
-                                        }
-                                        return null;
-                                      },
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 40,
-                                    child: IconButton(
-                                      onPressed: _togglePasswordVisibility2,
-                                      icon: Icon(
-                                        _obscureText2
-                                            ? Icons.visibility_off
-                                            : Icons.visibility,
-                                        color: const Color(0xFF9C0C04),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 70,
-                            width: screenWidth - 60,
-                            child: Row(
-                              children: [
-                                const Text(
-                                  'Έχεις ήδη λογαριασμό; ',
-                                  style: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    if (!_isRegistering) {
-                                      AutoRouter.of(context)
-                                          .replaceAll([const LoginRoute()]);
-                                    }
-                                  },
-                                  child: const Text(
-                                    'Συνδέσου',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+
+                  // Phone field
+                  _TextFieldWidget(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    controller: phoneController,
+                    hintText: 'Τηλέφωνο(+30)',
+                    isRegistering: isRegistering,
+                    inputFormatters: [
+                      NoEmojisTextInputFormatter(),
+                      FilteringTextInputFormatter.digitsOnly,
+                      LengthLimitingTextInputFormatter(15),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 30),
-                    child: _isRegistering
-                        ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF9C0C04)),
-                          )
-                        : ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                side:
-                                    const BorderSide(color: Color(0xFF9C0C04)),
-                              ),
-                              backgroundColor: Colors.transparent,
-                            ),
-                            onPressed: _register,
-                            child: const Text(
-                              'Εγγραφή',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+
+                  // Email field
+                  _TextFieldWidget(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    controller: emailController,
+                    hintText: 'Email',
+                    isRegistering: isRegistering,
+                    inputFormatters: [NoEmojisTextInputFormatter()],
                   ),
+
+                  // Password fields
+                  _PasswordFields(
+                    passwordController: passwordController,
+                    confirmPasswordController: confirmPasswordController,
+                    obscureText: obscureText,
+                    obscureText2: obscureText2,
+                    togglePasswordVisibility: togglePasswordVisibility,
+                    togglePasswordVisibility2: togglePasswordVisibility2,
+                    isRegistering: isRegistering,
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                  ),
+                  // Sign up button and login prompt
                 ],
               ),
             ),
-          ),
+            //TODO Add a 'go to login page' button
+            _SignUpButton(
+              isRegistering: isRegistering,
+              onRegister: onRegister,
+            ),
+            SizedBox(height: screenHeight / 100),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _TextFieldWidget extends StatelessWidget {
+  const _TextFieldWidget({
+    required this.controller,
+    required this.hintText,
+    required this.isRegistering,
+    required this.screenWidth,
+    required this.screenHeight,
+    this.inputFormatters,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final double screenHeight;
+  final double screenWidth;
+  final bool isRegistering;
+  final List<TextInputFormatter>? inputFormatters;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: screenHeight * 0.08,
+      child: Column(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: screenHeight * 0.05,
+              child: TextField(
+                readOnly: isRegistering,
+                controller: controller,
+                style: const TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                decoration: InputDecoration(
+                    hintText: hintText,
+                    hintStyle: const TextStyle(
+                      color: Color.fromARGB(132, 156, 12, 4),
+                    ),
+                    border: InputBorder.none),
+                inputFormatters: inputFormatters,
+              ),
+            ),
+          ),
+          _Divider(
+            screenWidth: screenWidth,
+            screenHeight: screenHeight,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PasswordFields extends StatelessWidget {
+  const _PasswordFields({
+    required this.passwordController,
+    required this.confirmPasswordController,
+    required this.obscureText,
+    required this.obscureText2,
+    required this.togglePasswordVisibility,
+    required this.togglePasswordVisibility2,
+    required this.isRegistering,
+    required this.screenWidth,
+    required this.screenHeight,
+  });
+
+  final TextEditingController passwordController;
+  final TextEditingController confirmPasswordController;
+  final bool obscureText;
+  final bool obscureText2;
+  final VoidCallback togglePasswordVisibility;
+  final VoidCallback togglePasswordVisibility2;
+  final bool isRegistering;
+  final double screenWidth;
+  final double screenHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _PasswordField(
+          controller: passwordController,
+          hintText: 'Κωδικός',
+          obscureText: obscureText,
+          toggleVisibility: togglePasswordVisibility,
+          isRegistering: isRegistering,
+          screenWidth: screenWidth,
+          screenHeight: screenHeight,
+        ),
+        _Divider(
+          screenWidth: screenWidth,
+          screenHeight: screenHeight,
+        ),
+        _PasswordField(
+          controller: confirmPasswordController,
+          hintText: 'Επιβεβαίωση κωδικού',
+          obscureText: obscureText2,
+          toggleVisibility: togglePasswordVisibility2,
+          isRegistering: isRegistering,
+          screenWidth: screenWidth,
+          screenHeight: screenHeight,
+        ),
+      ],
+    );
+  }
+}
+
+class _PasswordField extends StatelessWidget {
+  const _PasswordField({
+    required this.controller,
+    required this.hintText,
+    required this.obscureText,
+    required this.toggleVisibility,
+    required this.isRegistering,
+    required this.screenWidth,
+    required this.screenHeight,
+  });
+
+  final TextEditingController controller;
+  final String hintText;
+  final bool obscureText;
+  final VoidCallback toggleVisibility;
+  final bool isRegistering;
+  final double screenWidth;
+  final double screenHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: screenWidth * 0.8,
+      height: screenHeight * 0.08,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: screenHeight * 0.05,
+              child: TextField(
+                readOnly: isRegistering,
+                obscureText: obscureText,
+                controller: controller,
+                style: const TextStyle(
+                  fontSize: 23,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  hintStyle: const TextStyle(
+                    color: Color.fromARGB(132, 156, 12, 4),
+                  ),
+                  border: InputBorder.none,
+                ),
+              ),
+            ), //TODO Change size of icon and fontsize of texts
+          ),
+          SizedBox(
+            width: 40,
+            child: IconButton(
+              onPressed: toggleVisibility,
+              icon: Icon(
+                obscureText ? Icons.visibility_off : Icons.visibility,
+                color: const Color(0xFF9C0C04),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SignUpButton extends StatelessWidget {
+  const _SignUpButton({
+    required this.isRegistering,
+    required this.onRegister,
+  });
+
+  final bool isRegistering;
+  final VoidCallback onRegister;
+
+  @override
+  Widget build(BuildContext context) {
+    return isRegistering
+        ? const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+          )
+        : ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              //TODO Change dimensions of button
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+                side: const BorderSide(color: Color(0xFF9C0C04)),
+              ),
+              backgroundColor: Colors.transparent,
+            ),
+            onPressed: onRegister,
+            child: const Icon(
+              Icons.keyboard_arrow_right,
+              color: Colors.red,
+            ));
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider({required this.screenWidth, required this.screenHeight});
+
+  final double screenWidth;
+  final double screenHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    double divirderHeight = screenHeight * 0.001;
+    double divirderWidth = screenWidth * 0.8;
+    return SizedBox(
+      width: divirderWidth,
+      child: Divider(
+        height: divirderHeight,
+        color: const Color.fromARGB(204, 156, 12, 4),
+        thickness: (screenWidth * 0.0015) + (screenHeight * 0.006),
       ),
     );
   }

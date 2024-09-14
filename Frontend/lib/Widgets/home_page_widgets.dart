@@ -158,7 +158,7 @@ class _BigClubCardState extends State<BigClubCard> {
         padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
         child: SizedBox(
           width: screenWidth - 20,
-          height: screenHeight * 0.14,
+          height: screenHeight * 0.15,
           child: ClipRect(
             child: Container(
               decoration: BoxDecoration(

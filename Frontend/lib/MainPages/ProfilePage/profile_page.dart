@@ -103,6 +103,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         Column(
                           children: [
                             profileOptions(
+                              'Επικοινώνησε μαζί μας',
+                              const ImageIcon(
+                                AssetImage("assets/icons/support_icon.png"),
+                                color: Colors.grey,
+                              ),
+                              const ContactUsRoute(),
+                            ),
+                            profileOptions(
                               'Επεξεργασία Προφίλ',
                               const ImageIcon(
                                   AssetImage("assets/icons/settings_icon.png"),

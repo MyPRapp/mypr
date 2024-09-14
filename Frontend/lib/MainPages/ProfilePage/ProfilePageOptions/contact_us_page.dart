@@ -74,238 +74,252 @@ class _ContactUsPageState extends State<ContactUsPage> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 50),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 5),
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: const Icon(
-                          Icons.chevron_left,
-                          color: Color(0xFF9C0C04),
-                          size: 40,
+        body: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(height: constraints.maxHeight / 20),
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          icon: const Icon(
+                            Icons.chevron_left,
+                            color: Color(0xFF9C0C04),
+                            size: 40,
+                          ),
                         ),
                       ),
-                    ),
-                    const Text(
-                      'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
+                      const Text(
+                        'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              // Left Column for phone numbers and communication hours
-                              const Expanded(
-                                flex:
-                                    2, // Adjust this as per your layout requirement
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Πάρε μας τηλέφωνο',
-                                      style: TextStyle(
-                                        color: Color(0xFF9C0C04),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                // Left Column for phone numbers and communication hours
+                                SizedBox(
+                                  height: 300,
+                                  width: constraints.maxWidth / 2,
+                                  child: const Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Πάρε μας τηλέφωνο',
+                                        style: TextStyle(
+                                          color: Color(0xFF9C0C04),
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      ' 69 43784099\n 69 80984213',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
+                                      SizedBox(height: 10),
+                                      Text(
+                                        ' 69 43784099\n 69 80984213',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 20),
-                                    Text(
-                                      'Ωράριο επικοινωνίας',
-                                      style: TextStyle(
-                                        color: Color(0xFF9C0C04),
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
+                                      SizedBox(height: 20),
+                                      Text(
+                                        'Ωράριο επικοινωνίας',
+                                        style: TextStyle(
+                                          color: Color(0xFF9C0C04),
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      'Δευτέρα-Πέμπτη\n10πμ-8μμ\n\nΠαρασκευή-Κυριακή\n2μμ-3πμ',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Δευτέρα-Πέμπτη\n10πμ-8μμ\n\nΠαρασκευή-Κυριακή\n2μμ-3πμ',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              // Right Column for Instagram icon and text, aligned bottom-right
-                              Expanded(
-                                flex: 1,
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Padding(
-                                    padding: const EdgeInsets.only(right: 10),
+                                // Right Column for Instagram icon and text, aligned bottom-right
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: SizedBox(
+                                    height: 300,
+                                    width: constraints.maxWidth / 2 - 20,
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
                                       crossAxisAlignment:
                                           CrossAxisAlignment.end,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        const Text(
-                                          'Στείλε μας\nστο instagram',
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                            color: Color(0xFF9C0C04),
-                                            fontSize: 17,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                        Image.asset(
+                                          'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
+                                          height: constraints.maxHeight / 10,
                                         ),
-                                        const SizedBox(height: 10),
-                                        GestureDetector(
-                                          onTap: _launchInstagram,
-                                          child: const Padding(
-                                            padding: EdgeInsets.only(left: 5),
-                                            child: ImageIcon(
-                                              AssetImage(
-                                                  'assets/icons/instagram_icon.png'),
-                                              size: 30,
-                                              color: Color(0xFF9C0C04),
+                                        Column(
+                                          children: [
+                                            const Text(
+                                              'Στείλε μας\nστο instagram',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Color(0xFF9C0C04),
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
+                                            GestureDetector(
+                                              onTap: _launchInstagram,
+                                              child: const ImageIcon(
+                                                AssetImage(
+                                                    'assets/icons/instagram_icon.png'),
+                                                size: 30,
+                                                color: Color(0xFF9C0C04),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(40),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Στείλε μας ένα μήνυμα',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
+                              ],
                             ),
-                          ),
-                          const SizedBox(height: 30),
-                          _buildTextField('Ονοματεπώνυμο', 1, nameController),
-                          const SizedBox(height: 20),
-                          _buildTextField('Email', 1, emailController),
-                          const SizedBox(height: 20),
-                          _buildTextField('Μήνυμα', 4, messageController),
-                          const SizedBox(height: 30),
-                          Padding(
-                            padding: const EdgeInsets.only(left: 15),
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (messageController.text.isEmpty) {
-                                  floatingSnackBar(
-                                      message:
-                                          'Το μήνυμα δεν μπορεί να είναι άδειο',
-                                      context: context);
-                                  return;
-                                }
-
-                                if (!_isValidEmail(emailController.text)) {
-                                  floatingSnackBar(
-                                      message:
-                                          'Παρακαλώ συμπληρώστε email επικοινωνίας',
-                                      context: context);
-
-                                  return;
-                                }
-
-                                if (nameController.text.isEmpty) {
-                                  floatingSnackBar(
-                                      message:
-                                          'Παρακαλώ συμπληρώστε ονοματεπώνυμο',
-                                      context: context);
-                                  return;
-                                }
-
-                                final AuthService authService = AuthService();
-
-                                Future<void> ensureTokenIsValid() async {
-                                  try {
-                                    await authService.refreshAccessToken();
-                                  } catch (e) {
-                                    throw Exception('Token refresh failed');
-                                  }
-                                }
-
-                                Future<String?> getAccessToken() async {
-                                  await ensureTokenIsValid();
-                                  return await authService.getAccessToken();
-                                }
-
-                                String? accessToken = await getAccessToken();
-                                if (accessToken == null) {
-                                  if (context.mounted) {
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(40),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Στείλε μας ένα email',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 30),
+                            _buildTextField('Ονοματεπώνυμο', 1, nameController),
+                            const SizedBox(height: 20),
+                            _buildTextField('Email', 1, emailController),
+                            const SizedBox(height: 20),
+                            _buildTextField('Μήνυμα', 4, messageController),
+                            const SizedBox(height: 30),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 15),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  if (messageController.text.isEmpty) {
                                     floatingSnackBar(
                                         message:
-                                            'Σφάλμα κατά την αποστολή του μηνύματος',
+                                            'Το μήνυμα δεν μπορεί να είναι άδειο',
                                         context: context);
+                                    return;
                                   }
-                                  return;
-                                }
 
-                                try {
-                                  final response = await http
-                                      .post(
-                                    Uri.parse(
-                                        'http://${GlobalStateProvider().validatedIp}:8000/api/send-email/'),
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                      'Authorization': 'Bearer $accessToken',
-                                    },
-                                    body: jsonEncode({
-                                      'subject': nameController.text.trim(),
-                                      'sender_email':
-                                          emailController.text.trim(),
-                                      'message': messageController.text.trim(),
-                                    }),
-                                  )
-                                      .timeout(const Duration(seconds: 8),
-                                          onTimeout: () {
-                                    return http.Response('Error: Timeout', 408);
-                                  });
-                                  // if(context.mounted){
+                                  if (!_isValidEmail(emailController.text)) {
+                                    floatingSnackBar(
+                                        message:
+                                            'Παρακαλώ συμπληρώστε email επικοινωνίας',
+                                        context: context);
 
-                                  if (response.statusCode == 201) {
+                                    return;
+                                  }
+
+                                  if (nameController.text.isEmpty) {
+                                    floatingSnackBar(
+                                        message:
+                                            'Παρακαλώ συμπληρώστε ονοματεπώνυμο',
+                                        context: context);
+                                    return;
+                                  }
+
+                                  final AuthService authService = AuthService();
+
+                                  Future<void> ensureTokenIsValid() async {
+                                    try {
+                                      await authService.refreshAccessToken();
+                                    } catch (e) {
+                                      throw Exception('Token refresh failed');
+                                    }
+                                  }
+
+                                  Future<String?> getAccessToken() async {
+                                    await ensureTokenIsValid();
+                                    return await authService.getAccessToken();
+                                  }
+
+                                  String? accessToken = await getAccessToken();
+                                  if (accessToken == null) {
                                     if (context.mounted) {
                                       floatingSnackBar(
-                                          message: 'Το μήνυμα στάλθηκε',
+                                          message:
+                                              'Σφάλμα κατά την αποστολή του μηνύματος',
                                           context: context);
                                     }
-                                  } else {
+                                    return;
+                                  }
+
+                                  try {
+                                    final response = await http
+                                        .post(
+                                      Uri.parse(
+                                          'http://${GlobalStateProvider().validatedIp}:8000/api/send-email/'),
+                                      headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': 'Bearer $accessToken',
+                                      },
+                                      body: jsonEncode({
+                                        'subject': nameController.text.trim(),
+                                        'sender_email':
+                                            emailController.text.trim(),
+                                        'message':
+                                            messageController.text.trim(),
+                                      }),
+                                    )
+                                        .timeout(const Duration(seconds: 8),
+                                            onTimeout: () {
+                                      return http.Response(
+                                          'Error: Timeout', 408);
+                                    });
+                                    // if(context.mounted){
+
+                                    if (response.statusCode == 201) {
+                                      if (context.mounted) {
+                                        floatingSnackBar(
+                                            message: 'Το μήνυμα στάλθηκε',
+                                            context: context);
+                                      }
+                                    } else {
+                                      if (context.mounted) {
+                                        floatingSnackBar(
+                                            message:
+                                                'Σφάλμα κατά την αποστολή του μηνύματος',
+                                            context: context);
+                                      }
+                                    }
+                                  } catch (e) {
                                     if (context.mounted) {
                                       floatingSnackBar(
                                           message:
@@ -313,45 +327,31 @@ class _ContactUsPageState extends State<ContactUsPage> {
                                           context: context);
                                     }
                                   }
-                                } catch (e) {
-                                  if (context.mounted) {
-                                    floatingSnackBar(
-                                        message:
-                                            'Σφάλμα κατά την αποστολή του μηνύματος',
-                                        context: context);
-                                  }
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.black,
-                                side: const BorderSide(color: Colors.white),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 22,
-                                  vertical: 15,
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  side: const BorderSide(color: Colors.white),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 22,
+                                    vertical: 15,
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Αποστολή',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16),
                                 ),
                               ),
-                              child: const Text(
-                                'Αποστολή',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
-                              ),
                             ),
-                          ),
-                          Container(
-                            alignment: Alignment.centerRight,
-                            child: Image.asset(
-                              'assets/otherPhotos/Logo_v2.2-removebg.png',
-                              height: 140,
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

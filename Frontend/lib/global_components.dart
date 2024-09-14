@@ -233,7 +233,7 @@ class BookingInfoStruct {
 }
 
 class BottomNavBarVisibility extends ChangeNotifier {
-  bool _isVisible = true;
+  bool _isVisible = false;
 
   bool get isVisible => _isVisible;
 

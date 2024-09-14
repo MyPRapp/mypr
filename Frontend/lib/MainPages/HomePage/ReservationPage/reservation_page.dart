@@ -774,6 +774,14 @@ class _ReservationPageState extends State<ReservationPage> {
           });
         }
       }
+    } else {
+      floatingSnackBar(
+          message:
+              'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
+          context: context);
+      setState(() {
+        buttonIsVisible = true; // Show the button again
+      });
     }
   }
 
