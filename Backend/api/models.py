@@ -6,7 +6,10 @@ from django.contrib.auth.models import AbstractUser,Group, Permission
 # Create your models here.
 
 class CustomUser(AbstractUser):
-    phone = models.CharField(max_length= 15)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length= 15,unique=True)
+    points = models.IntegerField(default=20)
+    photo = models.ImageField(upload_to='user_photos/',blank=True,null=True,default= 'user_photos/Default_User.jpg')
 
     groups = models.ManyToManyField(
         Group,
@@ -40,7 +43,8 @@ class Clubs(models.Model):
     location = models.CharField(max_length=100)
     rating = models.DecimalField(range(1,5),decimal_places= 2,max_digits=3)
     availability = models.CharField(max_length=7)
-    photo = models.ImageField(upload_to='club_photos/',blank=True,null=True)
+    photo = models.ImageField(upload_to='club_photos/',blank=True,null=True,default= 'club_photos/Default_Club.jpg')
+    not_available = models.CharField(max_length= 130,default="")
 
     
     def __str__(self):
@@ -66,9 +70,14 @@ class Bookings(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name= "bookings")
     club = models.ForeignKey(Clubs, on_delete=models.CASCADE,related_name= "booking_I_made")  # Assuming 'Clubs' is another model in your app
+    reservation_name = models.CharField(max_length= 20,default="InputReservationName")
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
+
+    comments = models.TextField(max_length=200,default="No comment")
+
     number_of_people = models.IntegerField()
-    booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, default=REGULAR)
+    #booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, default=REGULAR)
+    booking_type = models.CharField(max_length=4,default= "000")
     booked_at = models.DateTimeField()
 
     def __str__(self):

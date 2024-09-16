@@ -15,28 +15,29 @@ class CustomUserCreationForm(UserCreationForm):
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'phone', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')
+        fields = ('username', 'email', 'phone', 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions','points','photo')
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
-    list_display = ('username', 'email', 'phone', 'is_staff', 'is_active')
+    list_display = ('username', 'email', 'phone', 'is_staff', 'is_active', 'points','photo')
     list_filter = ('is_staff', 'is_active', 'groups')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
-        ('Personal info', {'fields': ('email', 'phone','first_name','last_name')}),
+        ('Personal info', {'fields': ('email', 'phone', 'first_name', 'last_name', 'points','photo')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_superuser', 'groups', 'user_permissions')}),
         ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'phone', 'password1', 'password2', 'is_staff', 'is_active')}
+            'fields': ('username', 'email', 'phone', 'password1', 'password2', 'is_staff', 'is_active', 'points')}
         ),
     )
     search_fields = ('username', 'email', 'phone')
     ordering = ('username',)
+
 
 admin.site.register(CustomUser, CustomUserAdmin)
 

@@ -4,7 +4,7 @@ from .models import Bookings,CustomUser,Clubs,Catalogue
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ["id","username","password","first_name","last_name","email","phone",]
+        fields = ["id","username","password","first_name","last_name","email","phone","points","photo"]
         extra_kwargs = {"password":{"write_only":True}}
 
     def create(self,validated_data):
@@ -19,7 +19,7 @@ class BookingsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Bookings
-        fields = ['id', 'club', 'club_name', 'user', 'status', 'number_of_people', 'booking_type', 'booked_at']
+        fields = ['id', 'club', 'club_name', 'user', 'status','reservation_name','comments','number_of_people', 'booking_type', 'booked_at']
         extra_kwargs = {
             'user': {'read_only': True},
             'club': {'read_only': True},
@@ -38,10 +38,17 @@ class BookingsSerializer(serializers.ModelSerializer):
 class ClubsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clubs
-        fields = ["id","club_name","phone","location","rating","availability"]
+        fields = ["id","club_name","phone","location","rating","not_available","availability","photo"]
 
 
 class CatalogueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Catalogue
         fields = ['club','service_type', 'price', 'max_person']
+
+
+
+class MessageSerializer(serializers.Serializer):
+    subject = serializers.CharField(max_length=255)
+    message = serializers.CharField()
+    sender_email = serializers.EmailField()  # New field for the sender's email

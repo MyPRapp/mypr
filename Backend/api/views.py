@@ -1,11 +1,23 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
+from django.db.models import Q
 from .models import Bookings,CustomUser,Clubs,Catalogue
 from rest_framework import generics,status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer,BookingsSerializer,ClubsSerializer,CatalogueSerializer
+from .serializers import UserSerializer,BookingsSerializer,ClubsSerializer,CatalogueSerializer,MessageSerializer
 from rest_framework.permissions import IsAuthenticated,AllowAny,IsAdminUser
 from rest_framework.decorators import api_view, permission_classes
+from django.contrib.auth.forms import PasswordResetForm,SetPasswordForm
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
+from django.utils.encoding import force_bytes,force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+
+
+
+
+
 
 
 # Create your views here.
@@ -18,10 +30,14 @@ class BookingCreate(generics.ListCreateAPIView):
 
     def get_queryset(self):
         user = self.request.user
+
         return Bookings.objects.filter(user=user)
     
     def perform_create(self, serializer):
-            serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user)
+        user = self.request.user
+        user.points += 5
+        user.save()
 
 
 class BookingDelete(generics.DestroyAPIView):
@@ -30,7 +46,12 @@ class BookingDelete(generics.DestroyAPIView):
 
     def get_queryset(self):
         user = self.request.user
+        user.points -= 5
         return Bookings.objects.filter(user=user)
+
+
+#User related functions
+
 
 
 #User related functions
@@ -81,3 +102,122 @@ class PrintAllClubs(generics.ListAPIView):
 
 
 
+#points related functions
+class ReducePointsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        points_to_reduce = request.data.get('points', 0)
+
+        try:
+            points_to_reduce = int(points_to_reduce)
+        except ValueError:
+            return Response({"error": "Invalid points value."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if points_to_reduce <= 0:
+            return Response({"error": "Points to reduce must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if user.points < points_to_reduce:
+            return Response({"error": "Not enough points to reduce."}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.points -= points_to_reduce
+        user.save()
+
+        return Response({"detail": f"{points_to_reduce} points reduced.", "current_points": user.points}, status=status.HTTP_200_OK)
+    
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if email:
+            associated_users = CustomUser.objects.filter(Q(email=email))
+            if associated_users.exists():
+                for user in associated_users:
+                    subject = "Password Reset Requested"
+                    email_template_name = "password_reset_email.txt"
+                    c = {
+                        "email": user.email,
+                        'domain': '192.168.1.9:8000',  # Replace with your frontend domain
+                        'site_name': 'MyPr',
+                        "uid": urlsafe_base64_encode(force_bytes(user.pk)),
+                        "user": user,
+                        'token': default_token_generator.make_token(user),
+                        'protocol': 'http',
+                    }
+                    email_content = render_to_string(email_template_name, c)
+                    send_mail(subject, email_content, 'admin@yourdomain.com', [user.email], fail_silently=False)
+                return Response({"detail": "Password reset email sent."}, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid email address"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirmView(APIView):
+    def post(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            form = SetPasswordForm(user, request.data)
+            if form.is_valid():
+                form.save()
+                return Response({"detail": "Password has been reset."}, status=status.HTTP_200_OK)
+            else:
+                return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": "Invalid token or user ID"}, status=status.HTTP_400_BAD_REQUEST)
+
+def reset_password_page_view(request):
+    return render(request, 'password_reset_page.html')
+
+
+
+class UserPhotoUpdateView(generics.UpdateAPIView):
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def patch(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+class SendEmailView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = MessageSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            subject = serializer.validated_data['subject']
+            message = serializer.validated_data['message']
+            recipient_email = "support@mypr-app.com"
+            sender_email = serializer.validated_data['sender_email']
+
+            # Modify the message to include the sender's email
+            full_message = f"Message from {sender_email}:\n\n{message}"
+
+            try:
+                send_mail(
+                    subject,
+                    full_message,
+                    sender_email,  # The sender's email address
+                    [recipient_email],  # The recipient's email address
+                    fail_silently=False,
+                )
+                return Response({"detail": "Email sent successfully."}, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
