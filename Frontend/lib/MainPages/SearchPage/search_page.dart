@@ -64,7 +64,7 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
 
     return PopScope(
       canPop: false,
@@ -90,7 +90,7 @@ class SearchPageState extends State<SearchPage> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  const SizedBox(height: 50),
+                  SizedBox(height: screenHeight * 0.04),
                   TextField(
                     controller: _controller,
                     focusNode: _focusNode,
@@ -124,7 +124,7 @@ class SearchPageState extends State<SearchPage> {
                             const BorderRadius.all(Radius.circular(8)),
                       ),
                       child: SizedBox(
-                        height: 350,
+                        height: screenHeight / 3,
                         child: ListView.builder(
                           padding: EdgeInsets.zero,
                           shrinkWrap: true,

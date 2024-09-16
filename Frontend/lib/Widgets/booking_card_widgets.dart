@@ -82,7 +82,7 @@ class InteractiveNameAndStarsState extends State<InteractiveNameAndStars> {
     });
 
     // Hide the thank you message after 2 seconds
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 4), () {
       if (mounted) {
         setState(() {
           _isThankYouMessageVisible = false;

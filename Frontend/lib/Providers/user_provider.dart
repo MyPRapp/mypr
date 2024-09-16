@@ -14,7 +14,16 @@ import '../global_components.dart';
 import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
-  UserInfoStruct? _userDetails;
+  UserInfoStruct? _userDetails = UserInfoStruct(
+    userID: -1,
+    username: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    points: 0,
+    photo: '',
+  );
   bool _isFetching = false;
 
   UserInfoStruct? get userDetails => _userDetails;

@@ -53,19 +53,21 @@ class AuthService {
       String lastName, String email, String phone, int points) async {
     try {
       // Send registration request
-      final response = await http.post(
-        Uri.parse('$baseUrl/user/register/'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'username': username,
-          'password': password,
-          'first_name': firstName,
-          'last_name': lastName,
-          'email': email,
-          'phone': phone,
-          'points': points,
-        }),
-      );
+      final response = await http
+          .post(
+            Uri.parse('$baseUrl/user/register/'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'username': username,
+              'password': password,
+              'first_name': firstName,
+              'last_name': lastName,
+              'email': email,
+              'phone': phone,
+              'points': points,
+            }),
+          )
+          .timeout(const Duration(seconds: 5));
 
       // Log response details
       print('Register response status: ${response.statusCode}');

@@ -818,8 +818,9 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
 
     // Ensure we have pairs of month and day
     if (unavailablePairs.length % 2 != 0) {
-      throw Exception(
+      print(
           'Invalid unavailableDays format: Each month must be paired with a day.');
+      return false;
     }
 
     // Iterate over pairs (every two values: month, day)
@@ -833,8 +834,9 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           return true;
         }
       } catch (e) {
-        throw Exception(
+        print(
             'Invalid unavailableDays data: Unable to parse month/day at index $i');
+        return false;
       }
     }
 

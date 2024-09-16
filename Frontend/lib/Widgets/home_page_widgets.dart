@@ -94,6 +94,8 @@ class _SmallClubCardState extends State<SmallClubCard> {
                     Padding(
                       padding: const EdgeInsets.only(left: 5),
                       child: MinPriceAndMaxPersons(
+                        screenHeight: screenHeight,
+                        screenWidth: screenWidth,
                         minPrice: widget.club.clubMinPrice,
                         maxPersons: widget.club.clubMaxPersons,
                       ),
@@ -101,6 +103,8 @@ class _SmallClubCardState extends State<SmallClubCard> {
                   ],
                 ),
                 LikeButton(
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
                   club: widget.club,
                 ),
               ],
@@ -113,11 +117,15 @@ class _SmallClubCardState extends State<SmallClubCard> {
 }
 
 class BigClubCard extends StatefulWidget {
-  const BigClubCard({
-    super.key,
-    required this.club,
-  });
+  const BigClubCard(
+      {super.key,
+      required this.club,
+      required this.screenHeight,
+      required this.screenWidth});
+
   final ClubInfoStruct club;
+  final double screenHeight;
+  final double screenWidth;
 
   @override
   State<BigClubCard> createState() => _BigClubCardState();
@@ -151,116 +159,115 @@ class _BigClubCardState extends State<BigClubCard> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return GestureDetector(
+      behavior: HitTestBehavior.translucent,
       onTap: () {
         AutoRouter.of(context).push(ReservationRoute(club: widget.club));
       },
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 30, left: 10, right: 10),
+        padding: EdgeInsets.only(bottom: screenHeight * 0.03),
         child: SizedBox(
-          width: screenWidth - 20,
-          height: screenHeight * 0.15,
-          child: ClipRect(
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(0, 0, 0, 0),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
+          width: screenWidth,
+          height: screenHeight / 6,
+          child: Row(
+            children: [
+              SizedBox(width: screenWidth * 0.02),
+              Stack(
                 children: [
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.all(
-                          Radius.circular(4),
-                        ),
-                        child: FutureBuilder<ImageProvider?>(
-                          future: _imageFuture,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                    ConnectionState.done &&
-                                snapshot.hasData) {
-                              return SizedBox(
-                                height: screenHeight * 0.17,
-                                width: screenWidth * 0.3,
-                                child: Image(
-                                  image: snapshot.data!,
-                                  fit: BoxFit.cover,
-                                ),
-                              );
-                            } else {
-                              return SizedBox(
-                                height: screenHeight * 0.17,
-                                width: screenWidth * 0.3,
-                                child: const CircularProgressIndicator(),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                      Container(
-                        alignment: Alignment.topLeft,
-                        child: LikeButton(
-                          club: widget.club,
-                        ),
-                      ),
-                    ],
+                  FutureBuilder<ImageProvider?>(
+                    future: _imageFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done &&
+                          snapshot.hasData) {
+                        return SizedBox(
+                          height: screenHeight * 0.17,
+                          width: screenWidth * 0.3,
+                          child: Image(
+                            image: snapshot.data!,
+                            fit: BoxFit.cover,
+                          ),
+                        );
+                      } else {
+                        return SizedBox(
+                          height: screenHeight * 0.17,
+                          width: screenWidth * 0.3,
+                          child: const CircularProgressIndicator(
+                            color: Color(0xFF9C0C04),
+                            strokeCap: StrokeCap.square,
+                          ),
+                        );
+                      }
+                    },
                   ),
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              NameAndStars(
-                                clubName: widget.club.clubName,
-                                stars: widget.club.clubRating,
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(top: 3),
-                                child: Text(
-                                  widget.club.clubLocation,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color.fromARGB(255, 102, 102, 102),
-                                  ),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 5),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                MinPriceAndMaxPersons(
-                                  minPrice: widget.club.clubMinPrice,
-                                  maxPersons: widget.club.clubMaxPersons,
-                                ),
-                                DaysOpen(
-                                  monday: daysOpen[0],
-                                  tuesday: daysOpen[1],
-                                  wednesday: daysOpen[2],
-                                  thursday: daysOpen[3],
-                                  friday: daysOpen[4],
-                                  saturday: daysOpen[5],
-                                  sunday: daysOpen[6],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                  Container(
+                    alignment: Alignment.topLeft,
+                    child: LikeButton(
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                      club: widget.club,
                     ),
                   ),
                 ],
               ),
-            ),
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.all(screenHeight * 0.01),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          NameAndStars(
+                            screenHeight: screenHeight,
+                            screenWidth: screenWidth,
+                            clubName: widget.club.clubName,
+                            stars: widget.club.clubRating,
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(top: screenHeight * 0.006),
+                            child: Text(
+                              widget.club.clubLocation,
+                              style: TextStyle(
+                                fontSize: screenHeight * 0.015,
+                                fontWeight: FontWeight.w500,
+                                color: const Color.fromARGB(255, 102, 102, 102),
+                              ),
+                              textAlign: TextAlign.start,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 5),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            MinPriceAndMaxPersons(
+                              screenHeight: screenHeight,
+                              screenWidth: screenWidth,
+                              minPrice: widget.club.clubMinPrice,
+                              maxPersons: widget.club.clubMaxPersons,
+                            ),
+                            DaysOpen(
+                              monday: daysOpen[0],
+                              tuesday: daysOpen[1],
+                              wednesday: daysOpen[2],
+                              thursday: daysOpen[3],
+                              friday: daysOpen[4],
+                              saturday: daysOpen[5],
+                              sunday: daysOpen[6],
+                              screenHeight: screenHeight,
+                              screenWidth: screenWidth,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

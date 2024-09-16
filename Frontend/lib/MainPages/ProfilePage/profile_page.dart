@@ -42,111 +42,96 @@ class _ProfilePageState extends State<ProfilePage> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     final userDetails = context.watch<UserProvider>().userDetails;
-
     return PopScope(
       canPop: false,
       child: RefreshIndicator(
         onRefresh: _refresh,
         child: Scaffold(
           //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
-          backgroundColor: Colors.black,
+          backgroundColor: const Color.fromARGB(195, 40, 40, 40),
           body: userDetails == null
               ? const Center(child: CircularProgressIndicator())
-              : SingleChildScrollView(
+              : ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  child: Container(
-                    color: const Color.fromARGB(197, 40, 40, 40),
-                    height: screenHeight,
-                    child: Column(
+                  children: [
+                    SizedBox(height: screenHeight / 15),
+                    Column(
                       children: [
                         SizedBox(
-                          height: 70,
-                          width: screenWidth,
-                          child: const Image(
-                            image:
-                                AssetImage('assets/otherPhotos/IMG_0041.jpg'),
-                            fit: BoxFit.fitWidth,
-                            alignment: Alignment(0, -0.3),
+                          height: screenWidth * screenHeight * 0.0004,
+                          width: screenWidth * screenHeight * 0.0004,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(300),
+                            child: _buildProfileImage(
+                                userDetails.photo, screenHeight, screenWidth),
                           ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(top: 35),
-                          child: SizedBox(
-                            height: 130,
-                            width: 130,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(300),
-                              child: _buildProfileImage(userDetails.photo),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20),
-                          child: Text(
-                            '${userDetails.firstName} ${userDetails.lastName}',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              color: Colors.grey,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(top: 25),
-                          child: Divider(
-                            height: 60,
-                            color: Color.fromARGB(255, 65, 65, 65),
-                            thickness: 10,
-                          ),
-                        ),
-                        Column(
-                          children: [
-                            profileOptions(
-                              'Επικοινώνησε μαζί μας',
-                              const ImageIcon(
-                                AssetImage("assets/icons/support_icon.png"),
-                                color: Colors.grey,
-                              ),
-                              const ContactUsRoute(),
-                            ),
-                            profileOptions(
-                              'Επεξεργασία Προφίλ',
-                              const ImageIcon(
-                                  AssetImage("assets/icons/settings_icon.png"),
-                                  color: Colors.grey),
-                              const CustomizeProfileRoute(),
-                            ),
-                            profileOptions(
-                              'Οι κρατήσεις μου',
-                              const ImageIcon(
-                                AssetImage("assets/icons/book_icon.png"),
-                                color: Colors.grey,
-                              ),
-                              const MyBookingsRoute(),
-                            ),
-                            profileOptions(
-                              'Αγαπημένα',
-                              const ImageIcon(
-                                AssetImage(
-                                    "assets/icons/heart(liked)_icon.png"),
-                                color: Colors.grey,
-                              ),
-                              const FavoritesRoute(),
-                            ),
-                            profileOptions(
-                              'Επικοινώνησε μαζί μας',
-                              const ImageIcon(
-                                AssetImage("assets/icons/support_icon.png"),
-                                color: Colors.grey,
-                              ),
-                              const ContactUsRoute(),
-                            ),
-                          ],
                         ),
                       ],
                     ),
-                  ),
+                    SizedBox(height: screenHeight * 0.05),
+                    Text(
+                      '${userDetails.firstName} ${userDetails.lastName}',
+                      style: TextStyle(
+                        fontSize: screenHeight * 0.02 + screenWidth * 0.01,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    Divider(
+                      height: screenHeight * 0.1,
+                      color: const Color.fromARGB(255, 65, 65, 65),
+                      thickness: 10,
+                    ),
+                    Column(
+                      children: [
+                        profileOptions(
+                            'Επεξεργασία Προφίλ',
+                            ImageIcon(
+                                size: screenHeight * 0.03 + screenWidth * 0.01,
+                                const AssetImage(
+                                    "assets/icons/settings_icon.png"),
+                                color: Colors.grey),
+                            const CustomizeProfileRoute(),
+                            screenHeight,
+                            screenWidth),
+                        profileOptions(
+                            'Οι κρατήσεις μου',
+                            ImageIcon(
+                              size: screenHeight * 0.03 + screenWidth * 0.01,
+                              const AssetImage("assets/icons/book_icon.png"),
+                              color: Colors.grey,
+                            ),
+                            const MyBookingsRoute(),
+                            screenHeight,
+                            screenWidth),
+                        profileOptions(
+                            'Αγαπημένα',
+                            ImageIcon(
+                              size: screenHeight * 0.03 + screenWidth * 0.01,
+                              const AssetImage(
+                                  "assets/icons/heart(liked)_icon.png"),
+                              color: Colors.grey,
+                            ),
+                            const FavoritesRoute(),
+                            screenHeight,
+                            screenWidth),
+                        profileOptions(
+                            'Επικοινώνησε μαζί μας',
+                            ImageIcon(
+                              size: screenHeight * 0.03 + screenWidth * 0.01,
+                              const AssetImage("assets/icons/support_icon.png"),
+                              color: Colors.grey,
+                            ),
+                            const ContactUsRoute(),
+                            screenHeight,
+                            screenWidth),
+                        SizedBox(
+                          height: screenHeight / 40 * 6,
+                        )
+                      ],
+                    ),
+                  ],
                 ),
         ),
       ),
@@ -154,15 +139,16 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   /// Builds the profile image widget based on whether the photo path is valid.
-  Widget _buildProfileImage(String? photoPath) {
-    if (photoPath == null || photoPath.trim().isEmpty) {
+  Widget _buildProfileImage(
+      String? photoPath, double screenHeight, double screenWidth) {
+    if (photoPath == null || photoPath.trim().isNotEmpty) {
       // Show the red person icon immediately if photoPath is empty or null
       return Container(
         color: Colors.grey,
-        child: const Icon(
+        child: Icon(
           Icons.person,
           color: Colors.black,
-          size: 100,
+          size: screenHeight * screenWidth * 0.0003,
         ),
       );
     } else {
@@ -180,10 +166,10 @@ class _ProfilePageState extends State<ProfilePage> {
               // If the photo couldn't be loaded, show the red person icon
               return Container(
                 color: Colors.grey,
-                child: const Icon(
+                child: Icon(
                   Icons.person,
                   color: Colors.black,
-                  size: 100,
+                  size: screenHeight * screenWidth * 0.0003,
                 ),
               );
             }
@@ -196,17 +182,17 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  Widget profileOptions(
-      String label, ImageIcon widgetIcon, PageRouteInfo route) {
-    return GestureDetector(
-      onTap: () {
-        AutoRouter.of(context).push(route);
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 30),
+  Widget profileOptions(String label, ImageIcon widgetIcon, PageRouteInfo route,
+      double screenHeight, double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.035),
+      child: GestureDetector(
+        onTap: () {
+          AutoRouter.of(context).push(route);
+        },
         child: Container(
-          padding: const EdgeInsets.only(left: 10),
-          margin: const EdgeInsets.only(left: 50, right: 50),
+          width: screenWidth * 0.85,
+          height: screenHeight * 0.08,
           decoration: BoxDecoration(
               boxShadow: [
                 // Light shadow for depth
@@ -219,14 +205,20 @@ class _ProfilePageState extends State<ProfilePage> {
               border: Border.all(
                   color: const Color.fromARGB(255, 65, 65, 65), width: 7),
               borderRadius: const BorderRadius.all(Radius.circular(5))),
-          child: Row(children: [
-            SizedBox(height: 40, child: widgetIcon),
-            Text(' $label',
-                style: const TextStyle(
-                    fontSize: 20,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold))
-          ]),
+          child: Center(
+            child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
+              SizedBox(width: screenWidth * 0.01),
+              widgetIcon,
+              SizedBox(width: screenWidth * 0.01),
+              Expanded(
+                child: Text(label,
+                    style: TextStyle(
+                        fontSize: screenWidth * screenHeight * 0.00006,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold)),
+              )
+            ]),
+          ),
         ),
       ),
     );

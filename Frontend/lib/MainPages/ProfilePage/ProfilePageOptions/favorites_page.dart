@@ -1,9 +1,9 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Providers/club_provider.dart';
+import '../../../Widgets/home_page_widgets.dart';
 import '../../../global_components.dart';
 
 @RoutePage()
@@ -25,6 +25,7 @@ class FavoritesPageState extends State<FavoritesPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         context.read<BottomNavBarVisibility>().show();
@@ -90,14 +91,19 @@ class FavoritesPageState extends State<FavoritesPage> {
               selector: (context, clubProvider) => clubProvider.likedClubs,
               builder: (context, likedClubs, child) {
                 return SizedBox(
-                  height: likedClubs.length * 200,
+                  height: likedClubs.length * screenHeight / 5,
                   child: ListView.builder(
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: likedClubs.length,
                     itemBuilder: (context, index) {
                       final club = likedClubs[index];
+                      final double screenHeight =
+                          MediaQuery.sizeOf(context).height;
+                      final double screenWidth =
+                          MediaQuery.sizeOf(context).width;
                       return BigClubCard(
-                        key: ValueKey(club.clubID), // Assign a unique key
+                        screenHeight: screenHeight,
+                        screenWidth: screenWidth,
                         club: club,
                       );
                     },

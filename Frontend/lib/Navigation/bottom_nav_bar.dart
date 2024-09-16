@@ -37,6 +37,8 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           }
         }
 
+        final double screenHeight = MediaQuery.sizeOf(context).height;
+        final double screenWidth = MediaQuery.sizeOf(context).width;
         return Scaffold(
           backgroundColor: Colors.black,
           body: Stack(
@@ -44,28 +46,26 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
               child,
               if (bottomNavBarVisibility.isVisible && !isKeyboardVisible)
                 Positioned(
-                  left: 40,
-                  right: 40,
-                  bottom: 40,
+                  left: screenWidth / 10,
+                  right: screenWidth / 10,
+                  bottom: screenHeight / 40,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: SizedBox(
-                      height: 70,
+                      height: screenHeight / 40 * 3.5,
+                      width: screenWidth - screenWidth / 5,
                       child: BottomNavigationBar(
                         currentIndex: tabsRouter.activeIndex,
                         onTap: onTap,
-                        iconSize: 22,
                         showUnselectedLabels: true,
                         selectedItemColor: const Color(0xFF9C0C04),
                         unselectedItemColor: Colors.white,
                         backgroundColor: Colors.black,
                         unselectedLabelStyle: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                         selectedLabelStyle: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w700,
                         ),
                         items: const [
                           BottomNavigationBarItem(

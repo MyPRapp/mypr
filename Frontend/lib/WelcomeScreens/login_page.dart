@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
     print('Preferences loaded');
 
     await _startSyncingClubs();
-    _startSyncingUser();
+    await _startSyncingUser();
   }
 
   Future<void> _startSyncingClubs() async {
@@ -313,6 +313,8 @@ class LoginBody extends StatelessWidget {
                   onTogglePasswordVisibility: onTogglePasswordVisibility,
                 ),
                 LoginFooter(
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
                   isLoginPressed: isLoginPressed,
                   onLogin: onLogin,
                   serverController: serverController,
@@ -597,12 +599,15 @@ class LoginFooter extends StatelessWidget {
   final bool isLoginPressed;
   final VoidCallback onLogin;
   final TextEditingController serverController;
-
+  final double screenWidth;
+  final double screenHeight;
   const LoginFooter({
     super.key,
     required this.isLoginPressed,
     required this.onLogin,
     required this.serverController,
+    required this.screenHeight,
+    required this.screenWidth,
   });
 
   @override
@@ -615,19 +620,21 @@ class LoginFooter extends StatelessWidget {
               )
             : ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding: //TODO Change dimensions of button
-                      const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.07,
+                      vertical: screenHeight * 0.028),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                     side: const BorderSide(color: Color(0xFF9C0C04)),
                   ),
-                  backgroundColor: const Color.fromARGB(139, 0, 0, 0),
+                  backgroundColor: Colors.transparent,
                 ),
                 onPressed: onLogin,
                 child: const Icon(
                   Icons.keyboard_arrow_right,
                   color: Colors.red,
-                )),
+                ),
+              ),
         // Padding(
         //   padding: const EdgeInsets.only(top: 10),
         //   child: ServerInputField(

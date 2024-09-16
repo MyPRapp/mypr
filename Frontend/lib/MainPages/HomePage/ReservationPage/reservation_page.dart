@@ -274,7 +274,12 @@ class _ReservationPageState extends State<ReservationPage> {
             padding: const EdgeInsets.only(right: 20),
             child: Container(
               alignment: Alignment.centerRight,
-              child: LikeButton(club: widget.club, big: true),
+              //TODO Change screen dimensions given
+              child: LikeButton(
+                  club: widget.club,
+                  big: true,
+                  screenHeight: 40,
+                  screenWidth: 30),
             ),
           ),
         ],
@@ -550,10 +555,12 @@ class _ReservationPageState extends State<ReservationPage> {
         print("Booking submission failed.");
         return;
       }
+
       // Retract points if a discount is applied
       if (isDiscountApplied) {
         await _retractPoints(20);
       }
+
       // Submit the reservation form
       bool success = await BookingService().submitForm(
         reservationProvider.getInfo(1),

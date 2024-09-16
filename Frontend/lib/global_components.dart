@@ -74,7 +74,7 @@ class UserInfoStruct {
   String photo; // This will now hold the base64 string instead of a URL
 
   UserInfoStruct({
-    required this.userID,
+    this.userID = -1,
     this.username = '',
     this.firstName = '',
     this.lastName = '',
@@ -296,22 +296,6 @@ String formatName(String name) {
     }
     return word;
   }).join(' ');
-}
-
-TextStyle textStyle1() {
-  return const TextStyle(
-    fontSize: 20,
-    fontWeight: FontWeight.bold,
-    color: Colors.white,
-  );
-}
-
-TextStyle textStyle2() {
-  return const TextStyle(
-    fontSize: 18,
-    fontWeight: FontWeight.bold,
-    color: Color(0xFF9C0C04),
-  );
 }
 
 void printReservationInfo(List<dynamic> reservationInfo) {
