@@ -7,109 +7,122 @@ import '../../../Widgets/home_page_widgets.dart';
 import '../../../global_components.dart';
 
 @RoutePage()
-class FavoritesPage extends StatefulWidget {
+class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
 
   @override
-  FavoritesPageState createState() => FavoritesPageState();
-}
-
-class FavoritesPageState extends State<FavoritesPage> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().hide();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
+    // Obtain screen dimensions once to avoid repeated calls
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
-        body: ListView(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 20, bottom: 10),
-              child: Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 5),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      icon: const Icon(
-                        Icons.chevron_left,
-                        color: Colors.white,
-                        size: 35,
-                      ),
-                    ),
-                  ),
-                  const Text(
-                    'ΑΓΑΠΗΜΕΝΑ',
-                    style: TextStyle(
-                        color: Color(0xFF9C0C04),
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 30, top: 5),
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 15),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: const BorderSide(
-                                  color: Colors.black, width: 2),
-                            ),
-                            backgroundColor: const Color(0xFF9C0C04),
-                          ),
-                          onPressed:
-                              context.read<ClubProvider>().deleteAllLiked,
-                          child: const Text(
-                            'Αφαίρεση όλων',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.black,
-                            ),
-                          )),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Selector<ClubProvider, List<ClubInfoStruct>>(
-              selector: (context, clubProvider) => clubProvider.likedClubs,
-              builder: (context, likedClubs, child) {
-                return SizedBox(
-                  height: likedClubs.length * screenHeight / 5,
-                  child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: likedClubs.length,
-                    itemBuilder: (context, index) {
-                      final club = likedClubs[index];
-                      final double screenHeight =
-                          MediaQuery.sizeOf(context).height;
-                      final double screenWidth =
-                          MediaQuery.sizeOf(context).width;
-                      return BigClubCard(
+        backgroundColor: const Color.fromARGB(155, 51, 51, 51),
+        body: Selector<ClubProvider, List<ClubInfoStruct>>(
+          selector: (context, clubProvider) => clubProvider.likedClubs,
+          builder: (context, likedClubs, child) {
+            return ListView.builder(
+              itemCount: likedClubs.length + 1, // +1 for the header
+              itemBuilder: (context, index) {
+                if (index == 0) {
+                  return _buildHeader(context, screenHeight, screenWidth);
+                }
+                final club = likedClubs[index - 1];
+                if (index < likedClubs.length) {
+                  return BigClubCard(
+                    screenHeight: screenHeight,
+                    screenWidth: screenWidth,
+                    club: club,
+                  );
+                } else {
+                  return Column(
+                    children: [
+                      BigClubCard(
                         screenHeight: screenHeight,
                         screenWidth: screenWidth,
                         club: club,
-                      );
-                    },
-                  ),
-                );
+                      ),
+                      SizedBox(
+                        height: screenHeight / 40 * 5,
+                      )
+                    ],
+                  );
+                }
               },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // Create a separate method for the header to keep the build method clean
+  Widget _buildHeader(
+      BuildContext context, double screenHeight, double screenWidth) {
+    return Padding(
+      padding: EdgeInsets.only(
+          top: screenHeight * 0.035, bottom: screenHeight * 0.02),
+      child: SizedBox(
+        height: screenHeight * 0.06,
+        width: screenWidth * 2 / 3,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(
+                    Icons.chevron_left,
+                    color: Colors.white,
+                    size: screenHeight * 0.026 + screenWidth * 0.02,
+                  ),
+                ),
+                Text(
+                  'ΑΓΑΠΗΜΕΝΑ',
+                  style: TextStyle(
+                    color: const Color(0xFF9C0C04),
+                    fontSize: screenHeight * 0.026 + screenWidth * 0.02,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: screenWidth * 0.01),
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  context.read<ClubProvider>().deleteAllLiked();
+                },
+                child: Container(
+                  height: screenHeight * 0.05,
+                  width: screenWidth / 3,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: const Color(0xFF9C0C04),
+                      border: Border.all(width: 2, color: Colors.black)),
+                  alignment: Alignment.center,
+                  child: Text(
+                    textAlign: TextAlign.center,
+                    'Αφαίρεση όλων',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.032,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

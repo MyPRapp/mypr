@@ -141,4 +141,5 @@ app.*.symbols
 **.gitignore
 **desktop.ini
 **.venv
+**env
 **devtools_options.yaml

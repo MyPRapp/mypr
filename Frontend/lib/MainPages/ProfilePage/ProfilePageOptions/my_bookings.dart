@@ -81,6 +81,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           ),
           bottom: TabBar(
             controller: _tabController,
+            labelColor: Colors.white,
             indicatorColor: const Color(0xFF9C0C04),
             tabs: const [
               Tab(text: 'Ενεργείς'),

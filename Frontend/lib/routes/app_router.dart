@@ -10,7 +10,6 @@ class AppRouter extends RootStackRouter {
         AutoRoute(page: SignUpRoute.page, initial: false),
         AutoRoute(
           page: BottomNavBarRoute.page,
-          initial: false,
           children: [
             AutoRoute(
               page: HomeNavigation.page,

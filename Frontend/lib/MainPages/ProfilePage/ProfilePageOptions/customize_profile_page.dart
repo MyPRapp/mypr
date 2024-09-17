@@ -29,18 +29,21 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final userDetails = context.watch<UserProvider>().userDetails;
 
     /// Builds the profile image widget based on whether the photo path is valid.
-    Widget buildProfileImage(String? photoPath) {
+    Widget buildProfileImage(
+        String? photoPath, double screenHeight, double screenWidth) {
       if (photoPath == null || photoPath.trim().isEmpty) {
         // Show the red person icon immediately if photoPath is empty or null
         return Container(
-          color: const Color(0xFF9C0C04),
-          child: const Icon(
+          color: Colors.grey,
+          child: Icon(
             Icons.person,
             color: Colors.black,
-            size: 100,
+            size: screenHeight * screenWidth * 0.0003,
           ),
         );
       } else {
@@ -55,8 +58,15 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                   fit: BoxFit.cover,
                 );
               } else {
-                // If the photo couldn't be loaded, show a loading indicator
-                return const CircularProgressIndicator();
+                // If the photo couldn't be loaded, show the red person icon
+                return Container(
+                  color: Colors.grey,
+                  child: Icon(
+                    Icons.person,
+                    color: Colors.black,
+                    size: screenHeight * screenWidth * 0.0003,
+                  ),
+                );
               }
             } else {
               // Show a loading indicator while the photo is being loaded
@@ -137,57 +147,68 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
         backgroundColor: const Color(0xFF1D2428),
         body: userDetails == null
             ? const Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            : ListView(
                 children: [
-                  Container(
-                    color: const Color(0xFF14181B),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(top: 40),
-                            child: Row(
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 5),
-                                  child: IconButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                    icon: const Icon(
-                                      Icons.chevron_left,
-                                      color: Colors.white,
-                                      size: 35,
-                                    ),
-                                  ),
-                                ),
-                                const Text(
-                                  'ΠΡΟΦΙΛ',
-                                  style: TextStyle(
-                                      color: Color.fromARGB(255, 90, 90, 90),
-                                      fontSize: 36,
-                                      fontWeight: FontWeight.bold),
-                                )
-                              ],
-                            ),
-                          ),
-                          Row(
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(top: screenHeight * 0.035),
+                        child: SizedBox(
+                          height: screenHeight * 0.06,
+                          width: screenWidth,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.only(top: 35),
-                                child: SizedBox(
-                                  height: 130,
-                                  width: 130,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(300),
-                                    child: buildProfileImage(userDetails.photo),
-                                  ),
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: Icon(
+                                  Icons.chevron_left,
+                                  color: Colors.white,
+                                  size:
+                                      screenHeight * 0.026 + screenWidth * 0.02,
                                 ),
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
+                              Text(
+                                'ΠΡΟΦΙΛ',
+                                style: TextStyle(
+                                  color: const Color.fromARGB(255, 90, 90, 90),
+                                  fontSize:
+                                      screenHeight * 0.026 + screenWidth * 0.02,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Container(
+                        color: const Color(0xFF14181B),
+                        padding: EdgeInsets.only(
+                          top: screenHeight * 0.02,
+                          bottom: screenHeight * 0.05,
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(width: screenWidth * 0.03),
+                            SizedBox(
+                              height: screenWidth * screenHeight * 0.00036,
+                              width: screenWidth * screenHeight * 0.00036,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(300),
+                                child: buildProfileImage(userDetails.photo,
+                                    screenHeight, screenWidth),
+                              ),
+                            ),
+                            SizedBox(width: screenWidth * 0.05),
+                            Expanded(
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(top: screenHeight * 0.028),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -199,7 +220,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    SizedBox(height: screenHeight * 0.008),
                                     Text(
                                       userDetails.phone,
                                       style: const TextStyle(
@@ -208,7 +229,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold),
                                     ),
-                                    const SizedBox(height: 4),
+                                    SizedBox(height: screenHeight * 0.008),
                                     Text(
                                       userDetails.email,
                                       style: const TextStyle(
@@ -219,108 +240,131 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                                     ),
                                   ],
                                 ),
-                              )
-                            ],
-                          ),
-                        ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 50),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 40, right: 40),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Ρυθμίσεις λογαριασμού',
-                          style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400),
-                        ),
-                        const SizedBox(height: 20),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF14181B),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            title: const Text('Προσθήκη/Αλλαγή φωτογραφίας',
-                                style: TextStyle(color: Colors.white)),
-                            trailing: const Icon(Icons.chevron_right,
-                                color: Colors.white),
-                            onTap: () {
-                              // Handle change photo
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF14181B),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            title: const Text('Αλλαγή ονόματος',
-                                style: TextStyle(color: Colors.white)),
-                            trailing: const Icon(Icons.chevron_right,
-                                color: Colors.white),
-                            onTap: () {
-                              // Handle change password
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Container(
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF14181B),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 12),
-                            title: const Text('Αλλαγή κωδικού',
-                                style: TextStyle(color: Colors.white)),
-                            trailing: const Icon(Icons.chevron_right,
-                                color: Colors.white),
-                            onTap: () {
-                              // Handle change password
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 20),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                side: const BorderSide(
-                                    color: Color(0xFF9C0C04), width: 2),
-                              ),
-                              backgroundColor: Colors.black,
-                            ),
-                            onPressed: () {
-                              signOut(context);
-                            },
-                            child: const Text(
-                              'Αποσύνδεση',
+                  Column(
+                    children: [
+                      SizedBox(
+                        height: screenHeight * 0.03,
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                            left: screenWidth * 0.05,
+                            right: screenWidth * 0.05),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Ρυθμίσεις λογαριασμού',
                               style: TextStyle(
-                                color: Color(0xFF9C0C04),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400),
+                            ),
+                            SizedBox(
+                              height: screenHeight * 0.025,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF14181B),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                title: const Text('Προσθήκη/Αλλαγή φωτογραφίας',
+                                    style: TextStyle(color: Colors.white)),
+                                trailing: const Icon(Icons.chevron_right,
+                                    color: Colors.white),
+                                onTap: () {
+                                  // Handle change photo
+                                },
                               ),
                             ),
-                          ),
+                            SizedBox(
+                              height: screenHeight * 0.018,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF14181B),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                title: const Text('Αλλαγή ονόματος',
+                                    style: TextStyle(color: Colors.white)),
+                                trailing: const Icon(Icons.chevron_right,
+                                    color: Colors.white),
+                                onTap: () {
+                                  // Handle change password
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              height: screenHeight * 0.018,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF14181B),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
+                                title: const Text('Αλλαγή κωδικού',
+                                    style: TextStyle(color: Colors.white)),
+                                trailing: const Icon(Icons.chevron_right,
+                                    color: Colors.white),
+                                onTap: () {
+                                  // Handle change password
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              height: screenHeight * 0.07,
+                            ),
+                            Center(
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.translucent,
+                                onTap: () {
+                                  signOut(context);
+                                },
+                                child: Container(
+                                  height: screenHeight * 0.07,
+                                  width: screenWidth / 2.5,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      color: Colors.black,
+                                      border: Border.all(
+                                          width: 2,
+                                          color: const Color(0xFF9C0C04))),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    textAlign: TextAlign.center,
+                                    'Αποσύνδεση',
+                                    style: TextStyle(
+                                      fontSize:
+                                          screenWidth * screenHeight * 0.00006,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xFF9C0C04),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: screenHeight * 0.07,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ],
               ),

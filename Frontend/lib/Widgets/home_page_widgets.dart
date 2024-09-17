@@ -140,6 +140,15 @@ class _BigClubCardState extends State<BigClubCard> {
     _loadImage(); // Load the image when the widget is initialized
   }
 
+  @override
+  void didUpdateWidget(BigClubCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Check if the club has changed to reload the image
+    if (oldWidget.club.clubID != widget.club.clubID) {
+      _loadImage();
+    }
+  }
+
   void _loadImage() {
     setState(() {
       // Load club photo from the network first, fallback to local storage
@@ -174,16 +183,21 @@ class _BigClubCardState extends State<BigClubCard> {
               Stack(
                 children: [
                   FutureBuilder<ImageProvider?>(
+                    key: ValueKey(
+                        widget.club.clubID), // Use a unique key for each club
                     future: _imageFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.done &&
                           snapshot.hasData) {
-                        return SizedBox(
-                          height: screenHeight * 0.17,
-                          width: screenWidth * 0.3,
-                          child: Image(
-                            image: snapshot.data!,
-                            fit: BoxFit.cover,
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(7.5),
+                          child: SizedBox(
+                            height: screenHeight * 0.17,
+                            width: screenWidth * 0.3,
+                            child: Image(
+                              image: snapshot.data!,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         );
                       } else {

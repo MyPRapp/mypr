@@ -141,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
   /// Builds the profile image widget based on whether the photo path is valid.
   Widget _buildProfileImage(
       String? photoPath, double screenHeight, double screenWidth) {
-    if (photoPath == null || photoPath.trim().isNotEmpty) {
+    if (photoPath == null || photoPath.trim().isEmpty) {
       // Show the red person icon immediately if photoPath is empty or null
       return Container(
         color: Colors.grey,

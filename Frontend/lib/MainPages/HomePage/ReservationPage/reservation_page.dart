@@ -506,10 +506,9 @@ class _ReservationPageState extends State<ReservationPage> {
     }
     printReservationInfo(context.read<ReservationProvider>().reservationInfo);
 
-    if (context.mounted) {
+    if (mounted) {
       // Show the confirmation dialog
       showDialog(
-        // ignore: use_build_context_synchronously
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
@@ -765,7 +764,7 @@ class _ReservationPageState extends State<ReservationPage> {
             context.read<ClubProvider>());
       }
 
-      if (context.mounted) {
+      if (mounted) {
         // Show the confirmation dialog and wait for the result
         final bool? result = await reservationReviewDialog();
 
