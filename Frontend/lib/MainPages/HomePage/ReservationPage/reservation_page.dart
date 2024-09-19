@@ -251,7 +251,9 @@ class _ReservationPageState extends State<ReservationPage> {
             size: 30,
           ),
           onPressed: () {
-            Navigator.of(context).pop();
+            if (buttonIsVisible) {
+              Navigator.of(context).pop();
+            }
           },
         ),
         actions: [

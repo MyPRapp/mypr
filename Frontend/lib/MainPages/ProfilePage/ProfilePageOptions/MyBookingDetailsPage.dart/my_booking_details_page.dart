@@ -13,13 +13,11 @@ import '../../../../routes/app_router.gr.dart';
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
   final BookingInfoStruct booking;
-  final String title;
   final bool isHistory;
 
   const BookingDetailsPage({
     super.key,
     required this.booking,
-    required this.title,
     this.isHistory = false,
   });
 
@@ -108,10 +106,10 @@ class BookingDetailsPage extends StatelessWidget {
     return AppBar(
       backgroundColor: Colors.black,
       elevation: 0,
-      title: Text(
-        title,
-        style: const TextStyle(
-          color: Color(0xFF9C0C04),
+      title: const Text(
+        'ΠΛΗΡΟΦΟΡΙΕΣ ΚΡΑΤΗΣΗΣ',
+        style: TextStyle(
+          color: Colors.white,
           fontSize: 22,
           fontWeight: FontWeight.bold,
         ),

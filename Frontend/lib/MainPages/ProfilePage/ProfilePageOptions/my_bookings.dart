@@ -192,7 +192,6 @@ class BookingCard extends StatelessWidget {
         AutoRouter.of(context).push(
           BookingDetailsRoute(
             booking: booking,
-            title: 'ΠΛΗΡΟΦΟΡΙΕΣ ΚΡΑΤΗΣΗΣ',
             isHistory: isHistory,
           ),
         );

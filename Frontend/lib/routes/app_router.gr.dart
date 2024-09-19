@@ -10,11 +10,11 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
+import 'package:mypr/global_components.dart' as _i18;
+import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
 import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
     as _i12;
-import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
-import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/MyBookingDetailsPage.dart/my_booking_details_page.dart'
-    as _i1;
+import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i11;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/contact_us_page.dart'
     as _i3;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/customize_profile_page.dart'
@@ -23,7 +23,8 @@ import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/favorites_page.dar
     as _i5;
 import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/my_bookings.dart'
     as _i9;
-import 'package:mypr/MainPages/ProfilePage/profile_page.dart' as _i11;
+import 'package:mypr/MainPages/ProfilePage/ProfilePageOptions/MyBookingDetailsPage.dart/my_booking_details_page.dart'
+    as _i1;
 import 'package:mypr/MainPages/SearchPage/search_page.dart' as _i14;
 import 'package:mypr/Navigation/bottom_nav_bar.dart' as _i2;
 import 'package:mypr/Navigation/home_navigation.dart' as _i6;
@@ -31,7 +32,6 @@ import 'package:mypr/Navigation/profile_navigation.dart' as _i10;
 import 'package:mypr/Navigation/search_navigation.dart' as _i13;
 import 'package:mypr/WelcomeScreens/login_page.dart' as _i8;
 import 'package:mypr/WelcomeScreens/sign_up_page.dart' as _i15;
-import 'package:mypr/global_components.dart' as _i18;
 
 /// generated route for
 /// [_i1.BookingDetailsPage]
@@ -39,7 +39,6 @@ class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
   BookingDetailsRoute({
     _i17.Key? key,
     required _i18.BookingInfoStruct booking,
-    required String title,
     bool isHistory = false,
     List<_i16.PageRouteInfo>? children,
   }) : super(
@@ -47,7 +46,6 @@ class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
           args: BookingDetailsRouteArgs(
             key: key,
             booking: booking,
-            title: title,
             isHistory: isHistory,
           ),
           initialChildren: children,
@@ -62,7 +60,6 @@ class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
       return _i1.BookingDetailsPage(
         key: args.key,
         booking: args.booking,
-        title: args.title,
         isHistory: args.isHistory,
       );
     },
@@ -73,7 +70,6 @@ class BookingDetailsRouteArgs {
   const BookingDetailsRouteArgs({
     this.key,
     required this.booking,
-    required this.title,
     this.isHistory = false,
   });
 
@@ -81,13 +77,11 @@ class BookingDetailsRouteArgs {
 
   final _i18.BookingInfoStruct booking;
 
-  final String title;
-
   final bool isHistory;
 
   @override
   String toString() {
-    return 'BookingDetailsRouteArgs{key: $key, booking: $booking, title: $title, isHistory: $isHistory}';
+    return 'BookingDetailsRouteArgs{key: $key, booking: $booking, isHistory: $isHistory}';
   }
 }
 
@@ -124,7 +118,7 @@ class ContactUsRoute extends _i16.PageRouteInfo<void> {
   static _i16.PageInfo page = _i16.PageInfo(
     name,
     builder: (data) {
-      return _i3.ContactUsPage();
+      return const _i3.ContactUsPage();
     },
   );
 }
