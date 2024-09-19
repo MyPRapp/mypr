@@ -61,11 +61,11 @@ class Bookings(models.Model):
 
     REGULAR = 'Regular'
     PREMIUM = 'Premium'
-    SINGLE = 'Single'
+    SPECIAL = 'Special'
     BOOKING_TYPE_CHOICES = [
         (REGULAR, 'Regular'),
         (PREMIUM, 'Premium'),
-        (SINGLE, 'Single')
+        (SPECIAL, 'Special')
     ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name= "bookings")
@@ -87,11 +87,11 @@ class Bookings(models.Model):
 class Catalogue(models.Model):
     REGULAR = 'Regular'
     PREMIUM = 'Premium'
-    SINGLE = 'Single'
+    SPECIAL = 'Special'
     SERVICE_TYPE_CHOICES = [
         (REGULAR, 'Regular'),
         (PREMIUM, 'Premium'),
-        (SINGLE, 'Single')
+        (SPECIAL, 'Special')
     ]
 
     club = models.ForeignKey('Clubs', on_delete=models.CASCADE)
