@@ -3,10 +3,10 @@ import 'package:flutter/services.dart'; // Import this for setting orientations
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/reservation_provider.dart';
-import 'package:mypr/global_components.dart';
 import 'package:mypr/routes/app_router.dart';
 import 'package:provider/provider.dart';
 
+import 'Navigation/bottom_nav_bar.dart';
 import 'Providers/booking_provider.dart';
 import 'Providers/club_provider.dart';
 import 'Providers/user_provider.dart';
@@ -40,7 +40,6 @@ class MyPR extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appRouter = AppRouter();
-
     return MaterialApp.router(
       title: 'MyPR',
       debugShowCheckedModeBanner: false,

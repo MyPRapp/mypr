@@ -27,8 +27,7 @@ class LikeButtonState extends State<LikeButton>
   @override
   Widget build(BuildContext context) {
     final double size = widget.big
-        //TODO Change size for big parameter true
-        ? widget.screenHeight * widget.screenWidth * 0.00014
+        ? widget.screenHeight * widget.screenWidth * 0.00012
         : widget.screenHeight * widget.screenWidth * 0.00009;
     final clubProvider = context.watch<ClubProvider>();
 

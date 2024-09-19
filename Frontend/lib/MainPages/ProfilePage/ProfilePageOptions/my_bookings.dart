@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
 import '../../../global_components.dart';
@@ -48,48 +49,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          elevation: 0,
-          leading: Container(), // This replaces the default back button
-          flexibleSpace: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 5),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: const Icon(
-                      Icons.chevron_left,
-                      color: Color(0xFF9C0C04),
-                      size: 40,
-                    ),
-                  ),
-                  const Text(
-                    'ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          bottom: TabBar(
-            controller: _tabController,
-            labelColor: Colors.white,
-            indicatorColor: const Color(0xFF9C0C04),
-            tabs: const [
-              Tab(text: 'Ενεργείς'),
-              Tab(text: 'Εκκρεμείς'),
-              Tab(text: 'Ιστορικό'),
-            ],
-          ),
-        ),
+        appBar: _buildAppBar(context),
         body: Container(
           padding: const EdgeInsets.only(top: 20),
           child: TabBarView(
@@ -173,6 +133,41 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           },
         );
       },
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+      elevation: 0,
+      title: const Text(
+        'ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      leading: IconButton(
+        icon: const Icon(
+          Icons.chevron_left,
+          color: Colors.white,
+          size: 30,
+        ),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+      bottom: TabBar(
+        controller: _tabController,
+        labelColor: Colors.white,
+        indicatorColor: const Color(0xFF9C0C04),
+        tabs: const [
+          Tab(text: 'Ενεργείς'),
+          Tab(text: 'Εκκρεμείς'),
+          Tab(text: 'Ιστορικό'),
+        ],
+      ),
     );
   }
 }
@@ -271,13 +266,22 @@ class BookingCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 5),
-                    Text(
-                      '$formattedDate - ${booking.persons} άτομα',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
+                    if (booking.persons > 1)
+                      Text(
+                        '$formattedDate - ${booking.persons} άτομα',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
+                    if (booking.persons == 1)
+                      Text(
+                        '$formattedDate - 1 άτομο',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                        ),
+                      ),
                     const SizedBox(height: 5),
                     Row(mainAxisAlignment: MainAxisAlignment.start, children: [
                       if (simple == 1)

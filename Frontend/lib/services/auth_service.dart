@@ -20,33 +20,35 @@ class AuthService {
 
       // Check if the response is successful
       if (response.statusCode == 200) {
-        print('Login successful, parsing tokens...');
+        print('\x1B[32mLogin successful');
+        print('\x1B[33mParsing tokens...');
         var data = jsonDecode(response.body);
         String? accessToken = data['access'];
         String? refreshToken = data['refresh'];
 
         // Check if tokens are received
         if (accessToken != null && refreshToken != null) {
-          print('Tokens received, saving to SharedPreferences...');
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('access_token', accessToken);
           await prefs.setString('refresh_token', refreshToken);
           await prefs.setString('saved_email', username);
           await prefs.setString('saved_password', password);
 
+          print('\x1B[32mTokens received and saved to SharedPreferences');
           return true;
         } else {
-          print('Tokens are null');
+          print('\x1B[31mTokens are null');
+          return false;
         }
       } else {
-        print('Login failed with status code: ${response.statusCode}');
-        print('Response body: ${utf8.decode(response.bodyBytes)}');
+        print('\x1B[31mLogin failed with status code: ${response.statusCode}');
+        print('\x1B[31mResponse body: ${utf8.decode(response.bodyBytes)}');
+        return false;
       }
     } catch (e) {
-      print('Exception occurred during login: $e');
+      print('\x1B[31mException occurred during login: $e');
+      return false;
     }
-
-    return false;
   }
 
   Future<bool> register(String username, String password, String firstName,
@@ -70,21 +72,22 @@ class AuthService {
           .timeout(const Duration(seconds: 5));
 
       // Log response details
-      print('Register response status: ${response.statusCode}');
-      print('Register response body: ${utf8.decode(response.bodyBytes)}');
+      print('\x1B[32mRegister response status: ${response.statusCode}');
+      print(
+          '\x1B[32mRegister response body: ${utf8.decode(response.bodyBytes)}');
 
       // Check if registration was successful
       if (response.statusCode == 201) {
-        print('Registration successful');
+        print('\x1B[32mRegistration successful');
         return true;
       } else {
-        print('Registration failed: ${response.body}');
+        print('\x1B[31mRegistration failed: ${response.body}');
+        return false;
       }
     } catch (e) {
-      print('Exception occurred during registration: $e');
+      print('\x1B[31mException occurred during registration: $e');
+      return false;
     }
-
-    return false;
   }
 
   Future<Map<String, dynamic>> getUserDetails() async {
@@ -94,6 +97,7 @@ class AuthService {
 
       // Check if token exists
       if (token == null) {
+        print('\x1B[31mAccess token not found');
         throw Exception('Access token not found');
       }
 
@@ -104,14 +108,14 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        print('User details loaded successfully');
+        print('\x1B[32mUser details loaded successfully');
         return jsonDecode(response.body);
       } else {
-        print('Failed to load user details: ${response.statusCode}');
+        print('\x1B[31mFailed to load user details: ${response.statusCode}');
         throw Exception('Failed to load user details');
       }
     } catch (e) {
-      print('Exception occurred while loading user details: $e');
+      print('\x1B[31mException occurred while loading user details: $e');
       rethrow;
     }
   }
@@ -132,7 +136,8 @@ class AuthService {
         body: jsonEncode({'refresh': refreshToken}),
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
-        print("Can't connect to server. Refresh token request timed out.");
+        print(
+            "\x1B[31mCan't connect to server. Refresh token request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 
@@ -142,7 +147,7 @@ class AuthService {
 
         if (newAccessToken != null) {
           await prefs.setString('access_token', newAccessToken);
-          print('Access token refreshed successfully');
+          print('\x1B[32mAccess token refreshed successfully');
         } else {
           throw Exception('Failed to refresh access token');
         }
@@ -150,7 +155,7 @@ class AuthService {
         throw Exception('Failed to refresh access token');
       }
     } catch (e) {
-      print('Error refreshing access token: $e');
+      print('\x1B[31mError refreshing access token: $e');
       rethrow;
     }
   }
@@ -169,6 +174,6 @@ class AuthService {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('access_token');
     await prefs.remove('refresh_token');
-    print('User logged out successfully');
+    print('\x1B[32mUser logged out successfully');
   }
 }

@@ -5,9 +5,9 @@ import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/user_provider.dart';
-import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 
 @RoutePage()
@@ -77,9 +77,9 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
       }
     }
 
-    void signOut(BuildContext context) async {
+    void signOut() async {
       try {
-        print('Signing out...');
+        print('\x1B[33m------------SIGNING OUT------------');
 
         // Step 1: Get SharedPreferences instance for key-value data
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -89,53 +89,49 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
         // Step 3: Clear all preferences
         await prefs.clear();
-        print('Shared preferences cleared.');
+        print('\x1B[32mShared preferences cleared.');
 
         // Step 4: Restore the retained preferences (excluding liked clubs)
         if (validatedIp != null) {
           await prefs.setString('validatedIp', validatedIp);
-          print('Retained validatedIp: $validatedIp');
+          print('\x1B[32mRetained validatedIp: $validatedIp');
         }
 
         // Step 5: Clear liked clubs
         if (context.mounted) {
-          try {
-            print('Clearing liked clubs...');
-            ClubProvider clubProvider = context.read<ClubProvider>();
-            await clubProvider.deleteAllLiked();
-            print('Liked clubs cleared.');
-          } catch (e) {
-            print('Error clearing liked clubs: $e');
-          }
+          print('\x1B[33mClearing liked clubs...');
+          ClubProvider clubProvider = context.read<ClubProvider>();
+          await clubProvider.deleteAllLiked();
         }
 
         // Step 6: Clear bookings and reset flags
         if (context.mounted) {
           try {
-            print('Clearing bookings and resetting flags...');
+            print('\x1B[33mClearing bookings and resetting flags...');
             BookingProvider bookingProvider = context.read<BookingProvider>();
             bookingProvider.bookings.clear();
             bookingProvider.setLoading(false);
-            print('Bookings cleared, flags reset.');
+            print('\x1B[32mBookings cleared');
           } catch (e) {
-            print('Error clearing bookings or resetting flags: $e');
+            print('\x1B[31mError clearing bookings: $e');
           }
         }
 
         // Step 7: Set isAuthenticated to false
         if (context.mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = false;
-          print('User is authenticated flag set to false.');
+          print('\x1B[32m\'isAuthenticated\' flag set to false.');
         }
 
         // Step 8: Navigate to the Login page
         if (context.mounted) {
-          print('Navigating to the login page...');
+          print('\x1B[33mNavigating to the login page...');
           AutoRouter.of(context).replaceAll([const LoginRoute()]);
-          print('Navigation to login page successful.');
+          print('\x1B[32mNavigation to login page successful.');
         }
+        print('\x1B[32m------------SIGNED OUT------------');
       } catch (e) {
-        print('Error during sign out: $e');
+        print('\x1B[31mError during sign out: $e');
       }
     }
 
@@ -144,8 +140,9 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
+        appBar: _buildAppBar(context),
         backgroundColor: const Color(0xFF1D2428),
-        body: userDetails == null
+        body: userDetails.userID == -1
             ? const Center(child: CircularProgressIndicator())
             : ListView(
                 children: [
@@ -153,7 +150,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
+                      /*      Padding(
                         padding: EdgeInsets.only(top: screenHeight * 0.035),
                         child: SizedBox(
                           height: screenHeight * 0.06,
@@ -186,6 +183,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                           ),
                         ),
                       ),
+                   */
                       Container(
                         color: const Color(0xFF14181B),
                         padding: EdgeInsets.only(
@@ -333,7 +331,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                               child: GestureDetector(
                                 behavior: HitTestBehavior.translucent,
                                 onTap: () {
-                                  signOut(context);
+                                  signOut();
                                 },
                                 child: Container(
                                   height: screenHeight * 0.07,
@@ -368,6 +366,31 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                   ),
                 ],
               ),
+      ),
+    );
+  }
+
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+      elevation: 0,
+      title: const Text(
+        'ΠΡΟΦΙΛ',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 25,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      leading: IconButton(
+        icon: const Icon(
+          Icons.chevron_left,
+          color: Colors.white,
+          size: 30,
+        ),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
       ),
     );
   }

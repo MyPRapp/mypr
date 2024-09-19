@@ -19,9 +19,18 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    UserProvider userProvider = context.read<UserProvider>();
-    if (userProvider.userDetails!.userID < 0) {
-      userProvider.fetchUserDetailsFromServer();
+    if (mounted) {
+      UserProvider userProvider = context.read<UserProvider>();
+      if (userProvider.userDetails.userID < 0) {
+        userProvider.fetchUserDetailsFromServer();
+      }
+      if (mounted) {
+        BookingProvider bookingProvider = context.read<BookingProvider>();
+        if (bookingProvider.bookings.isEmpty) {
+          bookingProvider.fetchBookings(
+              userProvider.userDetails, context.read<ClubProvider>());
+        }
+      }
     }
   }
 
@@ -38,8 +47,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
 
     final userDetails = context.watch<UserProvider>().userDetails;
     return PopScope(
@@ -49,7 +58,7 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Scaffold(
           //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
           backgroundColor: const Color.fromARGB(195, 40, 40, 40),
-          body: userDetails == null
+          body: userDetails.userID == -1
               ? const Center(child: CircularProgressIndicator())
               : ListView(
                   physics: const AlwaysScrollableScrollPhysics(),

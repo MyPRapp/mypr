@@ -14,7 +14,7 @@ import '../global_components.dart';
 import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
-  UserInfoStruct? _userDetails = UserInfoStruct(
+  UserInfoStruct _userDetails = UserInfoStruct(
     userID: -1,
     username: '',
     firstName: '',
@@ -24,10 +24,7 @@ class UserProvider with ChangeNotifier {
     points: 0,
     photo: '',
   );
-  bool _isFetching = false;
-
-  UserInfoStruct? get userDetails => _userDetails;
-  bool get isFetching => _isFetching;
+  UserInfoStruct get userDetails => _userDetails;
 
   // Fetch user details from the server, save to shared preferences, and notify listeners
   Future<void> fetchUserDetailsFromServer() async {
@@ -35,13 +32,11 @@ class UserProvider with ChangeNotifier {
     String? token = prefs.getString('access_token');
 
     if (token == null) {
+      print('\x1B[31mNo access token found');
       throw Exception('No access token found');
     }
 
     try {
-      _isFetching = true;
-      notifyListeners();
-
       final response = await http.get(
         Uri.parse(
             'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
@@ -57,6 +52,7 @@ class UserProvider with ChangeNotifier {
 
         notifyListeners();
       } else {
+        print('\x1B[31mFailed to load user details');
         throw Exception('Failed to load user details');
       }
     } on TimeoutException catch (_) {
@@ -66,18 +62,15 @@ class UserProvider with ChangeNotifier {
     } catch (e) {
       await loadUserDetailsFromPreferences();
       throw Exception('Server unreachable, using cached data');
-    } finally {
-      _isFetching = false;
-      notifyListeners();
     }
   }
 
   // Save user details and photo to shared preferences
   Future<void> saveUserDetailsToPreferences() async {
-    if (_userDetails == null) return;
+    if (_userDetails.userID == -1) return;
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_details', jsonEncode(_userDetails!.toJson()));
+    await prefs.setString('user_details', jsonEncode(_userDetails.toJson()));
   }
 
   // Load user details and photo from shared preferences
@@ -88,24 +81,23 @@ class UserProvider with ChangeNotifier {
     if (userDetailsString != null) {
       _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
       await _loadCachedUserPhoto();
+      print('\x1B[32mLoaded user details from preferences');
       notifyListeners();
     }
   }
 
   // Cache user photo for faster loading later
   Future<void> _cacheUserPhoto() async {
-    if (_userDetails?.photo.isEmpty ?? true) return;
+    if (_userDetails.photo == '') return;
 
     String photoUrl =
-        'http://${GlobalStateProvider().validatedIp}:8000/${_userDetails!.photo}';
-    try {
-      final photoFile = await _downloadAndCompressImage(photoUrl);
-      if (photoFile.isNotEmpty) {
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('user_photo_path', photoFile);
-      }
-    } catch (e) {
-      print('Error caching user photo: $e');
+        'http://${GlobalStateProvider().validatedIp}:8000/${_userDetails.photo}';
+    final photoFile = await _downloadAndCompressImage(photoUrl);
+    if (photoFile.isNotEmpty && photoFile != '') {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_photo_path', photoFile);
+    } else {
+      print('\x1B[31mError caching user photo');
     }
   }
 
@@ -114,10 +106,10 @@ class UserProvider with ChangeNotifier {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userPhotoPath = prefs.getString('user_photo_path');
 
-    if (userPhotoPath != null && _userDetails != null) {
+    if (userPhotoPath != null && _userDetails.userID != -1) {
       File imageFile = File(userPhotoPath);
       if (await imageFile.exists()) {
-        _userDetails!.photo = userPhotoPath;
+        _userDetails.photo = userPhotoPath;
       }
     }
   }
@@ -137,17 +129,18 @@ class UserProvider with ChangeNotifier {
       List<int> jpegData = img.encodeJpg(compressedImage, quality: 85);
 
       final directory = await getApplicationDocumentsDirectory();
-      final filePath = '${directory.path}/user_photo.jpg';
+      final filePath = '${directory.path}/mypDirectory/user_photo.jpg';
       File file = File(filePath);
       await file.writeAsBytes(jpegData);
 
       return filePath;
     } catch (e) {
-      print('Error downloading/compressing image: $e');
+      print('\x1B[31mError downloading/compressing image: $e');
       return '';
     }
   }
 
+//TODO LOAD USER PHOTO HERE AND _LOAD CACHED USER PHOTO HIGHER IN THIS FILE
   // Load user photo from the local cache or server if not available
   Future<ImageProvider> loadUserPhoto(String photoPath) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

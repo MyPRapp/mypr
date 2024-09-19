@@ -267,7 +267,8 @@ class PackagesInfo extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Card(
-        color: const Color(0xFF9c0c04),
+        color: const Color.fromARGB(179, 85, 85, 85),
+        elevation: 20,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
@@ -351,8 +352,7 @@ class NameTextFieldState extends State<NameTextField> {
 
     // Initialize the text controller with the user's name from the provider
     final userDetails = context.read<UserProvider>().userDetails;
-    String initialName =
-        '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+    String initialName = '${userDetails.firstName} ${userDetails.lastName}';
 
     // Set the initial name in the provider if not already set
     if (reservationProvider.getInfo(1).isEmpty) {
@@ -399,8 +399,7 @@ class NameTextFieldState extends State<NameTextField> {
     String formattedName = formatName(nameController.text);
     if (formattedName.isEmpty) {
       final userDetails = context.read<UserProvider>().userDetails;
-      formattedName =
-          '${userDetails?.firstName ?? ''} ${userDetails?.lastName ?? ''}';
+      formattedName = '${userDetails.firstName} ${userDetails.lastName}';
     }
     reservationProvider.setInfo(1, formattedName);
     nameController.text = formattedName;
@@ -819,7 +818,7 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
     // Ensure we have pairs of month and day
     if (unavailablePairs.length % 2 != 0) {
       print(
-          'Invalid unavailableDays format: Each month must be paired with a day.');
+          '\x1B[31mInvalid unavailableDays format: Each month must be paired with a day.');
       return false;
     }
 
@@ -835,7 +834,7 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
         }
       } catch (e) {
         print(
-            'Invalid unavailableDays data: Unable to parse month/day at index $i');
+            '\x1B[31mInvalid unavailableDays data: Unable to parse month/day at index $i');
         return false;
       }
     }
@@ -860,7 +859,6 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        print(widget.unavailableDays);
         final now = DateTime.now();
         final lastDate = now.add(const Duration(days: 30));
 

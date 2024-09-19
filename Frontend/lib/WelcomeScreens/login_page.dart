@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -5,12 +7,13 @@ import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/auth_service.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Navigation/bottom_nav_bar.dart';
 import '../Providers/club_provider.dart';
 import '../Providers/user_provider.dart';
-import '../global_components.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -44,122 +47,125 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _checkPreferencesLoaded() async {
-    if (!mounted) {
-      return;
-    }
     final globalState = context.read<GlobalStateProvider>();
-
+    await createFilePath();
     while (!globalState.preferencesLoaded) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    print('Preferences loaded');
+    print('\x1B[32mGlobal state preferences loaded');
 
     await _startSyncingClubs();
-    await _startSyncingUser();
+    _startSyncingUser();
+  }
+
+  Future<void> createFilePath() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
+
+    // Create the new folder if it doesn't exist
+    if (await myprDirectory.exists() == false) {
+      await myprDirectory.create(recursive: true);
+      print('\x1B[32mFolder created: ${myprDirectory.path}');
+    } else {
+      print('\x1B[32mFolder ${myprDirectory.path} already exists');
+    }
   }
 
   Future<void> _startSyncingClubs() async {
-    print('//////SYNCING CLUBS');
-    if (mounted) {
-      await context.read<ClubProvider>().syncClubs();
-    }
-    print('//////SYNCED CLUBS');
+    print('\x1B[33m------------SYNCING CLUBS------------');
+    await context.read<ClubProvider>().syncClubs();
+    print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
   Future<void> _startSyncingUser() async {
-    print('//////SYNCING USER');
-    if (!mounted) {
-      return;
-    }
-    try {
-      final globalState = context.read<GlobalStateProvider>();
+    print('\x1B[33m------------SYNCING USER------------');
+    if (context.read<GlobalStateProvider>().isAuthenticated) {
+      print('\x1B[32mUSER AUTHENTICATED');
+      UserProvider userProvider = context.read<UserProvider>();
+      await _loadSavedUserCredentials();
 
-      if (globalState.isAuthenticated) {
-        print('USER AUTHENTICATED');
-        UserProvider userProvider = context.read<UserProvider>();
-        await _loadSavedUserCredentials();
+      if (_emailController.text.isNotEmpty &&
+          _passwordController.text.isNotEmpty) {
+        bool loginSuccess = await AuthService().login(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
 
-        if (_emailController.text.isNotEmpty &&
-            _passwordController.text.isNotEmpty) {
-          bool loginSuccess = await AuthService().login(
-            _emailController.text.trim(),
-            _passwordController.text.trim(),
-          );
-
-          if (loginSuccess) {
-            await userProvider.fetchUserDetailsFromServer();
-          } else {
-            print('Login failed, loading user details from preferences');
-            await userProvider.loadUserDetailsFromPreferences();
-          }
+        if (loginSuccess) {
+          await userProvider.fetchUserDetailsFromServer();
         } else {
+          print('\x1B[31mLogin failed, loading user details from preferences');
           await userProvider.loadUserDetailsFromPreferences();
         }
-        if (mounted) {
-          context.read<BookingProvider>().fetchBookings(
-              userProvider.userDetails, context.read<ClubProvider>());
-        }
-
-        if (mounted) {
-          context.read<BottomNavBarVisibility>().show();
-          context.router.replaceAll([const BottomNavBarRoute()]);
-        }
       } else {
-        print('USER NOT AUTHENTICATED');
-        setState(() {
-          _isLoading = false;
-        });
+        await userProvider.loadUserDetailsFromPreferences();
       }
-      print('//////SYNCED USER');
-    } catch (e) {
-      print('Error during user syncing: $e');
+      if (mounted) {
+        await context.read<BookingProvider>().fetchBookings(
+            userProvider.userDetails, context.read<ClubProvider>());
+      }
+
+      if (mounted) {
+        context.read<BottomNavBarVisibility>().show();
+        context.router.replaceAll([const BottomNavBarRoute()]);
+      }
+    } else {
+      print('\x1B[31mUSER NOT AUTHENTICATED');
       setState(() {
         _isLoading = false;
       });
     }
+    print('\x1B[32m------------SYNCED USER------------');
   }
 
   Future<void> _login() async {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
+      print('\x1B[32m------------LOGGING IN------------');
       setState(() {
         _isLoginPressed = true;
       });
+      bool success = false;
 
-      try {
-        bool success = await AuthService().login(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
+      success = await AuthService().login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
 
-        _startSyncingClubs();
-        if (success) {
-          if (mounted) {
-            await context.read<UserProvider>().fetchUserDetailsFromServer();
-          }
-          if (mounted) {
-            context.read<BookingProvider>().fetchBookings(
-                context.read<UserProvider>().userDetails,
-                context.read<ClubProvider>());
-          }
-          if (mounted) {
-            context.read<GlobalStateProvider>().isAuthenticated = true;
-          }
-
-          if (mounted) {
-            context.read<BottomNavBarVisibility>().show();
-            await context.router.replaceAll([const BottomNavBarRoute()]);
-          }
+      _startSyncingClubs();
+      if (success) {
+        if (mounted) {
+          floatingSnackBar(
+              message: 'Επιτυχής σύνδεση',
+              context: context,
+              duration: const Duration(milliseconds: 4000));
         }
-      } catch (e) {
-        print('Login failed: $e');
-        _handleLoginFailure();
-      } finally {
-        setState(() {
-          _isLoginPressed = false;
-        });
+
+        if (mounted) {
+          await context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
+        if (mounted) {
+          context.read<BookingProvider>().fetchBookings(
+              context.read<UserProvider>().userDetails,
+              context.read<ClubProvider>());
+        }
+        if (mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = true;
+        }
+
+        if (mounted) {
+          context.read<BottomNavBarVisibility>().show();
+          await context.router.replaceAll([const BottomNavBarRoute()]);
+          print('\x1B[32m------------LOGGED IN------------');
+        }
       }
+
+      _handleLoginFailure();
+      print('\x1B[31m------------LOGIN FAILED------------');
+      setState(() {
+        _isLoginPressed = false;
+      });
     } else {
       floatingSnackBar(
           message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
@@ -691,7 +697,7 @@ class ServerInputField extends StatelessWidget {
               final globalState = context.read<GlobalStateProvider>();
               globalState.validatedIp = serverIp;
               print(
-                  'Connecting to server at: http://${globalState.validatedIp}:8000/');
+                  '\x1B[33mConnecting to server at: http://${globalState.validatedIp}:8000/');
               floatingSnackBar(
                 message:
                     'Connecting to server at: http://${globalState.validatedIp}:8000/',

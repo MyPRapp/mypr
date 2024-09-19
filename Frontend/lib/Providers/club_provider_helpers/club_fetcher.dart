@@ -17,7 +17,7 @@ class ClubFetcher {
   ClubFetcher(this._clubManager, this._clubSaver);
 
   Future<void> fetchClubsAndCatalogues() async {
-    print('Fetching clubs from server');
+    print('\x1B[33mFetching clubs from server...');
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
 
@@ -48,10 +48,13 @@ class ClubFetcher {
         await _clubSaver.saveClubsToFile();
         await _clubSaver.saveCataloguesToFile();
       } else {
+        print(
+            '\x1B[31mError fetching clubs from server, loading from local storage');
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error fetching clubs from server, loading from local storage: $e');
+      print(
+          '\x1B[31mError fetching clubs from server, loading from local storage: $e');
       throw Exception('Failed to load clubs');
     }
   }
@@ -73,21 +76,21 @@ class ClubFetcher {
         return Uint8List.fromList(
             img.encodeJpg(resizedImage, quality: 85)); // Compress to JPEG
       } else {
-        throw Exception('Failed to load image: ${response.statusCode}');
+        throw Exception('\x1B[31mFailed to load image: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error downloading or compressing image: $e');
+      print('\x1B[31mError downloading or compressing image: $e');
       return null;
     }
   }
 
   Future<void> fetchCatalogues(ClubInfoStruct club) async {
     if (club.clubID <= 0) {
-      print('Invalid club ID');
+      print('\x1B[31mFetchCatalogues: Invalid club ID');
       return;
     }
 
-    print('Fetching catalogues for ${club.clubName} from server');
+    print('\x1B[33mFetching catalogues for ${club.clubName} from server...');
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/${club.clubID}/catalogue';
     try {
@@ -106,22 +109,22 @@ class ClubFetcher {
             _clubManager.addOrUpdateClub(club);
           }
         }
-        print('Fetched catalogues for ${club.clubName}');
       } else {
         throw Exception('Failed to load catalogues: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error fetching catalogues, loading from local storage: $e');
+      print(
+          '\x1B[31mError fetching catalogues, loading from local storage: $e');
     }
   }
 
   Future<void> fetchClub(int clubID) async {
     if (clubID <= 0) {
-      print('Invalid club ID');
+      print('\x1B[31mFetchClub: Invalid club ID');
       return;
     }
 
-    print('Fetching club with ID $clubID from server');
+    print('\x1B[33mFetching club with ID $clubID from server');
     final url =
         'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
     try {
@@ -148,15 +151,16 @@ class ClubFetcher {
 
           _clubManager.addOrUpdateClub(club);
           await _clubSaver.saveClubsToFile();
-          print('Club with ID $clubID fetched and updated.');
+          print('\x1B[32mClub with ID $clubID fetched and updated.');
         } else {
-          print('Club with ID $clubID not found');
+          print('\x1B[31mClub with ID $clubID not found');
         }
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Error fetching club from server, loading from local storage: $e');
+      print(
+          '\x1B[31mError fetching club from server, loading from local storage: $e');
     }
   }
 
@@ -170,7 +174,8 @@ class ClubFetcher {
         throw Exception('Failed to load image: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error downloading club photo, loading from local storage: $e');
+      print(
+          '\x1B[31mError downloading club photo, loading from local storage: $e');
       return null;
     }
   }

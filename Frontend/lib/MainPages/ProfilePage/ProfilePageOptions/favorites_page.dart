@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/club_provider.dart';
 import '../../../Widgets/home_page_widgets.dart';
 import '../../../global_components.dart';
@@ -21,17 +22,15 @@ class FavoritesPage extends StatelessWidget {
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
+        appBar: _buildAppBar(context, screenHeight, screenWidth),
         backgroundColor: const Color.fromARGB(155, 51, 51, 51),
         body: Selector<ClubProvider, List<ClubInfoStruct>>(
           selector: (context, clubProvider) => clubProvider.likedClubs,
           builder: (context, likedClubs, child) {
             return ListView.builder(
-              itemCount: likedClubs.length + 1, // +1 for the header
+              itemCount: likedClubs.length, // +1 for the header
               itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _buildHeader(context, screenHeight, screenWidth);
-                }
-                final club = likedClubs[index - 1];
+                final club = likedClubs[index];
                 if (index < likedClubs.length) {
                   return BigClubCard(
                     screenHeight: screenHeight,
@@ -60,73 +59,57 @@ class FavoritesPage extends StatelessWidget {
     );
   }
 
-  // Create a separate method for the header to keep the build method clean
-  Widget _buildHeader(
+  AppBar _buildAppBar(
       BuildContext context, double screenHeight, double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.only(
-          top: screenHeight * 0.035, bottom: screenHeight * 0.02),
-      child: SizedBox(
-        height: screenHeight * 0.06,
-        width: screenWidth * 2 / 3,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: Icon(
-                    Icons.chevron_left,
-                    color: Colors.white,
-                    size: screenHeight * 0.026 + screenWidth * 0.02,
-                  ),
-                ),
-                Text(
-                  'ΑΓΑΠΗΜΕΝΑ',
-                  style: TextStyle(
+    return AppBar(
+        backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+        elevation: 0,
+        title: const Text(
+          'ΑΓΑΠΗΜΕΝΑ',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.chevron_left,
+            color: Colors.white,
+            size: 30,
+          ),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.only(right: screenWidth * 0.01),
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () {
+                context.read<ClubProvider>().deleteAllLiked();
+              },
+              child: Container(
+                height: screenHeight * 0.05,
+                width: screenWidth / 3,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
                     color: const Color(0xFF9C0C04),
-                    fontSize: screenHeight * 0.026 + screenWidth * 0.02,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: screenWidth * 0.01),
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
-                  context.read<ClubProvider>().deleteAllLiked();
-                },
-                child: Container(
-                  height: screenHeight * 0.05,
-                  width: screenWidth / 3,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: const Color(0xFF9C0C04),
-                      border: Border.all(width: 2, color: Colors.black)),
-                  alignment: Alignment.center,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    'Αφαίρεση όλων',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.032,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black,
-                    ),
+                    border: Border.all(width: 2, color: Colors.black)),
+                alignment: Alignment.center,
+                child: Text(
+                  textAlign: TextAlign.center,
+                  'Αφαίρεση όλων',
+                  style: TextStyle(
+                    fontSize: screenWidth * 0.032,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ]);
   }
 }

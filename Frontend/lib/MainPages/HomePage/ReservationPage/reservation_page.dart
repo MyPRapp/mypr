@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
 import '../../../Providers/reservation_provider.dart';
@@ -81,7 +82,7 @@ class _ReservationPageState extends State<ReservationPage> {
     // Reset reservation data
     reservationProvider.resetInfo();
     reservationProvider.setInfo(2, widget.club.clubName); // Set club name
-    reservationProvider.setInfo(0, userDetails?.userID); // Set user ID
+    reservationProvider.setInfo(0, userDetails.userID); // Set user ID
 
     final clubProvider = context.read<ClubProvider>();
     // Fetch and initialize catalogues for the selected club
@@ -98,7 +99,7 @@ class _ReservationPageState extends State<ReservationPage> {
     });
 
     // Set the user's name in the form if available
-    if (userDetails != null && reservationProvider.getInfo(1).isEmpty) {
+    if (reservationProvider.getInfo(1).isEmpty) {
       String initialName =
           formatName('${userDetails.firstName} ${userDetails.lastName}');
       reservationProvider.setInfo(1, initialName);
@@ -113,7 +114,7 @@ class _ReservationPageState extends State<ReservationPage> {
           .refreshAccessToken(); // Ensure token is valid before retracting points
       await _pointsService.retractPoints(pointsToRetract);
     } catch (error) {
-      print("Failed to retract points: $error");
+      print("\x1B[31mFailed to retract points: $error");
     }
   }
 
@@ -164,7 +165,6 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
-    print('aa');
     final clubProvider = context.read<ClubProvider>();
 
     try {
@@ -182,7 +182,7 @@ class _ReservationPageState extends State<ReservationPage> {
       }
     } catch (error) {
       // Log error without additional snack bars
-      print("Failed to refresh catalogues: $error");
+      print("\x1B[31mFailed to refresh catalogues: $error");
     }
   }
 
@@ -205,6 +205,8 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
     return PopScope(
       canPop: buttonIsVisible,
       onPopInvokedWithResult: (didPop, result) {
@@ -213,78 +215,54 @@ class _ReservationPageState extends State<ReservationPage> {
         }
       }, // Restrict pop action based on button visibility
       child: Scaffold(
-        backgroundColor: Colors.black,
+        appBar: _buildAppBar(
+            context, widget.club.clubName, screenHeight, screenWidth),
+        backgroundColor: const Color.fromARGB(218, 43, 43, 43),
         body: RefreshIndicator(
           onRefresh: _refresh, // Handle refresh action
-          child: Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/otherPhotos/Untitled_Artwork.png'),
-                fit: BoxFit.fill,
-              ),
-            ),
-            child: ListView(
-              children: [
-                buildHeader(), // Build page header with club name
-                buildContent(), // Build form content and input fields
-              ],
-            ),
+          child: ListView(
+            children: [
+              // Build page header with club name
+              buildContent(), // Build form content and input fields
+            ],
           ),
         ),
       ),
     );
   }
 
-  /// Builds the header section with the club name and back button.
-  Widget buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 5, left: 10, right: 10),
-                child: IconButton(
-                  onPressed: () {
-                    if (buttonIsVisible) {
-                      context.read<BottomNavBarVisibility>().show();
-                      Navigator.pop(context);
-                    }
-                  },
-                  icon: const Icon(
-                    Icons.chevron_left,
-                    color: Colors.white,
-                    size: 35,
-                  ),
-                ),
-              ),
-              Text(
-                widget.club.clubName,
-                style: const TextStyle(
-                  color: Color(0xFF9C0C04),
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+  AppBar _buildAppBar(BuildContext context, String clubName,
+      double screenHeight, double screenWidth) {
+    return AppBar(
+        backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+        elevation: 0,
+        title: Text(
+          clubName,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 25,
+            fontWeight: FontWeight.bold,
           ),
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Container(
-              alignment: Alignment.centerRight,
-              //TODO Change screen dimensions given
-              child: LikeButton(
-                  club: widget.club,
-                  big: true,
-                  screenHeight: 40,
-                  screenWidth: 30),
-            ),
+        ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.chevron_left,
+            color: Colors.white,
+            size: 30,
           ),
-        ],
-      ),
-    );
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        actions: [
+          LikeButton(
+            club: widget.club,
+            big: true,
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+          ),
+          SizedBox(width: screenWidth * 0.02)
+        ]);
   }
 
   /// Builds the content section with form fields for reservation details.
@@ -426,7 +404,7 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Builds the discount checkbox if the user has enough points.
   Widget buildDiscountCheckbox() {
     final userDetails = context.read<UserProvider>().userDetails;
-    return userDetails!.points >= 20 && buttonIsVisible
+    return userDetails.points >= 20 && buttonIsVisible
         ? Row(
             children: [
               GestureDetector(
@@ -469,6 +447,7 @@ class _ReservationPageState extends State<ReservationPage> {
             width: double.infinity,
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  elevation: 20,
                   padding:
                       const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   shape: RoundedRectangleBorder(
@@ -504,8 +483,6 @@ class _ReservationPageState extends State<ReservationPage> {
       _showValidationError();
       return;
     }
-    printReservationInfo(context.read<ReservationProvider>().reservationInfo);
-
     if (mounted) {
       // Show the confirmation dialog
       showDialog(
@@ -521,6 +498,7 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget proceedConfirmationDialog() {
     ReservationProvider reservationProvider =
         context.read<ReservationProvider>();
+    printReservationInfo(reservationProvider.reservationInfo);
     void onConfirm() async {
       Navigator.of(context, rootNavigator: true).pop();
       setState(() {
@@ -534,7 +512,7 @@ class _ReservationPageState extends State<ReservationPage> {
         // Fetching catalogues, wrapped in a try-catch for error handling
         await ClubProvider().fetchCatalogues(widget.club);
       } catch (e) {
-        print("Failed to refresh access token or fetch catalogues");
+        print("\x1B[31mFailed to refresh access token or fetch catalogues");
         setState(() {
           buttonIsVisible = true;
         });
@@ -547,11 +525,11 @@ class _ReservationPageState extends State<ReservationPage> {
                 duration: const Duration(milliseconds: 1500));
           }
         } catch (e) {
-          print("Failed to show SnackBar: $e");
+          print("\x1B[31mFailed to show SnackBar: $e");
         }
 
         // Log error or handle failure in a way without more snack bars
-        print("Booking submission failed.");
+        print("\x1B[31mBooking submission failed.");
         return;
       }
 

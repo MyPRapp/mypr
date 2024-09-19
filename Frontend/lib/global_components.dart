@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ClubInfoStruct {
@@ -42,7 +41,7 @@ class ClubInfoStruct {
           clubPhoto: json['photo'] ?? '',
           clubNotAvailable: json['not_available'] ?? '');
     } catch (e) {
-      print('Error parsing ClubInfoStruct: $e');
+      print('\x1B[31mError parsing ClubInfoStruct: $e');
       return ClubInfoStruct(
           clubID: -1); // Return a default object with clubID -1
     }
@@ -97,7 +96,7 @@ class UserInfoStruct {
         photo: json['photo'] ?? '',
       );
     } catch (e) {
-      print('Error parsing UserInfoStruct: $e');
+      print('\x1B[31mError parsing UserInfoStruct: $e');
       return UserInfoStruct(
           userID: -1); // Return a default object with userID -1
     }
@@ -139,7 +138,7 @@ class CatalogueInfoStruct {
         maxPersons: json['max_person'] ?? -1,
       );
     } catch (e) {
-      print('Error parsing CatalogueInfoStruct: $e');
+      print('\x1B[31mError parsing CatalogueInfoStruct: $e');
       return CatalogueInfoStruct(
           clubID: -1,
           serviceType: '',
@@ -200,7 +199,7 @@ class BookingInfoStruct {
         status: json['status'] ?? 0,
       );
     } catch (e) {
-      print('Error parsing BookingInfoStruct: $e');
+      print('\x1B[31mError parsing BookingInfoStruct: $e');
       return BookingInfoStruct(
         bookingID: -1,
         userID: -1,
@@ -229,22 +228,6 @@ class BookingInfoStruct {
       'comments': comments,
       'status': status,
     };
-  }
-}
-
-class BottomNavBarVisibility extends ChangeNotifier {
-  bool _isVisible = false;
-
-  bool get isVisible => _isVisible;
-
-  void show() {
-    _isVisible = true;
-    notifyListeners();
-  }
-
-  void hide() {
-    _isVisible = false;
-    notifyListeners();
   }
 }
 
@@ -299,7 +282,7 @@ String formatName(String name) {
 }
 
 void printReservationInfo(List<dynamic> reservationInfo) {
-  print('Reservation Info:');
+  print('\x1B[37mReservation Info:');
   print('UserID: ${reservationInfo[0]}');
   print('ReservationName: ${reservationInfo[1]}');
   print('ClubName: ${reservationInfo[2]}');

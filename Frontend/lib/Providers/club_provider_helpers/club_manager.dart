@@ -21,7 +21,7 @@ class ClubManager with ChangeNotifier {
   // CLUB MANAGEMENT
   void addOrUpdateClub(ClubInfoStruct club) {
     if (club.clubID <= 0) {
-      print('AddOrUpdateClub: Invalid clubID: ${club.clubID}');
+      print('\x1B[31mAddOrUpdateClub: Invalid clubID: ${club.clubID}');
       return;
     }
 
@@ -32,23 +32,23 @@ class ClubManager with ChangeNotifier {
       if (index != -1) {
         // Club exists, update the existing entry
         _clubs[index] = club;
-        print('Club with clubID ${club.clubID} updated.');
+        print('\x1B[32m\'${club.clubName}\' is up to date.');
       } else {
         // Club does not exist, add it to the list
         _clubs.add(club);
-        print('New club with clubID ${club.clubID} added.');
+        print('\x1B[32mClub \'${club.clubName}\' added.');
       }
 
       _notifyListeners(); // Notify listeners that the club data has changed
     } catch (e) {
       // Catch any unexpected errors
-      print('Error in addOrUpdateClub for clubID ${club.clubID}: $e');
+      print('\x1B[31mError in addOrUpdateClub for clubID ${club.clubID}: $e');
     }
   }
 
   void removeClubWithClubCatalogues(int clubID) {
     if (clubID <= 0) {
-      print('RemoveClubWithClubCatalogues: Invalid clubID:: $clubID');
+      print('\x1B[31mRemoveClubWithClubCatalogues: Invalid clubID:: $clubID');
       return;
     }
     _clubs.removeWhere((club) => club.clubID == clubID);
@@ -72,10 +72,10 @@ class ClubManager with ChangeNotifier {
 
   void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
     if (catalogue.clubID <= 0) {
-      print('AddOrUpdateCatalogue: Invalid clubID: ${catalogue.clubID}');
+      print(
+          '\x1B[31mAddOrUpdateCatalogue: Invalid clubID: ${catalogue.clubID}');
       return;
     }
-
     try {
       // Try to find if the catalogue for the specific clubID and serviceType already exists
       int index = _catalogues.indexWhere((c) =>
@@ -86,18 +86,18 @@ class ClubManager with ChangeNotifier {
         // Catalogue exists, update the existing entry
         _catalogues[index] = catalogue;
         print(
-            'Catalogue for clubID ${catalogue.clubID} and serviceType ${catalogue.serviceType} updated.');
+            '\x1B[32m${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} are up to date.');
       } else {
         // Catalogue does not exist, add it to the list
         _catalogues.add(catalogue);
         print(
-            'New catalogue for clubID ${catalogue.clubID} and serviceType ${catalogue.serviceType} added.');
+            '\x1B[32m${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} added.');
       }
-
       _notifyListeners(); // Notify listeners that the catalogues data has changed
     } catch (e) {
       // Catch any unexpected errors during the operation
-      print('Error in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
+      print(
+          '\x1B[31mError in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
     }
   }
 
@@ -134,9 +134,9 @@ class ClubManager with ChangeNotifier {
       await prefs.remove('likedClubs');
       _likedClubIDs.clear();
       notifyListeners();
-      print('Liked clubs cleared from SharedPreferences.');
+      print('\x1B[32mLiked clubs cleared from SharedPreferences.');
     } catch (e) {
-      print('Error clearing liked clubs: $e');
+      print('\x1B[31mError clearing liked clubs: $e');
     }
     _notifyListeners();
   }
@@ -197,7 +197,7 @@ class ClubManager with ChangeNotifier {
         return;
       }
     }
-    print('ClubID not found!');
+    print('\x1B[31mClubID not found!');
   }
 
   void printClubWithName(String clubName) {
@@ -208,7 +208,7 @@ class ClubManager with ChangeNotifier {
         return;
       }
     }
-    print('ClubName not found!');
+    print('\x1B[31mClubName not found!');
   }
 
   void printAllCatalogues() {

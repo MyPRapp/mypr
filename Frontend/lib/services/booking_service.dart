@@ -26,7 +26,7 @@ class BookingService {
       String time, String numberOfPeople, String comments) async {
     String? accessToken = await _getAccessToken();
     if (accessToken == null) {
-      print('Access token is null. User is not authenticated.');
+      print('\x1B[31mAccess token is null. User is not authenticated.');
       return false;
     }
 
@@ -48,19 +48,19 @@ class BookingService {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        print("Can't connect to server. Request timed out.");
+        print("\x1B[31mCan't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 
       if (response.statusCode == 201) {
-        print('Booking successful');
+        print('\x1B[32mBooking successful');
         return true;
       } else {
-        print('Booking failed: ${response.body}');
+        print('\x1B[31mBooking failed: ${response.body}');
         return false;
       }
     } catch (e) {
-      print("Booking failed: $e");
+      print("\x1B[31mBooking failed: $e");
       return false;
     }
   }
@@ -68,7 +68,7 @@ class BookingService {
   Future<List<dynamic>?> getBookings() async {
     String? accessToken = await _getAccessToken();
     if (accessToken == null) {
-      print('Access token is null. User is not authenticated.');
+      print('\x1B[31mAccess token is null. User is not authenticated.');
       return null;
     }
 
@@ -79,20 +79,26 @@ class BookingService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-      ).timeout(const Duration(seconds: 5), onTimeout: () {
-        print("Can't connect to server. Request timed out.");
-        return http.Response('Error: Timeout', 408); // 408 Request Timeout
-      });
+      ).timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          print("\x1B[31mCan't connect to server. Request timed out.");
+          return http.Response('Error: Timeout', 408); // 408 Request Timeout
+        },
+      );
 
       if (response.statusCode == 200) {
-        print('Booking retrieval successful');
-        return jsonDecode(response.body) as List<dynamic>;
+        print('\x1B[32mBooking retrieval successful');
+
+        // Decode using utf8 to handle non-ASCII characters properly
+        final decodedBody = utf8.decode(response.bodyBytes);
+        return jsonDecode(decodedBody) as List<dynamic>;
       } else {
-        print('Booking retrieval failed: ${response.body}');
+        print('\x1B[31mBooking retrieval failed: ${response.body}');
         return null;
       }
     } catch (e) {
-      print("Booking retrieval failed: $e");
+      print("\x1B[31mBooking retrieval failed: $e");
       return null;
     }
   }

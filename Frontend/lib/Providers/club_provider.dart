@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../global_components.dart';
 import 'club_provider_helpers/club_fetcher.dart';
@@ -23,16 +22,9 @@ class ClubProvider with ChangeNotifier {
   ClubProvider() {
     _clubManager =
         ClubManager(_clubs, _catalogues, _likedClubIDs, notifyListeners);
-    _clubLoader = ClubLoader(
-      _clubs,
-      _catalogues,
-      _likedClubIDs,
-    );
+    _clubLoader = ClubLoader(_clubs, _catalogues, _likedClubIDs);
     _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs);
-    _clubFetcher = ClubFetcher(
-      _clubManager,
-      _clubSaver,
-    );
+    _clubFetcher = ClubFetcher(_clubManager, _clubSaver);
   }
 
   // Syncs clubs from the server, loads from file if fetch fails
@@ -40,10 +32,6 @@ class ClubProvider with ChangeNotifier {
     try {
       await _clubFetcher.fetchClubsAndCatalogues(); // Fetch from server
     } catch (e) {
-      // Load from local files if fetch fails (offline mode)
-      final directory = await getApplicationDocumentsDirectory();
-      print("Directory path: ${directory.path}");
-
       await _clubLoader.loadClubsFromFile();
       await _clubLoader.loadCataloguesFromFile();
     }

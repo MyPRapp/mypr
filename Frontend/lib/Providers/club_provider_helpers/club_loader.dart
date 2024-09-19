@@ -16,7 +16,15 @@ class ClubLoader {
 
   Future<String> _getFilePath(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/$fileName.json';
+    final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
+
+    // Create the new folder if it doesn't exist
+    if (await myprDirectory.exists() == false) {
+      await myprDirectory.create(recursive: true);
+      print('\x1B[32mFolder created: ${myprDirectory.path}');
+    }
+
+    return '${directory.path}/mypDirectory/$fileName.json';
   }
 
   Future<void> loadClubsFromFile() async {
@@ -30,9 +38,9 @@ class ClubLoader {
       _clubs.clear();
       _clubs.addAll(
           clubsList.map((json) => ClubInfoStruct.fromJson(json)).toList());
-      print('Clubs loaded from $filePath');
+      print('\x1B[32mClubs loaded from $filePath');
     } else {
-      print('Clubs file does not exist');
+      print('\x1B[31mClubs file does not exist');
     }
   }
 
@@ -49,22 +57,22 @@ class ClubLoader {
           .map((json) => CatalogueInfoStruct.fromJson(json))
           .toList());
 
-      print('Catalogues loaded from $filePath');
+      print('\x1B[32mCatalogues loaded from $filePath');
     } else {
-      print('Catalogues file does not exist');
+      print('\x1B[31mCatalogues file does not exist');
     }
   }
 
   Future<Uint8List?> loadClubPhotoFromFile(int clubID) async {
     final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/club_photo_$clubID.png';
+    final filePath = '${directory.path}/mypDirectory/club_photo_$clubID.png';
 
     File file = File(filePath);
 
     if (await file.exists()) {
       return await file.readAsBytes();
     } else {
-      print('Photo for club ID $clubID not found');
+      print('\x1B[31mPhoto for club ID $clubID not found');
       return null;
     }
   }
@@ -76,9 +84,9 @@ class ClubLoader {
     _likedClubIDs.clear();
     if (likedClubIDs != null) {
       _likedClubIDs.addAll(likedClubIDs.map((id) => int.parse(id)));
-      print('Liked clubs loaded from preferences.');
+      print('\x1B[32mLiked clubs loaded from preferences.');
     } else {
-      print('No liked clubs found in preferences.');
+      print('\x1B[32mNo liked clubs found in preferences.');
     }
   }
 }

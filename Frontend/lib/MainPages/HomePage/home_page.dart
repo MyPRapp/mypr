@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
-import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 
+import '../../Navigation/bottom_nav_bar.dart';
 import '../../Providers/club_provider.dart';
 import '../../Providers/user_provider.dart';
 import '../../routes/app_router.gr.dart';
@@ -23,22 +23,23 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!context.read<GlobalStateProvider>().isAuthenticated ||
-          context.read<UserProvider>().userDetails!.userID < 0) {
-        context.read<BottomNavBarVisibility>().show();
+          context.read<UserProvider>().userDetails.userID < 0) {
         context.read<BottomNavBarVisibility>().hide();
         context.read<GlobalStateProvider>().isAuthenticated = false;
         context.router.replaceAll([const LoginRoute()]);
       } else {
         context.read<BottomNavBarVisibility>().show();
       }
+      if (context.read<ClubProvider>().allClubs.isEmpty) {
+        _syncClubs();
+      }
     });
   }
 
   Future<void> _syncClubs() async {
-    ClubProvider clubProvider = context.read<ClubProvider>();
-    await clubProvider.syncClubs();
-    print('state setted');
-    setState(() {});
+    print('\x1B[33m------------SYNCING CLUBS------------');
+    await context.read<ClubProvider>().syncClubs();
+    print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
   void navigateToSearchTab(BuildContext context) {
@@ -160,6 +161,7 @@ class _HomePageState extends State<HomePage> {
                         itemCount: clubProvider.allClubs.length,
                         itemBuilder: (context, index) {
                           final club = clubProvider.allClubs[index];
+
                           return BigClubCard(
                             club: club,
                             screenHeight: screenHeight,

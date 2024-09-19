@@ -38,8 +38,8 @@ class _SmallClubCardState extends State<SmallClubCard> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
 
     return GestureDetector(
       onTap: () {
@@ -164,8 +164,8 @@ class _BigClubCardState extends State<BigClubCard> {
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(widget.club.clubAvailability);
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,

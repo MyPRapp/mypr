@@ -8,6 +8,7 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Navigation/bottom_nav_bar.dart';
 import '../Providers/club_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
@@ -296,7 +297,7 @@ class _SignUpPageState extends State<SignUpPage> {
         }
       }
     } catch (e) {
-      print('Login failed: $e');
+      print('\x1B[31mLogin failed: $e');
       _showSnackBar('Υπήρξε κάποιο σφάλμα κατά την είσοδο στην εφαρμογή');
     } finally {
       setState(() {
@@ -307,9 +308,9 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _startSyncingClubs() async {
-    print('//////SYNCING CLUBS');
+    print('\x1B[33m------------SYNCING CLUBS------------');
     await context.read<ClubProvider>().syncClubs();
-    print('//////SYNCED CLUBS');
+    print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
   void _showSnackBar(String message) {
@@ -321,8 +322,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double screenWidth = MediaQuery.sizeOf(context).width;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
@@ -343,9 +344,9 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
               LoginHeader(
-                  screenWidth: MediaQuery.of(context).size.width,
-                  screenHeight: MediaQuery.of(context).size.height),
-              LoginLogo(screenHeight: MediaQuery.of(context).size.height),
+                  screenWidth: MediaQuery.sizeOf(context).width,
+                  screenHeight: MediaQuery.sizeOf(context).height),
+              LoginLogo(screenHeight: MediaQuery.sizeOf(context).height),
               Expanded(
                 child: _SignUpForm(
                   phoneValidating: _phoneValidating,

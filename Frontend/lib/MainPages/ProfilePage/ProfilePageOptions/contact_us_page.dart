@@ -8,6 +8,7 @@ import 'package:mypr/Providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/global_state_provider.dart';
 import '../../../global_components.dart';
 import '../../../services/auth_service.dart';
@@ -49,7 +50,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         await launchUrl(instagramWebUri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('Could not launch Instagram: $e');
+      print('\x1B[31mCould not launch Instagram: $e');
     }
   }
 
@@ -67,22 +68,22 @@ class _ContactUsPageState extends State<ContactUsPage> {
     final screenWidth = MediaQuery.sizeOf(context).width;
 
     UserInfoStruct? userProvider = context.read<UserProvider>().userDetails;
-    nameController.text =
-        '${userProvider?.firstName} ${userProvider?.lastName}';
-    emailController.text = userProvider!.email;
+    nameController.text = '${userProvider.firstName} ${userProvider.lastName}';
+    emailController.text = userProvider.email;
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
+          appBar: _buildAppBar(context),
           backgroundColor: const Color.fromARGB(200, 37, 37, 37),
           body: ListView(
             children: [
               Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Padding(
+                  /*        Padding(
                     padding: EdgeInsets.only(top: screenHeight * 0.035),
                     child: SizedBox(
                       height: screenHeight * 0.06,
@@ -114,6 +115,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                       ),
                     ),
                   ),
+               */
                   Column(
                     children: [
                       Padding(
@@ -286,6 +288,31 @@ class _ContactUsPageState extends State<ContactUsPage> {
     );
   }
 
+  AppBar _buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+      elevation: 0,
+      title: const Text(
+        'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      leading: IconButton(
+        icon: const Icon(
+          Icons.chevron_left,
+          color: Colors.white,
+          size: 30,
+        ),
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
   Future<void> _showConfirmationDialog(BuildContext context) async {
     final result = await showDialog<bool>(
       context: context,
@@ -360,13 +387,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        print('Error on email sending: Timeout exception');
+        print('\x1B[31mError on email sending: Timeout exception');
         return http.Response('Error: Timeout', 408);
       });
 
       if (response.statusCode == 200) {
         if (mounted) {
-          print('Email sent successfully');
+          print('\x1B[32mEmail sent successfully');
           floatingSnackBar(
             message: 'Το μήνυμα στάλθηκε',
             context: context,
@@ -374,7 +401,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }
       } else {
         if (mounted) {
-          print('Error on email sending');
+          print('\x1B[31mError on email sending');
           floatingSnackBar(
             message: 'Σφάλμα κατά την αποστολή του μηνύματος',
             context: context,

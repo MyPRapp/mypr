@@ -36,8 +36,8 @@ class BookingDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = MediaQuery.sizeOf(context).width;
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
     final earnedPoints = (booking.price * 0.1).toInt();
 
@@ -63,6 +63,7 @@ class BookingDetailsPage extends StatelessWidget {
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

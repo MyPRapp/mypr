@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
+
+import '../Navigation/bottom_nav_bar.dart';
 
 class PresentationPage extends StatefulWidget {
   const PresentationPage({super.key});

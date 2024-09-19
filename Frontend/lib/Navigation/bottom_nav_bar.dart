@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
-import '../global_components.dart';
-
 @RoutePage()
 class BottomNavBarPage extends StatefulWidget {
   const BottomNavBarPage({super.key});
@@ -90,5 +88,21 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
         );
       },
     );
+  }
+}
+
+class BottomNavBarVisibility extends ChangeNotifier {
+  bool _isVisible = false;
+
+  bool get isVisible => _isVisible;
+
+  void show() {
+    _isVisible = true;
+    notifyListeners();
+  }
+
+  void hide() {
+    _isVisible = false;
+    notifyListeners();
   }
 }
