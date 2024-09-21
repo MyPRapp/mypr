@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
+import '../../../Providers/user_provider.dart';
 import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 
@@ -31,6 +32,9 @@ class _MyBookingsPageState extends State<MyBookingsPage>
     // Delay fetchBookings until after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
+      BookingProvider bookingProvider = context.read<BookingProvider>();
+      bookingProvider.fetchBookings(context.read<UserProvider>().userDetails,
+          context.read<ClubProvider>());
     });
   }
 

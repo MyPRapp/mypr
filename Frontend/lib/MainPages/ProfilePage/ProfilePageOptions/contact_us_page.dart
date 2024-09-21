@@ -375,7 +375,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
       final response = await http
           .post(
         Uri.parse(
-            'http://${GlobalStateProvider().validatedIp}:8000/api/send-email/'),
+            'http://${GlobalStateProvider().validatedIp}/api/send-email/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',

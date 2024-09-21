@@ -35,7 +35,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-    _checkPreferencesLoaded();
+
+    _initializeApp();
   }
 
   @override
@@ -46,17 +47,34 @@ class _LoginPageState extends State<LoginPage> {
     _serverController.dispose();
   }
 
-  Future<void> _checkPreferencesLoaded() async {
-    final globalState = context.read<GlobalStateProvider>();
+  Future<void> _initializeApp() async {
     await createFilePath();
-    while (!globalState.preferencesLoaded) {
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
+    if (mounted) {
+      context.read<ClubProvider>().loadClubsFromFile();
+      await context.read<ClubProvider>().loadCataloguesFromFile();
 
+      if (mounted) {
+        final globalState = context.read<GlobalStateProvider>();
+        while (!globalState.preferencesLoaded) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+      }
+    }
     print('\x1B[32mGlobal state preferences loaded');
 
-    await _startSyncingClubs();
-    _startSyncingUser();
+    if (mounted) {
+      if (context.read<GlobalStateProvider>().isAuthenticated) {
+        print('\x1B[32m------------USER AUTHENTICATED------------');
+
+        _startSyncingClubs();
+        _startSyncingUser();
+      } else {
+        print('\x1B[31m------------USER NOT AUTHENTICATED------------');
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   Future<void> createFilePath() async {
@@ -80,41 +98,33 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _startSyncingUser() async {
     print('\x1B[33m------------SYNCING USER------------');
-    if (context.read<GlobalStateProvider>().isAuthenticated) {
-      print('\x1B[32mUSER AUTHENTICATED');
-      UserProvider userProvider = context.read<UserProvider>();
-      await _loadSavedUserCredentials();
 
-      if (_emailController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty) {
-        bool loginSuccess = await AuthService().login(
-          _emailController.text.trim(),
-          _passwordController.text.trim(),
-        );
+    UserProvider userProvider = context.read<UserProvider>();
+    await userProvider.loadUserDetailsFromPreferences();
+    if (mounted) {
+      context.read<BottomNavBarVisibility>().show();
+      context.router.replaceAll([const BottomNavBarRoute()]);
+    }
 
-        if (loginSuccess) {
-          await userProvider.fetchUserDetailsFromServer();
-        } else {
-          print('\x1B[31mLogin failed, loading user details from preferences');
-          await userProvider.loadUserDetailsFromPreferences();
-        }
+    await _loadSavedUserCredentials();
+
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      bool loginSuccess = await AuthService().login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (loginSuccess) {
+        await userProvider.fetchUserDetailsFromServer();
       } else {
+        print('\x1B[31mLogin failed, loading user details from preferences');
         await userProvider.loadUserDetailsFromPreferences();
       }
       if (mounted) {
         await context.read<BookingProvider>().fetchBookings(
             userProvider.userDetails, context.read<ClubProvider>());
       }
-
-      if (mounted) {
-        context.read<BottomNavBarVisibility>().show();
-        context.router.replaceAll([const BottomNavBarRoute()]);
-      }
-    } else {
-      print('\x1B[31mUSER NOT AUTHENTICATED');
-      setState(() {
-        _isLoading = false;
-      });
     }
     print('\x1B[32m------------SYNCED USER------------');
   }
@@ -133,36 +143,35 @@ class _LoginPageState extends State<LoginPage> {
         _passwordController.text.trim(),
       );
 
-      _startSyncingClubs();
       if (success) {
+        if (mounted) {
+          await context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
+        if (mounted) {
+          context.read<BottomNavBarVisibility>().show();
+          await context.router.replaceAll([const BottomNavBarRoute()]);
+        }
+        _startSyncingClubs();
         if (mounted) {
           floatingSnackBar(
               message: 'Επιτυχής σύνδεση',
               context: context,
               duration: const Duration(milliseconds: 4000));
         }
-
         if (mounted) {
-          await context.read<UserProvider>().fetchUserDetailsFromServer();
+          context.read<GlobalStateProvider>().isAuthenticated = true;
         }
         if (mounted) {
           context.read<BookingProvider>().fetchBookings(
               context.read<UserProvider>().userDetails,
               context.read<ClubProvider>());
         }
-        if (mounted) {
-          context.read<GlobalStateProvider>().isAuthenticated = true;
-        }
 
-        if (mounted) {
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const BottomNavBarRoute()]);
-          print('\x1B[32m------------LOGGED IN------------');
-        }
+        print('\x1B[32m------------LOGGED IN------------');
+      } else {
+        _handleLoginFailure();
+        print('\x1B[31m------------LOGIN FAILED------------');
       }
-
-      _handleLoginFailure();
-      print('\x1B[31m------------LOGIN FAILED------------');
       setState(() {
         _isLoginPressed = false;
       });
@@ -697,10 +706,10 @@ class ServerInputField extends StatelessWidget {
               final globalState = context.read<GlobalStateProvider>();
               globalState.validatedIp = serverIp;
               print(
-                  '\x1B[33mConnecting to server at: http://${globalState.validatedIp}:8000/');
+                  '\x1B[33mConnecting to server at: http://${globalState.validatedIp}/');
               floatingSnackBar(
                 message:
-                    'Connecting to server at: http://${globalState.validatedIp}:8000/',
+                    'Connecting to server at: http://${globalState.validatedIp}/',
                 context: context,
                 duration: const Duration(milliseconds: 1500),
               );

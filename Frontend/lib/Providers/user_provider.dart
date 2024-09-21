@@ -38,8 +38,7 @@ class UserProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse(
-            'http://${GlobalStateProvider().validatedIp}:8000/api/user/print'),
+        Uri.parse('http://${GlobalStateProvider().validatedIp}/api/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       ).timeout(const Duration(seconds: 5));
 
@@ -90,8 +89,7 @@ class UserProvider with ChangeNotifier {
   Future<void> _cacheUserPhoto() async {
     if (_userDetails.photo == '') return;
 
-    String photoUrl =
-        'http://${GlobalStateProvider().validatedIp}:8000/${_userDetails.photo}';
+    String photoUrl = _userDetails.photo;
     final photoFile = await _downloadAndCompressImage(photoUrl);
     if (photoFile.isNotEmpty && photoFile != '') {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -118,6 +116,7 @@ class UserProvider with ChangeNotifier {
   Future<String> _downloadAndCompressImage(String imageUrl) async {
     try {
       final response = await http.get(Uri.parse(imageUrl));
+
       if (response.statusCode != 200) return '';
 
       Uint8List imageBytes = response.bodyBytes;
@@ -154,6 +153,6 @@ class UserProvider with ChangeNotifier {
     }
 
     return CachedNetworkImageProvider(
-        'http://${GlobalStateProvider().validatedIp}:8000/$photoPath');
+        'http://${GlobalStateProvider().validatedIp}/$photoPath');
   }
 }
