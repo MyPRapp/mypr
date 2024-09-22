@@ -39,14 +39,12 @@ class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
   BookingDetailsRoute({
     _i17.Key? key,
     required _i18.BookingInfoStruct booking,
-    bool isHistory = false,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           BookingDetailsRoute.name,
           args: BookingDetailsRouteArgs(
             key: key,
             booking: booking,
-            isHistory: isHistory,
           ),
           initialChildren: children,
         );
@@ -60,7 +58,6 @@ class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
       return _i1.BookingDetailsPage(
         key: args.key,
         booking: args.booking,
-        isHistory: args.isHistory,
       );
     },
   );
@@ -70,18 +67,15 @@ class BookingDetailsRouteArgs {
   const BookingDetailsRouteArgs({
     this.key,
     required this.booking,
-    this.isHistory = false,
   });
 
   final _i17.Key? key;
 
   final _i18.BookingInfoStruct booking;
 
-  final bool isHistory;
-
   @override
   String toString() {
-    return 'BookingDetailsRouteArgs{key: $key, booking: $booking, isHistory: $isHistory}';
+    return 'BookingDetailsRouteArgs{key: $key, booking: $booking}';
   }
 }
 

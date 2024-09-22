@@ -88,7 +88,8 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           } else if (status == 1) {
             return booking.status == 1; // Pending (Εκκρεμείς)
           } else if (status == 2) {
-            return booking.status == 2; // History (Ιστορικό)
+            return booking.status == 2 ||
+                booking.status == 3; // History (Ιστορικό)
           } else {
             return false; // Exclude bookings with status 3 (Error or undefined)
           }
@@ -190,13 +191,9 @@ class BookingCard extends StatelessWidget {
     int premium = double.parse(booking.fourbitString[2]).toInt();
     return GestureDetector(
       onTap: () {
-        final isHistory = booking.status == 2 ||
-            booking.date
-                .isBefore(DateTime.now().subtract(const Duration(days: 1)));
         AutoRouter.of(context).push(
           BookingDetailsRoute(
             booking: booking,
-            isHistory: isHistory,
           ),
         );
       },

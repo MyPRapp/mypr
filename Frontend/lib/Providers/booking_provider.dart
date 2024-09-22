@@ -100,9 +100,12 @@ class BookingProvider with ChangeNotifier {
   int _determineStatus(String status, String bookedAt) {
     final DateTime bookingDate = DateTime.parse(bookedAt);
 
-    if (bookingDate
-        .isBefore(DateTime.now().subtract(const Duration(days: 1)))) {
-      return 2; // History (Ιστορικό)
+    if (bookingDate.isBefore(DateTime.now())) {
+      if (status == 'Pending') {
+        return 3;
+      } else {
+        return 2; // History (Ιστορικό)
+      }
     } else if (status == 'Pending') {
       return 1; // Pending (Εκκρεμείς)
     } else if (status == 'Done') {

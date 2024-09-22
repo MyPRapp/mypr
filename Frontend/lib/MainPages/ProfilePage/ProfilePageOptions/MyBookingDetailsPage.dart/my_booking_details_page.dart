@@ -13,12 +13,10 @@ import '../../../../routes/app_router.gr.dart';
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
   final BookingInfoStruct booking;
-  final bool isHistory;
 
   const BookingDetailsPage({
     super.key,
     required this.booking,
-    this.isHistory = false,
   });
 
   List<int> extractThreeBits(String bitString) {
@@ -87,7 +85,7 @@ class BookingDetailsPage extends StatelessWidget {
                   children: [
                     _buildPriceDetails(earnedPoints, discountPercentage),
                     SizedBox(height: screenHeight * 0.03), // 3% height
-                    if (isHistory)
+                    if (booking.status == 2)
                       _buildHistoryBottomSection(context, clubName)
                     else
                       _buildRegularBottomSection(context),

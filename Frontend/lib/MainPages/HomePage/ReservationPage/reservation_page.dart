@@ -745,6 +745,9 @@ class _ReservationPageState extends State<ReservationPage> {
       }
 
       if (mounted) {
+        setState(() {
+          buttonIsVisible = true; // Show the button again
+        });
         // Show the confirmation dialog and wait for the result
         final bool? result = await reservationReviewDialog();
 
@@ -754,10 +757,6 @@ class _ReservationPageState extends State<ReservationPage> {
             context.read<BottomNavBarVisibility>().show();
             Navigator.pop(context); // Navigate back to the previous page
           }
-        } else {
-          setState(() {
-            buttonIsVisible = true; // Show the button again
-          });
         }
       }
     } else {
