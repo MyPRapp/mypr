@@ -221,18 +221,24 @@ class _LoginPageState extends State<LoginPage> {
       return const LoadingScreen();
     }
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: LoginBody(
-        screenHeight: screenHeight,
-        screenWidth: screenWidth,
-        isLoginPressed: _isLoginPressed,
-        emailController: _emailController,
-        passwordController: _passwordController,
-        serverController: _serverController,
-        obscureText: _obscureText,
-        onLogin: _login,
-        onTogglePasswordVisibility: _togglePasswordVisibility,
+    return PopScope(
+      canPop: false,
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          body: LoginBody(
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            isLoginPressed: _isLoginPressed,
+            emailController: _emailController,
+            passwordController: _passwordController,
+            serverController: _serverController,
+            obscureText: _obscureText,
+            onLogin: _login,
+            onTogglePasswordVisibility: _togglePasswordVisibility,
+          ),
+        ),
       ),
     );
   }
@@ -292,46 +298,75 @@ class LoginBody extends StatelessWidget {
       height: screenHeight,
       width: screenWidth,
       color: Colors.black,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
+      child: ListView(
         children: [
-          //HEADER: TOP PICTURE AND LOGO PICTURE
+          LoginLogo(screenHeight: screenHeight),
+          SizedBox(height: screenHeight / 10),
           Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
             children: [
-              LoginHeader(
-                screenWidth: screenWidth,
+              LoginTextField(
                 screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                controller: emailController,
+                hintText: 'Email/Τηλέφωνο(+30)',
+                isLoginPressed: isLoginPressed,
               ),
-              LoginLogo(screenHeight: screenHeight),
+              SizedBox(height: screenHeight * 0.02),
+              Container(
+                width: screenWidth * 0.85,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: const Color.fromARGB(133, 168, 168, 168)),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        readOnly: isLoginPressed,
+                        controller: passwordController,
+                        obscureText: obscureText,
+                        cursorColor: const Color.fromARGB(125, 244, 67, 54),
+                        style: TextStyle(
+                          fontSize: screenHeight * screenWidth * 0.000052,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.all(screenWidth * 0.02),
+                          hintText: 'Κωδικός',
+                          hintStyle: TextStyle(
+                            fontSize: screenHeight * screenWidth * 0.000052,
+                            fontWeight: FontWeight.w600,
+                            color: const Color.fromARGB(132, 199, 199, 199),
+                          ),
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: onTogglePasswordVisibility,
+                      icon: Icon(
+                        size: screenHeight * 0.03,
+                        obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: const Color(0xFF9C0C04),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          //LOGIN FORM AND LOGIN BUTTON
-          Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                LoginForm(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  emailController: emailController,
-                  passwordController: passwordController,
-                  obscureText: obscureText,
-                  isLoginPressed: isLoginPressed,
-                  onTogglePasswordVisibility: onTogglePasswordVisibility,
-                ),
-                LoginFooter(
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  isLoginPressed: isLoginPressed,
-                  onLogin: onLogin,
-                  serverController: serverController,
-                ),
-                SizedBox(height: screenHeight / 100)
-              ],
-            ),
+          SizedBox(height: screenHeight / 10),
+          LoginFooter(
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            isLoginPressed: isLoginPressed,
+            onLogin: onLogin,
+            serverController: serverController,
           ),
+          ForgotPasswordAndSignUp(
+              isLoginPressed: isLoginPressed,
+              screenHeight: screenHeight,
+              screenWidth: screenWidth),
         ],
       ),
     );
@@ -351,7 +386,7 @@ class LoginHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: screenHeight / 15, // Set the height to screenHeight / 15
+      height: screenHeight / 12, // Set the height to screenHeight / 15
       width: screenWidth, // Full width
       child: ShaderMask(
         shaderCallback: (Rect bounds) {
@@ -360,7 +395,7 @@ class LoginHeader extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Colors.white, // Opaque at the top
-              Color.fromARGB(0, 0, 0, 0), // Fully transparent at the bottom
+              Color.fromARGB(14, 0, 0, 0), // Fully transparent at the bottom
             ],
             stops: [0.4, 1], // Control where the fade starts and ends
           ).createShader(bounds);
@@ -392,97 +427,6 @@ class LoginLogo extends StatelessWidget {
   }
 }
 
-class LoginForm extends StatelessWidget {
-  final double screenWidth;
-  final double screenHeight;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final bool obscureText;
-  final bool isLoginPressed;
-  final VoidCallback onTogglePasswordVisibility;
-
-  const LoginForm({
-    super.key,
-    required this.screenWidth,
-    required this.screenHeight,
-    required this.emailController,
-    required this.passwordController,
-    required this.obscureText,
-    required this.isLoginPressed,
-    required this.onTogglePasswordVisibility,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: screenWidth * 0.90,
-      height: screenHeight / 2.5,
-      decoration: BoxDecoration(
-        border: Border.all(
-            color: const Color(0xFF9C0C04),
-            width: screenHeight * screenWidth * 0.00001),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding:
-            EdgeInsets.only(left: screenWidth / 20, right: screenWidth / 20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(
-              height: screenHeight / 100,
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                LoginTextField(
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  controller: emailController,
-                  hintText: 'Email/Τηλέφωνο(+30)',
-                  isLoginPressed: isLoginPressed,
-                ),
-                Divider(
-                  height: screenHeight * 0.001,
-                  color: const Color.fromARGB(204, 156, 12, 4),
-                  thickness: screenHeight * 0.005,
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: LoginTextField(
-                        screenWidth: screenWidth,
-                        screenHeight: screenHeight,
-                        controller: passwordController,
-                        hintText: 'Κωδικός',
-                        isObscure: obscureText,
-                        isLoginPressed: isLoginPressed,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: onTogglePasswordVisibility,
-                      icon: Icon(
-                        size: screenHeight * 0.03,
-                        obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF9C0C04),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            ForgotPasswordAndSignUp(
-                isLoginPressed: isLoginPressed,
-                screenHeight: screenHeight,
-                screenWidth: screenWidth),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class LoginTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -503,23 +447,31 @@ class LoginTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      readOnly: isLoginPressed,
-      controller: controller,
-      obscureText: isObscure,
-      style: TextStyle(
-        fontSize: screenHeight * screenWidth * 0.000052,
-        fontWeight: FontWeight.w600,
-        color: Colors.white,
-      ),
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: TextStyle(
+    return Container(
+      width: screenWidth * 0.85,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: const Color.fromARGB(133, 168, 168, 168)),
+      child: TextField(
+        readOnly: isLoginPressed,
+        controller: controller,
+        obscureText: isObscure,
+        cursorColor: const Color.fromARGB(125, 244, 67, 54),
+        style: TextStyle(
           fontSize: screenHeight * screenWidth * 0.000052,
           fontWeight: FontWeight.w600,
-          color: const Color.fromARGB(132, 156, 12, 4),
+          color: Colors.white,
         ),
-        border: InputBorder.none,
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.all(screenWidth * 0.02),
+          hintText: hintText,
+          hintStyle: TextStyle(
+            fontSize: screenHeight * screenWidth * 0.000052,
+            fontWeight: FontWeight.w600,
+            color: const Color.fromARGB(132, 199, 199, 199),
+          ),
+          border: InputBorder.none,
+        ),
       ),
     );
   }
@@ -597,34 +549,21 @@ class LoginFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        isLoginPressed
+    return ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          shape: const CircleBorder(),
+          backgroundColor:
+              isLoginPressed ? Colors.transparent : const Color(0xFF9C0C04),
+        ),
+        onPressed: onLogin,
+        child: isLoginPressed
             ? const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
               )
-            : ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(
-                      horizontal: screenWidth * 0.07,
-                      vertical: screenHeight * 0.028),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    side: const BorderSide(color: Color(0xFF9C0C04)),
-                  ),
-                  backgroundColor: Colors.transparent,
-                ),
-                onPressed: onLogin,
-                child: Text(
-                  'Είσοδος',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: screenHeight * screenWidth * 0.000062,
-                  ),
-                )),
-      ],
-    );
+            : const Icon(
+                Icons.arrow_forward,
+                color: Colors.black,
+              ));
   }
 }
 

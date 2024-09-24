@@ -333,40 +333,42 @@ class _SignUpPageState extends State<SignUpPage> {
 
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: ListView(
-          children: [
-            // HEADER: TOP PICTURE AND LOGO PICTURE
-            LoginHeader(
-                screenWidth: MediaQuery.sizeOf(context).width,
-                screenHeight: MediaQuery.sizeOf(context).height),
-            LoginLogo(screenHeight: MediaQuery.sizeOf(context).height),
-            _SignUpForm(
-              phoneValidating: _phoneValidating,
-              firstNameController: _firstNameController,
-              lastNameController: _lastNameController,
-              phoneController: _phoneController,
-              emailController: _emailController,
-              passwordController: _passwordController,
-              confirmPasswordController: _confirmPasswordController,
-              isRegistering: _isRegistering,
-              obscureText: _obscureText,
-              obscureText2: _obscureText2,
-              togglePasswordVisibility: _togglePasswordVisibility,
-              togglePasswordVisibility2: _togglePasswordVisibility2,
-              screenHeight: screenHeight,
-              screenWidth: screenWidth,
-              onRegister: _register,
-              firstnameError: firstnameError,
-              lastnameError: lastnameError,
-              phoneError: phoneError,
-              emailError: emailError,
-              passwordError: passwordError,
-              confirmationPasswordError: confirmationPasswordError,
-            ),
-          ],
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Colors.black,
+          body: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              // HEADER: TOP PICTURE AND LOGO PICTURE
+              LoginHeader(screenWidth: screenWidth, screenHeight: screenHeight),
+              LoginLogo(screenHeight: screenHeight),
+              _SignUpForm(
+                phoneValidating: _phoneValidating,
+                firstNameController: _firstNameController,
+                lastNameController: _lastNameController,
+                phoneController: _phoneController,
+                emailController: _emailController,
+                passwordController: _passwordController,
+                confirmPasswordController: _confirmPasswordController,
+                isRegistering: _isRegistering,
+                obscureText: _obscureText,
+                obscureText2: _obscureText2,
+                togglePasswordVisibility: _togglePasswordVisibility,
+                togglePasswordVisibility2: _togglePasswordVisibility2,
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                onRegister: _register,
+                firstnameError: firstnameError,
+                lastnameError: lastnameError,
+                phoneError: phoneError,
+                emailError: emailError,
+                passwordError: passwordError,
+                confirmationPasswordError: confirmationPasswordError,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -422,9 +424,6 @@ class _SignUpForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
     return SizedBox(
       width: screenWidth,
       child: Column(
@@ -480,13 +479,20 @@ class _SignUpForm extends StatelessWidget {
                 ),
 
                 // Password fields
-                _PasswordFields(
-                  passwordController: passwordController,
-                  confirmPasswordController: confirmPasswordController,
+                _PasswordField(
+                  controller: passwordController,
+                  hintText: 'Κωδικός',
                   obscureText: obscureText,
-                  obscureText2: obscureText2,
-                  togglePasswordVisibility: togglePasswordVisibility,
-                  togglePasswordVisibility2: togglePasswordVisibility2,
+                  toggleVisibility: togglePasswordVisibility,
+                  isRegistering: isRegistering,
+                  screenWidth: screenWidth,
+                  screenHeight: screenHeight,
+                ),
+                _PasswordField(
+                  controller: confirmPasswordController,
+                  hintText: 'Επιβεβαίωση κωδικού',
+                  obscureText: obscureText2,
+                  toggleVisibility: togglePasswordVisibility2,
                   isRegistering: isRegistering,
                   screenWidth: screenWidth,
                   screenHeight: screenHeight,
@@ -501,29 +507,27 @@ class _SignUpForm extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Έχεις ήδη λογαριασμό; ',
+                  'Έχεις ήδη λογαριασμό;',
                   style: TextStyle(
-                    color: const Color(0xFF9C0C04),
+                    color: const Color.fromARGB(104, 255, 255, 255),
                     fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () {
-                      if (!isRegistering) {
-                        AutoRouter.of(context).replaceAll([const LoginRoute()]);
-                      }
-                    },
-                    child: Text(
-                      'Συνδέσου',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize:
-                            (screenWidth * 0.012) + (screenHeight * 0.016),
-                        fontWeight: FontWeight.w700,
-                      ),
+                TextButton(
+                  onPressed: () {
+                    if (!isRegistering) {
+                      AutoRouter.of(context).replaceAll([const LoginRoute()]);
+                    }
+                  },
+                  child: Text(
+                    'Συνδέσου',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: Colors.white,
+                      color: Colors.white,
+                      fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
@@ -570,114 +574,38 @@ class _TextFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: screenHeight * 0.08,
-      width: screenWidth * 0.8,
-      child: Column(
-        children: [
-          Flexible(
-            flex: 10,
-            child: TextField(
-              readOnly: isRegistering,
-              controller: controller,
-              style: TextStyle(
-                fontSize: (screenWidth * 0.01) + (screenHeight * 0.025),
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(132, 156, 12, 4),
-                  ),
-                  border: InputBorder.none),
-              inputFormatters: inputFormatters,
+    return Padding(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(96, 63, 63, 63),
+          border: Border.all(
+            color: const Color.fromARGB(118, 88, 88, 88),
+          ),
+          borderRadius: BorderRadius.circular(05),
+        ),
+        child: TextField(
+          readOnly: isRegistering,
+          controller: controller,
+          style: TextStyle(
+            fontSize: (screenWidth * 0.0085) + (screenHeight * 0.022),
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+          cursorColor: const Color.fromARGB(125, 244, 67, 54),
+          decoration: InputDecoration(
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF9C0C04)),
+            ),
+            contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
+            hintText: hintText,
+            hintStyle: TextStyle(
+              fontSize: (screenWidth * 0.0078) + (screenHeight * 0.019),
+              color: const Color.fromARGB(75, 255, 255, 255),
             ),
           ),
-          Flexible(
-            flex: 1,
-            child: _Divider(
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PasswordFields extends StatelessWidget {
-  const _PasswordFields({
-    required this.passwordController,
-    required this.confirmPasswordController,
-    required this.obscureText,
-    required this.obscureText2,
-    required this.togglePasswordVisibility,
-    required this.togglePasswordVisibility2,
-    required this.isRegistering,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
-
-  final TextEditingController passwordController;
-  final TextEditingController confirmPasswordController;
-  final bool obscureText;
-  final bool obscureText2;
-  final VoidCallback togglePasswordVisibility;
-  final VoidCallback togglePasswordVisibility2;
-  final bool isRegistering;
-  final double screenWidth;
-  final double screenHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: screenHeight * 0.14,
-      width: screenWidth * 0.8,
-      child: Column(
-        children: [
-          SizedBox(
-            height: screenHeight * 0.08,
-            width: screenWidth * 0.8,
-            child: Column(
-              children: [
-                Flexible(
-                  flex: 10,
-                  child: _PasswordField(
-                    controller: passwordController,
-                    hintText: 'Κωδικός',
-                    obscureText: obscureText,
-                    toggleVisibility: togglePasswordVisibility,
-                    isRegistering: isRegistering,
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                  ),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: _Divider(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: screenHeight * 0.06,
-            width: screenWidth * 0.8,
-            child: _PasswordField(
-              controller: confirmPasswordController,
-              hintText: 'Επιβεβαίωση κωδικού',
-              obscureText: obscureText2,
-              toggleVisibility: togglePasswordVisibility2,
-              isRegistering: isRegistering,
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-            ),
-          ),
-        ],
+          inputFormatters: inputFormatters,
+        ),
       ),
     );
   }
@@ -704,43 +632,56 @@ class _PasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: screenWidth * 0.8,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: screenHeight * 0.07,
+    return Padding(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(96, 63, 63, 63),
+          border: Border.all(
+            color: const Color.fromARGB(118, 88, 88, 88),
+          ),
+          borderRadius: BorderRadius.circular(05),
+        ),
+        width: screenWidth * 0.8,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
               child: TextField(
                 inputFormatters: [NoEmojisTextInputFormatter()],
                 readOnly: isRegistering,
                 obscureText: obscureText,
                 controller: controller,
                 style: TextStyle(
-                  fontSize: (screenWidth * 0.01) + (screenHeight * 0.025),
+                  fontSize: (screenWidth * 0.0085) + (screenHeight * 0.022),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+                cursorColor: const Color.fromARGB(125, 244, 67, 54),
                 decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(132, 156, 12, 4),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF9C0C04)),
                   ),
-                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
+                  alignLabelWithHint: true,
+                  hintText: hintText,
+                  hintStyle: TextStyle(
+                    fontSize: (screenWidth * 0.0078) + (screenHeight * 0.019),
+                    color: const Color.fromARGB(75, 255, 255, 255),
+                  ),
                 ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: toggleVisibility,
-            icon: Icon(
-              size: (screenWidth * 0.01) + (screenHeight * 0.025),
-              obscureText ? Icons.visibility_off : Icons.visibility,
-              color: const Color(0xFF9C0C04),
+            IconButton(
+              onPressed: toggleVisibility,
+              icon: Icon(
+                size: (screenWidth * 0.01) + (screenHeight * 0.025),
+                obscureText ? Icons.visibility_off : Icons.visibility,
+                color: const Color(0xFF9C0C04),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -782,7 +723,7 @@ class _SignUpButton extends StatelessWidget {
       child: Column(
         children: [
           SizedBox(
-            width: screenWidth,
+            width: screenWidth * 0.8,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.start,
@@ -797,20 +738,20 @@ class _SignUpButton extends StatelessWidget {
                   _ErrorText(
                     screenWidth: screenWidth,
                     screenHeight: screenHeight,
-                    text: '- Μη έγκυρος αριθμός τηλεφώνου',
+                    text: '- Δεν βρέθηκε το τηλέφωνο',
                   ),
                 if (emailError)
                   _ErrorText(
                     screenWidth: screenWidth,
                     screenHeight: screenHeight,
-                    text: '- Μη έγκυρο email',
+                    text: '- Δεν βρέθηκε το email',
                   ),
                 if (passwordError)
                   _ErrorText(
                     screenWidth: screenWidth,
                     screenHeight: screenHeight,
                     text:
-                        '- Κωδικός: Τουλάχιστον 4 λατινικοί χαρακτήρες και 1 αριθμός',
+                        '- Τουλάχιστον 4 λατινικοί χαρακτήρες\n  και 1 αριθμός στον κωδικό',
                   ),
                 if (confirmationPasswordError)
                   _ErrorText(
@@ -853,27 +794,6 @@ class _SignUpButton extends StatelessWidget {
   }
 }
 
-class _Divider extends StatelessWidget {
-  const _Divider({required this.screenWidth, required this.screenHeight});
-
-  final double screenWidth;
-  final double screenHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    double divirderHeight = screenHeight * 0.001;
-    double divirderWidth = screenWidth * 0.8;
-    return SizedBox(
-      width: divirderWidth,
-      child: Divider(
-        height: divirderHeight,
-        color: const Color.fromARGB(204, 156, 12, 4),
-        thickness: (screenWidth * 0.0015) + (screenHeight * 0.006),
-      ),
-    );
-  }
-}
-
 class _ErrorText extends StatelessWidget {
   const _ErrorText({
     required this.screenWidth,
@@ -887,10 +807,6 @@ class _ErrorText extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: screenWidth,
-      height: (text ==
-              '- Κωδικός: Τουλάχιστον 4 λατινικοί χαρακτήρες και 1 αριθμός')
-          ? screenHeight * 0.027 * 2
-          : screenHeight * 0.027,
       child: Text(
         text,
         style: TextStyle(
