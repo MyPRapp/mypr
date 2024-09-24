@@ -90,7 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       // Password validation
       passwordError =
-          !RegExp(r'^(?=(.*[a-zA-Z]){6,})(?=.*[0-9]).+$').hasMatch(password);
+          !RegExp(r'^(?=(.*[a-zA-Z]){4,})(?=.*[0-9]).+$').hasMatch(password);
 
       // Confirmation password validation
       confirmationPasswordError = password != confirmPassword;
@@ -336,44 +336,37 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: Colors.black,
-        body: SizedBox(
-          width: screenWidth,
-          height: screenHeight,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              // HEADER: TOP PICTURE AND LOGO PICTURE
-              LoginHeader(
-                  screenWidth: MediaQuery.sizeOf(context).width,
-                  screenHeight: MediaQuery.sizeOf(context).height),
-              LoginLogo(screenHeight: MediaQuery.sizeOf(context).height),
-              Expanded(
-                child: _SignUpForm(
-                  phoneValidating: _phoneValidating,
-                  firstNameController: _firstNameController,
-                  lastNameController: _lastNameController,
-                  phoneController: _phoneController,
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                  confirmPasswordController: _confirmPasswordController,
-                  isRegistering: _isRegistering,
-                  obscureText: _obscureText,
-                  obscureText2: _obscureText2,
-                  togglePasswordVisibility: _togglePasswordVisibility,
-                  togglePasswordVisibility2: _togglePasswordVisibility2,
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  onRegister: _register,
-                  firstnameError: firstnameError,
-                  lastnameError: lastnameError,
-                  phoneError: phoneError,
-                  emailError: emailError,
-                  passwordError: passwordError,
-                  confirmationPasswordError: confirmationPasswordError,
-                ),
-              ),
-            ],
-          ),
+        body: ListView(
+          children: [
+            // HEADER: TOP PICTURE AND LOGO PICTURE
+            LoginHeader(
+                screenWidth: MediaQuery.sizeOf(context).width,
+                screenHeight: MediaQuery.sizeOf(context).height),
+            LoginLogo(screenHeight: MediaQuery.sizeOf(context).height),
+            _SignUpForm(
+              phoneValidating: _phoneValidating,
+              firstNameController: _firstNameController,
+              lastNameController: _lastNameController,
+              phoneController: _phoneController,
+              emailController: _emailController,
+              passwordController: _passwordController,
+              confirmPasswordController: _confirmPasswordController,
+              isRegistering: _isRegistering,
+              obscureText: _obscureText,
+              obscureText2: _obscureText2,
+              togglePasswordVisibility: _togglePasswordVisibility,
+              togglePasswordVisibility2: _togglePasswordVisibility2,
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              onRegister: _register,
+              firstnameError: firstnameError,
+              lastnameError: lastnameError,
+              phoneError: phoneError,
+              emailError: emailError,
+              passwordError: passwordError,
+              confirmationPasswordError: confirmationPasswordError,
+            ),
+          ],
         ),
       ),
     );
@@ -537,6 +530,7 @@ class _SignUpForm extends StatelessWidget {
               ],
             ),
           ),
+          SizedBox(height: screenHeight / 100),
           _SignUpButton(
             phoneValidating: phoneValidating,
             isRegistering: isRegistering,
@@ -785,56 +779,50 @@ class _SignUpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: screenWidth,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: firstnameError ||
-                lastnameError ||
-                phoneError ||
-                emailError ||
-                passwordError ||
-                confirmationPasswordError
-            ? MainAxisAlignment.start
-            : MainAxisAlignment.center,
+      child: Column(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (firstnameError || lastnameError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Μόνο γράμματα στο ονοματεπώνυμο',
-                ),
-              if (phoneError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Μη έγκυρος αριθμός τηλεφώνου',
-                ),
-              if (emailError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Μη έγκυρο email',
-                ),
-              if (passwordError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text:
-                      '🔻 Ο κωδικός πρέπει να αποτλείται από:\n6+ λατινικούς χαρακτήρες και 1 αριθμό',
-                ),
-              if (confirmationPasswordError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Οι κωδικοί δεν ταιριάζουν',
-                ),
-            ],
+          SizedBox(
+            width: screenWidth,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (firstnameError || lastnameError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Μόνο γράμματα στο ονοματεπώνυμο',
+                  ),
+                if (phoneError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Μη έγκυρος αριθμός τηλεφώνου',
+                  ),
+                if (emailError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Μη έγκυρο email',
+                  ),
+                if (passwordError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text:
+                        '- Κωδικός: Τουλάχιστον 4 λατινικοί χαρακτήρες και 1 αριθμός',
+                  ),
+                if (confirmationPasswordError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Οι κωδικοί δεν ταιριάζουν',
+                  ),
+              ],
+            ),
           ),
           SizedBox(
-              width: screenWidth * 0.007), // Add space between text and button
+              height: screenHeight * 0.02), // Add space between text and button
           isRegistering && phoneValidating
               ? const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
@@ -851,11 +839,14 @@ class _SignUpButton extends StatelessWidget {
                     backgroundColor: Colors.transparent,
                   ),
                   onPressed: onRegister,
-                  child: const Icon(
-                    Icons.keyboard_arrow_right,
-                    color: Colors.red,
-                  ),
-                ),
+                  child: Text(
+                    'Εγγραφή',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: screenHeight * screenWidth * 0.000062,
+                    ),
+                  )),
         ],
       ),
     );
@@ -895,16 +886,17 @@ class _ErrorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      width: screenWidth,
       height: (text ==
-              '🔻 Ο κωδικός πρέπει να αποτλείται από:\n6+ λατινικούς χαρακτήρες και 1 αριθμό')
+              '- Κωδικός: Τουλάχιστον 4 λατινικοί χαρακτήρες και 1 αριθμός')
           ? screenHeight * 0.027 * 2
           : screenHeight * 0.027,
       child: Text(
         text,
         style: TextStyle(
-            fontSize: (screenWidth * 0.008) + (screenHeight * 0.015),
+            fontSize: (screenWidth * 0.0074) + (screenHeight * 0.0138),
             color: const Color(0xFF9C0C04),
-            fontWeight: FontWeight.w700),
+            fontWeight: FontWeight.w500),
       ),
     );
   }

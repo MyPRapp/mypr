@@ -23,7 +23,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
       builder: (context, child) {
         final tabsRouter = AutoTabsRouter.of(context);
         final bottomNavBarVisibility = context.watch<BottomNavBarVisibility>();
-        final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+        final isKeyboardVisible = MediaQuery.viewInsetsOf(context).bottom > 0;
 
         void onTap(int index) {
           if (tabsRouter.activeIndex == index) {
@@ -41,7 +41,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           backgroundColor: Colors.black,
           body: Stack(
             children: [
-              child,
+              child, //TODO Fix nav bar adaptiveness
               if (bottomNavBarVisibility.isVisible && !isKeyboardVisible)
                 Positioned(
                   left: screenWidth / 10,
@@ -50,35 +50,37 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: SizedBox(
-                      height: screenHeight / 40 * 3.5,
+                      height: screenHeight / 40 * 4.4,
                       width: screenWidth - screenWidth / 5,
-                      child: BottomNavigationBar(
-                        currentIndex: tabsRouter.activeIndex,
-                        onTap: onTap,
-                        showUnselectedLabels: true,
-                        selectedItemColor: const Color(0xFF9C0C04),
-                        unselectedItemColor: Colors.white,
-                        backgroundColor: Colors.black,
-                        unselectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700,
+                      child: Center(
+                        child: BottomNavigationBar(
+                          currentIndex: tabsRouter.activeIndex,
+                          onTap: onTap,
+                          showUnselectedLabels: true,
+                          selectedItemColor: const Color(0xFF9C0C04),
+                          unselectedItemColor: Colors.white,
+                          backgroundColor: Colors.black,
+                          unselectedLabelStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          selectedLabelStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          items: const [
+                            BottomNavigationBarItem(
+                              icon: Icon(Icons.home),
+                              label: 'Αρχική',
+                            ),
+                            BottomNavigationBarItem(
+                              icon: Icon(Icons.search),
+                              label: 'Αναζήτηση',
+                            ),
+                            BottomNavigationBarItem(
+                              icon: Icon(Icons.person),
+                              label: 'Προφίλ',
+                            ),
+                          ],
                         ),
-                        selectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                        ),
-                        items: const [
-                          BottomNavigationBarItem(
-                            icon: Icon(Icons.home),
-                            label: 'Αρχική',
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(Icons.search),
-                            label: 'Αναζήτηση',
-                          ),
-                          BottomNavigationBarItem(
-                            icon: Icon(Icons.person),
-                            label: 'Προφίλ',
-                          ),
-                        ],
                       ),
                     ),
                   ),

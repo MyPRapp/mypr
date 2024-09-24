@@ -291,13 +291,7 @@ class LoginBody extends StatelessWidget {
     return Container(
       height: screenHeight,
       width: screenWidth,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.black, Color(0xFF9C0C04)],
-          begin: Alignment.center,
-          end: Alignment.bottomCenter,
-        ),
-      ),
+      color: Colors.black,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
@@ -434,6 +428,7 @@ class LoginForm extends StatelessWidget {
             EdgeInsets.only(left: screenWidth / 20, right: screenWidth / 20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
               height: screenHeight / 100,
@@ -543,69 +538,44 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: screenHeight * 0.1,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: screenWidth * 0.9 - screenWidth / 10,
-            height: screenHeight * 0.05,
-            child: Row(
-              children: [
-                SizedBox(
-                  width: screenWidth * 0.02,
-                ),
-                Text(
-                  'Ξέχασες τον κωδικό;',
-                  style: TextStyle(
-                    color: const Color(0xFF9C0C04),
-                    fontSize: (screenWidth * 0.02) + (screenHeight * 0.0035),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (!isLoginPressed) {
-                      floatingSnackBar(
-                          message: 'Στάλθηκε email για επαναφορά κωδικού',
-                          context: context,
-                          duration: const Duration(milliseconds: 1500));
-                    }
-                  },
-                  child: Text(
-                    'Επαναφορά κωδικού',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: (screenWidth * 0.02) + (screenHeight * 0.0035),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ],
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextButton(
+          onPressed: () {
+            if (!isLoginPressed) {
+              floatingSnackBar(
+                  message: 'Στάλθηκε email για επαναφορά κωδικού',
+                  context: context,
+                  duration: const Duration(milliseconds: 1500));
+            }
+          },
+          child: Text(
+            'Επαναφορά κωδικού',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: (screenWidth * 0.025) + (screenHeight * 0.0038),
+              fontWeight: FontWeight.w700,
             ),
           ),
-          SizedBox(
-            height: screenHeight * 0.05,
-            child: TextButton(
-              onPressed: () {
-                if (!isLoginPressed) {
-                  context.router.replaceAll([const SignUpRoute()]);
-                }
-              },
-              child: Text(
-                'Δημιουργία λογαριασμού',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: (screenWidth * 0.02) + (screenHeight * 0.0035),
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
+        ),
+        TextButton(
+          onPressed: () {
+            if (!isLoginPressed) {
+              context.router.replaceAll([const SignUpRoute()]);
+            }
+          },
+          child: Text(
+            'Δημιουργία λογαριασμού',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: (screenWidth * 0.025) + (screenHeight * 0.0038),
+              fontWeight: FontWeight.w700,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -645,17 +615,14 @@ class LoginFooter extends StatelessWidget {
                   backgroundColor: Colors.transparent,
                 ),
                 onPressed: onLogin,
-                child: const Icon(
-                  Icons.keyboard_arrow_right,
-                  color: Colors.red,
-                ),
-              ),
-        // Padding(
-        //   padding: const EdgeInsets.only(top: 10),
-        //   child: ServerInputField(
-        //     serverController: serverController,
-        //   ),
-        // ),
+                child: Text(
+                  'Είσοδος',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: screenHeight * screenWidth * 0.000062,
+                  ),
+                )),
       ],
     );
   }
