@@ -117,7 +117,7 @@ class _LoginPageState extends State<LoginPage> {
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
           backgroundColor: Colors.black,
-          resizeToAvoidBottomInset: true,
+          resizeToAvoidBottomInset: false,
           body: LoginBody(
             screenHeight: screenHeight,
             screenWidth: screenWidth,
