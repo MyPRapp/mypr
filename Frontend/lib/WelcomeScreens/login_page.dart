@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +5,7 @@ import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/auth_service.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Navigation/bottom_nav_bar.dart';
 import '../Providers/club_provider.dart';
@@ -29,104 +25,10 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _serverController = TextEditingController();
 
   bool _obscureText = true;
-  bool _isLoading = true;
   bool _isLoginPressed = false;
 
-  @override
-  void initState() {
-    super.initState();
-
-    _initializeApp();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _serverController.dispose();
-  }
-
-  Future<void> _initializeApp() async {
-    await createFilePath();
-    if (mounted) {
-      context.read<ClubProvider>().loadClubsFromFile();
-      await context.read<ClubProvider>().loadCataloguesFromFile();
-
-      if (mounted) {
-        final globalState = context.read<GlobalStateProvider>();
-        while (!globalState.preferencesLoaded) {
-          await Future.delayed(const Duration(milliseconds: 100));
-        }
-      }
-    }
-    print('\x1B[32mGlobal state preferences loaded');
-
-    if (mounted) {
-      if (context.read<GlobalStateProvider>().isAuthenticated) {
-        print('\x1B[32m------------USER AUTHENTICATED------------');
-
-        _startSyncingClubs();
-        _startSyncingUser();
-      } else {
-        print('\x1B[31m------------USER NOT AUTHENTICATED------------');
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
-  Future<void> createFilePath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
-
-    // Create the new folder if it doesn't exist
-    if (await myprDirectory.exists() == false) {
-      await myprDirectory.create(recursive: true);
-      print('\x1B[32mFolder created: ${myprDirectory.path}');
-    } else {
-      print('\x1B[32mFolder ${myprDirectory.path} already exists');
-    }
-  }
-
   Future<void> _startSyncingClubs() async {
-    print('\x1B[33m------------SYNCING CLUBS------------');
     await context.read<ClubProvider>().syncClubs();
-    print('\x1B[32m------------SYNCED CLUBS------------');
-  }
-
-  Future<void> _startSyncingUser() async {
-    print('\x1B[33m------------SYNCING USER------------');
-
-    UserProvider userProvider = context.read<UserProvider>();
-    await userProvider.loadUserDetailsFromPreferences();
-    if (mounted) {
-      context.read<BottomNavBarVisibility>().show();
-      context.router.replaceAll([const BottomNavBarRoute()]);
-    }
-
-    await _loadSavedUserCredentials();
-
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      bool loginSuccess = await AuthService().login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      if (loginSuccess) {
-        await userProvider.fetchUserDetailsFromServer();
-      } else {
-        print('\x1B[31mLogin failed, loading user details from preferences');
-        await userProvider.loadUserDetailsFromPreferences();
-      }
-      if (mounted) {
-        await context.read<BookingProvider>().fetchBookings(
-            userProvider.userDetails, context.read<ClubProvider>());
-      }
-    }
-    print('\x1B[32m------------SYNCED USER------------');
   }
 
   Future<void> _login() async {
@@ -183,24 +85,11 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<void> _loadSavedUserCredentials() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedEmail = prefs.getString('saved_email');
-    String? savedPassword = prefs.getString('saved_password');
-
-    if (savedEmail != null && savedPassword != null) {
-      setState(() {
-        _emailController.text = savedEmail;
-        _passwordController.text = savedPassword;
-      });
-    }
-  }
-
   void _handleLoginFailure() {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
       floatingSnackBar(
-          message: 'Λάθος email/τηλέφωνο ή κωδικός',
+          message: 'Λάθος στοιχεία εισόδου',
           context: context,
           duration: const Duration(milliseconds: 4000));
     }
@@ -213,14 +102,17 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _serverController.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    if (_isLoading) {
-      return const LoadingScreen();
-    }
-
     return PopScope(
       canPop: false,
       child: GestureDetector(
@@ -237,30 +129,6 @@ class _LoginPageState extends State<LoginPage> {
             obscureText: _obscureText,
             onLogin: _login,
             onTogglePasswordVisibility: _togglePasswordVisibility,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.black, Color(0xFF9C0C04)],
-            begin: Alignment.center,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
           ),
         ),
       ),

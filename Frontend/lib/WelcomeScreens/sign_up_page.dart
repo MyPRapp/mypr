@@ -35,6 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _obscureText = true;
   bool _obscureText2 = true;
+  bool _showLoadingIndicator = true;
   bool _isRegistering = false;
   bool _phoneValidating = false;
 
@@ -46,16 +47,41 @@ class _SignUpPageState extends State<SignUpPage> {
   bool passwordError = false;
   bool confirmationPasswordError = false;
 
-  void _togglePasswordVisibility() {
-    setState(() {
-      _obscureText = !_obscureText;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    _initializeApp();
   }
 
-  void _togglePasswordVisibility2() {
-    setState(() {
-      _obscureText2 = !_obscureText2;
-    });
+  Future<void> _initializeApp() async {
+    await createFilePath();
+    if (mounted) {
+      context.read<ClubProvider>().loadClubsFromFile();
+      await context.read<ClubProvider>().loadCataloguesFromFile();
+
+      if (mounted) {
+        final globalState = context.read<GlobalStateProvider>();
+        while (!globalState.preferencesLoaded) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+      }
+    }
+    print('\x1B[32mGlobal state preferences loaded');
+
+    if (mounted) {
+      if (context.read<GlobalStateProvider>().isAuthenticated) {
+        print('\x1B[32m------------USER AUTHENTICATED------------');
+
+        _startSyncingClubs();
+        _startSyncingUser(); //Load user details and navigate to homePage
+      } else {
+        print('\x1B[31m------------USER NOT AUTHENTICATED------------');
+        setState(() {
+          _showLoadingIndicator = false;
+        });
+      }
+    }
   }
 
   Future<void> _register() async {
@@ -106,6 +132,12 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
+    setState(() {
+      _firstNameController.text = _firstNameController.text[0].toUpperCase() +
+          _firstNameController.text.substring(1);
+      _lastNameController.text = _lastNameController.text[0].toUpperCase() +
+          _lastNameController.text.substring(1);
+    });
     // If validation is successful
     _showSnackBar('Στάλθηκε κωδικός με SMS');
     setState(() {
@@ -140,7 +172,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (registerSuccess) {
       await _clearPreferences();
-      _showSnackBar('Επιτυχής εγγραφή!');
       await _login();
     } else {
       setState(() {
@@ -149,6 +180,60 @@ class _SignUpPageState extends State<SignUpPage> {
       });
       _showSnackBar(
           'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
+    }
+  }
+
+  Future<void> _login() async {
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      print('\x1B[32m------------LOGGING IN------------');
+      setState(() {
+        _isRegistering = true;
+      });
+      bool success = false;
+
+      success = await AuthService().login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (success) {
+        if (mounted) {
+          await context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
+        if (mounted) {
+          context.read<BottomNavBarVisibility>().show();
+          await context.router.replaceAll([const BottomNavBarRoute()]);
+        }
+        _startSyncingClubs();
+        if (mounted) {
+          floatingSnackBar(
+              message: 'Επιτυχής σύνδεση',
+              context: context,
+              duration: const Duration(milliseconds: 4000));
+        }
+        if (mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = true;
+        }
+        if (mounted) {
+          context.read<BookingProvider>().fetchBookings(
+              context.read<UserProvider>().userDetails,
+              context.read<ClubProvider>());
+        }
+
+        print('\x1B[32m------------LOGGED IN------------');
+      } else {
+        _showSnackBar('Λάθος στοιχεία εισόδου');
+        print('\x1B[31m------------LOGIN FAILED------------');
+      }
+      setState(() {
+        _isRegistering = false;
+      });
+    } else {
+      floatingSnackBar(
+          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
+          context: context,
+          duration: const Duration(milliseconds: 4000));
     }
   }
 
@@ -269,48 +354,54 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('bookings');
   }
 
-  Future<void> _login() async {
-    try {
-      bool success = await AuthService().login(
+  Future<void> _startSyncingClubs() async {
+    await context.read<ClubProvider>().syncClubs();
+  }
+
+  Future<void> _startSyncingUser() async {
+    print('\x1B[33m------------SYNCING USER------------');
+
+    UserProvider userProvider = context.read<UserProvider>();
+    await userProvider.loadUserDetailsFromPreferences();
+    if (mounted) {
+      context.read<BottomNavBarVisibility>().show();
+      context.router.replaceAll([const BottomNavBarRoute()]);
+    }
+
+    await _loadSavedUserCredentials();
+
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      bool loginSuccess = await AuthService().login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      _startSyncingClubs();
-
-      if (success) {
-        if (mounted) {
-          await context.read<UserProvider>().fetchUserDetailsFromServer();
-        }
-        if (mounted) {
-          context.read<BookingProvider>().fetchBookings(
-              context.read<UserProvider>().userDetails,
-              context.read<ClubProvider>());
-          context.read<GlobalStateProvider>().isAuthenticated = true;
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const BottomNavBarRoute()]);
-        }
+      if (loginSuccess) {
+        await userProvider.fetchUserDetailsFromServer();
       } else {
-        if (mounted) {
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const LoginRoute()]);
-        }
+        print('\x1B[31mLogin failed, loading user details from preferences');
+        await userProvider.loadUserDetailsFromPreferences();
       }
-    } catch (e) {
-      print('\x1B[31mLogin failed: $e');
-      _showSnackBar('Υπήρξε κάποιο σφάλμα κατά την είσοδο στην εφαρμογή');
-    } finally {
-      setState(() {
-        _isRegistering = false;
-        _phoneValidating = false;
-      });
+      if (mounted) {
+        await context.read<BookingProvider>().fetchBookings(
+            userProvider.userDetails, context.read<ClubProvider>());
+      }
     }
+    print('\x1B[32m------------SYNCED USER------------');
   }
 
-  Future<void> _startSyncingClubs() async {
-    print('\x1B[33m------------SYNCING CLUBS------------');
-    await context.read<ClubProvider>().syncClubs();
-    print('\x1B[32m------------SYNCED CLUBS------------');
+  Future<void> _loadSavedUserCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('saved_email');
+    String? savedPassword = prefs.getString('saved_password');
+
+    if (savedEmail != null && savedPassword != null) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+      });
+    }
   }
 
   void _showSnackBar(String message) {
@@ -321,15 +412,36 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _confirmPasswordController.dispose();
+    _phoneController.dispose();
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
+
+  void _togglePasswordVisibility2() {
+    setState(() {
+      _obscureText2 = !_obscureText2;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<BottomNavBarVisibility>().hide();
-      }
-    });
+    if (_showLoadingIndicator) {
+      return const LoadingScreen();
+    }
 
     return PopScope(
       canPop: false,

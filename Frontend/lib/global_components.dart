@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ClubInfoStruct {
   int clubID;
@@ -268,6 +272,43 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
 
     // If the new value contains restricted characters, return the old value
     return oldValue;
+  }
+}
+
+class LoadingScreen extends StatelessWidget {
+  const LoadingScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.black, Color(0xFF9C0C04)],
+            begin: Alignment.center,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> createFilePath() async {
+  final directory = await getApplicationDocumentsDirectory();
+  final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
+
+  // Create the new folder if it doesn't exist
+  if (await myprDirectory.exists() == false) {
+    await myprDirectory.create(recursive: true);
+    print('\x1B[32mFolder created: ${myprDirectory.path}');
+  } else {
+    print('\x1B[32mFolder ${myprDirectory.path} already exists');
   }
 }
 

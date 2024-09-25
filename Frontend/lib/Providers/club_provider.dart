@@ -29,6 +29,7 @@ class ClubProvider with ChangeNotifier {
 
   // Syncs clubs from the server, loads from file if fetch fails
   Future<void> syncClubs() async {
+    print('\x1B[33m------------SYNCING CLUBS------------');
     try {
       await _clubFetcher.fetchClubsAndCatalogues(); // Fetch from server
     } catch (e) {
@@ -37,6 +38,7 @@ class ClubProvider with ChangeNotifier {
     }
     await _clubLoader.loadLikedClubsFromPreferences(); // Load liked clubs
     notifyListeners();
+    print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
   // Loading club photo with offline-first approach

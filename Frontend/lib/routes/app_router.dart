@@ -6,8 +6,8 @@ class AppRouter extends RootStackRouter {
   // RootStackRouter provides router configuration
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(page: LoginRoute.page, initial: true),
-        AutoRoute(page: SignUpRoute.page, initial: false),
+        AutoRoute(page: LoginRoute.page, initial: false),
+        AutoRoute(page: SignUpRoute.page, initial: true),
         AutoRoute(
           page: BottomNavBarRoute.page,
           children: [
