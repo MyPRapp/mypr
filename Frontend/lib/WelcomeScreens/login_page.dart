@@ -22,7 +22,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _serverController = TextEditingController();
 
   bool _obscureText = true;
   bool _isLoginPressed = false;
@@ -106,7 +105,6 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
     _emailController.dispose();
     _passwordController.dispose();
-    _serverController.dispose();
   }
 
   @override
@@ -118,6 +116,7 @@ class _LoginPageState extends State<LoginPage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
+          backgroundColor: Colors.black,
           resizeToAvoidBottomInset: true,
           body: LoginBody(
             screenHeight: screenHeight,
@@ -125,7 +124,6 @@ class _LoginPageState extends State<LoginPage> {
             isLoginPressed: _isLoginPressed,
             emailController: _emailController,
             passwordController: _passwordController,
-            serverController: _serverController,
             obscureText: _obscureText,
             onLogin: _login,
             onTogglePasswordVisibility: _togglePasswordVisibility,
@@ -142,7 +140,6 @@ class LoginBody extends StatelessWidget {
   final bool isLoginPressed;
   final TextEditingController emailController;
   final TextEditingController passwordController;
-  final TextEditingController serverController;
   final bool obscureText;
   final VoidCallback onLogin;
   final VoidCallback onTogglePasswordVisibility;
@@ -154,7 +151,6 @@ class LoginBody extends StatelessWidget {
     required this.isLoginPressed,
     required this.emailController,
     required this.passwordController,
-    required this.serverController,
     required this.obscureText,
     required this.onLogin,
     required this.onTogglePasswordVisibility,
@@ -163,15 +159,24 @@ class LoginBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: screenHeight,
       width: screenWidth,
-      color: Colors.black,
-      child: ListView(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.black, Color.fromARGB(150, 156, 12, 4)],
+          begin: Alignment.centerRight,
+          end: Alignment.topLeft,
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          LoginLogo(screenHeight: screenHeight),
-          SizedBox(height: screenHeight / 10),
           Column(
             children: [
+              Padding(
+                padding: EdgeInsets.only(
+                    top: screenHeight * 0.08, bottom: screenHeight * 0.1),
+                child: LoginLogo(screenHeight: screenHeight),
+              ),
               LoginTextField(
                 screenHeight: screenHeight,
                 screenWidth: screenWidth,
@@ -184,7 +189,7 @@ class LoginBody extends StatelessWidget {
                 width: screenWidth * 0.85,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: const Color.fromARGB(133, 168, 168, 168)),
+                    color: const Color.fromARGB(133, 84, 84, 84)),
                 child: Row(
                   children: [
                     Expanded(
@@ -221,58 +226,20 @@ class LoginBody extends StatelessWidget {
                   ],
                 ),
               ),
+              SizedBox(height: screenHeight * 0.05),
+              LoginFooter(
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                isLoginPressed: isLoginPressed,
+                onLogin: onLogin,
+              ),
             ],
-          ),
-          SizedBox(height: screenHeight / 10),
-          LoginFooter(
-            screenHeight: screenHeight,
-            screenWidth: screenWidth,
-            isLoginPressed: isLoginPressed,
-            onLogin: onLogin,
-            serverController: serverController,
           ),
           ForgotPasswordAndSignUp(
               isLoginPressed: isLoginPressed,
               screenHeight: screenHeight,
               screenWidth: screenWidth),
         ],
-      ),
-    );
-  }
-}
-
-class LoginHeader extends StatelessWidget {
-  final double screenWidth;
-  final double screenHeight;
-
-  const LoginHeader({
-    super.key,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: screenHeight / 12, // Set the height to screenHeight / 15
-      width: screenWidth, // Full width
-      child: ShaderMask(
-        shaderCallback: (Rect bounds) {
-          return const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Colors.white, // Opaque at the top
-              Color.fromARGB(14, 0, 0, 0), // Fully transparent at the bottom
-            ],
-            stops: [0.4, 1], // Control where the fade starts and ends
-          ).createShader(bounds);
-        },
-        blendMode: BlendMode.dstIn, // Blend mode to mask the image
-        child: const Image(
-          image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
-          fit: BoxFit.fitWidth, // Make sure the image fits the width
-        ),
       ),
     );
   }
@@ -319,7 +286,7 @@ class LoginTextField extends StatelessWidget {
       width: screenWidth * 0.85,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: const Color.fromARGB(133, 168, 168, 168)),
+          color: const Color.fromARGB(133, 84, 84, 84)),
       child: TextField(
         readOnly: isLoginPressed,
         controller: controller,
@@ -358,44 +325,79 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextButton(
-          onPressed: () {
-            if (!isLoginPressed) {
-              floatingSnackBar(
-                  message: 'Στάλθηκε email για επαναφορά κωδικού',
-                  context: context,
-                  duration: const Duration(milliseconds: 1500));
-            }
-          },
-          child: Text(
-            'Επαναφορά κωδικού',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: (screenWidth * 0.025) + (screenHeight * 0.0038),
-              fontWeight: FontWeight.w700,
+    return Padding(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.05),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: screenWidth,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'Πρώτη φορά εδώ;',
+                  style: TextStyle(
+                    color: const Color.fromARGB(104, 255, 255, 255),
+                    fontSize: screenHeight * screenWidth * 0.000045,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    if (!isLoginPressed) {
+                      AutoRouter.of(context).replaceAll([const SignUpRoute()]);
+                    }
+                  },
+                  child: Text(
+                    'Κάνε εγγραφή',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: const Color.fromARGB(157, 255, 255, 255),
+                      color: Colors.white,
+                      fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        TextButton(
-          onPressed: () {
-            if (!isLoginPressed) {
-              context.router.replaceAll([const SignUpRoute()]);
-            }
-          },
-          child: Text(
-            'Δημιουργία λογαριασμού',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: (screenWidth * 0.025) + (screenHeight * 0.0038),
-              fontWeight: FontWeight.w700,
+          SizedBox(
+            width: screenWidth,
+            child: Text(
+              textAlign: TextAlign.center,
+              'ή',
+              style: TextStyle(
+                color: const Color.fromARGB(104, 255, 255, 255),
+                fontSize: screenHeight * screenWidth * 0.000052,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        ),
-      ],
+          TextButton(
+            onPressed: () {
+              if (!isLoginPressed) {
+                floatingSnackBar(
+                    message: 'Στάλθηκε email για επαναφορά κωδικού',
+                    context: context,
+                    duration: const Duration(milliseconds: 4000));
+              }
+            },
+            child: Text(
+              'Επαναφορά κωδικού',
+              style: TextStyle(
+                decoration: TextDecoration.underline,
+                decorationColor: const Color.fromARGB(157, 255, 255, 255),
+                color: Colors.white,
+                fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -403,14 +405,12 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
 class LoginFooter extends StatelessWidget {
   final bool isLoginPressed;
   final VoidCallback onLogin;
-  final TextEditingController serverController;
   final double screenWidth;
   final double screenHeight;
   const LoginFooter({
     super.key,
     required this.isLoginPressed,
     required this.onLogin,
-    required this.serverController,
     required this.screenHeight,
     required this.screenWidth,
   });
@@ -432,73 +432,5 @@ class LoginFooter extends StatelessWidget {
                 Icons.arrow_forward,
                 color: Colors.black,
               ));
-  }
-}
-
-class ServerInputField extends StatelessWidget {
-  final TextEditingController serverController;
-
-  const ServerInputField({super.key, required this.serverController});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        TextField(
-          controller: serverController,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-          decoration: const InputDecoration(
-            hintText: 'Enter server\'s IP',
-            hintStyle: TextStyle(color: Colors.black),
-            border: InputBorder.none,
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.only(bottom: 10),
-          child: Divider(
-            height: 10,
-            color: Color.fromARGB(204, 156, 12, 4),
-            thickness: 7,
-          ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 14),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: const BorderSide(color: Color(0xFF9C0C04)),
-            ),
-            backgroundColor: Colors.black,
-          ),
-          onPressed: () {
-            String serverIp = serverController.text.trim();
-            if (serverIp.isNotEmpty) {
-              final globalState = context.read<GlobalStateProvider>();
-              globalState.validatedIp = serverIp;
-              print(
-                  '\x1B[33mConnecting to server at: http://${globalState.validatedIp}/');
-              floatingSnackBar(
-                message:
-                    'Connecting to server at: http://${globalState.validatedIp}/',
-                context: context,
-                duration: const Duration(milliseconds: 1500),
-              );
-            }
-          },
-          child: const Text(
-            'Connect to server',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 19,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

@@ -454,7 +454,7 @@ class _SignUpPageState extends State<SignUpPage> {
             padding: EdgeInsets.zero,
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
-              LoginHeader(screenWidth: screenWidth, screenHeight: screenHeight),
+              Header(screenWidth: screenWidth, screenHeight: screenHeight),
               LoginLogo(screenHeight: screenHeight),
               _SignUpForm(
                 phoneValidating: _phoneValidating,
@@ -636,7 +636,7 @@ class _SignUpForm extends StatelessWidget {
                     'Συνδέσου',
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      decorationColor: Colors.white,
+                      decorationColor: const Color.fromARGB(157, 255, 255, 255),
                       color: Colors.white,
                       fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
                       fontWeight: FontWeight.w900,
@@ -660,7 +660,7 @@ class _SignUpForm extends StatelessWidget {
             passwordError: passwordError,
             confirmationPasswordError: confirmationPasswordError,
           ),
-          SizedBox(height: screenHeight / 100),
+          SizedBox(height: screenHeight / 15),
         ],
       ),
     );
@@ -925,6 +925,43 @@ class _ErrorText extends StatelessWidget {
             fontSize: (screenWidth * 0.0074) + (screenHeight * 0.0138),
             color: const Color(0xFF9C0C04),
             fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+}
+
+class Header extends StatelessWidget {
+  final double screenWidth;
+  final double screenHeight;
+
+  const Header({
+    super.key,
+    required this.screenWidth,
+    required this.screenHeight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: screenHeight / 12, // Set the height to screenHeight / 15
+      width: screenWidth, // Full width
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white, // Opaque at the top
+              Color.fromARGB(14, 0, 0, 0), // Fully transparent at the bottom
+            ],
+            stops: [0.4, 1], // Control where the fade starts and ends
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn, // Blend mode to mask the image
+        child: const Image(
+          image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
+          fit: BoxFit.fitWidth, // Make sure the image fits the width
+        ),
       ),
     );
   }
