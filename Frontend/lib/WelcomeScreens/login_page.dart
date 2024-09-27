@@ -53,12 +53,7 @@ class _LoginPageState extends State<LoginPage> {
           await context.router.replaceAll([const BottomNavBarRoute()]);
         }
         _startSyncingClubs();
-        if (mounted) {
-          floatingSnackBar(
-              message: 'Επιτυχής σύνδεση',
-              context: context,
-              duration: const Duration(milliseconds: 4000));
-        }
+
         if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
         }

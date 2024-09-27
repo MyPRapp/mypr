@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -71,6 +73,7 @@ class _ReservationPageState extends State<ReservationPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePage();
       context.read<BottomNavBarVisibility>().hide();
+      _loadClubPhoto(widget.club.clubID);
     });
   }
 
@@ -214,17 +217,20 @@ class _ReservationPageState extends State<ReservationPage> {
           context.read<BottomNavBarVisibility>().show();
         }
       }, // Restrict pop action based on button visibility
-      child: Scaffold(
-        appBar: _buildAppBar(
-            context, widget.club.clubName, screenHeight, screenWidth),
-        backgroundColor: const Color.fromARGB(218, 43, 43, 43),
-        body: RefreshIndicator(
-          onRefresh: _refresh, // Handle refresh action
-          child: ListView(
-            children: [
-              // Build page header with club name
-              buildContent(), // Build form content and input fields
-            ],
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          appBar: _buildAppBar(
+              context, widget.club.clubName, screenHeight, screenWidth),
+          backgroundColor: const Color.fromARGB(218, 43, 43, 43),
+          body: RefreshIndicator(
+            onRefresh: _refresh, // Handle refresh action
+            child: ListView(
+              children: [
+                // Build page header with club name
+                buildContent(), // Build form content and input fields
+              ],
+            ),
           ),
         ),
       ),
@@ -286,6 +292,17 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
+  Future<ImageProvider?> _loadClubPhoto(int clubID) async {
+    Uint8List? imageBytes = await context
+        .read<ClubProvider>()
+        .loadClubPhotoFromFile(clubID); // Load from file
+    if (imageBytes != null) {
+      return MemoryImage(imageBytes); // Convert to MemoryImage for display
+    } else {
+      return null; // You can handle missing images here (optional placeholder)
+    }
+  }
+
   /// Builds the club image or a placeholder in case of an error.
   Widget buildClubImage() {
     return Padding(
@@ -297,10 +314,7 @@ class _ReservationPageState extends State<ReservationPage> {
           height: 350,
           child: FutureBuilder<ImageProvider?>(
             // Use the loadImageFromFileOrNetwork method from ClubProvider
-            future: context.read<ClubProvider>().loadImageFromFileOrNetwork(
-                  widget.club.clubID,
-                  widget.club.clubPhoto,
-                ),
+            future: _loadClubPhoto(widget.club.clubID),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
@@ -458,8 +472,10 @@ class _ReservationPageState extends State<ReservationPage> {
                   foregroundColor: Colors.white,
                   backgroundColor: const Color(0xFF9C0C04),
                 ),
-                onPressed: () async =>
-                    _handleSubmit(), // Handle form submission
+                onPressed: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  _handleSubmit(); // Handle form submission
+                },
                 child: const Text(
                   'Κράτηση',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
