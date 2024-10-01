@@ -222,7 +222,7 @@ class _ReservationPageState extends State<ReservationPage> {
         child: Scaffold(
           appBar: _buildAppBar(
               context, widget.club.clubName, screenHeight, screenWidth),
-          backgroundColor: const Color.fromARGB(218, 43, 43, 43),
+          backgroundColor: const Color.fromARGB(218, 31, 31, 31),
           body: RefreshIndicator(
             onRefresh: _refresh, // Handle refresh action
             child: ListView(

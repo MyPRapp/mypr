@@ -59,13 +59,18 @@ class _BigClubCardState extends State<BigClubCard> {
         AutoRouter.of(context).push(ReservationRoute(club: widget.club));
       },
       child: Padding(
-        padding: EdgeInsets.only(bottom: screenHeight * 0.03),
-        child: SizedBox(
+        padding: EdgeInsets.only(
+            bottom: screenHeight * 0.03,
+            left: screenWidth * 0.02,
+            right: screenWidth * 0.02),
+        child: Container(
           width: screenWidth,
           height: screenHeight / 6,
+          decoration: BoxDecoration(
+              color: const Color.fromARGB(57, 0, 0, 0),
+              borderRadius: BorderRadius.circular(7.5)),
           child: Row(
             children: [
-              SizedBox(width: screenWidth * 0.02),
               Stack(
                 children: [
                   FutureBuilder<ImageProvider?>(
@@ -76,7 +81,9 @@ class _BigClubCardState extends State<BigClubCard> {
                       if (snapshot.connectionState == ConnectionState.done &&
                           snapshot.hasData) {
                         return ClipRRect(
-                          borderRadius: BorderRadius.circular(7.5),
+                          borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(7.5),
+                              topLeft: Radius.circular(7.5)),
                           child: SizedBox(
                             height: screenHeight * 0.17,
                             width: screenWidth * 0.3,

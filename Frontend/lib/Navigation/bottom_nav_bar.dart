@@ -41,7 +41,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           backgroundColor: Colors.black,
           body: Stack(
             children: [
-              child, //TODO Fix nav bar adaptiveness
+              child,
               if (bottomNavBarVisibility.isVisible && !isKeyboardVisible)
                 Positioned(
                   left: screenWidth / 10,

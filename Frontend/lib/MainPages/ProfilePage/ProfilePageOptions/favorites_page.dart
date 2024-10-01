@@ -84,7 +84,7 @@ class FavoritesPage extends StatelessWidget {
         ),
         actions: [
           Padding(
-            padding: EdgeInsets.only(right: screenWidth * 0.01),
+            padding: EdgeInsets.only(right: screenWidth * 0.02),
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
@@ -95,7 +95,7 @@ class FavoritesPage extends StatelessWidget {
                 width: screenWidth / 3,
                 decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10),
-                    color: const Color(0xFF9C0C04),
+                    color: const Color.fromARGB(193, 156, 12, 4),
                     border: Border.all(width: 2, color: Colors.black)),
                 alignment: Alignment.center,
                 child: Text(
@@ -103,7 +103,7 @@ class FavoritesPage extends StatelessWidget {
                   'Αφαίρεση όλων',
                   style: TextStyle(
                     fontSize: screenWidth * 0.032,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: Colors.black,
                   ),
                 ),
