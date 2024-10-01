@@ -24,13 +24,6 @@ class _ProfilePageState extends State<ProfilePage> {
       if (userProvider.userDetails.userID < 0) {
         userProvider.fetchUserDetailsFromServer();
       }
-      if (mounted) {
-        BookingProvider bookingProvider = context.read<BookingProvider>();
-        if (bookingProvider.bookings.isEmpty) {
-          bookingProvider.fetchBookings(
-              userProvider.userDetails, context.read<ClubProvider>());
-        }
-      }
     }
   }
 

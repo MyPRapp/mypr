@@ -38,7 +38,9 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _syncClubs() async {
     print('\x1B[33m------------SYNCING CLUBS------------');
-    await context.read<ClubProvider>().syncClubs();
+    setState(() {
+      context.read<ClubProvider>().syncClubs();
+    });
     print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
@@ -161,8 +163,8 @@ class _HomePageState extends State<HomePage> {
                         itemCount: clubProvider.allClubs.length,
                         itemBuilder: (context, index) {
                           final club = clubProvider.allClubs[index];
-
                           return BigClubCard(
+                            key: ValueKey(club.clubID),
                             club: club,
                             screenHeight: screenHeight,
                             screenWidth: screenWidth,

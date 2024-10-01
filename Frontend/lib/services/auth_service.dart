@@ -5,7 +5,7 @@ import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}:8000/api';
+  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}/api';
 
   Future<bool> login(String username, String password) async {
     try {

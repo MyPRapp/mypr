@@ -179,7 +179,6 @@ class ReservationReview extends StatelessWidget {
 
 class CommentSection extends StatelessWidget {
   final TextEditingController commentController;
-
   const CommentSection({
     super.key,
     required this.commentController,
@@ -436,8 +435,30 @@ class NameTextFieldState extends State<NameTextField> {
   }
 }
 
-class PersonsTextField extends StatelessWidget {
+class PersonsTextField extends StatefulWidget {
   const PersonsTextField({super.key});
+
+  @override
+  State<PersonsTextField> createState() => _PersonsTextFieldState();
+}
+
+class _PersonsTextFieldState extends State<PersonsTextField> {
+  late FocusNode myFocusNode;
+
+  @override
+  void initState() {
+    super.initState();
+
+    myFocusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    myFocusNode.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -447,6 +468,7 @@ class PersonsTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: TextField(
+        focusNode: myFocusNode,
         readOnly: true,
         controller: TextEditingController(
             text: reservationProvider
@@ -479,10 +501,13 @@ class PersonsTextField extends StatelessWidget {
 
   Widget _buildRemoveButton(ReservationProvider reservationProvider) {
     return IconButton(
-      onPressed: () {
+      onPressed: () async {
         int persons = reservationProvider.getInfo(3);
         if (persons > 1) {
+          myFocusNode.requestFocus();
           reservationProvider.setInfo(3, persons - 1);
+          await Future.delayed(const Duration(seconds: 4));
+          myFocusNode.unfocus();
         }
       },
       icon: const Icon(Icons.remove, color: Colors.white),
@@ -492,7 +517,8 @@ class PersonsTextField extends StatelessWidget {
   Widget _buildAddButton(ReservationProvider reservationProvider,
       int maxPersons, BuildContext context) {
     return IconButton(
-      onPressed: () {
+      onPressed: () async {
+        myFocusNode.requestFocus();
         if (_validateBeforeAdding(reservationProvider, context)) {
           int persons = reservationProvider.getInfo(3);
           if (persons < maxPersons) {
@@ -504,6 +530,8 @@ class PersonsTextField extends StatelessWidget {
                 context: context,
                 duration: const Duration(milliseconds: 3000));
           }
+          await Future.delayed(const Duration(seconds: 4));
+          myFocusNode.unfocus();
         }
       },
       icon: const Icon(Icons.add, color: Colors.white),
@@ -636,7 +664,10 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     return Column(
       children: [
         GestureDetector(
-          onTap: toggleDropdown,
+          onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
+            toggleDropdown();
+          },
           child: InputDecorator(
             isFocused: _isExpanded,
             decoration: const InputDecoration(
@@ -859,6 +890,7 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
+        FocusManager.instance.primaryFocus?.unfocus();
         final now = DateTime.now();
         final lastDate = now.add(const Duration(days: 30));
 

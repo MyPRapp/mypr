@@ -35,6 +35,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _obscureText = true;
   bool _obscureText2 = true;
+  bool _showLoadingIndicator = true;
   bool _isRegistering = false;
   bool _phoneValidating = false;
 
@@ -46,16 +47,41 @@ class _SignUpPageState extends State<SignUpPage> {
   bool passwordError = false;
   bool confirmationPasswordError = false;
 
-  void _togglePasswordVisibility() {
-    setState(() {
-      _obscureText = !_obscureText;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    _initializeApp();
   }
 
-  void _togglePasswordVisibility2() {
-    setState(() {
-      _obscureText2 = !_obscureText2;
-    });
+  Future<void> _initializeApp() async {
+    await createFilePath();
+    if (mounted) {
+      context.read<ClubProvider>().loadClubsFromFile();
+      await context.read<ClubProvider>().loadCataloguesFromFile();
+
+      if (mounted) {
+        final globalState = context.read<GlobalStateProvider>();
+        while (!globalState.preferencesLoaded) {
+          await Future.delayed(const Duration(milliseconds: 100));
+        }
+      }
+    }
+    print('\x1B[32mGlobal state preferences loaded');
+
+    if (mounted) {
+      if (context.read<GlobalStateProvider>().isAuthenticated) {
+        print('\x1B[32m------------USER AUTHENTICATED------------');
+
+        _startSyncingClubs();
+        _startSyncingUser(); //Load user details and navigate to homePage
+      } else {
+        print('\x1B[31m------------USER NOT AUTHENTICATED------------');
+        setState(() {
+          _showLoadingIndicator = false;
+        });
+      }
+    }
   }
 
   Future<void> _register() async {
@@ -90,7 +116,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
       // Password validation
       passwordError =
-          !RegExp(r'^(?=(.*[a-zA-Z]){6,})(?=.*[0-9]).+$').hasMatch(password);
+          !RegExp(r'^(?=(.*[a-zA-Z]){4,})(?=.*[0-9]).+$').hasMatch(password);
 
       // Confirmation password validation
       confirmationPasswordError = password != confirmPassword;
@@ -106,6 +132,12 @@ class _SignUpPageState extends State<SignUpPage> {
       return;
     }
 
+    setState(() {
+      _firstNameController.text = _firstNameController.text[0].toUpperCase() +
+          _firstNameController.text.substring(1);
+      _lastNameController.text = _lastNameController.text[0].toUpperCase() +
+          _lastNameController.text.substring(1);
+    });
     // If validation is successful
     _showSnackBar('Στάλθηκε κωδικός με SMS');
     setState(() {
@@ -140,7 +172,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (registerSuccess) {
       await _clearPreferences();
-      _showSnackBar('Επιτυχής εγγραφή!');
       await _login();
     } else {
       setState(() {
@@ -149,6 +180,55 @@ class _SignUpPageState extends State<SignUpPage> {
       });
       _showSnackBar(
           'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
+    }
+  }
+
+  Future<void> _login() async {
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      print('\x1B[32m------------LOGGING IN------------');
+      setState(() {
+        _isRegistering = true;
+      });
+      bool success = false;
+
+      success = await AuthService().login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+      if (success) {
+        if (mounted) {
+          await context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
+        if (mounted) {
+          context.read<BottomNavBarVisibility>().show();
+          await context.router.replaceAll([const BottomNavBarRoute()]);
+        }
+        _startSyncingClubs();
+
+        if (mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = true;
+        }
+        if (mounted) {
+          context.read<BookingProvider>().fetchBookings(
+              context.read<UserProvider>().userDetails,
+              context.read<ClubProvider>());
+        }
+
+        print('\x1B[32m------------LOGGED IN------------');
+      } else {
+        _showSnackBar('Λάθος στοιχεία εισόδου');
+        print('\x1B[31m------------LOGIN FAILED------------');
+      }
+      setState(() {
+        _isRegistering = false;
+      });
+    } else {
+      floatingSnackBar(
+          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
+          context: context,
+          duration: const Duration(milliseconds: 4000));
     }
   }
 
@@ -269,48 +349,54 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('bookings');
   }
 
-  Future<void> _login() async {
-    try {
-      bool success = await AuthService().login(
+  Future<void> _startSyncingClubs() async {
+    await context.read<ClubProvider>().syncClubs();
+  }
+
+  Future<void> _startSyncingUser() async {
+    print('\x1B[33m------------SYNCING USER------------');
+
+    UserProvider userProvider = context.read<UserProvider>();
+    await userProvider.loadUserDetailsFromPreferences();
+    if (mounted) {
+      context.read<BottomNavBarVisibility>().show();
+      context.router.replaceAll([const BottomNavBarRoute()]);
+    }
+
+    await _loadSavedUserCredentials();
+
+    if (_emailController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
+      bool loginSuccess = await AuthService().login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
-      _startSyncingClubs();
-
-      if (success) {
-        if (mounted) {
-          await context.read<UserProvider>().fetchUserDetailsFromServer();
-        }
-        if (mounted) {
-          context.read<BookingProvider>().fetchBookings(
-              context.read<UserProvider>().userDetails,
-              context.read<ClubProvider>());
-          context.read<GlobalStateProvider>().isAuthenticated = true;
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const BottomNavBarRoute()]);
-        }
+      if (loginSuccess) {
+        await userProvider.fetchUserDetailsFromServer();
       } else {
-        if (mounted) {
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const LoginRoute()]);
-        }
+        print('\x1B[31mLogin failed, loading user details from preferences');
+        await userProvider.loadUserDetailsFromPreferences();
       }
-    } catch (e) {
-      print('\x1B[31mLogin failed: $e');
-      _showSnackBar('Υπήρξε κάποιο σφάλμα κατά την είσοδο στην εφαρμογή');
-    } finally {
-      setState(() {
-        _isRegistering = false;
-        _phoneValidating = false;
-      });
+      if (mounted) {
+        await context.read<BookingProvider>().fetchBookings(
+            userProvider.userDetails, context.read<ClubProvider>());
+      }
     }
+    print('\x1B[32m------------SYNCED USER------------');
   }
 
-  Future<void> _startSyncingClubs() async {
-    print('\x1B[33m------------SYNCING CLUBS------------');
-    await context.read<ClubProvider>().syncClubs();
-    print('\x1B[32m------------SYNCED CLUBS------------');
+  Future<void> _loadSavedUserCredentials() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? savedEmail = prefs.getString('saved_email');
+    String? savedPassword = prefs.getString('saved_password');
+
+    if (savedEmail != null && savedPassword != null) {
+      setState(() {
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+      });
+    }
   }
 
   void _showSnackBar(String message) {
@@ -321,56 +407,72 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _confirmPasswordController.dispose();
+    _phoneController.dispose();
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText;
+    });
+  }
+
+  void _togglePasswordVisibility2() {
+    setState(() {
+      _obscureText2 = !_obscureText2;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<BottomNavBarVisibility>().hide();
-      }
-    });
+    if (_showLoadingIndicator) {
+      return const LoadingScreen();
+    }
 
     return PopScope(
       canPop: false,
-      child: Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: Colors.black,
-        body: SizedBox(
-          width: screenWidth,
-          height: screenHeight,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          resizeToAvoidBottomInset: true,
+          backgroundColor: Colors.black,
+          body: ListView(
+            padding: EdgeInsets.zero,
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
-              LoginHeader(
-                  screenWidth: MediaQuery.sizeOf(context).width,
-                  screenHeight: MediaQuery.sizeOf(context).height),
-              LoginLogo(screenHeight: MediaQuery.sizeOf(context).height),
-              Expanded(
-                child: _SignUpForm(
-                  phoneValidating: _phoneValidating,
-                  firstNameController: _firstNameController,
-                  lastNameController: _lastNameController,
-                  phoneController: _phoneController,
-                  emailController: _emailController,
-                  passwordController: _passwordController,
-                  confirmPasswordController: _confirmPasswordController,
-                  isRegistering: _isRegistering,
-                  obscureText: _obscureText,
-                  obscureText2: _obscureText2,
-                  togglePasswordVisibility: _togglePasswordVisibility,
-                  togglePasswordVisibility2: _togglePasswordVisibility2,
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  onRegister: _register,
-                  firstnameError: firstnameError,
-                  lastnameError: lastnameError,
-                  phoneError: phoneError,
-                  emailError: emailError,
-                  passwordError: passwordError,
-                  confirmationPasswordError: confirmationPasswordError,
-                ),
+              Header(screenWidth: screenWidth, screenHeight: screenHeight),
+              LoginLogo(screenHeight: screenHeight),
+              _SignUpForm(
+                phoneValidating: _phoneValidating,
+                firstNameController: _firstNameController,
+                lastNameController: _lastNameController,
+                phoneController: _phoneController,
+                emailController: _emailController,
+                passwordController: _passwordController,
+                confirmPasswordController: _confirmPasswordController,
+                isRegistering: _isRegistering,
+                obscureText: _obscureText,
+                obscureText2: _obscureText2,
+                togglePasswordVisibility: _togglePasswordVisibility,
+                togglePasswordVisibility2: _togglePasswordVisibility2,
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                onRegister: _register,
+                firstnameError: firstnameError,
+                lastnameError: lastnameError,
+                phoneError: phoneError,
+                emailError: emailError,
+                passwordError: passwordError,
+                confirmationPasswordError: confirmationPasswordError,
               ),
             ],
           ),
@@ -429,9 +531,6 @@ class _SignUpForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
     return SizedBox(
       width: screenWidth,
       child: Column(
@@ -487,13 +586,20 @@ class _SignUpForm extends StatelessWidget {
                 ),
 
                 // Password fields
-                _PasswordFields(
-                  passwordController: passwordController,
-                  confirmPasswordController: confirmPasswordController,
+                _PasswordField(
+                  controller: passwordController,
+                  hintText: 'Κωδικός',
                   obscureText: obscureText,
-                  obscureText2: obscureText2,
-                  togglePasswordVisibility: togglePasswordVisibility,
-                  togglePasswordVisibility2: togglePasswordVisibility2,
+                  toggleVisibility: togglePasswordVisibility,
+                  isRegistering: isRegistering,
+                  screenWidth: screenWidth,
+                  screenHeight: screenHeight,
+                ),
+                _PasswordField(
+                  controller: confirmPasswordController,
+                  hintText: 'Επιβεβαίωση κωδικού',
+                  obscureText: obscureText2,
+                  toggleVisibility: togglePasswordVisibility2,
                   isRegistering: isRegistering,
                   screenWidth: screenWidth,
                   screenHeight: screenHeight,
@@ -508,35 +614,34 @@ class _SignUpForm extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Έχεις ήδη λογαριασμό; ',
+                  'Έχεις ήδη λογαριασμό;',
                   style: TextStyle(
-                    color: const Color(0xFF9C0C04),
+                    color: const Color.fromARGB(104, 255, 255, 255),
                     fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                Container(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton(
-                    onPressed: () {
-                      if (!isRegistering) {
-                        AutoRouter.of(context).replaceAll([const LoginRoute()]);
-                      }
-                    },
-                    child: Text(
-                      'Συνδέσου',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize:
-                            (screenWidth * 0.012) + (screenHeight * 0.016),
-                        fontWeight: FontWeight.w700,
-                      ),
+                TextButton(
+                  onPressed: () {
+                    if (!isRegistering) {
+                      AutoRouter.of(context).replaceAll([const LoginRoute()]);
+                    }
+                  },
+                  child: Text(
+                    'Συνδέσου',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: const Color.fromARGB(157, 255, 255, 255),
+                      color: Colors.white,
+                      fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
                 ),
               ],
             ),
           ),
+          SizedBox(height: screenHeight / 100),
           _SignUpButton(
             phoneValidating: phoneValidating,
             isRegistering: isRegistering,
@@ -550,7 +655,7 @@ class _SignUpForm extends StatelessWidget {
             passwordError: passwordError,
             confirmationPasswordError: confirmationPasswordError,
           ),
-          SizedBox(height: screenHeight / 100),
+          SizedBox(height: screenHeight / 15),
         ],
       ),
     );
@@ -576,114 +681,38 @@ class _TextFieldWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: screenHeight * 0.08,
-      width: screenWidth * 0.8,
-      child: Column(
-        children: [
-          Flexible(
-            flex: 10,
-            child: TextField(
-              readOnly: isRegistering,
-              controller: controller,
-              style: TextStyle(
-                fontSize: (screenWidth * 0.01) + (screenHeight * 0.025),
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(132, 156, 12, 4),
-                  ),
-                  border: InputBorder.none),
-              inputFormatters: inputFormatters,
+    return Padding(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(96, 63, 63, 63),
+          border: Border.all(
+            color: const Color.fromARGB(118, 88, 88, 88),
+          ),
+          borderRadius: BorderRadius.circular(05),
+        ),
+        child: TextField(
+          readOnly: isRegistering,
+          controller: controller,
+          style: TextStyle(
+            fontSize: (screenWidth * 0.0085) + (screenHeight * 0.022),
+            fontWeight: FontWeight.w500,
+            color: Colors.white,
+          ),
+          cursorColor: const Color.fromARGB(125, 244, 67, 54),
+          decoration: InputDecoration(
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF9C0C04)),
+            ),
+            contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
+            hintText: hintText,
+            hintStyle: TextStyle(
+              fontSize: (screenWidth * 0.0078) + (screenHeight * 0.019),
+              color: const Color.fromARGB(75, 255, 255, 255),
             ),
           ),
-          Flexible(
-            flex: 1,
-            child: _Divider(
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PasswordFields extends StatelessWidget {
-  const _PasswordFields({
-    required this.passwordController,
-    required this.confirmPasswordController,
-    required this.obscureText,
-    required this.obscureText2,
-    required this.togglePasswordVisibility,
-    required this.togglePasswordVisibility2,
-    required this.isRegistering,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
-
-  final TextEditingController passwordController;
-  final TextEditingController confirmPasswordController;
-  final bool obscureText;
-  final bool obscureText2;
-  final VoidCallback togglePasswordVisibility;
-  final VoidCallback togglePasswordVisibility2;
-  final bool isRegistering;
-  final double screenWidth;
-  final double screenHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: screenHeight * 0.14,
-      width: screenWidth * 0.8,
-      child: Column(
-        children: [
-          SizedBox(
-            height: screenHeight * 0.08,
-            width: screenWidth * 0.8,
-            child: Column(
-              children: [
-                Flexible(
-                  flex: 10,
-                  child: _PasswordField(
-                    controller: passwordController,
-                    hintText: 'Κωδικός',
-                    obscureText: obscureText,
-                    toggleVisibility: togglePasswordVisibility,
-                    isRegistering: isRegistering,
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                  ),
-                ),
-                Flexible(
-                  flex: 1,
-                  child: _Divider(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: screenHeight * 0.06,
-            width: screenWidth * 0.8,
-            child: _PasswordField(
-              controller: confirmPasswordController,
-              hintText: 'Επιβεβαίωση κωδικού',
-              obscureText: obscureText2,
-              toggleVisibility: togglePasswordVisibility2,
-              isRegistering: isRegistering,
-              screenWidth: screenWidth,
-              screenHeight: screenHeight,
-            ),
-          ),
-        ],
+          inputFormatters: inputFormatters,
+        ),
       ),
     );
   }
@@ -710,43 +739,56 @@ class _PasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: screenWidth * 0.8,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Expanded(
-            child: SizedBox(
-              height: screenHeight * 0.07,
+    return Padding(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(96, 63, 63, 63),
+          border: Border.all(
+            color: const Color.fromARGB(118, 88, 88, 88),
+          ),
+          borderRadius: BorderRadius.circular(05),
+        ),
+        width: screenWidth * 0.8,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
               child: TextField(
                 inputFormatters: [NoEmojisTextInputFormatter()],
                 readOnly: isRegistering,
                 obscureText: obscureText,
                 controller: controller,
                 style: TextStyle(
-                  fontSize: (screenWidth * 0.01) + (screenHeight * 0.025),
+                  fontSize: (screenWidth * 0.0085) + (screenHeight * 0.022),
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
+                cursorColor: const Color.fromARGB(125, 244, 67, 54),
                 decoration: InputDecoration(
-                  hintText: hintText,
-                  hintStyle: const TextStyle(
-                    color: Color.fromARGB(132, 156, 12, 4),
+                  focusedBorder: const UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF9C0C04)),
                   ),
-                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
+                  alignLabelWithHint: true,
+                  hintText: hintText,
+                  hintStyle: TextStyle(
+                    fontSize: (screenWidth * 0.0078) + (screenHeight * 0.019),
+                    color: const Color.fromARGB(75, 255, 255, 255),
+                  ),
                 ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: toggleVisibility,
-            icon: Icon(
-              size: (screenWidth * 0.01) + (screenHeight * 0.025),
-              obscureText ? Icons.visibility_off : Icons.visibility,
-              color: const Color(0xFF9C0C04),
+            IconButton(
+              onPressed: toggleVisibility,
+              icon: Icon(
+                size: (screenWidth * 0.01) + (screenHeight * 0.025),
+                obscureText ? Icons.visibility_off : Icons.visibility,
+                color: const Color(0xFF9C0C04),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -785,56 +827,50 @@ class _SignUpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: screenWidth,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: firstnameError ||
-                lastnameError ||
-                phoneError ||
-                emailError ||
-                passwordError ||
-                confirmationPasswordError
-            ? MainAxisAlignment.start
-            : MainAxisAlignment.center,
+      child: Column(
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (firstnameError || lastnameError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Μόνο γράμματα στο ονοματεπώνυμο',
-                ),
-              if (phoneError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Μη έγκυρος αριθμός τηλεφώνου',
-                ),
-              if (emailError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Μη έγκυρο email',
-                ),
-              if (passwordError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text:
-                      '🔻 Ο κωδικός πρέπει να αποτλείται από:\n6+ λατινικούς χαρακτήρες και 1 αριθμό',
-                ),
-              if (confirmationPasswordError)
-                _ErrorText(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  text: '🔻 Οι κωδικοί δεν ταιριάζουν',
-                ),
-            ],
+          SizedBox(
+            width: screenWidth * 0.8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                if (firstnameError || lastnameError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Μόνο γράμματα στο ονοματεπώνυμο',
+                  ),
+                if (phoneError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Δεν βρέθηκε το τηλέφωνο',
+                  ),
+                if (emailError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Δεν βρέθηκε το email',
+                  ),
+                if (passwordError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text:
+                        '- Τουλάχιστον 4 λατινικοί χαρακτήρες\n  και 1 αριθμός στον κωδικό',
+                  ),
+                if (confirmationPasswordError)
+                  _ErrorText(
+                    screenWidth: screenWidth,
+                    screenHeight: screenHeight,
+                    text: '- Οι κωδικοί δεν ταιριάζουν',
+                  ),
+              ],
+            ),
           ),
           SizedBox(
-              width: screenWidth * 0.007), // Add space between text and button
+              height: screenHeight * 0.02), // Add space between text and button
           isRegistering && phoneValidating
               ? const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
@@ -851,33 +887,15 @@ class _SignUpButton extends StatelessWidget {
                     backgroundColor: Colors.transparent,
                   ),
                   onPressed: onRegister,
-                  child: const Icon(
-                    Icons.keyboard_arrow_right,
-                    color: Colors.red,
-                  ),
-                ),
+                  child: Text(
+                    'Εγγραφή',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: screenHeight * screenWidth * 0.000062,
+                    ),
+                  )),
         ],
-      ),
-    );
-  }
-}
-
-class _Divider extends StatelessWidget {
-  const _Divider({required this.screenWidth, required this.screenHeight});
-
-  final double screenWidth;
-  final double screenHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    double divirderHeight = screenHeight * 0.001;
-    double divirderWidth = screenWidth * 0.8;
-    return SizedBox(
-      width: divirderWidth,
-      child: Divider(
-        height: divirderHeight,
-        color: const Color.fromARGB(204, 156, 12, 4),
-        thickness: (screenWidth * 0.0015) + (screenHeight * 0.006),
       ),
     );
   }
@@ -895,16 +913,50 @@ class _ErrorText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: (text ==
-              '🔻 Ο κωδικός πρέπει να αποτλείται από:\n6+ λατινικούς χαρακτήρες και 1 αριθμό')
-          ? screenHeight * 0.027 * 2
-          : screenHeight * 0.027,
+      width: screenWidth,
       child: Text(
         text,
         style: TextStyle(
-            fontSize: (screenWidth * 0.008) + (screenHeight * 0.015),
+            fontSize: (screenWidth * 0.0074) + (screenHeight * 0.0138),
             color: const Color(0xFF9C0C04),
-            fontWeight: FontWeight.w700),
+            fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+}
+
+class Header extends StatelessWidget {
+  final double screenWidth;
+  final double screenHeight;
+
+  const Header({
+    super.key,
+    required this.screenWidth,
+    required this.screenHeight,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: screenHeight / 12, // Set the height to screenHeight / 15
+      width: screenWidth, // Full width
+      child: ShaderMask(
+        shaderCallback: (Rect bounds) {
+          return const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white, // Opaque at the top
+              Color.fromARGB(14, 0, 0, 0), // Fully transparent at the bottom
+            ],
+            stops: [0.4, 1], // Control where the fade starts and ends
+          ).createShader(bounds);
+        },
+        blendMode: BlendMode.dstIn, // Blend mode to mask the image
+        child: const Image(
+          image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
+          fit: BoxFit.fitWidth, // Make sure the image fits the width
+        ),
       ),
     );
   }

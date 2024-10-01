@@ -18,8 +18,7 @@ class ClubFetcher {
 
   Future<void> fetchClubsAndCatalogues() async {
     print('\x1B[33mFetching clubs from server...');
-    final url =
-        'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
+    final url = 'http://${GlobalStateProvider().validatedIp}/api/clubs/print/';
 
     try {
       final response =
@@ -92,7 +91,7 @@ class ClubFetcher {
 
     print('\x1B[33mFetching catalogues for ${club.clubName} from server...');
     final url =
-        'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/${club.clubID}/catalogue';
+        'http://${GlobalStateProvider().validatedIp}/api/clubs/${club.clubID}/catalogue';
     try {
       final response =
           await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
@@ -125,8 +124,7 @@ class ClubFetcher {
     }
 
     print('\x1B[33mFetching club with ID $clubID from server');
-    final url =
-        'http://${GlobalStateProvider().validatedIp}:8000/api/clubs/print/';
+    final url = 'http://${GlobalStateProvider().validatedIp}/api/clubs/print/';
     try {
       final response =
           await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));

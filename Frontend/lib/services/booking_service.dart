@@ -7,7 +7,7 @@ import 'package:mypr/services/auth_service.dart';
 class BookingService {
   final AuthService _authService =
       AuthService(); // Create instance of AuthService
-  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}:8000/api';
+  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}/api';
 
   Future<void> _ensureTokenIsValid() async {
     try {

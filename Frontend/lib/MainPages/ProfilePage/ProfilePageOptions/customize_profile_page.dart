@@ -150,40 +150,6 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /*      Padding(
-                        padding: EdgeInsets.only(top: screenHeight * 0.035),
-                        child: SizedBox(
-                          height: screenHeight * 0.06,
-                          width: screenWidth,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                                icon: Icon(
-                                  Icons.chevron_left,
-                                  color: Colors.white,
-                                  size:
-                                      screenHeight * 0.026 + screenWidth * 0.02,
-                                ),
-                              ),
-                              Text(
-                                'ΠΡΟΦΙΛ',
-                                style: TextStyle(
-                                  color: const Color.fromARGB(255, 90, 90, 90),
-                                  fontSize:
-                                      screenHeight * 0.026 + screenWidth * 0.02,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                   */
                       Container(
                         color: const Color(0xFF14181B),
                         padding: EdgeInsets.only(

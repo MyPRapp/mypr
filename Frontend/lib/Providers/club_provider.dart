@@ -29,6 +29,7 @@ class ClubProvider with ChangeNotifier {
 
   // Syncs clubs from the server, loads from file if fetch fails
   Future<void> syncClubs() async {
+    print('\x1B[33m------------SYNCING CLUBS------------');
     try {
       await _clubFetcher.fetchClubsAndCatalogues(); // Fetch from server
     } catch (e) {
@@ -37,21 +38,23 @@ class ClubProvider with ChangeNotifier {
     }
     await _clubLoader.loadLikedClubsFromPreferences(); // Load liked clubs
     notifyListeners();
+    print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
   // Loading club photo with offline-first approach
-  Future<ImageProvider?> loadImageFromFileOrNetwork(
-      int clubID, String clubPhotoUrl) async {
-    Uint8List? imageBytes = await loadClubPhotoFromFile(clubID);
+  Future<ImageProvider?> loadImageFromFileOrNetwork(int clubID) async {
+    ClubInfoStruct club = getClubByID(clubID);
+    try {
+      // Try fetching from the network (if online)
+      return CachedNetworkImageProvider(club.clubPhoto);
+    } catch (e) {
+      // If no internet, return a default placeholder
+      Uint8List? imageBytes = await loadClubPhotoFromFile(clubID);
 
-    if (imageBytes != null) {
-      return MemoryImage(imageBytes); // Load image from local storage
-    } else {
-      try {
-        // Try fetching from the network (if online)
-        return CachedNetworkImageProvider(clubPhotoUrl);
-      } catch (e) {
-        // If no internet, return a default placeholder
+      if (imageBytes != null) {
+        return MemoryImage(imageBytes); // Load image from local storage
+        //TODO Να ορισουμε μια φωτο ως default για τα κλαμπ
+      } else {
         return const AssetImage('assets/images/default_club_image.png');
       }
     }
