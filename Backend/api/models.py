@@ -44,7 +44,7 @@ class Clubs(models.Model):
     rating = models.DecimalField(range(1,5),decimal_places= 2,max_digits=3)
     availability = models.CharField(max_length=7)
     photo = models.ImageField(upload_to='club_photos/',blank=True,null=True,default= 'club_photos/Default_Club.jpg')
-    not_available = models.CharField(max_length= 130,default="")
+    not_available = models.CharField(max_length= 130,default="",blank=True)
 
     
     def __str__(self):
@@ -59,25 +59,16 @@ class Bookings(models.Model):
         (DONE, 'Done')
     ]
 
-    REGULAR = 'Regular'
-    PREMIUM = 'Premium'
-    SPECIAL = 'Special'
-    BOOKING_TYPE_CHOICES = [
-        (REGULAR, 'Regular'),
-        (PREMIUM, 'Premium'),
-        (SPECIAL, 'Special')
-    ]
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE,related_name= "bookings")
     club = models.ForeignKey(Clubs, on_delete=models.CASCADE,related_name= "booking_I_made")  # Assuming 'Clubs' is another model in your app
     reservation_name = models.CharField(max_length= 20,default="InputReservationName")
     status = models.CharField(max_length=8, choices=STATUS_CHOICES, default=PENDING)
 
-    comments = models.TextField(max_length=200,default="No comment")
+    comments = models.TextField(max_length=200,default="No comment",blank=True)
 
     number_of_people = models.IntegerField()
-    #booking_type = models.CharField(max_length=10, choices=BOOKING_TYPE_CHOICES, default=REGULAR)
-    booking_type = models.CharField(max_length=4,default= "000")
+    booking_type = models.CharField(max_length=4,default= "0000")
     booked_at = models.DateTimeField()
 
     def __str__(self):
