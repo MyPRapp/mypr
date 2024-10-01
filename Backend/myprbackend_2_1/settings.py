@@ -12,7 +12,8 @@ SECRET_KEY = 'django-insecure-xfnu2na6+^)$xmxh04a750iz(gqbo81os)j@%7ty7gmy%6(c!x
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['13.38.200.158', 'localhost', '127.0.0.1']
+
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -32,6 +33,9 @@ AUTH_USER_MODEL = 'api.CustomUser'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -83,28 +87,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myprbackend_2_1.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'MyDatabase',
-#         'USER': 'myprAdmin',
-#         'PASSWORD': 'nJgnK22HZRZ9fP2ApBVv',
-#         'HOST': 'database-1.cbuqmcko09b5.eu-west-3.rds.amazonaws.com',
-#         'PORT': '3306',
-#         #'OPTIONS': {
-#             #'ssl': {
-#                 #'ca': 'rds-ca-rsa2048-g1',  # AWS provides an SSL certificate for RDS; download it from AWS
-#             #},
-#         #},
-#     }
+#   'default': {
+#     'ENGINE': 'django.db.backends.sqlite3',
+#      'NAME': BASE_DIR / 'db.sqlite3',
+#   }
 # }
+
+DATABASES = {
+ 'default': {
+   'ENGINE': 'django.db.backends.mysql',
+   'NAME': 'myprDB',
+   'USER': 'admin',
+   'PASSWORD': 'PKv8vduvV5MT8QT6M9Z3',
+   'HOST': 'mypr-database.cbuqmcko09b5.eu-west-3.rds.amazonaws.com',
+   'PORT': '3306',
+   'OPTIONS': {
+     'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+   },
+ }
+}
 
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -129,8 +131,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
-STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
