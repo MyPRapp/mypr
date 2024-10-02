@@ -243,15 +243,25 @@ class NoEmojisTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
       TextEditingValue oldValue, TextEditingValue newValue) {
-    // Allow autofill to work properly by not blocking complete input replacements
-    if (newValue.text.isEmpty ||
-        newValue.text == oldValue.text ||
-        _allowedCharacters.hasMatch(newValue.text)) {
+    // Allow empty or identical values (e.g., backspace, autofill)
+    if (newValue.text.isEmpty || newValue.text == oldValue.text) {
       return newValue;
     }
 
-    // If the new value contains restricted characters, return the old value
-    return oldValue;
+    // Filter the text, allowing only the characters that match the RegExp
+    final filteredText = newValue.text.characters.where((char) {
+      return _allowedCharacters.hasMatch(char);
+    }).join();
+
+    // Calculate the new selection position, ensuring it's within bounds
+    final newSelectionIndex =
+        newValue.selection.baseOffset.clamp(0, filteredText.length);
+
+    // Return the updated TextEditingValue with the filtered text and adjusted selection
+    return TextEditingValue(
+      text: filteredText,
+      selection: TextSelection.collapsed(offset: newSelectionIndex),
+    );
   }
 }
 
@@ -281,6 +291,7 @@ class LoadingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(

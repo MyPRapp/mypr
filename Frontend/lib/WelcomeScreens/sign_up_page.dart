@@ -7,6 +7,7 @@ import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../Navigation/bottom_nav_bar.dart';
 import '../Providers/club_provider.dart';
@@ -46,6 +47,13 @@ class _SignUpPageState extends State<SignUpPage> {
   bool emailError = false;
   bool passwordError = false;
   bool confirmationPasswordError = false;
+  bool _isCheckBoxPressed = false;
+
+  void _toggleCheckBox() {
+    setState(() {
+      _isCheckBoxPressed = !_isCheckBoxPressed;
+    });
+  }
 
   @override
   void initState() {
@@ -85,6 +93,14 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _register() async {
+    if (_isCheckBoxPressed == false) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      floatingSnackBar(
+          message: 'Δεν έχεις συμφωνήσει με τους όρους χρήσης',
+          context: context,
+          duration: const Duration(milliseconds: 4000));
+      return;
+    }
     setState(() {
       // Reset error states
       firstnameError = false;
@@ -225,6 +241,7 @@ class _SignUpPageState extends State<SignUpPage> {
         _isRegistering = false;
       });
     } else {
+      FocusManager.instance.primaryFocus?.unfocus();
       floatingSnackBar(
           message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
           context: context,
@@ -400,6 +417,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _showSnackBar(String message) {
+    FocusManager.instance.primaryFocus?.unfocus();
     floatingSnackBar(
         message: message,
         context: context,
@@ -409,12 +427,12 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   void dispose() {
     super.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
-    _confirmPasswordController.dispose();
     _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
   }
 
   void _togglePasswordVisibility() {
@@ -450,7 +468,12 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
               Header(screenWidth: screenWidth, screenHeight: screenHeight),
-              LoginLogo(screenHeight: screenHeight),
+              LoginLogo(
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                text: 'Καλώς όρισες στην',
+                color: const Color(0xFF9C0C04),
+              ),
               _SignUpForm(
                 phoneValidating: _phoneValidating,
                 firstNameController: _firstNameController,
@@ -473,6 +496,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 emailError: emailError,
                 passwordError: passwordError,
                 confirmationPasswordError: confirmationPasswordError,
+                isCheckBoxPressed: _isCheckBoxPressed,
+                toggleCheckBox: _toggleCheckBox,
               ),
             ],
           ),
@@ -505,6 +530,8 @@ class _SignUpForm extends StatelessWidget {
     required this.emailError,
     required this.passwordError,
     required this.confirmationPasswordError,
+    required this.isCheckBoxPressed,
+    required this.toggleCheckBox,
   });
 
   final TextEditingController firstNameController;
@@ -528,6 +555,8 @@ class _SignUpForm extends StatelessWidget {
   final bool emailError;
   final bool passwordError;
   final bool confirmationPasswordError;
+  final bool isCheckBoxPressed;
+  final Function toggleCheckBox;
 
   @override
   Widget build(BuildContext context) {
@@ -608,6 +637,58 @@ class _SignUpForm extends StatelessWidget {
               ],
             ),
           ),
+
+          Row(
+            children: [
+              SizedBox(
+                width: screenWidth * 0.1,
+              ),
+              CheckBoxWidget(
+                isCheckBoxPressed: isCheckBoxPressed,
+                toggleCheckBox: toggleCheckBox,
+              ),
+              Text(
+                'Συμφωνώ με τους ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              GestureDetector(
+                //TODO Change url
+                onTap: () {
+                  launchUrl(Uri.parse('https://www.instagram.com/mypr_app/'),
+                      mode: LaunchMode.externalApplication);
+                },
+                child: Text(
+                  'όρους χρήσης',
+                  style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      decorationColor: const Color.fromARGB(200, 255, 255, 255),
+                      color: Colors.white,
+                      fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
+                      fontWeight: FontWeight.w800),
+                ),
+              )
+            ],
+          ),
+
+          SizedBox(height: screenHeight / 100),
+          _SignUpButton(
+            phoneValidating: phoneValidating,
+            isRegistering: isRegistering,
+            onRegister: onRegister,
+            screenHeight: screenHeight,
+            screenWidth: screenWidth,
+            firstnameError: firstnameError,
+            lastnameError: lastnameError,
+            phoneError: phoneError,
+            emailError: emailError,
+            passwordError: passwordError,
+            confirmationPasswordError: confirmationPasswordError,
+          ),
+          SizedBox(height: screenHeight / 15),
           SizedBox(
             width: screenWidth,
             child: Row(
@@ -641,21 +722,7 @@ class _SignUpForm extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: screenHeight / 100),
-          _SignUpButton(
-            phoneValidating: phoneValidating,
-            isRegistering: isRegistering,
-            onRegister: onRegister,
-            screenHeight: screenHeight,
-            screenWidth: screenWidth,
-            firstnameError: firstnameError,
-            lastnameError: lastnameError,
-            phoneError: phoneError,
-            emailError: emailError,
-            passwordError: passwordError,
-            confirmationPasswordError: confirmationPasswordError,
-          ),
-          SizedBox(height: screenHeight / 15),
+          SizedBox(height: screenHeight / 20),
         ],
       ),
     );
@@ -957,6 +1024,45 @@ class Header extends StatelessWidget {
           image: AssetImage('assets/otherPhotos/IMG_0041.jpg'),
           fit: BoxFit.fitWidth, // Make sure the image fits the width
         ),
+      ),
+    );
+  }
+}
+
+class CheckBoxWidget extends StatefulWidget {
+  const CheckBoxWidget({
+    super.key,
+    required this.isCheckBoxPressed,
+    required this.toggleCheckBox,
+  });
+
+  final bool isCheckBoxPressed;
+  final Function toggleCheckBox;
+  @override
+  State<CheckBoxWidget> createState() => _CheckBoxWidgetState();
+}
+
+class _CheckBoxWidgetState extends State<CheckBoxWidget> {
+  @override
+  Widget build(BuildContext context) {
+    return Transform.scale(
+      scale: 1.15,
+      child: Checkbox.adaptive(
+        value: widget.isCheckBoxPressed,
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (!states.contains(WidgetState.selected)) {
+            return const Color.fromARGB(94, 255, 255, 255);
+          }
+          return null;
+        }),
+        side: BorderSide.none,
+        checkColor: const Color(0xFF9C0C04),
+        activeColor: Colors.black,
+        onChanged: (newValue) {
+          setState(() {
+            widget.toggleCheckBox();
+          });
+        },
       ),
     );
   }

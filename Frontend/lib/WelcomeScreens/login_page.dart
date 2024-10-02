@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -25,14 +27,19 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscureText = true;
   bool _isLoginPressed = false;
-
   Future<void> _startSyncingClubs() async {
     await context.read<ClubProvider>().syncClubs();
   }
 
   Future<void> _login() async {
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      FocusManager.instance.primaryFocus?.unfocus();
+      floatingSnackBar(
+          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
+          context: context,
+          duration: const Duration(milliseconds: 4000));
+      return;
+    } else {
       print('\x1B[32m------------LOGGING IN------------');
       setState(() {
         _isLoginPressed = true;
@@ -71,17 +78,13 @@ class _LoginPageState extends State<LoginPage> {
       setState(() {
         _isLoginPressed = false;
       });
-    } else {
-      floatingSnackBar(
-          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
-          context: context,
-          duration: const Duration(milliseconds: 4000));
     }
   }
 
   void _handleLoginFailure() {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
+      FocusManager.instance.primaryFocus?.unfocus();
       floatingSnackBar(
           message: 'Λάθος στοιχεία εισόδου',
           context: context,
@@ -169,8 +172,13 @@ class LoginBody extends StatelessWidget {
             children: [
               Padding(
                 padding: EdgeInsets.only(
-                    top: screenHeight * 0.08, bottom: screenHeight * 0.1),
-                child: LoginLogo(screenHeight: screenHeight),
+                    top: screenHeight * 0.08, bottom: screenHeight * 0.05),
+                child: LoginLogo(
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
+                  text: '',
+                  color: Colors.white,
+                ),
               ),
               LoginTextField(
                 screenHeight: screenHeight,
@@ -242,16 +250,48 @@ class LoginBody extends StatelessWidget {
 
 class LoginLogo extends StatelessWidget {
   final double screenHeight;
-  const LoginLogo({super.key, required this.screenHeight});
+  final double screenWidth;
+  final String text;
+  final Color color;
+  const LoginLogo(
+      {super.key,
+      required this.screenHeight,
+      required this.screenWidth,
+      required this.text,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
+      width: screenWidth,
       height: screenHeight / 5,
-      child: const Image(
-        image: AssetImage(
-            'assets/otherPhotos/Screenshot 2024-07-28 021714-Photoroom.png'),
-        fit: BoxFit.scaleDown,
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              height: (screenHeight / 5) / 5.5,
+              child: Text(
+                text,
+                style: TextStyle(
+                    color: color, fontSize: 21, fontWeight: FontWeight.w900),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: (screenHeight / 5) / 5.5),
+            child: SizedBox(
+              width: screenWidth,
+              height: screenHeight / 10,
+              child: const Image(
+                alignment: Alignment.center,
+                image: AssetImage(
+                    'assets/otherPhotos/Logo_v2.2-removebg(cropped).png'),
+                fit: BoxFit.scaleDown,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -349,7 +389,7 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
                     'Κάνε εγγραφή',
                     style: TextStyle(
                       decoration: TextDecoration.underline,
-                      decorationColor: const Color.fromARGB(157, 255, 255, 255),
+                      decorationColor: const Color.fromARGB(200, 255, 255, 255),
                       color: Colors.white,
                       fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
                       fontWeight: FontWeight.w800,
@@ -365,7 +405,7 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
               textAlign: TextAlign.center,
               'ή',
               style: TextStyle(
-                color: const Color.fromARGB(104, 255, 255, 255),
+                color: const Color.fromARGB(200, 255, 255, 255),
                 fontSize: screenHeight * screenWidth * 0.000052,
                 fontWeight: FontWeight.w700,
               ),
