@@ -72,18 +72,19 @@ class _ProfilePageState extends State<ProfilePage> {
                             userDetails.photo, screenHeight, screenWidth),
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(top: screenHeight * 0.03),
-                      child: Text(
-                        '${userDetails.firstName} ${userDetails.lastName}',
-                        style: TextStyle(
-                          fontSize: screenHeight * 0.02 + screenWidth * 0.01,
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          fontWeight: FontWeight.w700,
+                    if (isAuthenticated)
+                      Padding(
+                        padding: EdgeInsets.only(top: screenHeight * 0.03),
+                        child: Text(
+                          '${userDetails.firstName} ${userDetails.lastName}',
+                          style: TextStyle(
+                            fontSize: screenHeight * 0.02 + screenWidth * 0.01,
+                            color: const Color.fromARGB(255, 255, 255, 255),
+                            fontWeight: FontWeight.w700,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        textAlign: TextAlign.center,
                       ),
-                    ),
                     SizedBox(height: screenHeight * 0.04),
                   ],
                 ),

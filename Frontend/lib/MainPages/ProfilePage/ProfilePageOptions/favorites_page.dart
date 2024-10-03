@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
+import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Navigation/bottom_nav_bar.dart';

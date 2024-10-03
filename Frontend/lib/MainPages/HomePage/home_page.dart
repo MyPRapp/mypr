@@ -1,14 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Navigation/bottom_nav_bar.dart';
 import '../../Providers/booking_provider.dart';
 import '../../Providers/club_provider.dart';
+import '../../services/auth_service.dart';
 
 @RoutePage()
 class HomePage extends StatefulWidget {
@@ -36,7 +39,28 @@ class _HomePageState extends State<HomePage> {
     ClubProvider clubProvider = context.read<ClubProvider>();
     await clubProvider.loadClubsFromFile();
     await clubProvider.loadCataloguesFromFile();
+    if (mounted) {
+      await context.read<LikesClubsProvider>().loadLikedClubsFromPreferences();
+    }
     _syncClubs();
+  }
+
+  Future<String> getSavedPassword() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('saved_password') != null) {
+      return prefs.getString('saved_password')!;
+    } else {
+      return '';
+    }
+  }
+
+  Future<String> getSavedEmail() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('saved_email') != null) {
+      return prefs.getString('saved_email')!;
+    } else {
+      return '';
+    }
   }
 
   Future<void> initUser() async {
@@ -45,12 +69,20 @@ class _HomePageState extends State<HomePage> {
       if (context.read<GlobalStateProvider>().preferencesLoaded) {
         if (context.read<GlobalStateProvider>().isAuthenticated) {
           print('\x1B[32m------------USER IS AUTHENTICATED------------');
-          await context.read<UserProvider>().fetchUserDetailsFromServer();
+          // Await the Future to resolve and get the String values
+          String savedEmail = await getSavedEmail();
+          String savedPassword = await getSavedPassword();
 
-          if (mounted) {
-            context.read<BookingProvider>().fetchBookings(
-                context.read<UserProvider>().userDetails,
-                context.read<ClubProvider>());
+          bool loggedIn = await AuthService().login(savedEmail, savedPassword);
+          if (loggedIn) {
+            if (mounted) {
+              await context.read<UserProvider>().fetchUserDetailsFromServer();
+            }
+            if (mounted) {
+              context.read<BookingProvider>().fetchBookings(
+                  context.read<UserProvider>().userDetails,
+                  context.read<ClubProvider>());
+            }
           }
         } else {
           print('\x1B[31m------------USER IS NOT AUTHENTICATED------------');

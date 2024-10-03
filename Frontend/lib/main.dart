@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import this for setting orientations
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/Providers/reservation_provider.dart';
 import 'package:mypr/routes/app_router.dart';
 import 'package:provider/provider.dart';

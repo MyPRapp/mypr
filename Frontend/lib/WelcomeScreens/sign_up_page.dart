@@ -2,8 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -945,7 +945,7 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
   Widget build(BuildContext context) {
     return Transform.scale(
       scale: 1.15,
-      child: Checkbox.adaptive(
+      child: Checkbox(
         value: widget.isCheckBoxPressed,
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (!states.contains(WidgetState.selected)) {

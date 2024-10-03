@@ -1,7 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,14 +38,8 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
         String? photoPath, double screenHeight, double screenWidth) {
       if (photoPath == null || photoPath.trim().isEmpty) {
         // Show the red person icon immediately if photoPath is empty or null
-        return Container(
-          color: Colors.grey,
-          child: Icon(
-            Icons.person,
-            color: Colors.black,
-            size: screenHeight * screenWidth * 0.0003,
-          ),
-        );
+        return const Image(
+            image: AssetImage('assets/otherPhotos/Default_User.jpg'));
       } else {
         // Attempt to load the photo; show a loading indicator if the result is null
         return FutureBuilder<ImageProvider?>(
@@ -59,14 +53,8 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                 );
               } else {
                 // If the photo couldn't be loaded, show the red person icon
-                return Container(
-                  color: Colors.grey,
-                  child: Icon(
-                    Icons.person,
-                    color: Colors.black,
-                    size: screenHeight * screenWidth * 0.0003,
-                  ),
-                );
+                return const Image(
+                    image: AssetImage('assets/otherPhotos/Default_User.jpg'));
               }
             } else {
               // Show a loading indicator while the photo is being loaded
@@ -121,8 +109,13 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
           context.read<GlobalStateProvider>().isAuthenticated = false;
           print('\x1B[32m\'isAuthenticated\' flag set to false.');
         }
+        // Step 8: Reset saved user details
+        if (context.mounted) {
+          context.read<UserProvider>().resetUserDetails();
+          print('\x1B[32mSuccessfully restored user details.');
+        }
 
-        // Step 8: Navigate to the Login page
+        // Step 9: Navigate to the Login page
         if (context.mounted) {
           print('\x1B[33mNavigating to the login page...');
           AutoRouter.of(context).replaceAll([const LoginRoute()]);

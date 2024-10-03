@@ -77,8 +77,8 @@ class _ContactUsPageState extends State<ContactUsPage> {
     if (isAuthenticated) {
       nameController.text =
           '${userProvider.firstName} ${userProvider.lastName}';
+      emailController.text = userProvider.email;
     }
-    emailController.text = userProvider.email;
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
@@ -129,55 +129,53 @@ class _ContactUsPageState extends State<ContactUsPage> {
                  */
                     Column(
                       children: [
-                        Padding(
-                          padding: EdgeInsets.all(screenWidth * 0.07),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text(
-                                      'Τηλεφώνησε μας',
-                                      style: TextStyle(
-                                        color: Color(0xFF9C0C04),
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: screenHeight * 0.015),
-                                    const Text(
-                                      ' 69 43784099\n\n 69 80984213',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                  ]),
-                              Padding(
-                                padding:
-                                    EdgeInsets.only(top: screenHeight * 0.07),
-                                child: Column(children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   const Text(
-                                    'Ωράριο επικοινωνίας',
+                                    'Τηλεφώνησε μας',
                                     style: TextStyle(
                                       color: Color(0xFF9C0C04),
-                                      fontSize: 17,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                   SizedBox(height: screenHeight * 0.015),
                                   const Text(
-                                    'Δευτέρα-Πέμπτη\n10πμ-8μμ\n\nΠαρασκευή-Κυριακή\n2μμ-3πμ',
+                                    ' 69 43784099\n\n 69 80984213',
                                     style: TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
                                     ),
                                   ),
                                 ]),
-                              ),
-                            ],
-                          ),
+                            Padding(
+                              padding:
+                                  EdgeInsets.only(top: screenHeight * 0.07),
+                              child: Column(children: [
+                                const Text(
+                                  'Ωράριο επικοινωνίας',
+                                  style: TextStyle(
+                                    color: Color(0xFF9C0C04),
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: screenHeight * 0.015),
+                                const Text(
+                                  'Δευτέρα-Πέμπτη\n10πμ-8μμ\n\nΠαρασκευή-Κυριακή\n2μμ-3πμ',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ]),
+                            ),
+                          ],
                         ),
                         Container(
                           padding: EdgeInsets.all(screenWidth * 0.1),
@@ -197,7 +195,8 @@ class _ContactUsPageState extends State<ContactUsPage> {
                               _buildTextField(
                                   'Ονοματεπώνυμο', 1, nameController),
                               SizedBox(height: screenHeight * 0.022),
-                              _buildTextField('Email', 1, emailController),
+                              _buildTextField(
+                                  'Το email σου', 1, emailController),
                               SizedBox(height: screenHeight * 0.022),
                               _buildTextField('Μήνυμα', 4, messageController),
                               SizedBox(height: screenHeight * 0.035),

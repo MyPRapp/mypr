@@ -155,4 +155,26 @@ class UserProvider with ChangeNotifier {
     return CachedNetworkImageProvider(
         'http://${GlobalStateProvider().validatedIp}/$photoPath');
   }
+
+  Future<void> resetUserDetails() async {
+    // Restore the default values of the _userDetails object
+    _userDetails = UserInfoStruct(
+      userID: -1,
+      username: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      points: 0,
+      photo: '',
+    );
+
+    // Clear related user data from SharedPreferences
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('user_details');
+    await prefs.remove('user_photo_path');
+
+    // Notify listeners of the changes
+    notifyListeners();
+  }
 }
