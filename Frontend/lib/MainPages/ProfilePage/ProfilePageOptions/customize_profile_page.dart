@@ -42,26 +42,9 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
             image: AssetImage('assets/otherPhotos/Default_User.jpg'));
       } else {
         // Attempt to load the photo; show a loading indicator if the result is null
-        return FutureBuilder<ImageProvider?>(
-          future: context.read<UserProvider>().loadUserPhoto(photoPath),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData && snapshot.data != null) {
-                return Image(
-                  image: snapshot.data!,
-                  fit: BoxFit.cover,
-                );
-              } else {
-                // If the photo couldn't be loaded, show the red person icon
-                return const Image(
-                    image: AssetImage('assets/otherPhotos/Default_User.jpg'));
-              }
-            } else {
-              // Show a loading indicator while the photo is being loaded
-              return const CircularProgressIndicator();
-            }
-          },
-        );
+
+        return const Image(
+            image: AssetImage('assets/otherPhotos/Default_User.jpg'));
       }
     }
 
