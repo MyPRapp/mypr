@@ -11,7 +11,6 @@ import 'club_provider_helpers/club_saver.dart';
 class ClubProvider with ChangeNotifier {
   final List<ClubInfoStruct> _clubs = [];
   final List<CatalogueInfoStruct> _catalogues = [];
-  final List<int> _likedClubIDs = [];
 
   late final ClubManager _clubManager;
   late final ClubLoader _clubLoader;
@@ -19,18 +18,15 @@ class ClubProvider with ChangeNotifier {
   late final ClubFetcher _clubFetcher;
 
   ClubProvider() {
-    _clubManager = ClubManager(_clubs, _catalogues, _likedClubIDs);
-    _clubLoader = ClubLoader(_clubs, _catalogues, _likedClubIDs);
-    _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs);
+    _clubManager = ClubManager(_clubs, _catalogues);
+    _clubLoader = ClubLoader(_clubs, _catalogues);
+    _clubSaver = ClubSaver(_clubs, _catalogues);
     _clubFetcher = ClubFetcher(_clubManager, _clubSaver);
   }
 
   // GETTERS
   List<ClubInfoStruct> get allClubs => _clubs;
   List<CatalogueInfoStruct> get allCatalogues => _catalogues;
-  List<ClubInfoStruct> get allLikedClubs {
-    return _clubs.where((club) => _likedClubIDs.contains(club.clubID)).toList();
-  }
 
   // Syncs clubs from the server, loads from file if fetch fails
   Future<void> syncClubs() async {
@@ -41,7 +37,7 @@ class ClubProvider with ChangeNotifier {
       await loadClubsFromFile();
       await loadCataloguesFromFile();
     }
-    await loadLikedClubsFromPreferences(); // Load liked clubs
+    // await loadLikedClubsFromPreferences(); // Load liked clubs
     print('\x1B[32m------------SYNCED CLUBS------------');
   }
 
@@ -68,11 +64,6 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> loadCataloguesFromFile() async {
     await _clubLoader.loadCataloguesFromFile();
-    notifyListeners();
-  }
-
-  Future<void> loadLikedClubsFromPreferences() async {
-    await _clubLoader.loadLikedClubsFromPreferences();
     notifyListeners();
   }
 
@@ -106,22 +97,6 @@ class ClubProvider with ChangeNotifier {
     return _clubManager.getCataloguesByClubID(clubID);
   }
 
-  //// Liked Clubs Management (Stored in SharedPreferences)
-  void toggleLike(int clubID) {
-    //TODO FIX FAVORITES CAUSE THEY RELOAD THE IMAGE
-    _clubManager.toggleLike(clubID);
-    _clubSaver.saveLikedClubsToPreferences(); // Save to SharedPreferences
-  }
-
-  bool isLiked(int clubID) {
-    return _clubManager.isLiked(clubID);
-  }
-
-  Future<void> deleteAllLiked() async {
-    await _clubManager.deleteAllLiked();
-    notifyListeners();
-  }
-
   //// Saving To File Functions
   Future<void> saveClubsToFile() async {
     await _clubSaver
@@ -131,11 +106,6 @@ class ClubProvider with ChangeNotifier {
   Future<void> saveCataloguesToFile() async {
     await _clubSaver
         .saveCataloguesToFile(); // Save catalogues to the device directory
-  }
-
-  Future<void> saveLikedClubsToPreferences() async {
-    await _clubSaver
-        .saveLikedClubsToPreferences(); // Save liked clubs in SharedPreferences
   }
 
   // Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {

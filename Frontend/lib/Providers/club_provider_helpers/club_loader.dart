@@ -3,16 +3,14 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
 
 class ClubLoader {
-  ClubLoader(this._clubs, this._catalogues, this._likedClubIDs);
+  ClubLoader(this._clubs, this._catalogues);
 
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
-  final List<int> _likedClubIDs;
 
   Future<String> _getFilePath(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -75,19 +73,6 @@ class ClubLoader {
     } else {
       print('\x1B[31mPhoto for club ID $clubID not found');
       return null;
-    }
-  }
-
-  Future<void> loadLikedClubsFromPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? likedClubIDs = prefs.getStringList('likedClubs');
-
-    _likedClubIDs.clear();
-    if (likedClubIDs != null) {
-      _likedClubIDs.addAll(likedClubIDs.map((id) => int.parse(id)));
-      print('\x1B[32mLiked clubs loaded from preferences.');
-    } else {
-      print('\x1B[32mNo liked clubs found in preferences.');
     }
   }
 }

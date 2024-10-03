@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
 
 class ClubManager with ChangeNotifier {
-  ClubManager(this._clubs, this._catalogues, this._likedClubIDs);
+  ClubManager(this._clubs, this._catalogues);
 
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
-  final List<int> _likedClubIDs;
 
   // CLUB MANAGEMENT
   void addOrUpdateClub(ClubInfoStruct club) {
@@ -102,33 +100,6 @@ class ClubManager with ChangeNotifier {
       return catalogueList[0];
     }
     return _catalogues[0];
-  }
-
-  // LIKED CLUBS MANAGEMENT
-  void toggleLike(int clubID) {
-    if (_likedClubIDs.contains(clubID)) {
-      _likedClubIDs.remove(clubID);
-    } else {
-      _likedClubIDs.add(clubID);
-    }
-    notifyListeners();
-  }
-
-  bool isLiked(int clubID) {
-    return _likedClubIDs.contains(clubID);
-  }
-
-  Future<void> deleteAllLiked() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.remove('likedClubs');
-      _likedClubIDs.clear();
-      notifyListeners();
-      print('\x1B[32mLiked clubs cleared from SharedPreferences.');
-      notifyListeners();
-    } catch (e) {
-      print('\x1B[31mError clearing liked clubs: $e');
-    }
   }
 
   // UTILITY / HELPER FUNCTIONS

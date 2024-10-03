@@ -2,13 +2,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../Providers/club_provider.dart';
 import '../global_components.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
@@ -305,8 +305,7 @@ class _SignUpPageState extends State<SignUpPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (mounted) {
-      ClubProvider clubProvider = context.read<ClubProvider>();
-      await clubProvider.deleteAllLiked();
+      await context.read<LikesClubsProvider>().deleteAllLiked();
     }
 
     await prefs.remove('saved_email');
@@ -314,10 +313,6 @@ class _SignUpPageState extends State<SignUpPage> {
     await prefs.remove('user_details');
     await prefs.remove('user_photo_path');
     await prefs.remove('bookings');
-  }
-
-  Future<void> _startSyncingClubs() async {
-    await context.read<ClubProvider>().syncClubs();
   }
 
   void _showSnackBar(String message) {

@@ -48,7 +48,6 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                   right: screenWidth / 10,
                   bottom: screenHeight / 40,
                   child: SizedBox(
-                    height: 70,
                     width: screenWidth - screenWidth / 5,
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(20),

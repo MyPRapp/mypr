@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Navigation/bottom_nav_bar.dart';
@@ -16,6 +17,9 @@ class FavoritesPage extends StatelessWidget {
     // Obtain screen dimensions once to avoid repeated calls
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
+    LikesClubsProvider likesProvider = context.watch<LikesClubsProvider>();
+    List<ClubInfoStruct> likedClubs =
+        likesProvider.getAllLikedClubs(context.read<ClubProvider>().allClubs);
 
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
@@ -24,35 +28,30 @@ class FavoritesPage extends StatelessWidget {
       child: Scaffold(
         appBar: _buildAppBar(context, screenHeight, screenWidth),
         backgroundColor: const Color.fromARGB(155, 51, 51, 51),
-        body: Selector<ClubProvider, List<ClubInfoStruct>>(
-          selector: (context, clubProvider) => clubProvider.allLikedClubs,
-          builder: (context, likedClubs, child) {
-            return ListView.builder(
-              itemCount: likedClubs.length, // +1 for the header
-              itemBuilder: (context, index) {
-                final club = likedClubs[index];
-                if (index < likedClubs.length) {
-                  return BigClubCard(
+        body: ListView.builder(
+          itemCount: likedClubs.length, // +1 for the header
+          itemBuilder: (context, index) {
+            final club = likedClubs[index];
+            if (index < likedClubs.length) {
+              return BigClubCard(
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                club: club,
+              );
+            } else {
+              return Column(
+                children: [
+                  BigClubCard(
                     screenHeight: screenHeight,
                     screenWidth: screenWidth,
                     club: club,
-                  );
-                } else {
-                  return Column(
-                    children: [
-                      BigClubCard(
-                        screenHeight: screenHeight,
-                        screenWidth: screenWidth,
-                        club: club,
-                      ),
-                      SizedBox(
-                        height: screenHeight / 40 * 5,
-                      )
-                    ],
-                  );
-                }
-              },
-            );
+                  ),
+                  SizedBox(
+                    height: screenHeight / 40 * 5,
+                  )
+                ],
+              );
+            }
           },
         ),
       ),
@@ -62,6 +61,7 @@ class FavoritesPage extends StatelessWidget {
   AppBar _buildAppBar(
       BuildContext context, double screenHeight, double screenWidth) {
     return AppBar(
+        centerTitle: false,
         backgroundColor: const Color.fromARGB(0, 0, 0, 0),
         elevation: 0,
         title: const Text(
@@ -88,7 +88,7 @@ class FavoritesPage extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
-                context.read<ClubProvider>().deleteAllLiked();
+                context.read<LikesClubsProvider>().deleteAllLiked();
               },
               child: Container(
                 height: screenHeight * 0.046,

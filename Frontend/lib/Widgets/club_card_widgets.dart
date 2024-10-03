@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:provider/provider.dart';
 
-import '../Providers/club_provider.dart';
 import '../global_components.dart';
 
 class LikeButton extends StatefulWidget {
@@ -29,9 +29,8 @@ class LikeButtonState extends State<LikeButton>
     final double size = widget.big
         ? widget.screenHeight * widget.screenWidth * 0.00012
         : widget.screenHeight * widget.screenWidth * 0.00009;
-    final clubProvider = context.watch<ClubProvider>();
-
-    bool isLiked = clubProvider.isLiked(widget.club.clubID);
+    final likeProvider = context.watch<LikesClubsProvider>();
+    bool isLiked = likeProvider.isLiked(widget.club.clubID);
 
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
@@ -40,7 +39,7 @@ class LikeButtonState extends State<LikeButton>
           tapped = true;
         });
 
-        clubProvider.toggleLike(widget.club.clubID);
+        likeProvider.toggleLike(widget.club.clubID);
       },
       child: SizedBox(
         height: widget.screenWidth * 0.1,

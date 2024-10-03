@@ -2,16 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../global_components.dart';
 
 class ClubSaver {
-  ClubSaver(this._clubs, this._catalogues, this._likedClubIDs);
+  ClubSaver(this._clubs, this._catalogues);
 
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
-  final List<int> _likedClubIDs;
 
   Future<String> _getFilePath(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -55,10 +53,4 @@ class ClubSaver {
   //   await file.writeAsBytes(photoBytes); // Save photo as binary data
   //   print('\x1B[32mPhoto for club ID $clubID saved at $filePath');
   // }
-
-  Future<void> saveLikedClubsToPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(
-        'likedClubs', _likedClubIDs.map((id) => id.toString()).toList());
-  }
 }

@@ -1,6 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Providers/club_provider.dart';
+import 'package:mypr/Providers/club_provider_helpers/club_likes.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -100,8 +100,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
         // Step 5: Clear liked clubs
         if (context.mounted) {
           print('\x1B[33mClearing liked clubs...');
-          ClubProvider clubProvider = context.read<ClubProvider>();
-          await clubProvider.deleteAllLiked();
+          await context.read<LikesClubsProvider>().deleteAllLiked();
         }
 
         // Step 6: Clear bookings and reset flags
