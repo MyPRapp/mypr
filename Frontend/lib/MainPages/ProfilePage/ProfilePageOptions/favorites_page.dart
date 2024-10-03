@@ -17,7 +17,7 @@ class FavoritesPage extends StatelessWidget {
     // Obtain screen dimensions once to avoid repeated calls
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
-    LikesClubsProvider likesProvider = context.watch<LikesClubsProvider>();
+    LikedClubsProvider likesProvider = context.watch<LikedClubsProvider>();
     List<ClubInfoStruct> likedClubs =
         likesProvider.getAllLikedClubs(context.read<ClubProvider>().allClubs);
 
@@ -88,7 +88,7 @@ class FavoritesPage extends StatelessWidget {
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () {
-                context.read<LikesClubsProvider>().deleteAllLiked();
+                context.read<LikedClubsProvider>().deleteAllLiked();
               },
               child: Container(
                 height: screenHeight * 0.046,

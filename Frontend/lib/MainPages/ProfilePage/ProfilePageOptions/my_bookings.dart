@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -211,36 +209,12 @@ class BookingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: FutureBuilder<Uint8List?>(
-                  future: clubProvider.loadClubPhotoFromFile(booking.clubID),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasData && snapshot.data != null) {
-                        return Image.memory(
-                          snapshot.data!,
-                          width: 120,
-                          height: 120,
-                          fit: BoxFit.cover,
-                        );
-                      } else {
-                        return const Image(
-                          image: AssetImage(
-                              'assets/images/default_club_image.png'),
-                          width: 120,
-                          height: 120,
-                          fit: BoxFit.cover,
-                        );
-                      }
-                    } else {
-                      return const SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    }
-                  },
+                child: const SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
                 ),
               ),
               const SizedBox(width: 20),

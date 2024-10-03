@@ -305,13 +305,12 @@ class _SignUpPageState extends State<SignUpPage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (mounted) {
-      await context.read<LikesClubsProvider>().deleteAllLiked();
+      await context.read<LikedClubsProvider>().deleteAllLiked();
     }
 
     await prefs.remove('saved_email');
     await prefs.remove('saved_password');
     await prefs.remove('user_details');
-    await prefs.remove('user_photo_path');
     await prefs.remove('bookings');
   }
 

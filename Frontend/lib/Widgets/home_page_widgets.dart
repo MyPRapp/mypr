@@ -1,9 +1,9 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
-import 'package:provider/provider.dart';
 
 import '../global_components.dart';
 
@@ -28,24 +28,6 @@ class _BigClubCardState extends State<BigClubCard> {
     super.initState();
   }
 
-  // Future<Uint8List?> _loadClubPhotoFromFile(int clubID) async {
-  //   // This function loads the image from the file
-  //   // context
-  //   //     .read<ClubProvider>()
-  //   //     .printClub(context.read<ClubProvider>().getClubByID(clubID));
-  //   return await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
-  // }
-
-  Future<String> _loadClubPhotoFromNetwork(int clubID) async {
-    // This function loads the image URL from the network
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      return context.read<ClubProvider>().getClubByID(clubID).clubPhoto;
-    } else {
-      return '';
-    }
-  }
-
   List<bool> _daysOpen(String availabilityInBytes) {
     return availabilityInBytes.split('').map((char) => char == '1').toList();
   }
@@ -55,7 +37,6 @@ class _BigClubCardState extends State<BigClubCard> {
     final daysOpen = _daysOpen(widget.club.clubAvailability);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
-
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -83,11 +64,16 @@ class _BigClubCardState extends State<BigClubCard> {
                     child: SizedBox(
                       height: screenHeight * 0.17,
                       width: screenWidth * 0.3,
-                      // child: Image.network(
-                      //   widget.club.clubPhoto,
-                      //   fit: BoxFit.cover,
-                      // ),
-                      child: FutureBuilder<String?>(
+                      child: widget.club.localPhotoPath.isNotEmpty
+                          ? Image.file(
+                              File(widget.club.localPhotoPath),
+                              fit: BoxFit.fill,
+                            ) // Load from local file
+                          : Image.network(
+                              widget.club.clubPhoto,
+                              fit: BoxFit.fill,
+                            ), // Fallback to loading from the URL
+                      /*   FutureBuilder<String?>(
                         future: _loadClubPhotoFromNetwork(widget.club.clubID),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
@@ -109,7 +95,7 @@ class _BigClubCardState extends State<BigClubCard> {
                             return const CircularProgressIndicator();
                           }
                         },
-                      ),
+                      ), */
                     ),
                   ),
                   Container(

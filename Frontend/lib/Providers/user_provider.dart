@@ -19,6 +19,7 @@ class UserProvider with ChangeNotifier {
     points: 0,
     photo: '',
   );
+
   UserInfoStruct get userDetails => _userDetails;
 
   // Fetch user details from the server, save to shared preferences, and notify listeners
@@ -95,7 +96,6 @@ class UserProvider with ChangeNotifier {
     // Clear related user data from SharedPreferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_details');
-    await prefs.remove('user_photo_path');
 
     // Notify listeners of the changes
     notifyListeners();

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:mypr/global_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LikesClubsProvider extends ChangeNotifier {
+class LikedClubsProvider extends ChangeNotifier {
   final List<int> _likedClubIDs = [];
 
   List<ClubInfoStruct> getAllLikedClubs(List<ClubInfoStruct> clubs) {

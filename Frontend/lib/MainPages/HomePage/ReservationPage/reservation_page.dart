@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -75,7 +73,6 @@ class _ReservationPageState extends State<ReservationPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePage();
       context.read<BottomNavBarVisibility>().hide();
-      _loadClubPhoto(widget.club.clubID);
     });
   }
 
@@ -344,17 +341,6 @@ class _ReservationPageState extends State<ReservationPage> {
         ],
       ),
     );
-  }
-
-  Future<ImageProvider?> _loadClubPhoto(int clubID) async {
-    Uint8List? imageBytes = await context
-        .read<ClubProvider>()
-        .loadClubPhotoFromFile(clubID); // Load from file
-    if (imageBytes != null) {
-      return MemoryImage(imageBytes); // Convert to MemoryImage for display
-    } else {
-      return null; // You can handle missing images here (optional placeholder)
-    }
   }
 
   /// Builds the club image or a placeholder in case of an error.

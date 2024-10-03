@@ -4,6 +4,16 @@ import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+Future<String?> getAccessToken() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('access_token');
+}
+
+Future<String?> getRefreshToken() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getString('refresh_token');
+}
+
 class AuthService {
   String get baseUrl => 'http://${GlobalStateProvider().validatedIp}/api';
 
@@ -90,36 +100,6 @@ class AuthService {
     }
   }
 
-  Future<Map<String, dynamic>> getUserDetails() async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('access_token');
-
-      // Check if token exists
-      if (token == null) {
-        print('\x1B[31mAccess token not found');
-        throw Exception('Access token not found');
-      }
-
-      // Fetch user details
-      final response = await http.get(
-        Uri.parse('$baseUrl/user/print'),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      if (response.statusCode == 200) {
-        print('\x1B[32mUser details loaded successfully');
-        return jsonDecode(response.body);
-      } else {
-        print('\x1B[31mFailed to load user details: ${response.statusCode}');
-        throw Exception('Failed to load user details');
-      }
-    } catch (e) {
-      print('\x1B[31mException occurred while loading user details: $e');
-      rethrow;
-    }
-  }
-
   Future<void> refreshAccessToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? refreshToken = prefs.getString('refresh_token');
@@ -158,22 +138,5 @@ class AuthService {
       print('\x1B[31mError refreshing access token: $e');
       rethrow;
     }
-  }
-
-  Future<String?> getAccessToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token');
-  }
-
-  Future<String?> getRefreshToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('refresh_token');
-  }
-
-  Future<void> logout() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.remove('access_token');
-    await prefs.remove('refresh_token');
-    print('\x1B[32mUser logged out successfully');
   }
 }

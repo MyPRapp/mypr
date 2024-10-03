@@ -29,7 +29,7 @@ class LikeButtonState extends State<LikeButton>
     final double size = widget.big
         ? widget.screenHeight * widget.screenWidth * 0.00012
         : widget.screenHeight * widget.screenWidth * 0.00009;
-    final likeProvider = context.watch<LikesClubsProvider>();
+    final likeProvider = context.watch<LikedClubsProvider>();
     bool isLiked = likeProvider.isLiked(widget.club.clubID);
 
     return GestureDetector(

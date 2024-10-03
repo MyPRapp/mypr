@@ -15,6 +15,7 @@ class ClubInfoStruct {
   double clubRating;
   String clubAvailability;
   String clubPhoto;
+  String localPhotoPath = ''; // Local file path to the downloaded photo
   String clubNotAvailable;
 
   ClubInfoStruct({
@@ -62,8 +63,9 @@ class ClubInfoStruct {
       'location': clubLocation,
       'rating': clubRating,
       'availability': clubAvailability,
-      'clubPhoto': clubPhoto,
-      'not_available': clubNotAvailable
+      'photo': clubPhoto,
+      'not_available': clubNotAvailable,
+      'localPhotoPath': localPhotoPath,
     };
   }
 }
@@ -314,6 +316,19 @@ Future<void> createFilePath() async {
   } else {
     print('\x1B[32mFolder ${myprDirectory.path} already exists');
   }
+}
+
+Future<String> getFilePath(String fileName) async {
+  final directory = await getApplicationDocumentsDirectory();
+  final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
+
+  // Create the new folder if it doesn't exist
+  if (await myprDirectory.exists() == false) {
+    await myprDirectory.create(recursive: true);
+    print('\x1B[32mFolder created: ${myprDirectory.path}');
+  }
+
+  return '${directory.path}/mypDirectory/$fileName.json';
 }
 
 String formatName(String name) {

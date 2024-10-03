@@ -27,7 +27,7 @@ void main() {
           ChangeNotifierProvider(create: (_) => BookingProvider()),
           ChangeNotifierProvider(create: (_) => ReservationProvider()),
           ChangeNotifierProvider(create: (_) => BottomNavBarVisibility()),
-          ChangeNotifierProvider(create: (_) => LikesClubsProvider()),
+          ChangeNotifierProvider(create: (_) => LikedClubsProvider()),
           ChangeNotifierProvider(create: (_) => GlobalStateProvider()),
         ],
         child: const MyPR(),

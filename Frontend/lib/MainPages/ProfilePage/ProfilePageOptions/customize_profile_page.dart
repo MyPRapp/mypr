@@ -71,7 +71,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
         // Step 5: Clear liked clubs
         if (context.mounted) {
           print('\x1B[33mClearing liked clubs...');
-          await context.read<LikesClubsProvider>().deleteAllLiked();
+          await context.read<LikedClubsProvider>().deleteAllLiked();
         }
 
         // Step 6: Clear bookings and reset flags

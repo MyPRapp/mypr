@@ -9,22 +9,9 @@ class BookingService {
       AuthService(); // Create instance of AuthService
   String get baseUrl => 'http://${GlobalStateProvider().validatedIp}/api';
 
-  Future<void> _ensureTokenIsValid() async {
-    try {
-      await _authService.refreshAccessToken(); // Ensure token is refreshed
-    } catch (e) {
-      throw Exception('Token refresh failed');
-    }
-  }
-
-  Future<String?> _getAccessToken() async {
-    await _ensureTokenIsValid(); // Refresh token before making API call
-    return await _authService.getAccessToken();
-  }
-
   Future<bool> submitForm(String reservationName, String clubName, String type,
       String time, String numberOfPeople, String comments) async {
-    String? accessToken = await _getAccessToken();
+    String? accessToken = await _refreshAndGetAccessToken();
     if (accessToken == null) {
       print('\x1B[31mAccess token is null. User is not authenticated.');
       return false;
@@ -66,7 +53,7 @@ class BookingService {
   }
 
   Future<List<dynamic>?> getBookings() async {
-    String? accessToken = await _getAccessToken();
+    String? accessToken = await _refreshAndGetAccessToken();
     if (accessToken == null) {
       print('\x1B[31mAccess token is null. User is not authenticated.');
       return null;
@@ -101,5 +88,15 @@ class BookingService {
       print("\x1B[31mBooking retrieval failed: $e");
       return null;
     }
+  }
+
+  Future<String?> _refreshAndGetAccessToken() async {
+    // Refresh token before making API call
+    try {
+      await _authService.refreshAccessToken(); // Ensure token is refreshed
+    } catch (e) {
+      throw Exception('Token refresh failed');
+    }
+    return await getAccessToken();
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -128,37 +126,14 @@ class BookingDetailsPage extends StatelessWidget {
   Widget _buildClubPhoto(int clubID, ClubProvider clubProvider) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
-      child: FutureBuilder<Uint8List?>(
-        future: clubProvider.loadClubPhotoFromFile(clubID),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData && snapshot.data != null) {
-              return Image.memory(
-                snapshot.data!,
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-              );
-            } else {
-              return const Image(
-                image: AssetImage('assets/images/default_club_image.png'),
-                width: double.infinity,
-                height: 200,
-                fit: BoxFit.cover,
-              );
-            }
-          } else {
-            return const SizedBox(
-              width: double.infinity,
-              height: 200,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF9C0C04),
-                ),
-              ),
-            );
-          }
-        },
+      child: const SizedBox(
+        width: double.infinity,
+        height: 200,
+        child: Center(
+          child: CircularProgressIndicator(
+            color: Color(0xFF9C0C04),
+          ),
+        ),
       ),
     );
   }
