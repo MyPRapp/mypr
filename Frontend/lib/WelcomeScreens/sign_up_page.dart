@@ -2,16 +2,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../Navigation/bottom_nav_bar.dart';
 import '../Providers/club_provider.dart';
-import '../Providers/user_provider.dart';
 import '../global_components.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
@@ -36,7 +33,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
   bool _obscureText = true;
   bool _obscureText2 = true;
-  bool _showLoadingIndicator = true;
   bool _isRegistering = false;
   bool _phoneValidating = false;
 
@@ -58,38 +54,6 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   void initState() {
     super.initState();
-
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    await createFilePath();
-    if (mounted) {
-      context.read<ClubProvider>().loadClubsFromFile();
-      await context.read<ClubProvider>().loadCataloguesFromFile();
-
-      if (mounted) {
-        final globalState = context.read<GlobalStateProvider>();
-        while (!globalState.preferencesLoaded) {
-          await Future.delayed(const Duration(milliseconds: 100));
-        }
-      }
-    }
-    print('\x1B[32mGlobal state preferences loaded');
-
-    if (mounted) {
-      if (context.read<GlobalStateProvider>().isAuthenticated) {
-        print('\x1B[32m------------USER AUTHENTICATED------------');
-
-        _startSyncingClubs();
-        _startSyncingUser(); //Load user details and navigate to homePage
-      } else {
-        print('\x1B[31m------------USER NOT AUTHENTICATED------------');
-        setState(() {
-          _showLoadingIndicator = false;
-        });
-      }
-    }
   }
 
   Future<void> _register() async {
@@ -215,23 +179,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (success) {
         if (mounted) {
-          await context.read<UserProvider>().fetchUserDetailsFromServer();
-        }
-        if (mounted) {
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const BottomNavBarRoute()]);
-        }
-        _startSyncingClubs();
-
-        if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
+          context.router.replaceAll([const BottomNavBarRoute()]);
         }
-        if (mounted) {
-          context.read<BookingProvider>().fetchBookings(
-              context.read<UserProvider>().userDetails,
-              context.read<ClubProvider>());
-        }
-
         print('\x1B[32m------------LOGGED IN------------');
       } else {
         _showSnackBar('Λάθος στοιχεία εισόδου');
@@ -370,52 +320,6 @@ class _SignUpPageState extends State<SignUpPage> {
     await context.read<ClubProvider>().syncClubs();
   }
 
-  Future<void> _startSyncingUser() async {
-    print('\x1B[33m------------SYNCING USER------------');
-
-    UserProvider userProvider = context.read<UserProvider>();
-    await userProvider.loadUserDetailsFromPreferences();
-    if (mounted) {
-      context.read<BottomNavBarVisibility>().show();
-      context.router.replaceAll([const BottomNavBarRoute()]);
-    }
-
-    await _loadSavedUserCredentials();
-
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      bool loginSuccess = await AuthService().login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      if (loginSuccess) {
-        await userProvider.fetchUserDetailsFromServer();
-      } else {
-        print('\x1B[31mLogin failed, loading user details from preferences');
-        await userProvider.loadUserDetailsFromPreferences();
-      }
-      if (mounted) {
-        await context.read<BookingProvider>().fetchBookings(
-            userProvider.userDetails, context.read<ClubProvider>());
-      }
-    }
-    print('\x1B[32m------------SYNCED USER------------');
-  }
-
-  Future<void> _loadSavedUserCredentials() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? savedEmail = prefs.getString('saved_email');
-    String? savedPassword = prefs.getString('saved_password');
-
-    if (savedEmail != null && savedPassword != null) {
-      setState(() {
-        _emailController.text = savedEmail;
-        _passwordController.text = savedPassword;
-      });
-    }
-  }
-
   void _showSnackBar(String message) {
     FocusManager.instance.primaryFocus?.unfocus();
     floatingSnackBar(
@@ -451,11 +355,6 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    if (_showLoadingIndicator) {
-      return const LoadingScreen();
-    }
-
     return PopScope(
       canPop: false,
       child: GestureDetector(
@@ -467,7 +366,11 @@ class _SignUpPageState extends State<SignUpPage> {
             padding: EdgeInsets.zero,
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
-              Header(screenWidth: screenWidth, screenHeight: screenHeight),
+              Stack(
+                children: [
+                  Header(screenWidth: screenWidth, screenHeight: screenHeight),
+                ],
+              ),
               LoginLogo(
                 screenHeight: screenHeight,
                 screenWidth: screenWidth,

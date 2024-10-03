@@ -11,10 +11,10 @@ import '../global_state_provider.dart';
 import 'club_saver.dart';
 
 class ClubFetcher {
+  ClubFetcher(this._clubManager, this._clubSaver);
+
   final ClubManager _clubManager;
   final ClubSaver _clubSaver;
-
-  ClubFetcher(this._clubManager, this._clubSaver);
 
   Future<void> fetchClubsAndCatalogues() async {
     print('\x1B[33mFetching clubs from server...');
@@ -31,12 +31,12 @@ class ClubFetcher {
           final club = ClubInfoStruct.fromJson(item);
           if (club.clubID >= 0) {
             // Fetch and compress club photo, save it locally
-            Uint8List? photoBytes =
-                await downloadAndCompressImage(club.clubPhoto, 512);
-            if (photoBytes != null) {
-              await _clubSaver.saveClubPhotoToFile(
-                  club.clubID, photoBytes); // Save photo locally
-            }
+            // Uint8List? photoBytes =
+            //     await downloadAndCompressImage(club.clubPhoto, 512);
+            // if (photoBytes != null) {
+            //   await _clubSaver.saveClubPhotoToFile(
+            //       club.clubID, photoBytes); // Save photo locally
+            // }
 
             await fetchCatalogues(club); // Fetch catalogues for the club
             _clubManager.addOrUpdateClub(club); // Save club details
@@ -141,11 +141,11 @@ class ClubFetcher {
         if (clubData != null) {
           final club = ClubInfoStruct.fromJson(clubData);
 
-          // Download club photo and save it to the device directory
-          Uint8List? photoBytes = await downloadClubPhoto(club.clubPhoto);
-          if (photoBytes != null) {
-            await _clubSaver.saveClubPhotoToFile(club.clubID, photoBytes);
-          }
+          // // Download club photo and save it to the device directory
+          // Uint8List? photoBytes = await downloadClubPhoto(club.clubPhoto);
+          // if (photoBytes != null) {
+          //   await _clubSaver.saveClubPhotoToFile(club.clubID, photoBytes);
+          // }
 
           _clubManager.addOrUpdateClub(club);
           await _clubSaver.saveClubsToFile();
@@ -163,18 +163,18 @@ class ClubFetcher {
   }
 
   // Download club photo as Uint8List
-  Future<Uint8List?> downloadClubPhoto(String imageUrl) async {
-    try {
-      final response = await http.get(Uri.parse(imageUrl));
-      if (response.statusCode == 200) {
-        return response.bodyBytes; // Return photo as binary data
-      } else {
-        throw Exception('Failed to load image: ${response.statusCode}');
-      }
-    } catch (e) {
-      print(
-          '\x1B[31mError downloading club photo, loading from local storage: $e');
-      return null;
-    }
-  }
+  // Future<Uint8List?> downloadClubPhoto(String imageUrl) async {
+  //   try {
+  //     final response = await http.get(Uri.parse(imageUrl));
+  //     if (response.statusCode == 200) {
+  //       return response.bodyBytes; // Return photo as binary data
+  //     } else {
+  //       throw Exception('Failed to load image: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     print(
+  //         '\x1B[31mError downloading club photo, loading from local storage: $e');
+  //     return null;
+  //   }
+  // }
 }

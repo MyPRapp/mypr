@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,10 +7,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../global_components.dart';
 
 class ClubSaver {
+  ClubSaver(this._clubs, this._catalogues, this._likedClubIDs);
+
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
-  ClubSaver(this._clubs, this._catalogues, this._likedClubIDs);
+
   Future<String> _getFilePath(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
     final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
@@ -46,14 +47,14 @@ class ClubSaver {
     print('\x1B[32mCatalogues saved to $filePath');
   }
 
-  Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final filePath = '${directory.path}/mypDirectory/club_photo_$clubID.png';
+  // Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   final filePath = '${directory.path}/mypDirectory/club_photo_$clubID.png';
 
-    File file = File(filePath);
-    await file.writeAsBytes(photoBytes); // Save photo as binary data
-    print('\x1B[32mPhoto for club ID $clubID saved at $filePath');
-  }
+  //   File file = File(filePath);
+  //   await file.writeAsBytes(photoBytes); // Save photo as binary data
+  //   print('\x1B[32mPhoto for club ID $clubID saved at $filePath');
+  // }
 
   Future<void> saveLikedClubsToPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

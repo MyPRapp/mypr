@@ -25,7 +25,7 @@ class FavoritesPage extends StatelessWidget {
         appBar: _buildAppBar(context, screenHeight, screenWidth),
         backgroundColor: const Color.fromARGB(155, 51, 51, 51),
         body: Selector<ClubProvider, List<ClubInfoStruct>>(
-          selector: (context, clubProvider) => clubProvider.likedClubs,
+          selector: (context, clubProvider) => clubProvider.allLikedClubs,
           builder: (context, likedClubs, child) {
             return ListView.builder(
               itemCount: likedClubs.length, // +1 for the header
@@ -91,20 +91,21 @@ class FavoritesPage extends StatelessWidget {
                 context.read<ClubProvider>().deleteAllLiked();
               },
               child: Container(
-                height: screenHeight * 0.05,
-                width: screenWidth / 3,
+                height: screenHeight * 0.046,
+                width: screenWidth / 3.3,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: const Color.fromARGB(193, 156, 12, 4),
-                    border: Border.all(width: 2, color: Colors.black)),
+                    borderRadius: BorderRadius.circular(7),
+                    color: const Color.fromARGB(43, 145, 145, 145),
+                    border: Border.all(
+                        width: 2, color: const Color.fromARGB(209, 0, 0, 0))),
                 alignment: Alignment.center,
                 child: Text(
                   textAlign: TextAlign.center,
                   'Αφαίρεση όλων',
                   style: TextStyle(
-                    fontSize: screenWidth * 0.032,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
+                    fontSize: screenWidth * 0.03,
+                    fontWeight: FontWeight.w700,
+                    color: const Color.fromARGB(255, 136, 136, 136),
                   ),
                 ),
               ),

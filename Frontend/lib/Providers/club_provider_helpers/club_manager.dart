@@ -4,19 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../global_components.dart';
 
 class ClubManager with ChangeNotifier {
+  ClubManager(this._clubs, this._catalogues, this._likedClubIDs);
+
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
-  final VoidCallback _notifyListeners;
-
-  ClubManager(
-      this._clubs, this._catalogues, this._likedClubIDs, this._notifyListeners);
-
-  // GETTERS
-  List<ClubInfoStruct> get allClubs => _clubs;
-  List<CatalogueInfoStruct> get allCatalogues => _catalogues;
-  List<ClubInfoStruct> get allLikedClubs =>
-      _clubs.where((club) => _likedClubIDs.contains(club.clubID)).toList();
 
   // CLUB MANAGEMENT
   void addOrUpdateClub(ClubInfoStruct club) {
@@ -24,7 +16,6 @@ class ClubManager with ChangeNotifier {
       print('\x1B[31mAddOrUpdateClub: Invalid clubID: ${club.clubID}');
       return;
     }
-
     try {
       // Try to find if the club already exists in the list by its clubID
       int index = _clubs.indexWhere((c) => c.clubID == club.clubID);
@@ -32,14 +23,13 @@ class ClubManager with ChangeNotifier {
       if (index != -1) {
         // Club exists, update the existing entry
         _clubs[index] = club;
-        print('\x1B[32m\'${club.clubName}\' is up to date.');
+        print('\x1B[32m \'${club.clubName}\' is up to date.');
       } else {
         // Club does not exist, add it to the list
         _clubs.add(club);
         print('\x1B[32mClub \'${club.clubName}\' added.');
       }
-
-      _notifyListeners(); // Notify listeners that the club data has changed
+      notifyListeners();
     } catch (e) {
       // Catch any unexpected errors
       print('\x1B[31mError in addOrUpdateClub for clubID ${club.clubID}: $e');
@@ -53,13 +43,13 @@ class ClubManager with ChangeNotifier {
     }
     _clubs.removeWhere((club) => club.clubID == clubID);
     _catalogues.removeWhere((catalogue) => catalogue.clubID == clubID);
-    _notifyListeners();
+    notifyListeners();
   }
 
   // CATALOGUE MANAGEMENT
 
   // Method to initialize catalogues based on club ID and update the provided CatalogueInfoStruct variables
-  List<CatalogueInfoStruct> getAllCatalogues(int clubID) {
+  List<CatalogueInfoStruct> getAllCataloguesForClubWithID(int clubID) {
     ClubInfoStruct club = getClubByID(clubID);
 
     // Initialize and update the CatalogueInfoStruct variables
@@ -77,12 +67,13 @@ class ClubManager with ChangeNotifier {
       return;
     }
     try {
+      int index = -1;
       // Try to find if the catalogue for the specific clubID and serviceType already exists
-      int index = _catalogues.indexWhere((c) =>
+      index = _catalogues.indexWhere((c) =>
           c.clubID == catalogue.clubID &&
           c.serviceType == catalogue.serviceType);
 
-      if (index != -1) {
+      if (index > 0) {
         // Catalogue exists, update the existing entry
         _catalogues[index] = catalogue;
         print(
@@ -93,7 +84,6 @@ class ClubManager with ChangeNotifier {
         print(
             '\x1B[32m${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} added.');
       }
-      _notifyListeners(); // Notify listeners that the catalogues data has changed
     } catch (e) {
       // Catch any unexpected errors during the operation
       print(
@@ -121,7 +111,7 @@ class ClubManager with ChangeNotifier {
     } else {
       _likedClubIDs.add(clubID);
     }
-    _notifyListeners();
+    notifyListeners();
   }
 
   bool isLiked(int clubID) {
@@ -135,10 +125,10 @@ class ClubManager with ChangeNotifier {
       _likedClubIDs.clear();
       notifyListeners();
       print('\x1B[32mLiked clubs cleared from SharedPreferences.');
+      notifyListeners();
     } catch (e) {
       print('\x1B[31mError clearing liked clubs: $e');
     }
-    _notifyListeners();
   }
 
   // UTILITY / HELPER FUNCTIONS

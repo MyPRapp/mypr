@@ -43,7 +43,6 @@ class GlobalStateProvider with ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _validatedIp = prefs.getString('validatedIp') ?? '13.38.200.158';
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
-
     // Set the preferences loaded state to true
     _preferencesLoaded = true;
     notifyListeners(); // Notify that preferences have been loaded

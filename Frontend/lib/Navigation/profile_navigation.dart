@@ -7,6 +7,8 @@ class ProfileNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AutoRouter();
+    return AutoRouter(
+        placeholder: (context) =>
+            const Scaffold(backgroundColor: Colors.black));
   }
 }

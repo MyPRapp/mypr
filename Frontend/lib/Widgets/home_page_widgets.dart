@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/club_provider.dart';
@@ -28,18 +26,23 @@ class _BigClubCardState extends State<BigClubCard> {
   @override
   void initState() {
     super.initState();
-    _loadClubPhoto(
-        widget.club.clubID); // Load the image when the widget is initialized
   }
 
-  Future<ImageProvider?> _loadClubPhoto(int clubID) async {
-    Uint8List? imageBytes = await context
-        .read<ClubProvider>()
-        .loadClubPhotoFromFile(clubID); // Load from file
-    if (imageBytes != null) {
-      return MemoryImage(imageBytes); // Convert to MemoryImage for display
+  // Future<Uint8List?> _loadClubPhotoFromFile(int clubID) async {
+  //   // This function loads the image from the file
+  //   // context
+  //   //     .read<ClubProvider>()
+  //   //     .printClub(context.read<ClubProvider>().getClubByID(clubID));
+  //   return await context.read<ClubProvider>().loadClubPhotoFromFile(clubID);
+  // }
+
+  Future<String> _loadClubPhotoFromNetwork(int clubID) async {
+    // This function loads the image URL from the network
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      return context.read<ClubProvider>().getClubByID(clubID).clubPhoto;
     } else {
-      return null; // You can handle missing images here (optional placeholder)
+      return '';
     }
   }
 
@@ -64,7 +67,7 @@ class _BigClubCardState extends State<BigClubCard> {
             left: screenWidth * 0.02,
             right: screenWidth * 0.02),
         child: Container(
-          width: screenWidth,
+          width: screenWidth * 0.96,
           height: screenHeight / 6,
           decoration: BoxDecoration(
               color: const Color.fromARGB(57, 0, 0, 0),
@@ -73,37 +76,41 @@ class _BigClubCardState extends State<BigClubCard> {
             children: [
               Stack(
                 children: [
-                  FutureBuilder<ImageProvider?>(
-                    key: ValueKey(
-                        widget.club.clubID), // Use a unique key for each club
-                    future: _loadClubPhoto(widget.club.clubID),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.done &&
-                          snapshot.hasData) {
-                        return ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                              bottomLeft: Radius.circular(7.5),
-                              topLeft: Radius.circular(7.5)),
-                          child: SizedBox(
-                            height: screenHeight * 0.17,
-                            width: screenWidth * 0.3,
-                            child: Image(
-                              image: snapshot.data!,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        );
-                      } else {
-                        return SizedBox(
-                          height: screenHeight * 0.17,
-                          width: screenWidth * 0.3,
-                          child: const CircularProgressIndicator(
-                            color: Color(0xFF9C0C04),
-                            strokeCap: StrokeCap.square,
-                          ),
-                        );
-                      }
-                    },
+                  ClipRRect(
+                    borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(7.5),
+                        topLeft: Radius.circular(7.5)),
+                    child: SizedBox(
+                      height: screenHeight * 0.17,
+                      width: screenWidth * 0.3,
+                      // child: Image.network(
+                      //   widget.club.clubPhoto,
+                      //   fit: BoxFit.cover,
+                      // ),
+                      child: FutureBuilder<String?>(
+                        future: _loadClubPhotoFromNetwork(widget.club.clubID),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Padding(
+                              padding: EdgeInsets.all(20),
+                              child: CircularProgressIndicator(
+                                color: Color.fromARGB(255, 71, 71, 71),
+                              ),
+                            ); // Loading spinner while loading the file image
+                          } else if (snapshot.hasData &&
+                              snapshot.data != null) {
+                            return Image.network(
+                              snapshot.data!,
+                              fit: BoxFit.fill,
+                            );
+                            // First, load the local file image
+                          } else {
+                            return const CircularProgressIndicator();
+                          }
+                        },
+                      ),
+                    ),
                   ),
                   Container(
                     alignment: Alignment.topLeft,
@@ -181,7 +188,7 @@ class _BigClubCardState extends State<BigClubCard> {
     );
   }
 }
-
+/* 
 class SmallClubCard extends StatefulWidget {
   const SmallClubCard({
     super.key,
@@ -291,3 +298,4 @@ class _SmallClubCardState extends State<SmallClubCard> {
     );
   }
 }
+ */

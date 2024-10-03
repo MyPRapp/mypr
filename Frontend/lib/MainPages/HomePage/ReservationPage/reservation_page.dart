@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../../../Navigation/bottom_nav_bar.dart';
@@ -14,6 +15,7 @@ import '../../../Providers/user_provider.dart';
 import '../../../Widgets/club_card_widgets.dart';
 import '../../../Widgets/reservation_page_widgets.dart';
 import '../../../global_components.dart';
+import '../../../routes/app_router.gr.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/points_service.dart';
@@ -89,7 +91,8 @@ class _ReservationPageState extends State<ReservationPage> {
 
     final clubProvider = context.read<ClubProvider>();
     // Fetch and initialize catalogues for the selected club
-    final catalogues = clubProvider.getAllCatalogues(widget.club.clubID);
+    final catalogues =
+        clubProvider.getAllCataloguesForClubWithID(widget.club.clubID);
 
     setState(() {
       regularCatalogue = catalogues[0];
@@ -173,7 +176,8 @@ class _ReservationPageState extends State<ReservationPage> {
     try {
       // Fetch updated catalogues
       await clubProvider.fetchCatalogues(widget.club);
-      final catalogues = clubProvider.getAllCatalogues(widget.club.clubID);
+      final catalogues =
+          clubProvider.getAllCataloguesForClubWithID(widget.club.clubID);
 
       if (regularCatalogue.maxPersons != catalogues[0].maxPersons ||
           regularCatalogue.price != catalogues[0].price ||
@@ -210,6 +214,8 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
+    final bool isAuthenticated =
+        context.read<GlobalStateProvider>().isAuthenticated;
     return PopScope(
       canPop: buttonIsVisible,
       onPopInvokedWithResult: (didPop, result) {
@@ -228,7 +234,8 @@ class _ReservationPageState extends State<ReservationPage> {
             child: ListView(
               children: [
                 // Build page header with club name
-                buildContent(), // Build form content and input fields
+                buildContent(isAuthenticated, screenHeight,
+                    screenWidth), // Build form content and input fields
               ],
             ),
           ),
@@ -274,7 +281,8 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the content section with form fields for reservation details.
-  Widget buildContent() {
+  Widget buildContent(
+      bool isAuthenticated, double screenHeight, double screenWidth) {
     return Container(
       padding: const EdgeInsets.all(15),
       child: Column(
@@ -284,9 +292,55 @@ class _ReservationPageState extends State<ReservationPage> {
           buildTitle('Φιάλες και Τιμές'), // Display packages
           buildPackageInfo(),
           const SizedBox(height: 40),
-          buildTitle('Κάνε κράτηση'), // Display booking form
-          const SizedBox(height: 50),
-          buildReservationForm(), // Build reservation form
+          isAuthenticated
+              ? Column(
+                  children: [
+                    buildTitle('Κάνε κράτηση'), // Display booking form
+                    const SizedBox(height: 50),
+                    buildReservationForm(),
+                  ],
+                )
+              : Column(
+                  children: [
+                    buildTitle(
+                        'Ενδιαφέρεσαι για κράτηση;'), // Display booking form
+                    const SizedBox(height: 50),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          AutoRouter.of(context)
+                              .replaceAll([const SignUpRoute()]);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          elevation: 10,
+                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                          backgroundColor: const Color.fromARGB(
+                              136, 173, 173, 173), // Text color
+                          minimumSize: Size(screenWidth * 0.45,
+                              screenHeight * 0.06), // Button size
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: const BorderSide(
+                              width: 4,
+                              color:
+                                  Color.fromARGB(255, 0, 0, 0), // Border color
+                            ),
+                          ),
+                        ),
+                        child: Text(
+                          'Κάνε εγγραφή/Συνδέσου',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.028,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    SizedBox(height: screenHeight * 0.1),
+                  ],
+                ), // Build reservation form
         ],
       ),
     );
@@ -306,37 +360,16 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Builds the club image or a placeholder in case of an error.
   Widget buildClubImage() {
     return Padding(
-      padding: const EdgeInsets.all(15),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: SizedBox(
-          width: 520,
-          height: 350,
-          child: FutureBuilder<ImageProvider?>(
-            // Use the loadImageFromFileOrNetwork method from ClubProvider
-            future: _loadClubPhoto(widget.club.clubID),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  // Display the loaded image (either from the network or local storage)
-                  return Image(image: snapshot.data!, fit: BoxFit.fill);
-                } else if (snapshot.hasError || !snapshot.hasData) {
-                  // Display a fallback image if there's an error or no data
-                  return const Image(
-                    image: AssetImage('assets/images/default_club_image.png'),
-                    fit: BoxFit.fill,
-                  );
-                }
-              }
-              // Show a loading spinner while the image is being loaded
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            },
+        padding: const EdgeInsets.all(15),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(30),
+          child: SizedBox(
+            width: 520,
+            height:
+                350, // Display the loaded image (either from the network or local storage)
+            child: Image.network(widget.club.clubPhoto, fit: BoxFit.fill),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   /// Builds a section title.

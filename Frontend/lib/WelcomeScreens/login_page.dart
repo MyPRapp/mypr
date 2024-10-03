@@ -3,15 +3,10 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
-
-import '../Navigation/bottom_nav_bar.dart';
-import '../Providers/club_provider.dart';
-import '../Providers/user_provider.dart';
 
 @RoutePage()
 class LoginPage extends StatefulWidget {
@@ -27,9 +22,6 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscureText = true;
   bool _isLoginPressed = false;
-  Future<void> _startSyncingClubs() async {
-    await context.read<ClubProvider>().syncClubs();
-  }
 
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -53,21 +45,8 @@ class _LoginPageState extends State<LoginPage> {
 
       if (success) {
         if (mounted) {
-          await context.read<UserProvider>().fetchUserDetailsFromServer();
-        }
-        if (mounted) {
-          context.read<BottomNavBarVisibility>().show();
-          await context.router.replaceAll([const BottomNavBarRoute()]);
-        }
-        _startSyncingClubs();
-
-        if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
-        }
-        if (mounted) {
-          context.read<BookingProvider>().fetchBookings(
-              context.read<UserProvider>().userDetails,
-              context.read<ClubProvider>());
+          context.router.replaceAll([const BottomNavBarRoute()]);
         }
 
         print('\x1B[32m------------LOGGED IN------------');
@@ -170,9 +149,44 @@ class LoginBody extends StatelessWidget {
         children: [
           Column(
             children: [
+              GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () {
+                  AutoRouter.of(context)
+                      .replaceAll([const BottomNavBarRoute()]);
+                },
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.paddingOf(context).top +
+                          screenHeight * 0.02,
+                      right: screenWidth * 0.05),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Container(
+                      padding:
+                          EdgeInsets.all(screenHeight * screenWidth * 0.000018),
+                      decoration: BoxDecoration(
+                          color: const Color.fromARGB(0, 0, 0, 0),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                blurRadius: 3,
+                                blurStyle: BlurStyle.outer)
+                          ],
+                          border: Border.all(color: Colors.black),
+                          borderRadius: BorderRadius.circular(4)),
+                      child: const Text('Παράλειψη',
+                          style: TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            fontWeight: FontWeight.w700,
+                          )),
+                    ),
+                  ),
+                ),
+              ),
               Padding(
                 padding: EdgeInsets.only(
-                    top: screenHeight * 0.08, bottom: screenHeight * 0.05),
+                    top: screenHeight * 0.03, bottom: screenHeight * 0.05),
                 child: LoginLogo(
                   screenHeight: screenHeight,
                   screenWidth: screenWidth,

@@ -82,7 +82,7 @@ class SearchPageState extends State<SearchPage> {
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 colors: [Colors.black, Color(0xFF9C0C04)],
-                begin: Alignment.topCenter,
+                begin: Alignment.center,
                 end: Alignment.bottomCenter,
               ),
             ),

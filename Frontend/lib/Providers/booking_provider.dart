@@ -45,7 +45,7 @@ class BookingProvider with ChangeNotifier {
     _bookings.clear();
     for (var bookingData in bookingsData) {
       List<CatalogueInfoStruct> catalogues =
-          clubProvider.getAllCatalogues(bookingData['club']);
+          clubProvider.getAllCataloguesForClubWithID(bookingData['club']);
       final regularCatalogue =
           _getCatalogue(catalogues, 0, bookingData['club'], 'Regular');
       final specialCatalogue =

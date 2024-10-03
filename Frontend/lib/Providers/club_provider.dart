@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../global_components.dart';
@@ -20,44 +19,30 @@ class ClubProvider with ChangeNotifier {
   late final ClubFetcher _clubFetcher;
 
   ClubProvider() {
-    _clubManager =
-        ClubManager(_clubs, _catalogues, _likedClubIDs, notifyListeners);
+    _clubManager = ClubManager(_clubs, _catalogues, _likedClubIDs);
     _clubLoader = ClubLoader(_clubs, _catalogues, _likedClubIDs);
     _clubSaver = ClubSaver(_clubs, _catalogues, _likedClubIDs);
     _clubFetcher = ClubFetcher(_clubManager, _clubSaver);
+  }
+
+  // GETTERS
+  List<ClubInfoStruct> get allClubs => _clubs;
+  List<CatalogueInfoStruct> get allCatalogues => _catalogues;
+  List<ClubInfoStruct> get allLikedClubs {
+    return _clubs.where((club) => _likedClubIDs.contains(club.clubID)).toList();
   }
 
   // Syncs clubs from the server, loads from file if fetch fails
   Future<void> syncClubs() async {
     print('\x1B[33m------------SYNCING CLUBS------------');
     try {
-      await _clubFetcher.fetchClubsAndCatalogues(); // Fetch from server
+      await fetchClubsAndCatalogues(); // Fetch from server
     } catch (e) {
-      await _clubLoader.loadClubsFromFile();
-      await _clubLoader.loadCataloguesFromFile();
+      await loadClubsFromFile();
+      await loadCataloguesFromFile();
     }
-    await _clubLoader.loadLikedClubsFromPreferences(); // Load liked clubs
-    notifyListeners();
+    await loadLikedClubsFromPreferences(); // Load liked clubs
     print('\x1B[32m------------SYNCED CLUBS------------');
-  }
-
-  // Loading club photo with offline-first approach
-  Future<ImageProvider?> loadImageFromFileOrNetwork(int clubID) async {
-    ClubInfoStruct club = getClubByID(clubID);
-    try {
-      // Try fetching from the network (if online)
-      return CachedNetworkImageProvider(club.clubPhoto);
-    } catch (e) {
-      // If no internet, return a default placeholder
-      Uint8List? imageBytes = await loadClubPhotoFromFile(clubID);
-
-      if (imageBytes != null) {
-        return MemoryImage(imageBytes); // Load image from local storage
-        //TODO Να ορισουμε μια φωτο ως default για τα κλαμπ
-      } else {
-        return const AssetImage('assets/images/default_club_image.png');
-      }
-    }
   }
 
   //// Fetch From Server Functions
@@ -78,14 +63,17 @@ class ClubProvider with ChangeNotifier {
   //// Load From File Functions (Replaces SharedPreferences)
   Future<void> loadClubsFromFile() async {
     await _clubLoader.loadClubsFromFile();
+    notifyListeners();
   }
 
   Future<void> loadCataloguesFromFile() async {
     await _clubLoader.loadCataloguesFromFile();
+    notifyListeners();
   }
 
   Future<void> loadLikedClubsFromPreferences() async {
     await _clubLoader.loadLikedClubsFromPreferences();
+    notifyListeners();
   }
 
   // Load club photo from the file system
@@ -94,12 +82,8 @@ class ClubProvider with ChangeNotifier {
   }
 
   //// Club Manager Functions
-  List<ClubInfoStruct> get allClubs => _clubManager.allClubs;
-  List<CatalogueInfoStruct> get allCatalogues => _clubManager.allCatalogues;
-  List<ClubInfoStruct> get likedClubs => _clubManager.allLikedClubs;
-
-  List<CatalogueInfoStruct> getAllCatalogues(int clubID) {
-    return _clubManager.getAllCatalogues(clubID);
+  List<CatalogueInfoStruct> getAllCataloguesForClubWithID(int clubID) {
+    return _clubManager.getAllCataloguesForClubWithID(clubID);
   }
 
   void addOrUpdateClub(ClubInfoStruct club) {
@@ -124,6 +108,7 @@ class ClubProvider with ChangeNotifier {
 
   //// Liked Clubs Management (Stored in SharedPreferences)
   void toggleLike(int clubID) {
+    //TODO FIX FAVORITES CAUSE THEY RELOAD THE IMAGE
     _clubManager.toggleLike(clubID);
     _clubSaver.saveLikedClubsToPreferences(); // Save to SharedPreferences
   }
@@ -134,6 +119,7 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> deleteAllLiked() async {
     await _clubManager.deleteAllLiked();
+    notifyListeners();
   }
 
   //// Saving To File Functions
@@ -152,9 +138,9 @@ class ClubProvider with ChangeNotifier {
         .saveLikedClubsToPreferences(); // Save liked clubs in SharedPreferences
   }
 
-  Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {
-    await _clubSaver.saveClubPhotoToFile(clubID, photoBytes);
-  }
+  // Future<void> saveClubPhotoToFile(int clubID, Uint8List photoBytes) async {
+  //   await _clubSaver.saveClubPhotoToFile(clubID, photoBytes);
+  // }
 
   //// Utility / Helper Functions
   String getClubAvailability(String clubName) {

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ClubInfoStruct {
@@ -290,20 +291,12 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.black, Color(0xFF9C0C04)],
-            begin: Alignment.center,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
-          ),
+    return const Scaffold(
+      backgroundColor: Color.fromARGB(197, 40, 40, 40),
+      body: Center(
+        child: SpinKitRing(
+          color: Color(0xFF9C0C04),
+          size: 50.0,
         ),
       ),
     );

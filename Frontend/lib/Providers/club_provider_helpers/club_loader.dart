@@ -8,11 +8,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../global_components.dart';
 
 class ClubLoader {
+  ClubLoader(this._clubs, this._catalogues, this._likedClubIDs);
+
   final List<ClubInfoStruct> _clubs;
   final List<CatalogueInfoStruct> _catalogues;
   final List<int> _likedClubIDs;
-
-  ClubLoader(this._clubs, this._catalogues, this._likedClubIDs);
 
   Future<String> _getFilePath(String fileName) async {
     final directory = await getApplicationDocumentsDirectory();
@@ -38,6 +38,7 @@ class ClubLoader {
       _clubs.clear();
       _clubs.addAll(
           clubsList.map((json) => ClubInfoStruct.fromJson(json)).toList());
+
       print('\x1B[32mClubs loaded from $filePath');
     } else {
       print('\x1B[31mClubs file does not exist');
