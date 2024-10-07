@@ -65,10 +65,23 @@ class _HomePageState extends State<HomePage> {
           String savedEmail = await getSavedEmail();
           String savedPassword = await getSavedPassword();
 
-          bool loggedIn = await AuthService().login(savedEmail, savedPassword);
-          if (loggedIn) {
+          if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+            bool loggedIn =
+                await AuthService().login(savedEmail, savedPassword);
+            if (loggedIn) {
+              if (mounted) {
+                await context.read<UserProvider>().fetchUserDetailsFromServer();
+              }
+            } else {
+              print('\x1B[31mEmail or Password is incorrect');
+              if (mounted) {
+                context.read<GlobalStateProvider>().isAuthenticated = false;
+              }
+            }
+          } else {
+            print('\x1B[31mEmail or Password is empty');
             if (mounted) {
-              await context.read<UserProvider>().fetchUserDetailsFromServer();
+              context.read<GlobalStateProvider>().isAuthenticated = false;
             }
           }
         } else {
