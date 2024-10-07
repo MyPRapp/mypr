@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -161,11 +163,6 @@ class _ReservationPageState extends State<ReservationPage> {
     reservationProvider.setInfo(4, price);
   }
 
-  /// Safely parses a string to a double, returning 0.0 if the string is invalid.
-  double safeParse(String value) {
-    return double.tryParse(value) ?? 0.0;
-  }
-
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
     final clubProvider = context.read<ClubProvider>();
@@ -226,7 +223,8 @@ class _ReservationPageState extends State<ReservationPage> {
           appBar: _buildAppBar(
               context, widget.club.clubName, screenHeight, screenWidth),
           backgroundColor: const Color.fromARGB(218, 31, 31, 31),
-          body: RefreshIndicator(
+          body: RefreshIndicator.adaptive(
+            color: const Color(0xFF9C0C04),
             onRefresh: _refresh, // Handle refresh action
             child: ListView(
               children: [
@@ -245,7 +243,6 @@ class _ReservationPageState extends State<ReservationPage> {
       double screenHeight, double screenWidth) {
     return AppBar(
         backgroundColor: const Color.fromARGB(0, 0, 0, 0),
-        elevation: 0,
         title: Text(
           clubName,
           style: const TextStyle(
@@ -294,7 +291,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   children: [
                     buildTitle('Κάνε κράτηση'), // Display booking form
                     const SizedBox(height: 50),
-                    buildReservationForm(),
+                    buildReservationForm(), const SizedBox(height: 120),
                   ],
                 )
               : Column(
@@ -348,12 +345,20 @@ class _ReservationPageState extends State<ReservationPage> {
     return Padding(
         padding: const EdgeInsets.all(15),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(15),
           child: SizedBox(
             width: 520,
             height:
                 350, // Display the loaded image (either from the network or local storage)
-            child: Image.network(widget.club.clubPhoto, fit: BoxFit.fill),
+            child: widget.club.localPhotoPath.isNotEmpty
+                ? Image.file(
+                    File(widget.club.localPhotoPath),
+                    fit: BoxFit.fill,
+                  ) // Load from local file
+                : Image.network(
+                    widget.club.clubPhoto,
+                    fit: BoxFit.fill,
+                  ),
           ),
         ));
   }
@@ -397,19 +402,12 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Builds the reservation form with various input fields.
   Widget buildReservationForm() {
     return Column(
+      //TODO add top/bottom padding of about 25 px
       children: [
-        SizedBox(
-          height: 70,
-          child: NameTextField(key: nameTextFieldKey),
-        ),
-        const SizedBox(height: 25),
-        SizedBox(
-          height: 70,
-          child: BookingDatePicker(
-              days: widget.club.clubAvailability,
-              unavailableDays: widget.club.clubNotAvailable),
-        ),
-        const SizedBox(height: 25),
+        NameTextField(key: nameTextFieldKey),
+        BookingDatePicker(
+            days: widget.club.clubAvailability,
+            unavailableDays: widget.club.clubNotAvailable),
         CategoriesTextField(
           key: categoriesTextFieldKey,
           regularCatalogue: regularCatalogue,
@@ -420,18 +418,11 @@ class _ReservationPageState extends State<ReservationPage> {
             calculatePrice(); // Recalculate total price
           },
         ),
-        const SizedBox(height: 25),
-        const SizedBox(
-          height: 70,
-          child: PersonsTextField(),
-        ),
+        const PersonsTextField(),
         CommentSection(
             commentController: _commentController), // Optional comment field
-        const SizedBox(height: 25),
         buildDiscountCheckbox(), // Discount checkbox
-        const SizedBox(height: 25),
         buildSubmitButton(), // Submit button
-        const SizedBox(height: 120),
       ],
     );
   }
@@ -479,12 +470,11 @@ class _ReservationPageState extends State<ReservationPage> {
     return buttonIsVisible
         ? Container(
             alignment: Alignment.center,
-            width: double.infinity,
             child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  elevation: 20,
+                  elevation: 10,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 13),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -510,9 +500,7 @@ class _ReservationPageState extends State<ReservationPage> {
   Future<void> _handleSubmit() async {
     String rawName = nameTextFieldKey.currentState?.nameController.text ?? '';
     String formattedName = formatName(rawName);
-    if (formattedName != '' &&
-        formattedName != ' ' &&
-        formattedName.isNotEmpty) {
+    if (formattedName.isNotEmpty) {
       context.read<ReservationProvider>().setInfo(1, formattedName);
     }
 
@@ -809,5 +797,10 @@ class _ReservationPageState extends State<ReservationPage> {
   String _generateFourBitString() {
     final reservationProvider = context.read<ReservationProvider>();
     return '${reservationProvider.getInfo(5)}${reservationProvider.getInfo(6)}${reservationProvider.getInfo(7)}${reservationProvider.getInfo(10) ~/ 10}';
+  }
+
+  /// Safely parses a string to a double, returning 0.0 if the string is invalid.
+  double safeParse(String value) {
+    return double.tryParse(value) ?? 0.0;
   }
 }

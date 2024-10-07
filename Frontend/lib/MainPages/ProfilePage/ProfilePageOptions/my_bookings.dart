@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
-import '../../../Providers/user_provider.dart';
 import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 
@@ -30,9 +31,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
     // Delay fetchBookings until after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
-      BookingProvider bookingProvider = context.read<BookingProvider>();
-      bookingProvider.fetchBookings(context.read<UserProvider>().userDetails,
-          context.read<ClubProvider>());
     });
   }
 
@@ -209,12 +207,23 @@ class BookingCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: const SizedBox(
+                child: SizedBox(
                   width: 120,
                   height: 120,
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  child: clubProvider
+                          .getClubByID(booking.clubID)
+                          .localPhotoPath
+                          .isNotEmpty
+                      ? Image.file(
+                          File(clubProvider
+                              .getClubByID(booking.clubID)
+                              .localPhotoPath),
+                          fit: BoxFit.fill,
+                        ) // Load from local file
+                      : Image.network(
+                          clubProvider.getClubByID(booking.clubID).clubPhoto,
+                          fit: BoxFit.fill,
+                        ),
                 ),
               ),
               const SizedBox(width: 20),

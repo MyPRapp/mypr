@@ -267,7 +267,7 @@ class PackagesInfo extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Card(
         color: const Color.fromARGB(179, 85, 85, 85),
-        elevation: 20,
+        elevation: 10,
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
@@ -414,23 +414,26 @@ class NameTextFieldState extends State<NameTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: nameController,
-      focusNode: focusNode,
-      inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
-      decoration: const InputDecoration(
-        labelText: 'Όνομα κράτησης',
-        labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-        enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 25),
+      child: TextField(
+        controller: nameController,
+        focusNode: focusNode,
+        inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
+        decoration: const InputDecoration(
+          labelText: 'Όνομα κράτησης',
+          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
+          ),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-        ),
+        style: const TextStyle(color: Colors.white),
       ),
-      style: const TextStyle(color: Colors.white),
     );
   }
 }
@@ -693,25 +696,29 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
           ),
         ),
         const SizedBox(height: 10),
-        Visibility(
-          visible: _isExpanded,
-          child: ClipRect(
-            child: SizeTransition(
-              sizeFactor: _heightFactor,
-              axisAlignment: -1.0,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFF9C0C04), width: 4),
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.black,
-                ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      buildCounterRow('Απλή', 5),
-                      buildCounterRow('Special', 6),
-                      buildCounterRow('Premium', 7),
-                    ],
+        Padding(
+          padding: const EdgeInsets.only(bottom: 25),
+          child: Visibility(
+            visible: _isExpanded,
+            child: ClipRect(
+              child: SizeTransition(
+                sizeFactor: _heightFactor,
+                axisAlignment: -1.0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border:
+                        Border.all(color: const Color(0xFF9C0C04), width: 4),
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.black,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        buildCounterRow('Απλή', 5),
+                        buildCounterRow('Special', 6),
+                        buildCounterRow('Premium', 7),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -939,25 +946,28 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           }
         }
       },
-      child: InputDecorator(
-        decoration: const InputDecoration(
-          labelText: 'Ημερομηνία κράτησης',
-          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 25),
+        child: InputDecorator(
+          decoration: const InputDecoration(
+            labelText: 'Ημερομηνία κράτησης',
+            labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+            ),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+          child: Text(
+            _selectedDate != null
+                ? DateFormat('dd MMMM, yyyy', 'el')
+                    .format(_selectedDate!) // Greek format
+                : 'Επίλεξε ημερομηνία',
+            style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
-        ),
-        child: Text(
-          _selectedDate != null
-              ? DateFormat('dd MMMM, yyyy', 'el')
-                  .format(_selectedDate!) // Greek format
-              : 'Επίλεξε ημερομηνία',
-          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
     );

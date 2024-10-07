@@ -17,10 +17,10 @@ class FavoritesPage extends StatelessWidget {
     // Obtain screen dimensions once to avoid repeated calls
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
-    LikedClubsProvider likesProvider = context.watch<LikedClubsProvider>();
-    List<ClubInfoStruct> likedClubs =
-        likesProvider.getAllLikedClubs(context.read<ClubProvider>().allClubs);
 
+    List<ClubInfoStruct> likedClubs = context
+        .watch<LikedClubsProvider>()
+        .getAllLikedClubs(context.read<ClubProvider>().allClubs);
     return PopScope(
       onPopInvokedWithResult: (didPop, result) {
         context.read<BottomNavBarVisibility>().show();
@@ -28,32 +28,38 @@ class FavoritesPage extends StatelessWidget {
       child: Scaffold(
         appBar: _buildAppBar(context, screenHeight, screenWidth),
         backgroundColor: const Color.fromARGB(155, 51, 51, 51),
-        body: ListView.builder(
-          itemCount: likedClubs.length, // +1 for the header
-          itemBuilder: (context, index) {
-            final club = likedClubs[index];
-            if (index < likedClubs.length) {
-              return BigClubCard(
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
-                club: club,
-              );
-            } else {
-              return Column(
-                children: [
-                  BigClubCard(
-                    screenHeight: screenHeight,
-                    screenWidth: screenWidth,
-                    club: club,
-                  ),
-                  SizedBox(
-                    height: screenHeight / 40 * 5,
-                  )
-                ],
-              );
-            }
-          },
-        ),
+        body: likedClubs.isNotEmpty
+            ? ListView.builder(
+                itemCount: likedClubs.length,
+                itemBuilder: (context, index) {
+                  final club = likedClubs[index];
+                  if (index < likedClubs.length) {
+                    return BigClubCard(
+                      screenHeight: screenHeight,
+                      screenWidth: screenWidth,
+                      club: club,
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        BigClubCard(
+                          screenHeight: screenHeight,
+                          screenWidth: screenWidth,
+                          club: club,
+                        ),
+                        SizedBox(
+                          height: screenHeight / 40 * 5,
+                        )
+                      ],
+                    );
+                  }
+                },
+              )
+            : const Center(
+                child: Text(
+                'Δεν υπάρχουν αγαπημένα',
+                style: TextStyle(color: Colors.white),
+              )),
       ),
     );
   }

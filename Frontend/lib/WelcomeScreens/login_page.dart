@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/global_components.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,14 @@ class _LoginPageState extends State<LoginPage> {
 
   bool _obscureText = true;
   bool _isLoginPressed = false;
+  String savedEmail = '';
+  String savedPassword = '';
+  @override
+  void initState() {
+    super.initState();
+
+    _autofillCredentials();
+  }
 
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
@@ -46,6 +55,9 @@ class _LoginPageState extends State<LoginPage> {
       if (success) {
         if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
+          bool authenticated =
+              context.read<GlobalStateProvider>().isAuthenticated;
+          while (!authenticated) {}
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
 
@@ -58,6 +70,15 @@ class _LoginPageState extends State<LoginPage> {
         _isLoginPressed = false;
       });
     }
+  }
+
+  void _autofillCredentials() async {
+    String savedEmail = await getSavedEmail();
+    String savedPassword = await getSavedPassword();
+    setState(() {
+      _emailController.text = savedEmail;
+      _passwordController.text = savedPassword;
+    });
   }
 
   void _handleLoginFailure() {
@@ -152,8 +173,10 @@ class LoginBody extends StatelessWidget {
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () {
-                  AutoRouter.of(context)
-                      .replaceAll([const BottomNavBarRoute()]);
+                  if (!isLoginPressed) {
+                    AutoRouter.of(context)
+                        .replaceAll([const BottomNavBarRoute()]);
+                  }
                 },
                 child: Padding(
                   padding: EdgeInsets.only(

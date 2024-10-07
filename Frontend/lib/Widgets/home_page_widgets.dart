@@ -72,30 +72,7 @@ class _BigClubCardState extends State<BigClubCard> {
                           : Image.network(
                               widget.club.clubPhoto,
                               fit: BoxFit.fill,
-                            ), // Fallback to loading from the URL
-                      /*   FutureBuilder<String?>(
-                        future: _loadClubPhotoFromNetwork(widget.club.clubID),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const Padding(
-                              padding: EdgeInsets.all(20),
-                              child: CircularProgressIndicator(
-                                color: Color.fromARGB(255, 71, 71, 71),
-                              ),
-                            ); // Loading spinner while loading the file image
-                          } else if (snapshot.hasData &&
-                              snapshot.data != null) {
-                            return Image.network(
-                              snapshot.data!,
-                              fit: BoxFit.fill,
-                            );
-                            // First, load the local file image
-                          } else {
-                            return const CircularProgressIndicator();
-                          }
-                        },
-                      ), */
+                            ),
                     ),
                   ),
                   Container(

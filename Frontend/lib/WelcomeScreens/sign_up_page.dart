@@ -308,8 +308,8 @@ class _SignUpPageState extends State<SignUpPage> {
       await context.read<LikedClubsProvider>().deleteAllLiked();
     }
 
-    await prefs.remove('saved_email');
-    await prefs.remove('saved_password');
+    await prefs.remove('savedEmail');
+    await prefs.remove('savedPassword');
     await prefs.remove('user_details');
     await prefs.remove('bookings');
   }
@@ -543,6 +543,7 @@ class _SignUpForm extends StatelessWidget {
               CheckBoxWidget(
                 isCheckBoxPressed: isCheckBoxPressed,
                 toggleCheckBox: toggleCheckBox,
+                isRegistering: isRegistering,
               ),
               Text(
                 'Συμφωνώ με τους ',
@@ -931,10 +932,13 @@ class CheckBoxWidget extends StatefulWidget {
     super.key,
     required this.isCheckBoxPressed,
     required this.toggleCheckBox,
+    required this.isRegistering,
   });
 
   final bool isCheckBoxPressed;
   final Function toggleCheckBox;
+  final bool isRegistering;
+
   @override
   State<CheckBoxWidget> createState() => _CheckBoxWidgetState();
 }
@@ -956,9 +960,11 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
         checkColor: const Color(0xFF9C0C04),
         activeColor: Colors.black,
         onChanged: (newValue) {
-          setState(() {
-            widget.toggleCheckBox();
-          });
+          if (!widget.isRegistering) {
+            setState(() {
+              widget.toggleCheckBox();
+            });
+          }
         },
       ),
     );

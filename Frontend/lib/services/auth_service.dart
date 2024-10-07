@@ -41,8 +41,8 @@ class AuthService {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           await prefs.setString('access_token', accessToken);
           await prefs.setString('refresh_token', refreshToken);
-          await prefs.setString('saved_email', username);
-          await prefs.setString('saved_password', password);
+          await prefs.setString('savedEmail', username);
+          await prefs.setString('savedPassword', password);
 
           print('\x1B[32mTokens received and saved to SharedPreferences');
           return true;

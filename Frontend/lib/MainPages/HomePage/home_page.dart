@@ -6,7 +6,6 @@ import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Navigation/bottom_nav_bar.dart';
 import '../../Providers/booking_provider.dart';
@@ -25,34 +24,39 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    createFilePath();
+    _initApp();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<BottomNavBarVisibility>().hide();
-      _initClubs();
-      _initUser();
+      context.read<BottomNavBarVisibility>().show();
     });
   }
 
-  Future<String> getSavedPassword() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('saved_password') != null) {
-      return prefs.getString('saved_password')!;
-    } else {
-      return '';
+  Future<void> _initApp() async {
+    // Run both futures concurrently
+    await Future.wait([
+      _initUser(),
+      _initClubs(),
+    ]);
+
+    // Now both _initUser and _initClubs are completed
+    if (mounted && context.read<GlobalStateProvider>().isAuthenticated) {
+      await context.read<BookingProvider>().fetchBookings(
+          context.read<UserProvider>().userDetails,
+          context.read<ClubProvider>());
     }
   }
 
-  Future<String> getSavedEmail() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('saved_email') != null) {
-      return prefs.getString('saved_email')!;
-    } else {
-      return '';
+  Future<void> _initClubs() async {
+    await createFilePath();
+
+    if (mounted) {
+      context.read<LikedClubsProvider>().loadLikedClubsFromPreferences();
+    }
+    if (mounted) {
+      await context.read<ClubProvider>().syncClubs();
     }
   }
 
   Future<void> _initUser() async {
-    await Future.delayed(const Duration(seconds: 2));
     if (mounted) {
       if (context.read<GlobalStateProvider>().preferencesLoaded) {
         if (context.read<GlobalStateProvider>().isAuthenticated) {
@@ -66,36 +70,17 @@ class _HomePageState extends State<HomePage> {
             if (mounted) {
               await context.read<UserProvider>().fetchUserDetailsFromServer();
             }
-            if (mounted) {
-              context.read<BookingProvider>().fetchBookings(
-                  context.read<UserProvider>().userDetails,
-                  context.read<ClubProvider>());
-            }
           }
         } else {
           print('\x1B[31m------------USER IS NOT AUTHENTICATED------------');
         }
+      } else {
+        await Future.delayed(const Duration(seconds: 2));
+        _initUser();
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));
       _initUser();
-    }
-  }
-
-  Future<void> _initClubs() async {
-    print('\x1B[33m------------SYNCING CLUBS------------');
-    context.read<LikedClubsProvider>().loadLikedClubsFromPreferences();
-    context.read<ClubProvider>().allClubs.clear();
-    context.read<ClubProvider>().allCatalogues.clear();
-    try {
-      await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
-    } finally {
-      setState(() {
-        context.read<BottomNavBarVisibility>().show();
-        context.read<ClubProvider>().loadClubsFromFile();
-        context.read<ClubProvider>().loadCataloguesFromFile();
-      });
-      print('\x1B[32m------------SYNCED CLUBS------------');
     }
   }
 
@@ -119,8 +104,9 @@ class _HomePageState extends State<HomePage> {
           body: SizedBox(
             height: screenHeight,
             width: screenWidth,
-            child: RefreshIndicator(
-              onRefresh: _initClubs,
+            child: RefreshIndicator.adaptive(
+              color: const Color(0xFF9C0C04),
+              onRefresh: _initApp,
               child: ListView(
                 children: [
                   SizedBox(

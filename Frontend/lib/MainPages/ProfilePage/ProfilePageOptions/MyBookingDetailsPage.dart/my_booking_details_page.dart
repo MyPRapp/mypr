@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -33,7 +35,7 @@ class BookingDetailsPage extends StatelessWidget {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
-    final earnedPoints = (booking.price * 0.1).toInt();
+    const earnedPoints = 5;
 
     final discountPercentage =
         (double.parse(booking.fourbitString[3])).toInt() * 10;
@@ -124,15 +126,20 @@ class BookingDetailsPage extends StatelessWidget {
   }
 
   Widget _buildClubPhoto(int clubID, ClubProvider clubProvider) {
+    ClubInfoStruct club = clubProvider.getClubByID(clubID);
     return ClipRRect(
       borderRadius: BorderRadius.circular(15),
-      child: const SizedBox(
-        width: double.infinity,
-        height: 200,
+      child: SizedBox(
         child: Center(
-          child: CircularProgressIndicator(
-            color: Color(0xFF9C0C04),
-          ),
+          child: club.localPhotoPath.isNotEmpty
+              ? Image.file(
+                  File(club.localPhotoPath),
+                  fit: BoxFit.fill,
+                ) // Load from local file
+              : Image.network(
+                  club.clubPhoto,
+                  fit: BoxFit.fill,
+                ),
         ),
       ),
     );

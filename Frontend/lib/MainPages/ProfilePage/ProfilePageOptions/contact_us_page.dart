@@ -94,39 +94,6 @@ class _ContactUsPageState extends State<ContactUsPage> {
                 Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    /*        Padding(
-                      padding: EdgeInsets.only(top: screenHeight * 0.035),
-                      child: SizedBox(
-                        height: screenHeight * 0.06,
-                        width: screenWidth,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: Icon(
-                                Icons.chevron_left,
-                                color: Colors.white,
-                                size: screenHeight * 0.025 + screenWidth * 0.015,
-                              ),
-                            ),
-                            Text(
-                              'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize:
-                                    screenHeight * 0.016 + screenWidth * 0.013,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                 */
                     Column(
                       children: [
                         Row(
@@ -435,46 +402,3 @@ class _ContactUsPageState extends State<ContactUsPage> {
     );
   }
 }
-
-
-/* Padding(
-                                  padding: const EdgeInsets.only(right: 10),
-                                  child: SizedBox(
-                                    height: 300,
-                                    width: constraints.maxWidth / 2 - 20,
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Image.asset(
-                                          'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
-                                          height: constraints.maxHeight / 10,
-                                        ),
-                                        Column(
-                                          children: [
-                                            const Text(
-                                              'Στείλε μας\nστο instagram',
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                color: Color(0xFF9C0C04),
-                                                fontSize: 17,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            GestureDetector(
-                                              onTap: _launchInstagram,
-                                              child: const ImageIcon(
-                                                AssetImage(
-                                                    'assets/icons/instagram_icon.png'),
-                                                size: 30,
-                                                color: Color(0xFF9C0C04),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ), */

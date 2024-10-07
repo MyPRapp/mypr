@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClubInfoStruct {
   int clubID;
@@ -339,6 +340,24 @@ String formatName(String name) {
     }
     return word;
   }).join(' ');
+}
+
+Future<String> getSavedPassword() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if (prefs.getString('savedPassword') != null) {
+    return prefs.getString('savedPassword')!;
+  } else {
+    return '';
+  }
+}
+
+Future<String> getSavedEmail() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  if (prefs.getString('savedEmail') != null) {
+    return prefs.getString('savedEmail')!;
+  } else {
+    return '';
+  }
 }
 
 void printReservationInfo(List<dynamic> reservationInfo) {

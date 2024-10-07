@@ -20,12 +20,14 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   Future<void> _refresh() async {
     UserProvider userProvider = context.read<UserProvider>();
-    BookingProvider bookingProvider = context.read<BookingProvider>();
 
-    await userProvider.fetchUserDetailsFromServer();
-    if (mounted) {
-      await bookingProvider.fetchBookings(
-          userProvider.userDetails, context.read<ClubProvider>());
+    if (userProvider.userDetails.userID > 0) {
+      await userProvider.fetchUserDetailsFromServer();
+
+      if (mounted) {
+        await context.read<BookingProvider>().fetchBookings(
+            userProvider.userDetails, context.read<ClubProvider>());
+      }
     }
   }
 
@@ -35,11 +37,13 @@ class _ProfilePageState extends State<ProfilePage> {
     final double screenWidth = MediaQuery.sizeOf(context).width;
 
     final userDetails = context.watch<UserProvider>().userDetails;
+
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
     return PopScope(
       canPop: false,
-      child: RefreshIndicator(
+      child: RefreshIndicator.adaptive(
+        color: const Color(0xFF9C0C04),
         onRefresh: _refresh,
         child: Scaffold(
           //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
