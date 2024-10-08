@@ -170,7 +170,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _login() async {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
-      print('✅------------LOGGING IN------------');
+      successPrint('------------LOGGING IN------------');
       setState(() {
         _isRegistering = true;
       });
@@ -186,10 +186,10 @@ class _SignUpPageState extends State<SignUpPage> {
           context.read<GlobalStateProvider>().isAuthenticated = true;
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
-        print('✅------------LOGGED IN------------');
+        successPrint('------------LOGGED IN------------');
       } else {
         _showSnackBar('Λάθος στοιχεία εισόδου');
-        print('❌------------LOGIN FAILED------------');
+        errorPrint('------------LOGIN FAILED------------');
       }
       setState(() {
         _isRegistering = false;

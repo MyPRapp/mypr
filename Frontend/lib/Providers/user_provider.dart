@@ -27,7 +27,7 @@ class UserProvider with ChangeNotifier {
     String? token = prefs.getString('access_token');
 
     if (token == null) {
-      print('❌No access token found');
+      errorPrint('No access token found');
       throw Exception('No access token found');
     }
 
@@ -46,15 +46,14 @@ class UserProvider with ChangeNotifier {
 
         notifyListeners();
       } else {
-        print('❌Failed to load user details');
+        errorPrint('Failed to load user details');
         throw Exception('Failed to load user details');
       }
     } on TimeoutException catch (_) {
       // Fallback to cached data on timeout
-      await loadUserDetailsFromPreferences();
+      errorPrint('Failed to load user details.Request timed out');
       throw Exception('Request timed out, using cached data');
     } catch (e) {
-      await loadUserDetailsFromPreferences();
       throw Exception('Server unreachable, using cached data');
     }
   }
@@ -74,7 +73,7 @@ class UserProvider with ChangeNotifier {
 
     if (userDetailsString != null) {
       _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
-      print('✅Loaded user details from preferences');
+      successPrint('Loaded user details from preferences');
       notifyListeners();
     }
   }

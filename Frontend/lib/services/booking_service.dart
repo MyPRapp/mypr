@@ -13,7 +13,7 @@ class BookingService {
       String time, String numberOfPeople, String comments) async {
     String? accessToken = await _refreshAndGetAccessToken();
     if (accessToken == null) {
-      print('❌Access token is null. User is not authenticated.');
+      errorPrint('Access token is null. User is not authenticated.');
       return false;
     }
 
@@ -40,10 +40,10 @@ class BookingService {
       });
 
       if (response.statusCode == 201) {
-        print('✅Booking successful');
+        successPrint('Booking successful');
         return true;
       } else {
-        print('❌Booking failed: ${response.body}');
+        errorPrint('Booking failed: ${response.body}');
         return false;
       }
     } catch (e) {
@@ -55,7 +55,7 @@ class BookingService {
   Future<List<dynamic>?> getBookings() async {
     String? accessToken = await _refreshAndGetAccessToken();
     if (accessToken == null) {
-      print('❌Access token is null. User is not authenticated.');
+      errorPrint('Access token is null. User is not authenticated.');
       return null;
     }
 
@@ -75,13 +75,13 @@ class BookingService {
       );
 
       if (response.statusCode == 200) {
-        print('✅Booking retrieval successful');
+        successPrint('Booking retrieval successful');
 
         // Decode using utf8 to handle non-ASCII characters properly
         final decodedBody = utf8.decode(response.bodyBytes);
         return jsonDecode(decodedBody) as List<dynamic>;
       } else {
-        print('❌Booking retrieval failed: ${response.body}');
+        errorPrint('Booking retrieval failed: ${response.body}');
         return null;
       }
     } catch (e) {

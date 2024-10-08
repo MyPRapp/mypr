@@ -1,7 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
-import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:mypr/global_components.dart';
@@ -34,10 +33,10 @@ class _HomePageState extends State<HomePage> {
     // Run both futures concurrently
     await Future.wait([
       _initUser(),
-      _initClubs(),
+      _fetchClubs(),
     ]);
 
-    // Now both _initUser and _initClubs are completed
+    // Now both _initUser and _fetchClubs are completed
     if (mounted && context.read<GlobalStateProvider>().isAuthenticated) {
       await context.read<BookingProvider>().fetchBookings(
           context.read<UserProvider>().userDetails,
@@ -45,51 +44,49 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _initClubs() async {
-    await createFilePath();
-
+  Future<void> _fetchClubs() async {
+    warningPrint('------------SYNCING CLUBS------------');
     if (mounted) {
-      context.read<LikedClubsProvider>().loadLikedClubsFromPreferences();
+      await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
     }
-    if (mounted) {
-      await context.read<ClubProvider>().syncClubs();
-    }
+    successPrint('------------SYNCED CLUBS------------');
   }
 
   Future<void> _initUser() async {
-    if (mounted) {
-      if (context.read<GlobalStateProvider>().preferencesLoaded) {
-        if (context.read<GlobalStateProvider>().isAuthenticated) {
-          print('✅------------USER IS AUTHENTICATED------------');
-          // Await the Future to resolve and get the String values
-          String savedEmail = await getSavedEmail();
-          String savedPassword = await getSavedPassword();
+    GlobalStateProvider globalStateProvider =
+        context.read<GlobalStateProvider>();
+    UserProvider userProvider = context.read<UserProvider>();
 
-          if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-            bool loggedIn =
-                await AuthService().login(savedEmail, savedPassword);
-            if (loggedIn) {
-              if (mounted) {
-                await context.read<UserProvider>().fetchUserDetailsFromServer();
-              }
-            } else {
-              print('❌Email or Password is incorrect');
-              if (mounted) {
-                context.read<GlobalStateProvider>().isAuthenticated = false;
-              }
-            }
+    if (mounted && globalStateProvider.preferencesLoaded) {
+      if (globalStateProvider.isAuthenticated) {
+        successPrint('------------USER IS AUTHENTICATED------------');
+        userProvider.loadUserDetailsFromPreferences();
+
+        // Await the Future to resolve and get the String values from shared preferences
+        String savedEmail = await getSavedEmail();
+        String savedPassword = await getSavedPassword();
+
+        if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+          bool loggedIn = await AuthService().login(savedEmail, savedPassword);
+
+          if (loggedIn && mounted) {
+            await userProvider.fetchUserDetailsFromServer();
           } else {
-            print('❌Email or Password is empty');
+            errorPrint('Email or Password is incorrect');
+
             if (mounted) {
-              context.read<GlobalStateProvider>().isAuthenticated = false;
+              globalStateProvider.isAuthenticated = false;
             }
           }
         } else {
-          print('❌------------USER IS NOT AUTHENTICATED------------');
+          errorPrint('Email or Password is empty');
+
+          if (mounted) {
+            globalStateProvider.isAuthenticated = false;
+          }
         }
       } else {
-        await Future.delayed(const Duration(seconds: 2));
-        _initUser();
+        errorPrint('------------USER IS NOT AUTHENTICATED------------');
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));
@@ -114,7 +111,7 @@ class _HomePageState extends State<HomePage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-          backgroundColor: const Color.fromARGB(197, 40, 40, 40),
+          backgroundColor: const Color.fromARGB(197, 41, 41, 41),
           body: Padding(
             padding: EdgeInsets.only(top: statusBarHeight),
             child: SizedBox(

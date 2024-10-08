@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img; // For compressing images
 import 'package:path_provider/path_provider.dart';
 
+import '../global_components.dart';
+
 class PhotoManager {
   // Function to download and save the image to local storage
   Future<String> downloadAndSavePhoto(String url, String fileName) async {
@@ -23,7 +25,7 @@ class PhotoManager {
         // Create the new folder if it doesn't exist
         if (await clubPhotosDirectory.exists() == false) {
           await clubPhotosDirectory.create(recursive: true);
-          print('✅Folder created: ${clubPhotosDirectory.path}');
+          successPrint('Folder created: ${clubPhotosDirectory.path}');
         }
 
         String filePath = '${clubPhotosDirectory.path}/$fileName.jpg';
@@ -32,13 +34,13 @@ class PhotoManager {
         File file = File(filePath);
         await file.writeAsBytes(compressedImage);
 
-        print('✅Photo saved to $filePath');
+        successPrint('Photo saved to $filePath');
         return filePath;
       } else {
         throw Exception('Failed to download image');
       }
     } catch (e) {
-      print('❌Error saving photo: $e');
+      errorPrint('Error saving photo: $e');
       return '';
     }
   }
@@ -48,7 +50,7 @@ class PhotoManager {
     // Decode the image
     img.Image? image = img.decodeImage(imageData);
     if (image == null) {
-      print('✅Invalid image format');
+      successPrint('Invalid image format');
       throw Exception("Invalid image format");
     }
 

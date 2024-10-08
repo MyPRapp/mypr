@@ -7,9 +7,10 @@ import '../global_components.dart';
 
 class PointsService {
   Future<int> retractPoints(int points) async {
+    //Only retracts points(can't add point if negative points are given)
     String? accessToken = await getAccessToken();
     final response = await http.post(
-      Uri.parse(apiUrl),
+      Uri.parse('$apiUrl/reduce-points/'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $accessToken',

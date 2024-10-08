@@ -56,7 +56,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         await launchUrl(instagramWebUri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('❌Could not launch Instagram: $e');
+      errorPrint('Could not launch Instagram: $e');
     }
   }
 
@@ -340,13 +340,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        print('❌Error on email sending: Timeout exception');
+        errorPrint('Error on email sending: Timeout exception');
         return http.Response('Error: Timeout', 408);
       });
 
       if (response.statusCode == 200) {
         if (mounted) {
-          print('✅Email sent successfully');
+          successPrint('Email sent successfully');
           floatingSnackBar(
             message: 'Το μήνυμα στάλθηκε',
             context: context,
@@ -354,7 +354,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }
       } else {
         if (mounted) {
-          print('❌Error on email sending');
+          errorPrint('Error on email sending');
           floatingSnackBar(
             message: 'Σφάλμα κατά την αποστολή του μηνύματος',
             context: context,

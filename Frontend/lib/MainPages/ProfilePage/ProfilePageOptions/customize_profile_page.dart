@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/user_provider.dart';
+import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 
 @RoutePage()
@@ -50,7 +51,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
     void signOut() async {
       try {
-        print('🟡------------SIGNING OUT------------');
+        warningPrint('------------SIGNING OUT------------');
 
         // Step 1: Get SharedPreferences instance for key-value data
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -62,61 +63,61 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
         // Step 3: Clear all preferences
         await prefs.clear();
-        print('✅Shared preferences cleared.');
+        successPrint('Shared preferences cleared.');
 
         // Step 4: Restore the retained preferences (excluding liked clubs)
         if (validatedIp != null) {
           await prefs.setString('validatedIp', validatedIp);
-          print('✅Retained validatedIp: $validatedIp');
+          successPrint('Retained validatedIp: $validatedIp');
         }
         if (savedEmail != null) {
           await prefs.setString('savedEmail', savedEmail);
-          print('✅Retained savedEmail: $savedEmail');
+          successPrint('Retained savedEmail: $savedEmail');
         }
         if (savedPassword != null) {
           await prefs.setString('savedPassword', savedPassword);
-          print('✅Retained savedPassword: $savedPassword');
+          successPrint('Retained savedPassword: $savedPassword');
         }
 
         // Step 5: Clear liked clubs
         if (context.mounted) {
-          print('🟡Clearing liked clubs...');
+          warningPrint('Clearing liked clubs...');
           await context.read<LikedClubsProvider>().deleteAllLiked();
         }
 
         // Step 6: Clear bookings and reset flags
         if (context.mounted) {
           try {
-            print('🟡Clearing bookings and resetting flags...');
+            warningPrint('Clearing bookings and resetting flags...');
             BookingProvider bookingProvider = context.read<BookingProvider>();
             bookingProvider.bookings.clear();
             bookingProvider.setLoading(false);
-            print('✅Bookings cleared');
+            successPrint('Bookings cleared');
           } catch (e) {
-            print('❌Error clearing bookings: $e');
+            errorPrint('Error clearing bookings: $e');
           }
         }
 
         // Step 7: Set isAuthenticated to false
         if (context.mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = false;
-          print('✅\'isAuthenticated\' flag set to false.');
+          successPrint('\'isAuthenticated\' flag set to false.');
         }
         // Step 8: Reset saved user details
         if (context.mounted) {
           context.read<UserProvider>().resetUserDetails();
-          print('✅Successfully restored user details.');
+          successPrint('Successfully restored user details.');
         }
 
         // Step 9: Navigate to the Login page
         if (context.mounted) {
-          print('🟡Navigating to the login page...');
+          warningPrint('Navigating to the login page...');
           AutoRouter.of(context).replaceAll([const LoginRoute()]);
-          print('✅Navigation to login page successful.');
+          successPrint('Navigation to login page successful.');
         }
-        print('✅------------SIGNED OUT------------');
+        successPrint('------------SIGNED OUT------------');
       } catch (e) {
-        print('❌Error during sign out: $e');
+        errorPrint('Error during sign out: $e');
       }
     }
 

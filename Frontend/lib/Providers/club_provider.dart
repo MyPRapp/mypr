@@ -18,20 +18,20 @@ class ClubProvider with ChangeNotifier {
 
 //// Syncs clubs from the server, loads from file if fetch fails
   Future<void> syncClubs() async {
-    print('🟡------------SYNCING CLUBS------------');
+    warningPrint('------------SYNCING CLUBS------------');
     try {
       await fetchAndSaveClubsAndCatalogues(); // Fetch from server
     } catch (e) {
       await loadClubsFromFile();
       await loadCataloguesFromFile();
     }
-    print('✅------------SYNCED CLUBS------------');
+    successPrint('------------SYNCED CLUBS------------');
   }
 ////////////////////////////////////////////////////////////////
 
 //// Fetch From Server Functions
   Future<void> fetchAndSaveClubsAndCatalogues() async {
-    print('🟡Fetching clubs from server...');
+    warningPrint('Fetching clubs from server...');
     final url = '$apiUrl/clubs/print/';
 
     try {
@@ -52,7 +52,7 @@ class ClubProvider with ChangeNotifier {
               club.localPhotoPath =
                   localPath; // Store local path in the club object
             } else {
-              print('❌Club photo URL is empty');
+              errorPrint('Club photo URL is empty');
             }
             await fetchCatalogues(club); // Fetch catalogues for the club
             addOrUpdateClub(club); // Save club details
@@ -63,7 +63,8 @@ class ClubProvider with ChangeNotifier {
         await saveClubsToFile();
         await saveCataloguesToFile();
       } else {
-        print('❌Error fetching clubs from server, loading from local storage');
+        errorPrint(
+            'Error fetching clubs from server, loading from local storage');
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
@@ -75,11 +76,11 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> fetchCatalogues(ClubInfoStruct club) async {
     if (club.clubID <= 0) {
-      print('❌FetchCatalogues: Invalid club ID');
+      errorPrint('FetchCatalogues: Invalid club ID');
       return;
     }
 
-    print('🟡Fetching catalogues for ${club.clubName} from server...');
+    warningPrint('Fetching catalogues for ${club.clubName} from server...');
     final url = '$apiUrl/clubs/${club.clubID}/catalogue';
     try {
       final response =
@@ -101,17 +102,17 @@ class ClubProvider with ChangeNotifier {
         throw Exception('Failed to load catalogues: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('❌Error fetching catalogues, loading from local storage: $e');
+      errorPrint('Error fetching catalogues, loading from local storage: $e');
     }
   }
 
   Future<void> fetchClub(int clubID) async {
     if (clubID <= 0) {
-      print('❌FetchClub: Invalid club ID');
+      errorPrint('FetchClub: Invalid club ID');
       return;
     }
 
-    print('🟡Fetching club with ID $clubID from server');
+    warningPrint('Fetching club with ID $clubID from server');
     final url = '$apiUrl/clubs/print/';
     try {
       final response =
@@ -131,15 +132,16 @@ class ClubProvider with ChangeNotifier {
 
           addOrUpdateClub(club);
           await saveClubsToFile();
-          print('✅Club with ID $clubID fetched and updated.');
+          successPrint('Club with ID $clubID fetched and updated.');
         } else {
-          print('❌Club with ID $clubID not found');
+          errorPrint('Club with ID $clubID not found');
         }
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('❌Error fetching club from server, loading from local storage: $e');
+      errorPrint(
+          'Error fetching club from server, loading from local storage: $e');
     }
   }
 ////////////////////////////////////////////////////////////////
@@ -152,7 +154,7 @@ class ClubProvider with ChangeNotifier {
     // Save club data as JSON in local storage
     String jsonClubs = jsonEncode(_clubs.map((club) => club.toJson()).toList());
     await file.writeAsString(jsonClubs);
-    print('✅Clubs saved to $filePath');
+    successPrint('Clubs saved to $filePath');
   }
 
   Future<void> saveCataloguesToFile() async {
@@ -163,7 +165,7 @@ class ClubProvider with ChangeNotifier {
     String jsonCatalogues =
         jsonEncode(_catalogues.map((catalogue) => catalogue.toJson()).toList());
     await file.writeAsString(jsonCatalogues);
-    print('✅Catalogues saved to $filePath');
+    successPrint('Catalogues saved to $filePath');
   }
 ////////////////////////////////////////////////////////////////
 
@@ -190,13 +192,13 @@ class ClubProvider with ChangeNotifier {
               '${directory.path}/mypDirectory/club_photos/club_${i.clubID}_photo.jpg';
         }
       } else {
-        print('❌Club photos directory doesn\'t exist');
+        errorPrint('Club photos directory doesn\'t exist');
       }
 
       notifyListeners();
-      print('✅Clubs loaded from $filePath');
+      successPrint('Clubs loaded from $filePath');
     } else {
-      print('❌Clubs file does not exist');
+      errorPrint('Clubs file does not exist');
     }
   }
 
@@ -213,9 +215,9 @@ class ClubProvider with ChangeNotifier {
           .map((json) => CatalogueInfoStruct.fromJson(json))
           .toList());
       notifyListeners();
-      print('✅Catalogues loaded from $filePath');
+      successPrint('Catalogues loaded from $filePath');
     } else {
-      print('❌Catalogues file does not exist');
+      errorPrint('Catalogues file does not exist');
     }
   }
 ////////////////////////////////////////////////////////////////
@@ -223,7 +225,7 @@ class ClubProvider with ChangeNotifier {
 //// Add Functions
   void addOrUpdateClub(ClubInfoStruct club) {
     if (club.clubID <= 0) {
-      print('❌AddOrUpdateClub: Invalid clubID: ${club.clubID}');
+      errorPrint('AddOrUpdateClub: Invalid clubID: ${club.clubID}');
       return;
     }
     try {
@@ -233,22 +235,22 @@ class ClubProvider with ChangeNotifier {
       if (index != -1) {
 //// Club exists, update the existing entry
         _clubs[index] = club;
-        print('✅ \'${club.clubName}\' is up to date.');
+        successPrint(' \'${club.clubName}\' is up to date.');
       } else {
 //// Club does not exist, add it to the list
         _clubs.add(club);
-        print('✅Club \'${club.clubName}\' added.');
+        successPrint('Club \'${club.clubName}\' added.');
       }
       notifyListeners();
     } catch (e) {
 //// Catch any unexpected errors
-      print('❌Error in addOrUpdateClub for clubID ${club.clubID}: $e');
+      errorPrint('Error in addOrUpdateClub for clubID ${club.clubID}: $e');
     }
   }
 
   void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
     if (catalogue.clubID <= 0) {
-      print('❌AddOrUpdateCatalogue: Invalid clubID: ${catalogue.clubID}');
+      errorPrint('AddOrUpdateCatalogue: Invalid clubID: ${catalogue.clubID}');
       return;
     }
     try {
@@ -360,7 +362,7 @@ class ClubProvider with ChangeNotifier {
         return;
       }
     }
-    print('❌ClubID not found!');
+    errorPrint('ClubID not found!');
   }
 
   void printClubWithName(String clubName) {
@@ -371,7 +373,7 @@ class ClubProvider with ChangeNotifier {
         return;
       }
     }
-    print('❌ClubName not found!');
+    errorPrint('ClubName not found!');
   }
 
   void printAllCatalogues() {

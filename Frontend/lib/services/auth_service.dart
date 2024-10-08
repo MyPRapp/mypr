@@ -28,8 +28,8 @@ class AuthService {
 
       // Check if the response is successful
       if (response.statusCode == 200) {
-        print('✅Login successful');
-        print('🟡Parsing tokens...');
+        successPrint('Login successful');
+        warningPrint('Parsing tokens...');
         var data = jsonDecode(response.body);
         String? accessToken = data['access'];
         String? refreshToken = data['refresh'];
@@ -42,19 +42,19 @@ class AuthService {
           await prefs.setString('savedEmail', username);
           await prefs.setString('savedPassword', password);
 
-          print('✅Tokens received and saved to SharedPreferences');
+          successPrint('Tokens received and saved to SharedPreferences');
           return true;
         } else {
-          print('❌Tokens are null');
+          errorPrint('Tokens are null');
           return false;
         }
       } else {
-        print('❌Login failed with status code: ${response.statusCode}');
-        print('❌Response body: ${utf8.decode(response.bodyBytes)}');
+        errorPrint('Login failed with status code: ${response.statusCode}');
+        errorPrint('Response body: ${utf8.decode(response.bodyBytes)}');
         return false;
       }
     } catch (e) {
-      print('❌Exception occurred during login: $e');
+      errorPrint('Exception occurred during login: $e');
       return false;
     }
   }
@@ -80,19 +80,20 @@ class AuthService {
           .timeout(const Duration(seconds: 5));
 
       // Log response details
-      print('✅Register response status: ${response.statusCode}');
-      print('✅Register response body: ${utf8.decode(response.bodyBytes)}');
+      successPrint('Register response status: ${response.statusCode}');
+      successPrint(
+          'Register response body: ${utf8.decode(response.bodyBytes)}');
 
       // Check if registration was successful
       if (response.statusCode == 201) {
-        print('✅Registration successful');
+        successPrint('Registration successful');
         return true;
       } else {
-        print('❌Registration failed: ${response.body}');
+        errorPrint('Registration failed: ${response.body}');
         return false;
       }
     } catch (e) {
-      print('❌Exception occurred during registration: $e');
+      errorPrint('Exception occurred during registration: $e');
       return false;
     }
   }
@@ -123,7 +124,7 @@ class AuthService {
 
         if (newAccessToken != null) {
           await prefs.setString('access_token', newAccessToken);
-          print('✅Access token refreshed successfully');
+          successPrint('Access token refreshed successfully');
         } else {
           throw Exception('Failed to refresh access token');
         }
@@ -131,7 +132,7 @@ class AuthService {
         throw Exception('Failed to refresh access token');
       }
     } catch (e) {
-      print('❌Error refreshing access token: $e');
+      errorPrint('Error refreshing access token: $e');
       rethrow;
     }
   }

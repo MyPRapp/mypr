@@ -52,7 +52,7 @@ class ClubInfoStruct {
           clubPhoto: json['photo'] ?? '',
           clubNotAvailable: json['not_available'] ?? '');
     } catch (e) {
-      print('❌Error parsing ClubInfoStruct: $e');
+      errorPrint('Error parsing ClubInfoStruct: $e');
       return ClubInfoStruct(
           clubID: -1); // Return a default object with clubID -1
     }
@@ -108,7 +108,7 @@ class UserInfoStruct {
         photo: json['photo'] ?? '',
       );
     } catch (e) {
-      print('❌Error parsing UserInfoStruct: $e');
+      errorPrint('Error parsing UserInfoStruct: $e');
       return UserInfoStruct(
           userID: -1); // Return a default object with userID -1
     }
@@ -150,7 +150,7 @@ class CatalogueInfoStruct {
         maxPersons: json['max_person'] ?? -1,
       );
     } catch (e) {
-      print('❌Error parsing CatalogueInfoStruct: $e');
+      errorPrint('Error parsing CatalogueInfoStruct: $e');
       return CatalogueInfoStruct(
           clubID: -1,
           serviceType: '',
@@ -211,7 +211,7 @@ class BookingInfoStruct {
         status: json['status'] ?? 0,
       );
     } catch (e) {
-      print('❌Error parsing BookingInfoStruct: $e');
+      errorPrint('Error parsing BookingInfoStruct: $e');
       return BookingInfoStruct(
         bookingID: -1,
         userID: -1,
@@ -317,9 +317,9 @@ Future<void> createFilePath() async {
   // Create the new folder if it doesn't exist
   if (await myprDirectory.exists() == false) {
     await myprDirectory.create(recursive: true);
-    print('✅Folder created: ${myprDirectory.path}');
+    successPrint('Folder created: ${myprDirectory.path}');
   } else {
-    print('✅Folder ${myprDirectory.path} already exists');
+    successPrint('Folder ${myprDirectory.path} already exists');
   }
 }
 
@@ -330,7 +330,7 @@ Future<String> getFilePath(String fileName) async {
   // Create the new folder if it doesn't exist
   if (await myprDirectory.exists() == false) {
     await myprDirectory.create(recursive: true);
-    print('✅Folder created: ${myprDirectory.path}');
+    successPrint('Folder created: ${myprDirectory.path}');
   }
 
   return '${directory.path}/mypDirectory/$fileName.json';
@@ -377,4 +377,16 @@ void printReservationInfo(List<dynamic> reservationInfo) {
   print('Date: ${reservationInfo[8]}');
   print('Comment: ${reservationInfo[9]}');
   print('Discount(%): ${reservationInfo[10]}');
+}
+
+void successPrint(String text) {
+  print('✅$text');
+}
+
+void warningPrint(String text) {
+  print('🟡$text');
+}
+
+void errorPrint(String text) {
+  print('❌$text');
 }

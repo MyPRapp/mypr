@@ -11,8 +11,9 @@ import 'Navigation/bottom_nav_bar.dart';
 import 'Providers/booking_provider.dart';
 import 'Providers/club_provider.dart';
 import 'Providers/user_provider.dart';
+import 'global_components.dart';
 
-void main() {
+void main() async {
   // Lock the app to portrait mode only
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensure the binding is initialized before calling SystemChrome
@@ -36,8 +37,31 @@ void main() {
   });
 }
 
-class MyPR extends StatelessWidget {
+class MyPR extends StatefulWidget {
   const MyPR({super.key});
+
+  @override
+  State<MyPR> createState() => _MyPRState();
+}
+
+class _MyPRState extends State<MyPR> {
+  @override
+  void initState() {
+    super.initState();
+    _initApp();
+  }
+
+  Future<void> _initApp() async {
+    await createFilePath();
+    if (mounted) {
+      ClubProvider clubProvider = context.read<ClubProvider>();
+      await clubProvider.loadClubsFromFile();
+      clubProvider.loadCataloguesFromFile();
+    }
+    if (mounted) {
+      context.read<LikedClubsProvider>().loadLikedClubsFromPreferences();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
