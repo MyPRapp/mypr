@@ -1,26 +1,26 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/services/auth_service.dart';
+
+import '../global_components.dart';
 
 class BookingService {
   final AuthService _authService =
       AuthService(); // Create instance of AuthService
-  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}/api';
 
   Future<bool> submitForm(String reservationName, String clubName, String type,
       String time, String numberOfPeople, String comments) async {
     String? accessToken = await _refreshAndGetAccessToken();
     if (accessToken == null) {
-      print('\x1B[31mAccess token is null. User is not authenticated.');
+      print('❌Access token is null. User is not authenticated.');
       return false;
     }
 
     try {
       final response = await http
           .post(
-        Uri.parse('$baseUrl/bookings/'),
+        Uri.parse('$apiUrl/bookings/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -35,19 +35,19 @@ class BookingService {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        print("\x1B[31mCan't connect to server. Request timed out.");
+        print("❌Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 
       if (response.statusCode == 201) {
-        print('\x1B[32mBooking successful');
+        print('✅Booking successful');
         return true;
       } else {
-        print('\x1B[31mBooking failed: ${response.body}');
+        print('❌Booking failed: ${response.body}');
         return false;
       }
     } catch (e) {
-      print("\x1B[31mBooking failed: $e");
+      print("❌Booking failed: $e");
       return false;
     }
   }
@@ -55,13 +55,13 @@ class BookingService {
   Future<List<dynamic>?> getBookings() async {
     String? accessToken = await _refreshAndGetAccessToken();
     if (accessToken == null) {
-      print('\x1B[31mAccess token is null. User is not authenticated.');
+      print('❌Access token is null. User is not authenticated.');
       return null;
     }
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/bookings/'),
+        Uri.parse('$apiUrl/bookings/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -69,23 +69,23 @@ class BookingService {
       ).timeout(
         const Duration(seconds: 5),
         onTimeout: () {
-          print("\x1B[31mCan't connect to server. Request timed out.");
+          print("❌Can't connect to server. Request timed out.");
           return http.Response('Error: Timeout', 408); // 408 Request Timeout
         },
       );
 
       if (response.statusCode == 200) {
-        print('\x1B[32mBooking retrieval successful');
+        print('✅Booking retrieval successful');
 
         // Decode using utf8 to handle non-ASCII characters properly
         final decodedBody = utf8.decode(response.bodyBytes);
         return jsonDecode(decodedBody) as List<dynamic>;
       } else {
-        print('\x1B[31mBooking retrieval failed: ${response.body}');
+        print('❌Booking retrieval failed: ${response.body}');
         return null;
       }
     } catch (e) {
-      print("\x1B[31mBooking retrieval failed: $e");
+      print("❌Booking retrieval failed: $e");
       return null;
     }
   }

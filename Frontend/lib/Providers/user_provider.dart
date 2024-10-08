@@ -6,7 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../global_components.dart';
-import 'global_state_provider.dart';
 
 class UserProvider with ChangeNotifier {
   UserInfoStruct _userDetails = UserInfoStruct(
@@ -28,13 +27,13 @@ class UserProvider with ChangeNotifier {
     String? token = prefs.getString('access_token');
 
     if (token == null) {
-      print('\x1B[31mNo access token found');
+      print('❌No access token found');
       throw Exception('No access token found');
     }
 
     try {
       final response = await http.get(
-        Uri.parse('http://${GlobalStateProvider().validatedIp}/api/user/print'),
+        Uri.parse('$apiUrl/user/print'),
         headers: {'Authorization': 'Bearer $token'},
       ).timeout(const Duration(seconds: 5));
 
@@ -47,7 +46,7 @@ class UserProvider with ChangeNotifier {
 
         notifyListeners();
       } else {
-        print('\x1B[31mFailed to load user details');
+        print('❌Failed to load user details');
         throw Exception('Failed to load user details');
       }
     } on TimeoutException catch (_) {
@@ -75,7 +74,7 @@ class UserProvider with ChangeNotifier {
 
     if (userDetailsString != null) {
       _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
-      print('\x1B[32mLoaded user details from preferences');
+      print('✅Loaded user details from preferences');
       notifyListeners();
     }
   }

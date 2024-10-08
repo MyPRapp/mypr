@@ -50,7 +50,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
     void signOut() async {
       try {
-        print('\x1B[33m------------SIGNING OUT------------');
+        print('🟡------------SIGNING OUT------------');
 
         // Step 1: Get SharedPreferences instance for key-value data
         SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -62,61 +62,61 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
         // Step 3: Clear all preferences
         await prefs.clear();
-        print('\x1B[32mShared preferences cleared.');
+        print('✅Shared preferences cleared.');
 
         // Step 4: Restore the retained preferences (excluding liked clubs)
         if (validatedIp != null) {
           await prefs.setString('validatedIp', validatedIp);
-          print('\x1B[32mRetained validatedIp: $validatedIp');
+          print('✅Retained validatedIp: $validatedIp');
         }
         if (savedEmail != null) {
           await prefs.setString('savedEmail', savedEmail);
-          print('\x1B[32mRetained savedEmail: $savedEmail');
+          print('✅Retained savedEmail: $savedEmail');
         }
         if (savedPassword != null) {
           await prefs.setString('savedPassword', savedPassword);
-          print('\x1B[32mRetained savedPassword: $savedPassword');
+          print('✅Retained savedPassword: $savedPassword');
         }
 
         // Step 5: Clear liked clubs
         if (context.mounted) {
-          print('\x1B[33mClearing liked clubs...');
+          print('🟡Clearing liked clubs...');
           await context.read<LikedClubsProvider>().deleteAllLiked();
         }
 
         // Step 6: Clear bookings and reset flags
         if (context.mounted) {
           try {
-            print('\x1B[33mClearing bookings and resetting flags...');
+            print('🟡Clearing bookings and resetting flags...');
             BookingProvider bookingProvider = context.read<BookingProvider>();
             bookingProvider.bookings.clear();
             bookingProvider.setLoading(false);
-            print('\x1B[32mBookings cleared');
+            print('✅Bookings cleared');
           } catch (e) {
-            print('\x1B[31mError clearing bookings: $e');
+            print('❌Error clearing bookings: $e');
           }
         }
 
         // Step 7: Set isAuthenticated to false
         if (context.mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = false;
-          print('\x1B[32m\'isAuthenticated\' flag set to false.');
+          print('✅\'isAuthenticated\' flag set to false.');
         }
         // Step 8: Reset saved user details
         if (context.mounted) {
           context.read<UserProvider>().resetUserDetails();
-          print('\x1B[32mSuccessfully restored user details.');
+          print('✅Successfully restored user details.');
         }
 
         // Step 9: Navigate to the Login page
         if (context.mounted) {
-          print('\x1B[33mNavigating to the login page...');
+          print('🟡Navigating to the login page...');
           AutoRouter.of(context).replaceAll([const LoginRoute()]);
-          print('\x1B[32mNavigation to login page successful.');
+          print('✅Navigation to login page successful.');
         }
-        print('\x1B[32m------------SIGNED OUT------------');
+        print('✅------------SIGNED OUT------------');
       } catch (e) {
-        print('\x1B[31mError during sign out: $e');
+        print('❌Error during sign out: $e');
       }
     }
 

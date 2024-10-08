@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/global_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String?> getAccessToken() async {
@@ -15,14 +15,12 @@ Future<String?> getRefreshToken() async {
 }
 
 class AuthService {
-  String get baseUrl => 'http://${GlobalStateProvider().validatedIp}/api';
-
   Future<bool> login(String username, String password) async {
     try {
       // Send login request
       final response = await http
           .post(
-            Uri.parse('$baseUrl/token/'),
+            Uri.parse('$apiUrl/token/'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({'username': username, 'password': password}),
           )
@@ -30,8 +28,8 @@ class AuthService {
 
       // Check if the response is successful
       if (response.statusCode == 200) {
-        print('\x1B[32mLogin successful');
-        print('\x1B[33mParsing tokens...');
+        print('✅Login successful');
+        print('🟡Parsing tokens...');
         var data = jsonDecode(response.body);
         String? accessToken = data['access'];
         String? refreshToken = data['refresh'];
@@ -44,19 +42,19 @@ class AuthService {
           await prefs.setString('savedEmail', username);
           await prefs.setString('savedPassword', password);
 
-          print('\x1B[32mTokens received and saved to SharedPreferences');
+          print('✅Tokens received and saved to SharedPreferences');
           return true;
         } else {
-          print('\x1B[31mTokens are null');
+          print('❌Tokens are null');
           return false;
         }
       } else {
-        print('\x1B[31mLogin failed with status code: ${response.statusCode}');
-        print('\x1B[31mResponse body: ${utf8.decode(response.bodyBytes)}');
+        print('❌Login failed with status code: ${response.statusCode}');
+        print('❌Response body: ${utf8.decode(response.bodyBytes)}');
         return false;
       }
     } catch (e) {
-      print('\x1B[31mException occurred during login: $e');
+      print('❌Exception occurred during login: $e');
       return false;
     }
   }
@@ -67,7 +65,7 @@ class AuthService {
       // Send registration request
       final response = await http
           .post(
-            Uri.parse('$baseUrl/user/register/'),
+            Uri.parse('$apiUrl/user/register/'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'username': username,
@@ -82,20 +80,19 @@ class AuthService {
           .timeout(const Duration(seconds: 5));
 
       // Log response details
-      print('\x1B[32mRegister response status: ${response.statusCode}');
-      print(
-          '\x1B[32mRegister response body: ${utf8.decode(response.bodyBytes)}');
+      print('✅Register response status: ${response.statusCode}');
+      print('✅Register response body: ${utf8.decode(response.bodyBytes)}');
 
       // Check if registration was successful
       if (response.statusCode == 201) {
-        print('\x1B[32mRegistration successful');
+        print('✅Registration successful');
         return true;
       } else {
-        print('\x1B[31mRegistration failed: ${response.body}');
+        print('❌Registration failed: ${response.body}');
         return false;
       }
     } catch (e) {
-      print('\x1B[31mException occurred during registration: $e');
+      print('❌Exception occurred during registration: $e');
       return false;
     }
   }
@@ -111,13 +108,12 @@ class AuthService {
     try {
       final response = await http
           .post(
-        Uri.parse('$baseUrl/token/refresh/'),
+        Uri.parse('$apiUrl/token/refresh/'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refresh': refreshToken}),
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
-        print(
-            "\x1B[31mCan't connect to server. Refresh token request timed out.");
+        print("❌Can't connect to server. Refresh token request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 
@@ -127,7 +123,7 @@ class AuthService {
 
         if (newAccessToken != null) {
           await prefs.setString('access_token', newAccessToken);
-          print('\x1B[32mAccess token refreshed successfully');
+          print('✅Access token refreshed successfully');
         } else {
           throw Exception('Failed to refresh access token');
         }
@@ -135,7 +131,7 @@ class AuthService {
         throw Exception('Failed to refresh access token');
       }
     } catch (e) {
-      print('\x1B[31mError refreshing access token: $e');
+      print('❌Error refreshing access token: $e');
       rethrow;
     }
   }

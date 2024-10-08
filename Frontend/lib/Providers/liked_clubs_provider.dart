@@ -29,10 +29,10 @@ class LikedClubsProvider extends ChangeNotifier {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.remove('likedClubs');
       _likedClubIDs.clear();
-      print('\x1B[32mLiked clubs cleared from SharedPreferences.');
+      print('✅Liked clubs cleared from SharedPreferences.');
       notifyListeners();
     } catch (e) {
-      print('\x1B[31mError clearing liked clubs: $e');
+      print('❌Error clearing liked clubs: $e');
     }
   }
 
@@ -49,9 +49,9 @@ class LikedClubsProvider extends ChangeNotifier {
     _likedClubIDs.clear();
     if (likedClubIDs != null) {
       _likedClubIDs.addAll(likedClubIDs.map((id) => int.parse(id)));
-      print('\x1B[32mLiked clubs loaded from preferences.');
+      print('✅Liked clubs loaded from preferences.');
     } else {
-      print('\x1B[32mNo liked clubs found in preferences.');
+      print('✅No liked clubs found in preferences.');
     }
   }
 }

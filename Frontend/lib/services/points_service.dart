@@ -1,13 +1,11 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/services/auth_service.dart';
 
-class PointsService {
-  String get apiUrl =>
-      'http://${GlobalStateProvider().validatedIp}/api/reduce-points/'; // Dynamically generate apiUrl
+import '../global_components.dart';
 
+class PointsService {
   Future<int> retractPoints(int points) async {
     String? accessToken = await getAccessToken();
     final response = await http.post(

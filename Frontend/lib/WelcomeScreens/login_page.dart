@@ -41,7 +41,7 @@ class _LoginPageState extends State<LoginPage> {
           duration: const Duration(milliseconds: 4000));
       return;
     } else {
-      print('\x1B[32m------------LOGGING IN------------');
+      print('✅------------LOGGING IN------------');
       setState(() {
         _isLoginPressed = true;
       });
@@ -61,10 +61,10 @@ class _LoginPageState extends State<LoginPage> {
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
 
-        print('\x1B[32m------------LOGGED IN------------');
+        print('✅------------LOGGED IN------------');
       } else {
         _handleLoginFailure();
-        print('\x1B[31m------------LOGIN FAILED------------');
+        print('❌------------LOGIN FAILED------------');
       }
       setState(() {
         _isLoginPressed = false;

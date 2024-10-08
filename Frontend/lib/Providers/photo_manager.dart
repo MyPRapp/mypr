@@ -23,7 +23,7 @@ class PhotoManager {
         // Create the new folder if it doesn't exist
         if (await clubPhotosDirectory.exists() == false) {
           await clubPhotosDirectory.create(recursive: true);
-          print('\x1B[32mFolder created: ${clubPhotosDirectory.path}');
+          print('✅Folder created: ${clubPhotosDirectory.path}');
         }
 
         String filePath = '${clubPhotosDirectory.path}/$fileName.jpg';
@@ -32,13 +32,13 @@ class PhotoManager {
         File file = File(filePath);
         await file.writeAsBytes(compressedImage);
 
-        print('\x1B[32mPhoto saved to $filePath');
+        print('✅Photo saved to $filePath');
         return filePath;
       } else {
         throw Exception('Failed to download image');
       }
     } catch (e) {
-      print('\x1B[31mError saving photo: $e');
+      print('❌Error saving photo: $e');
       return '';
     }
   }
@@ -48,7 +48,7 @@ class PhotoManager {
     // Decode the image
     img.Image? image = img.decodeImage(imageData);
     if (image == null) {
-      print('\x1B[32mInvalid image format');
+      print('✅Invalid image format');
       throw Exception("Invalid image format");
     }
 

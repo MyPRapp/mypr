@@ -119,7 +119,7 @@ class _ReservationPageState extends State<ReservationPage> {
           .refreshAccessToken(); // Ensure token is valid before retracting points
       await _pointsService.retractPoints(pointsToRetract);
     } catch (error) {
-      print("\x1B[31mFailed to retract points: $error");
+      print("❌Failed to retract points: $error");
     }
   }
 
@@ -183,7 +183,7 @@ class _ReservationPageState extends State<ReservationPage> {
       }
     } catch (error) {
       // Log error without additional snack bars
-      print("\x1B[31mFailed to refresh catalogues: $error");
+      print("❌Failed to refresh catalogues: $error");
     }
   }
 
@@ -537,7 +537,7 @@ class _ReservationPageState extends State<ReservationPage> {
         // Fetching catalogues, wrapped in a try-catch for error handling
         await ClubProvider().fetchCatalogues(widget.club);
       } catch (e) {
-        print("\x1B[31mFailed to refresh access token or fetch catalogues");
+        print("❌Failed to refresh access token or fetch catalogues");
         setState(() {
           buttonIsVisible = true;
         });
@@ -550,11 +550,11 @@ class _ReservationPageState extends State<ReservationPage> {
                 duration: const Duration(milliseconds: 1500));
           }
         } catch (e) {
-          print("\x1B[31mFailed to show SnackBar: $e");
+          print("❌Failed to show SnackBar: $e");
         }
 
         // Log error or handle failure in a way without more snack bars
-        print("\x1B[31mBooking submission failed.");
+        print("❌Booking submission failed.");
         return;
       }
 

@@ -56,7 +56,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         await launchUrl(instagramWebUri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print('\x1B[31mCould not launch Instagram: $e');
+      print('❌Could not launch Instagram: $e');
     }
   }
 
@@ -325,22 +325,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
 
   Future<void> _sendMessage() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    if (mounted) {
-      floatingSnackBar(
-        message: 'Σφάλμα κατά την αποστολή του μηνύματος',
-        context: context,
-      );
-    }
 
     try {
       final response = await http
           .post(
-        Uri.parse(
-            'http://${GlobalStateProvider().validatedIp}/api/send-email/'),
+        Uri.parse('$apiUrl/send-email/'),
         headers: {
-          'Content-Type':
-              'application/json', //TODO Remove access token requirement from send-email function
-          // 'Authorization': 'Bearer $accessToken',
+          'Content-Type': 'application/json',
         },
         body: jsonEncode({
           'subject': nameController.text.trim(),
@@ -349,13 +340,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        print('\x1B[31mError on email sending: Timeout exception');
+        print('❌Error on email sending: Timeout exception');
         return http.Response('Error: Timeout', 408);
       });
 
       if (response.statusCode == 200) {
         if (mounted) {
-          print('\x1B[32mEmail sent successfully');
+          print('✅Email sent successfully');
           floatingSnackBar(
             message: 'Το μήνυμα στάλθηκε',
             context: context,
@@ -363,7 +354,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }
       } else {
         if (mounted) {
-          print('\x1B[31mError on email sending');
+          print('❌Error on email sending');
           floatingSnackBar(
             message: 'Σφάλμα κατά την αποστολή του μηνύματος',
             context: context,

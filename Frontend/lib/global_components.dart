@@ -6,6 +6,10 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'Providers/global_state_provider.dart';
+
+String apiUrl = 'http://${GlobalStateProvider().validatedIp}/api';
+
 class ClubInfoStruct {
   int clubID;
   String clubName;
@@ -48,7 +52,7 @@ class ClubInfoStruct {
           clubPhoto: json['photo'] ?? '',
           clubNotAvailable: json['not_available'] ?? '');
     } catch (e) {
-      print('\x1B[31mError parsing ClubInfoStruct: $e');
+      print('❌Error parsing ClubInfoStruct: $e');
       return ClubInfoStruct(
           clubID: -1); // Return a default object with clubID -1
     }
@@ -104,7 +108,7 @@ class UserInfoStruct {
         photo: json['photo'] ?? '',
       );
     } catch (e) {
-      print('\x1B[31mError parsing UserInfoStruct: $e');
+      print('❌Error parsing UserInfoStruct: $e');
       return UserInfoStruct(
           userID: -1); // Return a default object with userID -1
     }
@@ -146,7 +150,7 @@ class CatalogueInfoStruct {
         maxPersons: json['max_person'] ?? -1,
       );
     } catch (e) {
-      print('\x1B[31mError parsing CatalogueInfoStruct: $e');
+      print('❌Error parsing CatalogueInfoStruct: $e');
       return CatalogueInfoStruct(
           clubID: -1,
           serviceType: '',
@@ -207,7 +211,7 @@ class BookingInfoStruct {
         status: json['status'] ?? 0,
       );
     } catch (e) {
-      print('\x1B[31mError parsing BookingInfoStruct: $e');
+      print('❌Error parsing BookingInfoStruct: $e');
       return BookingInfoStruct(
         bookingID: -1,
         userID: -1,
@@ -313,9 +317,9 @@ Future<void> createFilePath() async {
   // Create the new folder if it doesn't exist
   if (await myprDirectory.exists() == false) {
     await myprDirectory.create(recursive: true);
-    print('\x1B[32mFolder created: ${myprDirectory.path}');
+    print('✅Folder created: ${myprDirectory.path}');
   } else {
-    print('\x1B[32mFolder ${myprDirectory.path} already exists');
+    print('✅Folder ${myprDirectory.path} already exists');
   }
 }
 
@@ -326,7 +330,7 @@ Future<String> getFilePath(String fileName) async {
   // Create the new folder if it doesn't exist
   if (await myprDirectory.exists() == false) {
     await myprDirectory.create(recursive: true);
-    print('\x1B[32mFolder created: ${myprDirectory.path}');
+    print('✅Folder created: ${myprDirectory.path}');
   }
 
   return '${directory.path}/mypDirectory/$fileName.json';

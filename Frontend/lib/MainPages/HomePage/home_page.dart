@@ -60,7 +60,7 @@ class _HomePageState extends State<HomePage> {
     if (mounted) {
       if (context.read<GlobalStateProvider>().preferencesLoaded) {
         if (context.read<GlobalStateProvider>().isAuthenticated) {
-          print('\x1B[32m------------USER IS AUTHENTICATED------------');
+          print('✅------------USER IS AUTHENTICATED------------');
           // Await the Future to resolve and get the String values
           String savedEmail = await getSavedEmail();
           String savedPassword = await getSavedPassword();
@@ -73,19 +73,19 @@ class _HomePageState extends State<HomePage> {
                 await context.read<UserProvider>().fetchUserDetailsFromServer();
               }
             } else {
-              print('\x1B[31mEmail or Password is incorrect');
+              print('❌Email or Password is incorrect');
               if (mounted) {
                 context.read<GlobalStateProvider>().isAuthenticated = false;
               }
             }
           } else {
-            print('\x1B[31mEmail or Password is empty');
+            print('❌Email or Password is empty');
             if (mounted) {
               context.read<GlobalStateProvider>().isAuthenticated = false;
             }
           }
         } else {
-          print('\x1B[31m------------USER IS NOT AUTHENTICATED------------');
+          print('❌------------USER IS NOT AUTHENTICATED------------');
         }
       } else {
         await Future.delayed(const Duration(seconds: 2));
@@ -110,23 +110,24 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
+    double statusBarHeight = MediaQuery.viewPaddingOf(context).top;
     return PopScope(
       canPop: false,
       child: Scaffold(
           backgroundColor: const Color.fromARGB(197, 40, 40, 40),
-          body: SizedBox(
-            height: screenHeight,
-            width: screenWidth,
-            child: RefreshIndicator.adaptive(
-              color: const Color(0xFF9C0C04),
-              onRefresh: _initApp,
-              child: ListView(
-                children: [
-                  SizedBox(
-                    height: screenHeight / 13,
-                    width: screenWidth,
-                    child: Padding(
-                      padding: EdgeInsets.only(top: screenHeight * 0.01),
+          body: Padding(
+            padding: EdgeInsets.only(top: statusBarHeight),
+            child: SizedBox(
+              height: screenHeight,
+              width: screenWidth,
+              child: RefreshIndicator.adaptive(
+                color: const Color(0xFF9C0C04),
+                onRefresh: _initApp,
+                child: ListView(
+                  children: [
+                    SizedBox(
+                      height: screenHeight / 13,
+                      width: screenWidth,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -169,54 +170,54 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: screenWidth * 0.03,
-                        top: screenHeight * 0.035,
-                        bottom: screenHeight * 0.02),
-                    child: Text(
-                      'Όλα τα αποτελέσματα',
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.02 + screenHeight * 0.0125,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                    Padding(
+                      padding: EdgeInsets.only(
+                          left: screenWidth * 0.03,
+                          top: screenHeight * 0.035,
+                          bottom: screenHeight * 0.02),
+                      child: Text(
+                        'Όλα τα αποτελέσματα',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.02 + screenHeight * 0.0125,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
-                  ),
-                  Consumer<ClubProvider>(
-                    builder: (context, clubProvider, _) {
-                      return ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: clubProvider.allClubs.length,
-                        itemBuilder: (context, index) {
-                          ClubInfoStruct club = clubProvider.allClubs[index];
-                          if (club.clubPhoto.isNotEmpty ||
-                              club.localPhotoPath.isNotEmpty) {
-                            return BigClubCard(
-                              key: ValueKey(club.clubID),
-                              club: club,
-                              screenHeight: screenHeight,
-                              screenWidth: screenWidth,
-                            );
-                          }
-                          return null;
-                        },
-                      );
-                    },
-                  ),
-                  const Text(
-                    textAlign: TextAlign.center,
-                    'Περισσότερα club έρχονται σύντομα...',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
+                    Consumer<ClubProvider>(
+                      builder: (context, clubProvider, _) {
+                        return ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: clubProvider.allClubs.length,
+                          itemBuilder: (context, index) {
+                            ClubInfoStruct club = clubProvider.allClubs[index];
+                            if (club.clubPhoto.isNotEmpty ||
+                                club.localPhotoPath.isNotEmpty) {
+                              return BigClubCard(
+                                key: ValueKey(club.clubID),
+                                club: club,
+                                screenHeight: screenHeight,
+                                screenWidth: screenWidth,
+                              );
+                            }
+                            return null;
+                          },
+                        );
+                      },
                     ),
-                  ),
-                  SizedBox(height: screenHeight / 40 * 6)
-                ],
+                    const Text(
+                      textAlign: TextAlign.center,
+                      'Περισσότερα club έρχονται σύντομα...',
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: screenHeight / 40 * 6)
+                  ],
+                ),
               ),
             ),
           )),

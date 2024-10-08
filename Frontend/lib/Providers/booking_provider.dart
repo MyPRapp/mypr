@@ -17,22 +17,22 @@ class BookingProvider with ChangeNotifier {
   // Fetch bookings from server or preferences if already loaded
   Future<void> fetchBookings(
       UserInfoStruct userDetails, ClubProvider clubProvider) async {
-    print('\x1B[33mFetching bookings...');
+    print('🟡Fetching bookings...');
 
     setLoading(true);
 
     try {
       final bookingsData = await BookingService().getBookings();
       if (bookingsData != null && bookingsData.isNotEmpty) {
-        print('\x1B[33mProcessing fetched bookings...');
+        print('🟡Processing fetched bookings...');
         await _processFetchedBookings(bookingsData, userDetails, clubProvider);
-        print('\x1B[32mBookings loaded and processed successfully');
+        print('✅Bookings loaded and processed successfully');
       } else {
-        print('\x1B[31mNo bookings from server. Loading from preferences...');
+        print('❌No bookings from server. Loading from preferences...');
         await _loadBookingsFromPreferences();
       }
     } catch (e) {
-      print('\x1B[31mError fetching bookings: $e');
+      print('❌Error fetching bookings: $e');
       await _loadBookingsFromPreferences();
     } finally {
       setLoading(false);
@@ -111,7 +111,7 @@ class BookingProvider with ChangeNotifier {
     } else if (status == 'Done') {
       return 0; // Active (Ενεργείς)
     } else {
-      print('\x1B[31mError: Status is $status');
+      print('❌Error: Status is $status');
       return 3; // Undefined or error status
     }
   }
@@ -124,15 +124,15 @@ class BookingProvider with ChangeNotifier {
       final String bookingsJson =
           jsonEncode(bookings.map((booking) => booking.toJson()).toList());
       await prefs.setString('bookings', bookingsJson);
-      print('\x1B[32mSaved bookings to preferences');
+      print('✅Saved bookings to preferences');
     } catch (e) {
-      print('\x1B[31mError saving bookings to preferences: $e');
+      print('❌Error saving bookings to preferences: $e');
     }
   }
 
   // Load bookings from shared preferences
   Future<void> _loadBookingsFromPreferences() async {
-    print('\x1B[33mAttempting to load bookings from shared preferences...');
+    print('🟡Attempting to load bookings from shared preferences...');
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? bookingsJson = prefs.getString('bookings');
@@ -147,13 +147,13 @@ class BookingProvider with ChangeNotifier {
           }).toList(),
         );
 
-        print('\x1B[32mBookings successfully loaded from preferences');
+        print('✅Bookings successfully loaded from preferences');
         notifyListeners(); // Notify listeners to update UI
       } else {
-        print('\x1B[31mNo bookings found in shared preferences.');
+        print('❌No bookings found in shared preferences.');
       }
     } catch (e) {
-      print('\x1B[31mError loading bookings from preferences: $e');
+      print('❌Error loading bookings from preferences: $e');
     }
   }
 

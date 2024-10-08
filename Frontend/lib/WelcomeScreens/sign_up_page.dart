@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
@@ -88,7 +92,7 @@ class _SignUpPageState extends State<SignUpPage> {
           !RegExp(r'^[\p{L}]+$', unicode: true).hasMatch(lastName);
 
       // Phone validation
-      phoneError = phone.isEmpty || phone.length < 7 || phone.length > 15;
+      phoneError = phone.isEmpty || phone.length != 10;
 
       // Email validation
       emailError = email.isEmpty ||
@@ -123,7 +127,7 @@ class _SignUpPageState extends State<SignUpPage> {
     setState(() {
       _phoneValidating = true;
     });
-    if (!await _showPhoneConfirmationDialog()) {
+    if (!await _showPhoneConfirmationDialog(_phoneController.text)) {
       setState(() {
         _phoneValidating = false;
       });
@@ -166,7 +170,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _login() async {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
-      print('\x1B[32m------------LOGGING IN------------');
+      print('✅------------LOGGING IN------------');
       setState(() {
         _isRegistering = true;
       });
@@ -182,10 +186,10 @@ class _SignUpPageState extends State<SignUpPage> {
           context.read<GlobalStateProvider>().isAuthenticated = true;
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
-        print('\x1B[32m------------LOGGED IN------------');
+        print('✅------------LOGGED IN------------');
       } else {
         _showSnackBar('Λάθος στοιχεία εισόδου');
-        print('\x1B[31m------------LOGIN FAILED------------');
+        print('❌------------LOGIN FAILED------------');
       }
       setState(() {
         _isRegistering = false;
@@ -199,105 +203,122 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  Future<bool> _showPhoneConfirmationDialog() async {
+  Future<bool> _showPhoneConfirmationDialog(String phoneNumber) async {
     String codeInput = '';
     bool isCodeValid = false; // Simulate the validation result
     bool showError = false; // Track whether to show the error message
     int attemptCount = 0; // Track the number of attempts
 
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor:
-                  Colors.black, // Match the dialog's background to your page
-              title: const Text(
-                'Επιβεβαίωση Κινητού',
-                style: TextStyle(color: Colors.white), // Set title text color
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    keyboardType: TextInputType.number,
-                    maxLength: 6,
-                    style: const TextStyle(
-                        color: Colors.white), // Input text color
-                    decoration: const InputDecoration(
-                      hintText: 'Εισάγετε τον 6-ψήφιο κωδικό',
-                      hintStyle:
-                          TextStyle(color: Colors.grey), // Hint text color
-                      enabledBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.redAccent),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.red),
-                      ),
-                    ),
-                    onChanged: (value) {
-                      codeInput = value;
-                    },
-                  ),
-                  if (showError) // Show error message if showError is true
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        'Λάθος κωδικός',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    if (codeInput.length == 6) {
-                      if (attemptCount >= 3) {
-                        // If the user has tried more than 3 times, return false
-                        Navigator.of(context).pop(false);
-                        _showSnackBar('Ο αριθμός κινητού δεν επιβεβαιώθηκε');
-                        return;
-                      }
+    int generateRandom6DigitNumber() {
+      Random random = Random();
+      int min = 100000; // Smallest 6-digit number
+      int max = 999999; // Largest 6-digit number
+      return min + random.nextInt(max - min + 1);
+    }
 
-                      // Simulate code validation (Replace with actual code validation)
-                      if (codeInput == '123456') {
-                        // Replace '123456' with actual logic
-                        isCodeValid = true;
-                        Navigator.of(context).pop(true);
-                        _showSnackBar(
-                            'Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
-                      } else {
-                        // Show the error message if the code is invalid
-                        setState(() {
-                          showError = true;
-                          attemptCount++;
-                        });
+    int otpCode = generateRandom6DigitNumber();
+    await http
+        .post(
+          Uri.parse('$apiUrl/send-otp/'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'phone_number': '+30$phoneNumber', 'otp': otpCode}),
+        )
+        .timeout(const Duration(seconds: 5)); // Adding a 5-second timeout]
 
-                        // Hide the error message after 4 seconds
-                        Future.delayed(const Duration(seconds: 4), () {
-                          setState(() {
-                            showError = false;
-                          });
-                        });
-                      }
-                    }
-                  },
-                  child: const Text(
-                    'Επιβεβαίωση',
-                    style: TextStyle(
-                        color: Colors.redAccent), // Set button text color
-                  ),
+    if (mounted) {
+      await showDialog(
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor:
+                    Colors.black, // Match the dialog's background to your page
+                title: const Text(
+                  'Επιβεβαίωση Κινητού',
+                  style: TextStyle(color: Colors.white), // Set title text color
                 ),
-              ],
-            );
-          },
-        );
-      },
-    );
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      style: const TextStyle(
+                          color: Colors.white), // Input text color
+                      decoration: const InputDecoration(
+                        hintText: 'Εισάγετε τον 6-ψήφιο κωδικό',
+                        hintStyle:
+                            TextStyle(color: Colors.grey), // Hint text color
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.redAccent),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.red),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        codeInput = value;
+                      },
+                    ),
+                    if (showError) // Show error message if showError is true
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          'Λάθος κωδικός',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      if (codeInput.length == 6) {
+                        if (attemptCount >= 3) {
+                          // If the user has tried more than 3 times, return false
+                          Navigator.of(context).pop(false);
+                          _showSnackBar('Ο αριθμός κινητού δεν επιβεβαιώθηκε');
+                          return;
+                        }
 
+                        // Simulate code validation (Replace with actual code validation)
+                        if (codeInput == otpCode.toString()) {
+                          // Replace '123456' with actual logic
+                          isCodeValid = true;
+                          Navigator.of(context).pop(true);
+                          _showSnackBar(
+                              'Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
+                        } else {
+                          // Show the error message if the code is invalid
+                          setState(() {
+                            showError = true;
+                            attemptCount++;
+                          });
+
+                          // Hide the error message after 4 seconds
+                          Future.delayed(const Duration(seconds: 4), () {
+                            setState(() {
+                              showError = false;
+                            });
+                          });
+                        }
+                      }
+                    },
+                    child: const Text(
+                      'Επιβεβαίωση',
+                      style: TextStyle(
+                          color: Colors.redAccent), // Set button text color
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    }
     return isCodeValid;
   }
 
