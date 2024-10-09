@@ -99,11 +99,13 @@ class BottomNavBarVisibility extends ChangeNotifier {
 
   void show() {
     _isVisible = true;
+
     notifyListeners();
   }
 
   void hide() {
     _isVisible = false;
+
     notifyListeners();
   }
 }

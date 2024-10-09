@@ -27,6 +27,7 @@ class ReservationProvider with ChangeNotifier {
     } else {
       _maxPersons = 1; // Ensure the minimum value is 1
     }
+
     notifyListeners();
   }
 
@@ -38,12 +39,7 @@ class ReservationProvider with ChangeNotifier {
   // Set information in the reservationInfo list and notify listeners
   void setInfo(int index, dynamic value) {
     reservationInfo[index] = value;
-    notifyListeners();
-  }
 
-  // Update information in the reservationInfo list and notify listeners
-  void updateInfo(int index, dynamic value) {
-    reservationInfo[index] = value;
     notifyListeners();
   }
 
@@ -63,6 +59,7 @@ class ReservationProvider with ChangeNotifier {
       0, // Discount Percentage
     ];
     _maxPersons = 1; // Reset maxPersons to its default value
+
     notifyListeners();
   }
 }

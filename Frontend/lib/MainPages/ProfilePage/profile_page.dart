@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -81,6 +82,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: screenHeight * 0.06),
+                    const Padding(
+                      padding: EdgeInsets.only(right: 25),
+                      child: Align(
+                          alignment: Alignment.centerRight,
+                          child: NumberScrollBox()),
+                    ),
                     SizedBox(
                       height: screenWidth * screenHeight * 0.0004,
                       width: screenWidth * screenHeight * 0.0004,
@@ -232,6 +239,113 @@ class _ProfilePageState extends State<ProfilePage> {
                   fontWeight: FontWeight.w500)),
         ),
       ),
+    );
+  }
+}
+
+// class FadeTextApp extends StatefulWidget {
+//   @override
+//   _FadeTextAppState createState() => _FadeTextAppState();
+// }
+
+// class _FadeTextAppState extends State<FadeTextApp> {
+//   bool _isVisible = false;
+
+//   void _toggleTextVisibility() {
+//     setState(() {
+//       _isVisible = true;
+//     });
+
+//     // Set a timer to automatically hide the text after 4 seconds
+//     Timer(const Duration(seconds: 4), () {
+//       setState(() {
+//         _isVisible = false;
+//       });
+//     });
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: Column(
+//         mainAxisAlignment: MainAxisAlignment.center,
+//         children: [
+//           // The button to trigger text visibility
+//           ElevatedButton(
+//             onPressed: _toggleTextVisibility,
+//             child: const Text("Show Text"),
+//           ),
+//           const SizedBox(height: 20),
+//           // AnimatedOpacity for fading effect
+//           AnimatedOpacity(
+//             opacity: _isVisible ? 1.0 : 0.0,
+//             duration: const Duration(seconds: 1), // Fade duration
+//             child: const Text(
+//               "This is the fading text",
+//               style: TextStyle(fontSize: 24, color: Colors.white),
+//             ),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+// }
+
+class NumberScrollBox extends StatelessWidget {
+  const NumberScrollBox({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        const Text(
+          'Shots:',
+          style: TextStyle(
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        // SizedBox(
+        //   height: 50,
+        //   width: 50,
+        //   child: Image(
+        //       image: AssetImage(
+        //           'assets/otherPhotos/glowing-neon-line-martini-glass-260nw-2306886543.jpg')),
+        // ),
+        Container(
+          width: 80,
+          height: 60,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.black, Colors.red[900]!],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.7),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const SingleChildScrollView(
+            physics: BouncingScrollPhysics(),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.0),
+                child: Text(
+                  '123', // Fixed number to display
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

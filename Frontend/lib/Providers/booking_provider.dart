@@ -76,6 +76,7 @@ class BookingProvider with ChangeNotifier {
     }
 
     await _saveBookingsToPreferences(_bookings);
+
     notifyListeners(); // Notify listeners to update UI
   }
 
@@ -148,6 +149,7 @@ class BookingProvider with ChangeNotifier {
         );
 
         successPrint('Bookings successfully loaded from preferences');
+
         notifyListeners(); // Notify listeners to update UI
       } else {
         errorPrint('No bookings found in shared preferences.');
@@ -175,6 +177,7 @@ class BookingProvider with ChangeNotifier {
   // Helper method to toggle loading state
   void setLoading(bool value) {
     _isLoading = value;
+
     notifyListeners(); // Notify listeners to update UI
   }
 }

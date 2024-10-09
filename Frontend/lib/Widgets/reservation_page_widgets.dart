@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import '../Providers/reservation_provider.dart';
 import '../Providers/user_provider.dart';
 import '../global_components.dart';
+import '../services/auth_service.dart';
+import '../services/points_service.dart';
 
 class ReservationReview extends StatelessWidget {
   const ReservationReview({super.key});
@@ -971,5 +973,66 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
         ),
       ),
     );
+  }
+}
+
+CatalogueInfoStruct createCatalogue(String serviceType) {
+  return CatalogueInfoStruct(
+    clubID: -1,
+    serviceType: serviceType,
+    price: '0',
+    maxPersons: 0,
+  );
+}
+
+String formatDate(String date) {
+  if (date.isNotEmpty) {
+    return DateFormat('dd/MM').format(DateTime.parse(date));
+  }
+  return '';
+}
+
+/// Safely parses a string to a double, returning 0.0 if the string is invalid.
+double safeParse(String value) {
+  return double.tryParse(value) ?? 0.0;
+}
+
+Widget buildInfoRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(top: 10),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Safely retracts points for the discount and updates the provider.
+Future<void> retractPoints(int pointsToRetract) async {
+  try {
+    await AuthService()
+        .refreshAccessToken(); // Ensure token is valid before retracting points
+    await PointsService().retractPoints(pointsToRetract);
+  } catch (error) {
+    print("❌Failed to retract points: $error");
   }
 }

@@ -29,12 +29,14 @@ class GlobalStateProvider with ChangeNotifier {
   set validatedIp(String value) {
     _validatedIp = value;
     _saveToPreferences('validatedIp', value);
+
     notifyListeners();
   }
 
   set isAuthenticated(bool value) {
     _isAuthenticated = value;
     _saveToPreferences('isAuthenticated', value);
+
     notifyListeners();
   }
 
@@ -45,6 +47,7 @@ class GlobalStateProvider with ChangeNotifier {
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
     // Set the preferences loaded state to true
     _preferencesLoaded = true;
+
     notifyListeners(); // Notify that preferences have been loaded
   }
 

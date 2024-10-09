@@ -58,6 +58,7 @@ class UserProvider with ChangeNotifier {
         }
 
         await saveUserDetailsToPreferences();
+
         notifyListeners();
       } else {
         errorPrint('Failed to load user details');
@@ -101,6 +102,7 @@ class UserProvider with ChangeNotifier {
       }
 
       successPrint('Loaded user details from preferences');
+
       notifyListeners();
     }
   }
@@ -123,6 +125,7 @@ class UserProvider with ChangeNotifier {
     await prefs.remove('user_details');
 
     // Notify listeners of the changes
+
     notifyListeners();
   }
 }

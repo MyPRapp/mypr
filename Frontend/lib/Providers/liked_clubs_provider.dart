@@ -17,6 +17,7 @@ class LikedClubsProvider extends ChangeNotifier {
       _likedClubIDs.add(clubID);
     }
     saveLikedClubsToPreferences();
+
     notifyListeners();
   }
 
@@ -30,6 +31,7 @@ class LikedClubsProvider extends ChangeNotifier {
       await prefs.remove('likedClubs');
       _likedClubIDs.clear();
       successPrint('Liked clubs cleared from SharedPreferences.');
+
       notifyListeners();
     } catch (e) {
       errorPrint('Error clearing liked clubs: $e');

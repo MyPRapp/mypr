@@ -105,37 +105,18 @@ class RatingStars extends StatelessWidget {
   final double screenWidth;
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        if (stars <= 0 || stars > 5)
-          for (int i = 0; i < 5; i++)
-            Icon(
-              Icons.star_border_outlined,
-              size: screenHeight * screenWidth * 0.000065,
-              color: Colors.white30,
-            ),
-        if (stars % 1 == 0 && stars > 0 && stars <= 5)
-          for (int i = 0; i < stars; i++)
-            Icon(
-              Icons.star,
-              size: screenHeight * screenWidth * 0.000065,
-              color: const Color.fromARGB(200, 156, 12, 4),
-            ),
-        if (stars % 1 != 0 && stars > 0 && stars <= 5)
-          for (int i = 1; i < stars; i++)
-            Icon(
-              Icons.star,
-              size: screenHeight * screenWidth * 0.000065,
-              color: const Color.fromARGB(200, 156, 12, 4),
-            ),
-        if (stars % 1 != 0 && stars > 0 && stars <= 5)
-          Icon(
-            Icons.star_half,
-            size: screenHeight * screenWidth * 0.000065,
-            color: const Color.fromARGB(200, 156, 12, 4),
-          ),
-      ],
-    );
+    return Row(children: [
+      Icon(
+        Icons.star,
+        size: screenHeight * screenWidth * 0.000065,
+        color: const Color.fromARGB(200, 156, 12, 4),
+      ),
+      Text(
+        '($stars)',
+        style: const TextStyle(
+            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17),
+      )
+    ]);
   }
 }
 

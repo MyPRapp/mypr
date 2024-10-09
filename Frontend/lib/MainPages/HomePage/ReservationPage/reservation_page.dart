@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +17,6 @@ import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/booking_service.dart';
-import '../../../services/points_service.dart';
 
 @RoutePage()
 class ReservationPage extends StatefulWidget {
@@ -30,53 +28,34 @@ class ReservationPage extends StatefulWidget {
 }
 
 class _ReservationPageState extends State<ReservationPage> {
-  final AuthService _authService = AuthService(); // Create AuthService instance
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializePage();
+      context.read<BottomNavBarVisibility>().hide();
+    });
+  }
 
   // State variables for managing the page
   bool isDiscountApplied = false; // Flag to check if discount is applied
   bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
 
-  // Catalogues for different types of services in the club
-  CatalogueInfoStruct regularCatalogue = CatalogueInfoStruct(
-    clubID: -1,
-    serviceType: 'Regular',
-    price: '0',
-    maxPersons: 0,
-  );
+// List of catalogues for different types of services in the club
+  List<CatalogueInfoStruct> localCatalogues = [
+    createCatalogue('Regular'),
+    createCatalogue('Special'),
+    createCatalogue('Premium'),
+  ];
 
-  CatalogueInfoStruct specialCatalogue = CatalogueInfoStruct(
-    clubID: -1,
-    serviceType: 'Special',
-    price: '0',
-    maxPersons: 0,
-  );
-
-  CatalogueInfoStruct premiumCatalogue = CatalogueInfoStruct(
-    clubID: -1,
-    serviceType: 'Premium',
-    price: '0',
-    maxPersons: 0,
-  );
-
+////////////////////TODO CHECK THIS PART
   // Controllers and keys for managing form inputs
   final TextEditingController _commentController = TextEditingController();
   final GlobalKey<NameTextFieldState> nameTextFieldKey =
       GlobalKey<NameTextFieldState>();
   final GlobalKey<CategoriesTextFieldState> categoriesTextFieldKey =
       GlobalKey<CategoriesTextFieldState>();
-  final PointsService _pointsService =
-      PointsService(); // Service for points management
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Initialize the page after the build phase completes
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializePage();
-      context.read<BottomNavBarVisibility>().hide();
-    });
-  }
+////////////////////
 
   /// Initializes the reservation page by setting the club's catalogues and resetting form data.
   void _initializePage() {
@@ -86,41 +65,32 @@ class _ReservationPageState extends State<ReservationPage> {
     // Reset reservation data
     reservationProvider.resetInfo();
     reservationProvider.setInfo(2, widget.club.clubName); // Set club name
-    reservationProvider.setInfo(0, userDetails.userID); // Set user ID
+    if (userDetails.userID > 0) {
+      reservationProvider.setInfo(0, userDetails.userID); // Set user ID
+      String initialName =
+          formatName('${userDetails.firstName} ${userDetails.lastName}');
+      reservationProvider.setInfo(1, initialName);
+      nameTextFieldKey.currentState?.setNameText(initialName);
+    } else {
+      setState(() {
+        context.read<UserProvider>().fetchUserDetailsFromServer();
+      });
+    }
 
-    final clubProvider = context.read<ClubProvider>();
     // Fetch and initialize catalogues for the selected club
-    final catalogues =
-        clubProvider.getAllCataloguesForClubWithID(widget.club.clubID);
+    final catalogues = context
+        .read<ClubProvider>()
+        .getAllCataloguesForClubWithID(widget.club.clubID);
 
     setState(() {
-      regularCatalogue = catalogues[0];
-      specialCatalogue = catalogues[1];
-      premiumCatalogue = catalogues[2];
+      localCatalogues[0] = catalogues[0];
+      localCatalogues[1] = catalogues[1];
+      localCatalogues[2] = catalogues[2];
 
       // Update the max persons and calculate the total price for the reservation
       updateMaxPersons();
       calculatePrice();
     });
-
-    // Set the user's name in the form if available
-    if (reservationProvider.getInfo(1).isEmpty) {
-      String initialName =
-          formatName('${userDetails.firstName} ${userDetails.lastName}');
-      reservationProvider.setInfo(1, initialName);
-      nameTextFieldKey.currentState?.setNameText(initialName);
-    }
-  }
-
-  /// Safely retracts points for the discount and updates the provider.
-  Future<void> _retractPoints(int pointsToRetract) async {
-    try {
-      await _authService
-          .refreshAccessToken(); // Ensure token is valid before retracting points
-      await _pointsService.retractPoints(pointsToRetract);
-    } catch (error) {
-      print("❌Failed to retract points: $error");
-    }
   }
 
   /// Updates the maximum number of persons allowed based on selected services (bottles).
@@ -128,9 +98,9 @@ class _ReservationPageState extends State<ReservationPage> {
     final reservationProvider = context.read<ReservationProvider>();
 
     int maxPersons =
-        (regularCatalogue.maxPersons * reservationProvider.getInfo(5) +
-                specialCatalogue.maxPersons * reservationProvider.getInfo(6) +
-                premiumCatalogue.maxPersons * reservationProvider.getInfo(7))
+        (localCatalogues[0].maxPersons * reservationProvider.getInfo(5) +
+                localCatalogues[1].maxPersons * reservationProvider.getInfo(6) +
+                localCatalogues[2].maxPersons * reservationProvider.getInfo(7))
             .toInt();
 
     // Ensure at least one person is allowed for the reservation
@@ -150,9 +120,9 @@ class _ReservationPageState extends State<ReservationPage> {
     final reservationProvider = context.read<ReservationProvider>();
 
     double price = (reservationProvider.getInfo(5) *
-            safeParse(regularCatalogue.price)) +
-        (reservationProvider.getInfo(6) * safeParse(specialCatalogue.price)) +
-        (reservationProvider.getInfo(7) * safeParse(premiumCatalogue.price));
+            safeParse(localCatalogues[0].price)) +
+        (reservationProvider.getInfo(6) * safeParse(localCatalogues[1].price)) +
+        (reservationProvider.getInfo(7) * safeParse(localCatalogues[2].price));
 
     // Apply discount if applicable
     if (isDiscountApplied) {
@@ -166,19 +136,19 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
     final clubProvider = context.read<ClubProvider>();
-
+//TODO Refresh user details too
     try {
       // Fetch updated catalogues
       await clubProvider.fetchCatalogues(widget.club);
       final catalogues =
           clubProvider.getAllCataloguesForClubWithID(widget.club.clubID);
 
-      if (regularCatalogue.maxPersons != catalogues[0].maxPersons ||
-          regularCatalogue.price != catalogues[0].price ||
-          specialCatalogue.maxPersons != catalogues[1].maxPersons ||
-          specialCatalogue.price != catalogues[1].price ||
-          premiumCatalogue.maxPersons != catalogues[2].maxPersons ||
-          premiumCatalogue.price != catalogues[2].price) {
+      if (localCatalogues[0].maxPersons != catalogues[0].maxPersons ||
+          localCatalogues[0].price != catalogues[0].price ||
+          localCatalogues[1].maxPersons != catalogues[1].maxPersons ||
+          localCatalogues[1].price != catalogues[1].price ||
+          localCatalogues[2].maxPersons != catalogues[2].maxPersons ||
+          localCatalogues[2].price != catalogues[2].price) {
         _updateCatalogues(catalogues);
       }
     } catch (error) {
@@ -189,9 +159,9 @@ class _ReservationPageState extends State<ReservationPage> {
 
   void _updateCatalogues(List<CatalogueInfoStruct> catalogues) {
     setState(() {
-      regularCatalogue = catalogues[0];
-      specialCatalogue = catalogues[1];
-      premiumCatalogue = catalogues[2];
+      localCatalogues[0] = catalogues[0];
+      localCatalogues[1] = catalogues[1];
+      localCatalogues[2] = catalogues[2];
       updateMaxPersons();
       calculatePrice();
     });
@@ -284,6 +254,7 @@ class _ReservationPageState extends State<ReservationPage> {
           buildClubImage(), // Display club image
           const SizedBox(height: 50),
           buildTitle('Φιάλες και Τιμές'), // Display packages
+          const SizedBox(height: 25),
           buildPackageInfo(),
           const SizedBox(height: 40),
           isAuthenticated
@@ -355,10 +326,17 @@ class _ReservationPageState extends State<ReservationPage> {
                     File(widget.club.localPhotoPath),
                     fit: BoxFit.fill,
                   ) // Load from local file
-                : Image.network(
-                    widget.club.clubPhoto,
-                    fit: BoxFit.fill,
-                  ),
+                : widget.club.clubPhoto.isNotEmpty
+                    ? Image.network(
+                        widget.club.clubPhoto,
+                        fit: BoxFit.fill,
+                      )
+                    : const Center(
+                        child: CircularProgressIndicator(
+                        color: Color(0xFF9C0C04),
+                        backgroundColor: Colors.black,
+                        strokeWidth: 2,
+                      )),
           ),
         ));
   }
@@ -379,26 +357,26 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget buildPackageInfo() {
     return Column(
       children: [
-        const SizedBox(height: 25),
         PackagesInfo(
           package: 'Απλή',
-          maxPersons: regularCatalogue.maxPersons,
-          minPrice: safeParse(regularCatalogue.price).toInt(),
+          maxPersons: localCatalogues[0].maxPersons,
+          minPrice: safeParse(localCatalogues[0].price).toInt(),
         ),
         PackagesInfo(
           package: 'Special',
-          maxPersons: specialCatalogue.maxPersons,
-          minPrice: safeParse(specialCatalogue.price).toInt(),
+          maxPersons: localCatalogues[1].maxPersons,
+          minPrice: safeParse(localCatalogues[1].price).toInt(),
         ),
         PackagesInfo(
           package: 'Premium',
-          maxPersons: premiumCatalogue.maxPersons,
-          minPrice: safeParse(premiumCatalogue.price).toInt(),
+          maxPersons: localCatalogues[2].maxPersons,
+          minPrice: safeParse(localCatalogues[2].price).toInt(),
         ),
       ],
     );
   }
 
+//TODO Check the buildReservationForm
   /// Builds the reservation form with various input fields.
   Widget buildReservationForm() {
     return Column(
@@ -410,9 +388,9 @@ class _ReservationPageState extends State<ReservationPage> {
             unavailableDays: widget.club.clubNotAvailable),
         CategoriesTextField(
           key: categoriesTextFieldKey,
-          regularCatalogue: regularCatalogue,
-          specialCatalogue: specialCatalogue,
-          premiumCatalogue: premiumCatalogue,
+          regularCatalogue: localCatalogues[0],
+          specialCatalogue: localCatalogues[1],
+          premiumCatalogue: localCatalogues[2],
           onCountersChanged: () {
             updateMaxPersons(); // Update max persons based on selected services
             calculatePrice(); // Recalculate total price
@@ -429,8 +407,8 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Builds the discount checkbox if the user has enough points.
   Widget buildDiscountCheckbox() {
-    final userDetails = context.read<UserProvider>().userDetails;
-    return userDetails.points >= 20 && buttonIsVisible
+    return context.read<UserProvider>().userDetails.points >= 20 &&
+            buttonIsVisible
         ? Row(
             children: [
               GestureDetector(
@@ -523,7 +501,6 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget proceedConfirmationDialog() {
     ReservationProvider reservationProvider =
         context.read<ReservationProvider>();
-    printReservationInfo(reservationProvider.reservationInfo);
     void onConfirm() async {
       Navigator.of(context, rootNavigator: true).pop();
       setState(() {
@@ -531,26 +508,21 @@ class _ReservationPageState extends State<ReservationPage> {
       });
       try {
         // Call the refreshAccessToken method on the instance
-        await _authService
+        await AuthService()
             .refreshAccessToken(); // Ensure token is valid before submission
 
         // Fetching catalogues, wrapped in a try-catch for error handling
         await ClubProvider().fetchCatalogues(widget.club);
       } catch (e) {
-        print("❌Failed to refresh access token or fetch catalogues");
         setState(() {
           buttonIsVisible = true;
         });
-        try {
-          if (mounted) {
-            floatingSnackBar(
-                message:
-                    'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
-                context: context,
-                duration: const Duration(milliseconds: 1500));
-          }
-        } catch (e) {
-          print("❌Failed to show SnackBar: $e");
+        if (mounted) {
+          floatingSnackBar(
+              message:
+                  'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
+              context: context,
+              duration: const Duration(milliseconds: 1500));
         }
 
         // Log error or handle failure in a way without more snack bars
@@ -560,7 +532,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
       // Retract points if a discount is applied
       if (isDiscountApplied) {
-        await _retractPoints(20);
+        await retractPoints(20);
       }
 
       // Submit the reservation form
@@ -588,7 +560,7 @@ class _ReservationPageState extends State<ReservationPage> {
     String date = reservationProvider.reservationInfo[8];
     final price = reservationProvider.reservationInfo[4];
 
-    final formattedDate = _formatDate(date);
+    final formattedDate = formatDate(date);
     final formattedPrice = price.toStringAsFixed(2);
 
     return Center(
@@ -615,13 +587,13 @@ class _ReservationPageState extends State<ReservationPage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              _buildInfoRow(
+              buildInfoRow(
                   'Όνομα κράτησης:', reservationProvider.reservationInfo[1]),
-              _buildInfoRow('Μαγαζί:', reservationProvider.reservationInfo[2]),
-              _buildInfoRow('Αριθμός ατόμων:',
+              buildInfoRow('Μαγαζί:', reservationProvider.reservationInfo[2]),
+              buildInfoRow('Αριθμός ατόμων:',
                   reservationProvider.reservationInfo[3].toString()),
-              _buildInfoRow('Ημερομηνία:', formattedDate),
-              _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
+              buildInfoRow('Ημερομηνία:', formattedDate),
+              buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -663,42 +635,6 @@ class _ReservationPageState extends State<ReservationPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  String _formatDate(String date) {
-    if (date.isNotEmpty) {
-      return DateFormat('dd/MM').format(DateTime.parse(date));
-    }
-    return '';
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -747,16 +683,6 @@ class _ReservationPageState extends State<ReservationPage> {
     });
   }
 
-  Future<bool?> reservationReviewDialog() {
-    return showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return const ReservationReview();
-      },
-    );
-  }
-
   /// Handles the submission response and shows appropriate feedback.
   void _handleSubmissionResponse(bool success) async {
     if (success) {
@@ -793,14 +719,19 @@ class _ReservationPageState extends State<ReservationPage> {
     }
   }
 
+  Future<bool?> reservationReviewDialog() {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return const ReservationReview();
+      },
+    );
+  }
+
   /// Generates a four-bit string required for form submission.
   String _generateFourBitString() {
     final reservationProvider = context.read<ReservationProvider>();
     return '${reservationProvider.getInfo(5)}${reservationProvider.getInfo(6)}${reservationProvider.getInfo(7)}${reservationProvider.getInfo(10) ~/ 10}';
-  }
-
-  /// Safely parses a string to a double, returning 0.0 if the string is invalid.
-  double safeParse(String value) {
-    return double.tryParse(value) ?? 0.0;
   }
 }

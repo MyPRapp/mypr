@@ -214,6 +214,7 @@ class ClubProvider with ChangeNotifier {
       _catalogues.addAll(cataloguesList
           .map((json) => CatalogueInfoStruct.fromJson(json))
           .toList());
+
       notifyListeners();
       successPrint('Catalogues loaded from $filePath');
     } else {
@@ -241,6 +242,7 @@ class ClubProvider with ChangeNotifier {
         _clubs.add(club);
         successPrint('Club \'${club.clubName}\' added.');
       }
+
       notifyListeners();
     } catch (e) {
 //// Catch any unexpected errors

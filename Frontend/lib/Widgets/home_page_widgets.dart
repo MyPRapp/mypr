@@ -32,6 +32,21 @@ class _BigClubCardState extends State<BigClubCard> {
     return availabilityInBytes.split('').map((char) => char == '1').toList();
   }
 
+  String processString(String input) {
+    // Check if there are any commas in the string
+    if (!input.contains(',')) {
+      return input;
+    }
+
+    // Split the string by commas
+    List<String> parts = input.split(',');
+
+    // Get the substring after the last comma and trim whitespaces
+    String result = parts.last.trim();
+
+    return result;
+  }
+
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(widget.club.clubAvailability);
@@ -141,7 +156,7 @@ class _BigClubCardState extends State<BigClubCard> {
                           Padding(
                             padding: EdgeInsets.only(top: screenHeight * 0.006),
                             child: Text(
-                              widget.club.clubLocation,
+                              processString(widget.club.clubLocation),
                               style: TextStyle(
                                 fontSize: screenHeight * 0.015,
                                 fontWeight: FontWeight.w500,

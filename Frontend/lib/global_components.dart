@@ -86,7 +86,7 @@ class UserInfoStruct {
   String localPhotoPath;
 
   UserInfoStruct({
-    this.userID = -1,
+    required this.userID,
     this.username = '',
     this.firstName = '',
     this.lastName = '',
