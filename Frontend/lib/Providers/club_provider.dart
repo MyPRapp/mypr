@@ -46,7 +46,7 @@ class ClubProvider with ChangeNotifier {
           if (club.clubID >= 0) {
             // Download and save club photo
             if (club.clubPhoto.isNotEmpty) {
-              String localPath = await _photoManager.downloadAndSavePhoto(
+              String localPath = await _photoManager.downloadAndSaveClubPhoto(
                   club.clubPhoto, 'club_${club.clubID}_photo');
 
               club.localPhotoPath =
@@ -187,9 +187,9 @@ class ClubProvider with ChangeNotifier {
           Directory('${directory.path}/mypDirectory/club_photos');
 
       if (await clubPhotosDirectory.exists()) {
-        for (var i in _clubs) {
-          i.localPhotoPath =
-              '${directory.path}/mypDirectory/club_photos/club_${i.clubID}_photo.jpg';
+        for (var club in _clubs) {
+          club.localPhotoPath =
+              '${directory.path}/mypDirectory/club_photos/club_${club.clubID}_photo.jpg';
         }
       } else {
         errorPrint('Club photos directory doesn\'t exist');

@@ -208,23 +208,34 @@ class BookingCard extends StatelessWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: SizedBox(
-                  width: 120,
-                  height: 120,
-                  child: clubProvider
-                          .getClubByID(booking.clubID)
-                          .localPhotoPath
-                          .isNotEmpty
-                      ? Image.file(
-                          File(clubProvider
-                              .getClubByID(booking.clubID)
-                              .localPhotoPath),
-                          fit: BoxFit.fill,
-                        ) // Load from local file
-                      : Image.network(
-                          clubProvider.getClubByID(booking.clubID).clubPhoto,
-                          fit: BoxFit.fill,
-                        ),
-                ),
+                    width: 120,
+                    height: 120,
+                    child: clubProvider
+                            .getClubByID(booking.clubID)
+                            .localPhotoPath
+                            .isNotEmpty
+                        ? Image.file(
+                            File(clubProvider
+                                .getClubByID(booking.clubID)
+                                .localPhotoPath),
+                            fit: BoxFit.fill,
+                          ) // Load from local file
+                        : clubProvider
+                                .getClubByID(booking.clubID)
+                                .clubPhoto
+                                .isNotEmpty
+                            ? Image.network(
+                                clubProvider
+                                    .getClubByID(booking.clubID)
+                                    .clubPhoto,
+                                fit: BoxFit.fill,
+                              )
+                            : const Center(
+                                child: CircularProgressIndicator(
+                                color: Color(0xFF9C0C04),
+                                backgroundColor: Colors.black,
+                                strokeWidth: 2,
+                              ))),
               ),
               const SizedBox(width: 20),
               Expanded(

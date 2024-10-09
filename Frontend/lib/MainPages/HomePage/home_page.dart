@@ -70,13 +70,10 @@ class _HomePageState extends State<HomePage> {
           bool loggedIn = await AuthService().login(savedEmail, savedPassword);
 
           if (loggedIn && mounted) {
+            context.read<GlobalStateProvider>().isAuthenticated = true;
             await userProvider.fetchUserDetailsFromServer();
           } else {
             errorPrint('Email or Password is incorrect');
-
-            if (mounted) {
-              globalStateProvider.isAuthenticated = false;
-            }
           }
         } else {
           errorPrint('Email or Password is empty');
@@ -87,6 +84,8 @@ class _HomePageState extends State<HomePage> {
         }
       } else {
         errorPrint('------------USER IS NOT AUTHENTICATED------------');
+        // userProvider.loadUserDetailsFromPreferences();
+        // globalStateProvider.isAuthenticated = true;
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));

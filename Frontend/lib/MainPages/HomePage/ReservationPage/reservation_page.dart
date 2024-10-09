@@ -209,7 +209,7 @@ class _ReservationPageState extends State<ReservationPage> {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isAuthenticated =
-        context.read<GlobalStateProvider>().isAuthenticated;
+        context.watch<GlobalStateProvider>().isAuthenticated;
     return PopScope(
       canPop: buttonIsVisible,
       onPopInvokedWithResult: (didPop, result) {

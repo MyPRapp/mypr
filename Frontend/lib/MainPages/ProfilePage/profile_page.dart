@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:glassmorphism_widgets/glassmorphism_widgets.dart';
@@ -8,6 +10,8 @@ import 'package:provider/provider.dart';
 import '../../Providers/booking_provider.dart'; // Import the BookingProvider
 import '../../Providers/global_state_provider.dart';
 import '../../Providers/user_provider.dart';
+import '../../global_components.dart';
+import '../../services/auth_service.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -21,12 +25,21 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _refresh() async {
     UserProvider userProvider = context.read<UserProvider>();
 
-    if (userProvider.userDetails.userID > 0) {
-      await userProvider.fetchUserDetailsFromServer();
+    // Await the Future to resolve and get the String values from shared preferences
+    String savedEmail = await getSavedEmail();
+    String savedPassword = await getSavedPassword();
 
-      if (mounted) {
-        await context.read<BookingProvider>().fetchBookings(
-            userProvider.userDetails, context.read<ClubProvider>());
+    if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+      bool loggedIn = await AuthService().login(savedEmail, savedPassword);
+
+      if (loggedIn && mounted) {
+        context.read<GlobalStateProvider>().isAuthenticated = true;
+        await userProvider.fetchUserDetailsFromServer();
+
+        if (mounted) {
+          await context.read<BookingProvider>().fetchBookings(
+              userProvider.userDetails, context.read<ClubProvider>());
+        }
       }
     }
   }
@@ -40,6 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
+
     return PopScope(
       canPop: false,
       child: RefreshIndicator.adaptive(
@@ -71,10 +85,24 @@ class _ProfilePageState extends State<ProfilePage> {
                       height: screenWidth * screenHeight * 0.0004,
                       width: screenWidth * screenHeight * 0.0004,
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(300),
-                        child: _buildProfileImage(
-                            userDetails.photo, screenHeight, screenWidth),
-                      ),
+                          borderRadius: BorderRadius.circular(300),
+                          child: isAuthenticated
+                              ? userDetails.localPhotoPath.isNotEmpty
+                                  ? Image.file(
+                                      File(userDetails.localPhotoPath),
+                                      fit: BoxFit.cover,
+                                    ) // Load from local file
+                                  : userDetails.photo.isNotEmpty
+                                      ? Image.network(
+                                          'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
+                                          fit: BoxFit.cover,
+                                        )
+                                      : const Image(
+                                          image: AssetImage(
+                                              'assets/otherPhotos/Default_User.jpg'))
+                              : const Image(
+                                  image: AssetImage(
+                                      'assets/otherPhotos/Default_User.jpg'))),
                     ),
                     if (isAuthenticated)
                       Padding(
@@ -176,57 +204,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                 ),
-              // SizedBox(height: screenHeight * 0.035),
-              // Center(
-              //   child: GestureDetector(
-              //     behavior: HitTestBehavior.translucent,
-              //     onTap: () {
-              //       signOut();
-              //     },
-              //     child: Container(
-              //       height: screenHeight * 0.07,
-              //       width: screenWidth / 2.5,
-              //       decoration: BoxDecoration(
-              //           borderRadius: BorderRadius.circular(14),
-              //           color: const Color.fromARGB(162, 15, 15, 15),
-              //           border: Border.all(
-              //               width: 2,
-              //               color:
-              //                   const Color.fromARGB(108, 156, 12, 4))),
-              //       alignment: Alignment.center,
-              //       child: Text(
-              //         textAlign: TextAlign.center,
-              //         'Αποσύνδεση',
-              //         style: TextStyle(
-              //           fontSize: screenWidth * screenHeight * 0.00006,
-              //           fontWeight: FontWeight.w700,
-              //           color: const Color.fromARGB(199, 235, 230, 230),
-              //         ),
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              // SizedBox(height: screenHeight * 0.15),
             ],
           ),
         ),
       ),
     );
-  }
-
-  /// Builds the profile image widget based on whether the photo path is valid.
-  Widget _buildProfileImage(
-      String? photoPath, double screenHeight, double screenWidth) {
-    if (photoPath == null || photoPath.trim().isEmpty) {
-      // Show the red person icon immediately if photoPath is empty or null
-      return const Image(
-          image: AssetImage('assets/otherPhotos/Default_User.jpg'));
-    } else {
-      // Attempt to load the photo; show a loading indicator if the result is null
-
-      return const Image(
-          image: AssetImage('assets/otherPhotos/Default_User.jpg'));
-    }
   }
 
   Widget profileOptions(String label, PageRouteInfo route, double screenHeight,

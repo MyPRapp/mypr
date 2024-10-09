@@ -62,18 +62,55 @@ class _BigClubCardState extends State<BigClubCard> {
                         bottomLeft: Radius.circular(7.5),
                         topLeft: Radius.circular(7.5)),
                     child: SizedBox(
-                      height: screenHeight * 0.17,
-                      width: screenWidth * 0.3,
-                      child: widget.club.localPhotoPath.isNotEmpty
-                          ? Image.file(
-                              File(widget.club.localPhotoPath),
-                              fit: BoxFit.fill,
-                            ) // Load from local file
-                          : Image.network(
-                              widget.club.clubPhoto,
-                              fit: BoxFit.fill,
-                            ),
-                    ),
+                        height: screenHeight * 0.17,
+                        width: screenWidth * 0.3,
+                        child: widget.club.localPhotoPath.isNotEmpty
+                            ? Image(
+                                fit: BoxFit.fill,
+                                image:
+                                    FileImage(File(widget.club.localPhotoPath)),
+                              )
+                            : widget.club.clubPhoto.isNotEmpty
+                                ? Image.network(
+                                    widget.club.clubPhoto,
+                                    fit: BoxFit.fill,
+                                    loadingBuilder: (BuildContext context,
+                                        Widget child,
+                                        ImageChunkEvent? loadingProgress) {
+                                      if (loadingProgress == null) {
+                                        return child; // Image is fully loaded, show the image.
+                                      }
+                                      return const Center(
+                                        child: CircularProgressIndicator(
+                                          color: Color(0xFF9C0C04),
+                                          backgroundColor: Colors.black,
+                                          strokeWidth: 2,
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (BuildContext context,
+                                        Object error, StackTrace? stackTrace) {
+                                      return widget
+                                              .club.localPhotoPath.isNotEmpty
+                                          ? Image(
+                                              fit: BoxFit.fill,
+                                              image: FileImage(File(
+                                                  widget.club.localPhotoPath)),
+                                            )
+                                          : const Center(
+                                              child: CircularProgressIndicator(
+                                              color: Color(0xFF9C0C04),
+                                              backgroundColor: Colors.black,
+                                              strokeWidth: 2,
+                                            ));
+                                    },
+                                  )
+                                : const Center(
+                                    child: CircularProgressIndicator(
+                                    color: Color(0xFF9C0C04),
+                                    backgroundColor: Colors.black,
+                                    strokeWidth: 2,
+                                  ))),
                   ),
                   Container(
                     alignment: Alignment.topLeft,

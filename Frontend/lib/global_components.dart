@@ -82,7 +82,8 @@ class UserInfoStruct {
   String lastName;
   String email;
   String phone;
-  String photo; // This will now hold the base64 string instead of a URL
+  String photo;
+  String localPhotoPath;
 
   UserInfoStruct({
     this.userID = -1,
@@ -92,7 +93,8 @@ class UserInfoStruct {
     this.email = '',
     this.phone = '',
     this.points = -1,
-    this.photo = '', // Initialize as an empty string
+    this.photo = '',
+    this.localPhotoPath = '',
   });
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -124,6 +126,7 @@ class UserInfoStruct {
       'phone': phone,
       'points': points,
       'photo': photo,
+      'localPhotoPath': localPhotoPath,
     };
   }
 }

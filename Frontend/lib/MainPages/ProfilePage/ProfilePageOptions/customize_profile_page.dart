@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
@@ -149,10 +151,26 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                               height: screenWidth * screenHeight * 0.00036,
                               width: screenWidth * screenHeight * 0.00036,
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(300),
-                                child: buildProfileImage(userDetails.photo,
-                                    screenHeight, screenWidth),
-                              ),
+                                  borderRadius: BorderRadius.circular(300),
+                                  child: context
+                                          .read<GlobalStateProvider>()
+                                          .isAuthenticated
+                                      ? userDetails.localPhotoPath.isNotEmpty
+                                          ? Image.file(
+                                              File(userDetails.localPhotoPath),
+                                              fit: BoxFit.cover,
+                                            ) // Load from local file
+                                          : userDetails.photo.isNotEmpty
+                                              ? Image.network(
+                                                  'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
+                                                  fit: BoxFit.cover,
+                                                )
+                                              : const Image(
+                                                  image: AssetImage(
+                                                      'assets/otherPhotos/Default_User.jpg'))
+                                      : const Image(
+                                          image: AssetImage(
+                                              'assets/otherPhotos/Default_User.jpg'))),
                             ),
                             SizedBox(width: screenWidth * 0.05),
                             Expanded(
