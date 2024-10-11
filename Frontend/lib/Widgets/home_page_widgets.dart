@@ -52,7 +52,7 @@ class _BigClubCardState extends State<BigClubCard> {
     return result;
   }
 
-  double _scale = 0.6;
+  double _scale = 0;
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(widget.club.clubAvailability);
@@ -80,7 +80,7 @@ class _BigClubCardState extends State<BigClubCard> {
                 children: [
                   AnimatedScale(
                     scale: _scale,
-                    duration: const Duration(milliseconds: 400),
+                    duration: const Duration(milliseconds: 600),
                     curve: Curves.easeOut,
                     child: ClipRRect(
                       borderRadius: const BorderRadius.only(
@@ -198,6 +198,8 @@ class _BigClubCardState extends State<BigClubCard> {
     );
   }
 }
+
+
 /* 
 class SmallClubCard extends StatefulWidget {
   const SmallClubCard({

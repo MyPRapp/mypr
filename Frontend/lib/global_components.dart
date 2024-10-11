@@ -296,6 +296,27 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
   }
 }
 
+// Route createRoute(ClubInfoStruct club) {
+//   return PageRouteBuilder(
+//     pageBuilder: (context, animation, secondaryAnimation) =>
+//         ReservationPage(club: club),
+//     transitionsBuilder: (context, animation, secondaryAnimation, child) {
+//       const begin = Offset(0.0, 1.0); // Start position (1, 0) is from the right
+//       const end = Offset.zero;
+//       const curve = Curves.fastOutSlowIn;
+
+//       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+//       var offsetAnimation = animation.drive(tween);
+
+//       return SlideTransition(
+//         position: offsetAnimation,
+//         child: child,
+//       );
+//     },
+//     transitionDuration: const Duration(milliseconds: 300),
+//   );
+// }
+
 class LoadingScreen extends StatelessWidget {
   const LoadingScreen({super.key});
 

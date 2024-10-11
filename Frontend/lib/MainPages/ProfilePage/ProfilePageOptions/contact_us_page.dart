@@ -199,12 +199,13 @@ class _ContactUsPageState extends State<ContactUsPage> {
                           ],
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(screenHeight * 0.02),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: screenWidth * 0.1),
+                            child: Column(
                               children: [
                                 const Text(
                                   'Στείλε μήνυμα\nστο instagram',
@@ -227,18 +228,24 @@ class _ContactUsPageState extends State<ContactUsPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(right: screenWidth * 0.1),
+                            child: SizedBox(
                               width: screenWidth / 2.5,
                               child: Image.asset(
                                 'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
                                 height: screenHeight / 10,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                  SizedBox(
+                    height: screenHeight / 10,
+                  )
                 ],
               ),
             )),
@@ -333,7 +340,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         }
       } else {
         if (mounted) {
-          errorPrint('Error on email sending');
+          errorPrint('Error on email sending: ${response.body}');
           floatingSnackBar(
             message: 'Σφάλμα κατά την αποστολή του μηνύματος',
             context: context,

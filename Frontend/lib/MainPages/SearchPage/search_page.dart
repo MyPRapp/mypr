@@ -72,8 +72,8 @@ class SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
-            FocusScope.of(context).unfocus();
             setState(() {
+              FocusScope.of(context).unfocus();
               _isDropdownVisible = false;
             });
           },
@@ -108,8 +108,12 @@ class SearchPageState extends State<SearchPage> {
                           ? IconButton(
                               icon: const Icon(Icons.clear, color: Colors.grey),
                               onPressed: () {
-                                _controller.clear();
-                                filterClubs('');
+                                setState(() {
+                                  _controller.clear();
+                                  filterClubs('');
+                                  _isDropdownVisible = !_isDropdownVisible;
+                                  FocusScope.of(context).unfocus();
+                                });
                               },
                             )
                           : null,
@@ -153,6 +157,8 @@ class SearchPageState extends State<SearchPage> {
                                       if (_isDropdownVisible) {
                                         setState(() {
                                           _isDropdownVisible = false;
+                                          FocusScope.of(context).unfocus();
+                                          _controller.clear();
                                         });
                                         AutoRouter.of(context)
                                             .push(ReservationRoute(
@@ -160,7 +166,10 @@ class SearchPageState extends State<SearchPage> {
                                               .read<ClubProvider>()
                                               .getClubByName(clubName),
                                         ));
-                                        _controller.clear();
+                                      } else {
+                                        setState(() {
+                                          FocusScope.of(context).unfocus();
+                                        });
                                       }
                                     },
                                   ),
