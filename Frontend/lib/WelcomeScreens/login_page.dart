@@ -160,9 +160,9 @@ class LoginBody extends StatelessWidget {
       width: screenWidth,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.black, Color.fromARGB(150, 156, 12, 4)],
-          begin: Alignment.centerRight,
-          end: Alignment.topLeft,
+          colors: [Colors.black, Color.fromARGB(255, 68, 3, 3)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
       ),
       child: Column(

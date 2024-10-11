@@ -26,9 +26,9 @@ class LikeButtonState extends State<LikeButton>
 
   @override
   Widget build(BuildContext context) {
-    final double size = widget.big
-        ? widget.screenHeight * widget.screenWidth * 0.00012
-        : widget.screenHeight * widget.screenWidth * 0.00009;
+    // final double size = widget.big
+    // ? widget.screenHeight * widget.screenWidth * 0.00012
+    // : widget.screenHeight * widget.screenWidth * 0.00009;
     final likeProvider = context.watch<LikedClubsProvider>();
     bool isLiked = likeProvider.isLiked(widget.club.clubID);
 
@@ -41,14 +41,36 @@ class LikeButtonState extends State<LikeButton>
 
         likeProvider.toggleLike(widget.club.clubID);
       },
-      child: SizedBox(
-        height: widget.screenWidth * 0.1,
-        width: widget.screenWidth * 0.1,
-        child: isLiked
-            ? Icon(Icons.favorite_rounded,
-                size: size, color: const Color.fromARGB(199, 156, 12, 4))
-            : Icon(Icons.favorite_border_rounded,
-                size: size, color: const Color.fromARGB(199, 156, 12, 4)),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 7, top: 7),
+        child: SizedBox(
+          height: widget.screenWidth * 0.075,
+          width: widget.screenWidth * 0.075,
+          child: AnimatedSwitcher(
+            duration:
+                const Duration(milliseconds: 300), // Duration of the animation
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return ScaleTransition(
+                scale: animation,
+                child: FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ),
+              );
+            },
+            child: isLiked
+                ? Image.asset(
+                    'assets/icons/heart_filled.png',
+                    key: const ValueKey('filledHeart'),
+                    color: const Color.fromARGB(105, 136, 136, 136),
+                  )
+                : Image.asset(
+                    'assets/icons/heart_outline.png',
+                    key: const ValueKey('outlineHeart'),
+                    color: const Color.fromARGB(179, 136, 136, 136),
+                  ),
+          ),
+        ),
       ),
     );
   }
@@ -131,61 +153,63 @@ class MinPriceAndMaxPersons extends StatelessWidget {
   final int minPrice, maxPersons;
   final double screenHeight;
   final double screenWidth;
+  // final bool a = false;
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
-        Icon(
-          size: screenHeight * 0.03 + screenWidth * 0.01,
-          Icons.monetization_on_outlined,
-          color: const Color.fromARGB(197, 158, 158, 158),
-        ),
+        // Icon(
+        //   size: screenHeight * 0.03 + screenWidth * 0.01,
+        //   Icons.monetization_on_outlined,
+        //   color: const Color.fromARGB(197, 158, 158, 158),
+        // ),
         if (minPrice >= 0 && maxPersons >= 0)
           Text(
             ' $minPrice',
             style: TextStyle(
               fontSize: screenHeight * 0.02 + screenWidth * 0.004,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w400,
               color: const Color.fromARGB(197, 158, 158, 158),
             ),
           ),
-        if (minPrice < 0 || maxPersons < 0)
-          Text(
-            '     ',
-            style: TextStyle(
-              fontSize: screenHeight * 0.02 + screenWidth * 0.004,
-              fontWeight: FontWeight.w500,
-              color: const Color.fromARGB(197, 158, 158, 158),
-            ),
+        SizedBox(
+          height: 18,
+          width: 18,
+          child: Image.asset(
+            'assets/icons/euro.png',
+            fit: BoxFit.scaleDown,
+            color: const Color.fromARGB(197, 158, 158, 158),
           ),
+        ),
+
         Text(
           ' | ',
           style: TextStyle(
               fontSize: screenHeight * 0.02 + screenWidth * 0.004,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w400,
               color: Colors.grey),
         ),
-        Icon(
-          size: screenHeight * 0.03 + screenWidth * 0.01,
-          Icons.account_circle_outlined,
-          color: const Color.fromARGB(197, 158, 158, 158),
+        // Icon(
+        //   size: screenHeight * 0.03 + screenWidth * 0.01,
+        //   Icons.account_circle_outlined,
+        //   color: const Color.fromARGB(197, 158, 158, 158),
+        // ),
+        SizedBox(
+          height: 36,
+          width: 36,
+          child: Image.asset(
+            'assets/icons/person_with_circle.png',
+            fit: BoxFit.scaleDown,
+            color: const Color.fromARGB(255, 255, 255, 255),
+          ),
         ),
         if (minPrice >= 0 && maxPersons >= 0)
           Text(
-            ' $maxPersons',
+            '$maxPersons',
             style: TextStyle(
               fontSize: screenHeight * 0.02 + screenWidth * 0.004,
-              fontWeight: FontWeight.w500,
-              color: const Color.fromARGB(197, 158, 158, 158),
-            ),
-          ),
-        if (minPrice < 0 || maxPersons < 0)
-          Text(
-            ' ',
-            style: TextStyle(
-              fontSize: screenHeight * 0.02 + screenWidth * 0.004,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w400,
               color: const Color.fromARGB(197, 158, 158, 158),
             ),
           ),

@@ -36,21 +36,6 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
     final screenWidth = MediaQuery.sizeOf(context).width;
     final userDetails = context.watch<UserProvider>().userDetails;
 
-    /// Builds the profile image widget based on whether the photo path is valid.
-    Widget buildProfileImage(
-        String? photoPath, double screenHeight, double screenWidth) {
-      if (photoPath == null || photoPath.trim().isEmpty) {
-        // Show the red person icon immediately if photoPath is empty or null
-        return const Image(
-            image: AssetImage('assets/otherPhotos/Default_User.jpg'));
-      } else {
-        // Attempt to load the photo; show a loading indicator if the result is null
-
-        return const Image(
-            image: AssetImage('assets/otherPhotos/Default_User.jpg'));
-      }
-    }
-
     void signOut() async {
       try {
         warningPrint('------------SIGNING OUT------------');

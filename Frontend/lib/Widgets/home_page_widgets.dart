@@ -26,6 +26,11 @@ class _BigClubCardState extends State<BigClubCard> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setState(() {
+        _scale = 1.0; // Animate to full size
+      });
+    });
   }
 
   List<bool> _daysOpen(String availabilityInBytes) {
@@ -47,6 +52,7 @@ class _BigClubCardState extends State<BigClubCard> {
     return result;
   }
 
+  double _scale = 0.6;
   @override
   Widget build(BuildContext context) {
     final daysOpen = _daysOpen(widget.club.clubAvailability);
@@ -72,13 +78,17 @@ class _BigClubCardState extends State<BigClubCard> {
             children: [
               Stack(
                 children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(7.5),
-                        topLeft: Radius.circular(7.5)),
-                    child: SizedBox(
-                        height: screenHeight * 0.17,
-                        width: screenWidth * 0.3,
+                  AnimatedScale(
+                    scale: _scale,
+                    duration: const Duration(milliseconds: 400),
+                    curve: Curves.easeOut,
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(7.5),
+                          topLeft: Radius.circular(7.5)),
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.17,
+                        width: MediaQuery.of(context).size.width * 0.3,
                         child: widget.club.localPhotoPath.isNotEmpty
                             ? Image(
                                 fit: BoxFit.fill,
@@ -88,13 +98,11 @@ class _BigClubCardState extends State<BigClubCard> {
                             : widget.club.clubPhoto.isNotEmpty
                                 ? Image.network(
                                     widget.club.clubPhoto,
-                                    fit: BoxFit.fill,
+                                    fit: BoxFit.cover,
                                     loadingBuilder: (BuildContext context,
                                         Widget child,
                                         ImageChunkEvent? loadingProgress) {
-                                      if (loadingProgress == null) {
-                                        return child; // Image is fully loaded, show the image.
-                                      }
+                                      if (loadingProgress == null) return child;
                                       return const Center(
                                         child: CircularProgressIndicator(
                                           color: Color(0xFF9C0C04),
@@ -103,29 +111,16 @@ class _BigClubCardState extends State<BigClubCard> {
                                         ),
                                       );
                                     },
-                                    errorBuilder: (BuildContext context,
-                                        Object error, StackTrace? stackTrace) {
-                                      return widget
-                                              .club.localPhotoPath.isNotEmpty
-                                          ? Image(
-                                              fit: BoxFit.fill,
-                                              image: FileImage(File(
-                                                  widget.club.localPhotoPath)),
-                                            )
-                                          : const Center(
-                                              child: CircularProgressIndicator(
-                                              color: Color(0xFF9C0C04),
-                                              backgroundColor: Colors.black,
-                                              strokeWidth: 2,
-                                            ));
-                                    },
                                   )
                                 : const Center(
                                     child: CircularProgressIndicator(
-                                    color: Color(0xFF9C0C04),
-                                    backgroundColor: Colors.black,
-                                    strokeWidth: 2,
-                                  ))),
+                                      color: Color(0xFF9C0C04),
+                                      backgroundColor: Colors.black,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                      ),
+                    ),
                   ),
                   Container(
                     alignment: Alignment.topLeft,

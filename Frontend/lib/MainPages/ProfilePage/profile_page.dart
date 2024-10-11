@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:glassmorphism_widgets/glassmorphism_widgets.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
@@ -81,12 +82,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: screenHeight * 0.06),
+                    SizedBox(height: screenHeight * 0.02),
                     const Padding(
                       padding: EdgeInsets.only(right: 25),
                       child: Align(
-                          alignment: Alignment.centerRight,
-                          child: NumberScrollBox()),
+                          alignment: Alignment.centerRight, child: FadeText()),
                     ),
                     SizedBox(
                       height: screenWidth * screenHeight * 0.0004,
@@ -125,6 +125,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                       ),
                     SizedBox(height: screenHeight * 0.04),
+                    const PointsProgressBar(),
                   ],
                 ),
               ),
@@ -243,73 +244,82 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 }
 
-// class FadeTextApp extends StatefulWidget {
-//   @override
-//   _FadeTextAppState createState() => _FadeTextAppState();
-// }
+class FadeText extends StatefulWidget {
+  const FadeText({super.key});
 
-// class _FadeTextAppState extends State<FadeTextApp> {
-//   bool _isVisible = false;
+  @override
+  FadeTextState createState() => FadeTextState();
+}
 
-//   void _toggleTextVisibility() {
-//     setState(() {
-//       _isVisible = true;
-//     });
+class FadeTextState extends State<FadeText> {
+  bool _isVisible = false;
+  final ScrollController _scrollController = ScrollController();
 
-//     // Set a timer to automatically hide the text after 4 seconds
-//     Timer(const Duration(seconds: 4), () {
-//       setState(() {
-//         _isVisible = false;
-//       });
-//     });
-//   }
+  @override
+  void initState() {
+    super.initState();
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Center(
-//       child: Column(
-//         mainAxisAlignment: MainAxisAlignment.center,
-//         children: [
-//           // The button to trigger text visibility
-//           ElevatedButton(
-//             onPressed: _toggleTextVisibility,
-//             child: const Text("Show Text"),
-//           ),
-//           const SizedBox(height: 20),
-//           // AnimatedOpacity for fading effect
-//           AnimatedOpacity(
-//             opacity: _isVisible ? 1.0 : 0.0,
-//             duration: const Duration(seconds: 1), // Fade duration
-//             child: const Text(
-//               "This is the fading text",
-//               style: TextStyle(fontSize: 24, color: Colors.white),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
+    // Listen for scroll events on the controller
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection !=
+          ScrollDirection.idle) {
+        _toggleTextVisibility();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _toggleTextVisibility() {
+    // Check if it's already visible to avoid triggering again
+    if (!_isVisible) {
+      setState(() {
+        _isVisible = true;
+      });
+
+      // Set a timer to automatically hide the text after 4 seconds
+      Timer(const Duration(seconds: 1), () {
+        setState(() {
+          _isVisible = false;
+        });
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // AnimatedOpacity for fading effect
+        AnimatedOpacity(
+          opacity: _isVisible ? 1.0 : 0.0,
+          duration: const Duration(seconds: 1), // Fade duration
+          child: const Text(
+            'Shots:',
+            style: TextStyle(
+                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+        NumberScrollBox(scrollController: _scrollController),
+      ],
+    );
+  }
+}
 
 class NumberScrollBox extends StatelessWidget {
-  const NumberScrollBox({super.key});
+  final ScrollController scrollController;
+
+  const NumberScrollBox({super.key, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const Text(
-          'Shots:',
-          style: TextStyle(
-              color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        // SizedBox(
-        //   height: 50,
-        //   width: 50,
-        //   child: Image(
-        //       image: AssetImage(
-        //           'assets/otherPhotos/glowing-neon-line-martini-glass-260nw-2306886543.jpg')),
-        // ),
         Container(
           width: 80,
           height: 60,
@@ -328,9 +338,10 @@ class NumberScrollBox extends StatelessWidget {
               ),
             ],
           ),
-          child: const SingleChildScrollView(
-            physics: BouncingScrollPhysics(),
-            child: Center(
+          child: SingleChildScrollView(
+            controller: scrollController, // Use the scroll controller
+            physics: const BouncingScrollPhysics(),
+            child: const Center(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0),
                 child: Text(
@@ -344,6 +355,177 @@ class NumberScrollBox extends StatelessWidget {
               ),
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+class PointsProgressBar extends StatefulWidget {
+  const PointsProgressBar({super.key});
+
+  @override
+  PointsProgressBarState createState() => PointsProgressBarState();
+}
+
+class PointsProgressBarState extends State<PointsProgressBar>
+    with SingleTickerProviderStateMixin {
+  int _points = 0;
+  late AnimationController _controller;
+  late Animation<double> _glowAnimation;
+  int _lastCheckpointReached = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Timer to increase points by 5 every second for demo purposes
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_points < 100) {
+        setState(() {
+          _points += 5;
+        });
+        _controller.forward(from: 0);
+      } else {
+        timer.cancel();
+      }
+    });
+
+    // Animation controller for pulsing checkpoints
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    // Glow effect animation
+    _glowAnimation = Tween<double>(begin: 1.0, end: 1.5).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+    double barWidth = screenWidth * 0.8;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'Your Points Progress',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            // Background bar
+            Container(
+              height: 20,
+              width: barWidth,
+              decoration: BoxDecoration(
+                color: Colors.grey[800],
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            // Progress bar overlay
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 20,
+              width: barWidth * (_points / 100),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [Colors.red, Colors.orange],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            // Checkpoints
+            Positioned.fill(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: List.generate(6, (index) {
+                  bool isReached = _points >= index * 20;
+
+                  // Activate glow and floating text for checkpoints after the first one
+                  if (isReached &&
+                      index > 0 &&
+                      _lastCheckpointReached < index) {
+                    _lastCheckpointReached = index;
+                  }
+
+                  return AnimatedBuilder(
+                    animation: _glowAnimation,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale:
+                            isReached && index > 0 ? _glowAnimation.value : 1.0,
+                        child: Stack(
+                          alignment: Alignment.topCenter,
+                          children: [
+                            // Glow effect for reached checkpoints beyond the first one
+                            if (isReached && index > 0)
+                              Positioned(
+                                top: -30,
+                                child: Opacity(
+                                  opacity: _controller.value,
+                                  child: const Text(
+                                    "Great!",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.yellow,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            Container(
+                              width: 10,
+                              height: 20,
+                              decoration: BoxDecoration(
+                                color:
+                                    isReached ? Colors.white : Colors.grey[600],
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        // Scrolling points display
+        TweenAnimationBuilder(
+          tween: IntTween(begin: _points - 5, end: _points),
+          duration: const Duration(milliseconds: 300),
+          builder: (BuildContext context, int value, Widget? child) {
+            return Text(
+              '$value Points',
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            );
+          },
         ),
       ],
     );

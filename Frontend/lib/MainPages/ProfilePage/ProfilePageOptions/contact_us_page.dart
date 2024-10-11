@@ -89,179 +89,158 @@ class _ContactUsPageState extends State<ContactUsPage> {
         child: Scaffold(
             appBar: _buildAppBar(context),
             backgroundColor: const Color.fromARGB(200, 37, 37, 37),
-            body: ListView(
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Column(
-                      children: [
-                        Row(
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: ListView(
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                            top: screenWidth * 0.065, left: screenWidth * 0.1),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Τηλεφώνησε μας',
-                                    style: TextStyle(
-                                      color: Color(0xFF9C0C04),
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  SizedBox(height: screenHeight * 0.015),
-                                  const Text(
-                                    ' 69 43784099\n\n 69 80984213',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ]),
-                            Padding(
-                              padding:
-                                  EdgeInsets.only(top: screenHeight * 0.07),
-                              child: Column(children: [
-                                const Text(
-                                  'Ωράριο επικοινωνίας',
-                                  style: TextStyle(
-                                    color: Color(0xFF9C0C04),
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                SizedBox(height: screenHeight * 0.015),
-                                const Text(
-                                  'Δευτέρα-Πέμπτη\n10πμ-8μμ\n\nΠαρασκευή-Κυριακή\n2μμ-3πμ',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ]),
+                            const Text(
+                              'Τηλεφώνησε μας',
+                              style: TextStyle(
+                                color: Color(0xFF9C0C04),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: screenHeight * 0.015),
+                            const Text(
+                              ' 69 43784099\n\n 69 80984213',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
                             ),
                           ],
                         ),
-                        Container(
-                          padding: EdgeInsets.all(screenWidth * 0.1),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Στείλε ένα email',
+                      ),
+                      Container(
+                        padding: EdgeInsets.all(screenWidth * 0.1),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Στείλε ένα email',
+                              style: TextStyle(
+                                color: Color(0xFF9C0C04),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: screenHeight * 0.02),
+                            _buildTextField('Ονοματεπώνυμο', 1, nameController),
+                            SizedBox(height: screenHeight * 0.022),
+                            _buildTextField('Το email σου', 1, emailController),
+                            SizedBox(height: screenHeight * 0.022),
+                            _buildTextField('Μήνυμα', 4, messageController),
+                            SizedBox(height: screenHeight * 0.035),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (messageController.text.isEmpty) {
+                                  floatingSnackBar(
+                                    message:
+                                        'Το μήνυμα δεν μπορεί να είναι άδειο',
+                                    context: context,
+                                  );
+                                  return;
+                                }
+
+                                if (!_isValidEmail(emailController.text)) {
+                                  floatingSnackBar(
+                                    message:
+                                        'Παρακαλώ συμπληρώστε email επικοινωνίας',
+                                    context: context,
+                                  );
+                                  return;
+                                }
+
+                                if (nameController.text.isEmpty) {
+                                  floatingSnackBar(
+                                    message:
+                                        'Παρακαλώ συμπληρώστε ονοματεπώνυμο',
+                                    context: context,
+                                  );
+                                  return;
+                                }
+
+                                // Show the confirmation dialog
+                                await _showConfirmationDialog(context);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                elevation: 20, shadowColor: Colors.black,
+
+                                backgroundColor: Colors.black,
+                                // side: const BorderSide(color: Colors.white),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 22,
+                                  vertical: 15,
+                                ),
+                              ),
+                              child: const Text(
+                                'Αποστολή',
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                    color: Colors.white, fontSize: 16),
                               ),
-                              SizedBox(height: screenHeight * 0.02),
-                              _buildTextField(
-                                  'Ονοματεπώνυμο', 1, nameController),
-                              SizedBox(height: screenHeight * 0.022),
-                              _buildTextField(
-                                  'Το email σου', 1, emailController),
-                              SizedBox(height: screenHeight * 0.022),
-                              _buildTextField('Μήνυμα', 4, messageController),
-                              SizedBox(height: screenHeight * 0.035),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 15),
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    if (messageController.text.isEmpty) {
-                                      floatingSnackBar(
-                                        message:
-                                            'Το μήνυμα δεν μπορεί να είναι άδειο',
-                                        context: context,
-                                      );
-                                      return;
-                                    }
-
-                                    if (!_isValidEmail(emailController.text)) {
-                                      floatingSnackBar(
-                                        message:
-                                            'Παρακαλώ συμπληρώστε email επικοινωνίας',
-                                        context: context,
-                                      );
-                                      return;
-                                    }
-
-                                    if (nameController.text.isEmpty) {
-                                      floatingSnackBar(
-                                        message:
-                                            'Παρακαλώ συμπληρώστε ονοματεπώνυμο',
-                                        context: context,
-                                      );
-                                      return;
-                                    }
-
-                                    // Show the confirmation dialog
-                                    await _showConfirmationDialog(context);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.black,
-                                    side: const BorderSide(color: Colors.white),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 22,
-                                      vertical: 15,
-                                    ),
-                                  ),
-                                  child: const Text(
-                                    'Αποστολή',
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 16),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(screenHeight * 0.02),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                children: [
-                                  const Text(
-                                    'Στείλε μήνυμα\nστο instagram',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(screenHeight * 0.02),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              children: [
+                                const Text(
+                                  'Στείλε μήνυμα\nστο instagram',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                                  SizedBox(height: screenHeight * 0.02),
-                                  GestureDetector(
-                                    onTap: _launchInstagram,
-                                    child: const ImageIcon(
-                                      AssetImage(
-                                          'assets/icons/instagram_icon.png'),
-                                      size: 40,
-                                      color: Color(0xFF9C0C04),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(
-                                width: screenWidth / 2.5,
-                                child: Image.asset(
-                                  'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
-                                  height: screenHeight / 10,
                                 ),
+                                SizedBox(height: screenHeight * 0.02),
+                                GestureDetector(
+                                  onTap: _launchInstagram,
+                                  child: const ImageIcon(
+                                    AssetImage(
+                                        'assets/icons/instagram_icon.png'),
+                                    size: 40,
+                                    color: Color(0xFF9C0C04),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              width: screenWidth / 2.5,
+                              child: Image.asset(
+                                'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
+                                height: screenHeight / 10,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             )),
       ),
     );
@@ -269,7 +248,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
-      backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+      backgroundColor: Colors.black,
       elevation: 0,
       title: const Text(
         'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
@@ -374,21 +353,44 @@ class _ContactUsPageState extends State<ContactUsPage> {
   // TextField builder method for form inputs
   Widget _buildTextField(
       String hintText, int maxLines, TextEditingController controller) {
-    return TextField(
-      maxLines: maxLines,
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        filled: true,
-        fillColor: Colors.white.withOpacity(0.2),
-        hintFadeDuration: const Duration(milliseconds: 300),
-        hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.white54),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide.none,
+    return Focus(
+      onFocusChange: (hasFocus) {
+        // Optionally, you can control animation or other effects here
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 10,
+              offset: const Offset(3, 3),
+            ),
+            BoxShadow(
+              color: Colors.white.withOpacity(0.05),
+              spreadRadius: -2,
+              blurRadius: 10,
+              offset: const Offset(-3, -3),
+            ),
+          ],
+          borderRadius: BorderRadius.circular(12),
         ),
-        contentPadding: const EdgeInsets.all(15),
+        child: TextField(
+          maxLines: maxLines,
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white.withOpacity(0.2),
+            hintText: hintText,
+            hintStyle: const TextStyle(color: Colors.white54),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            contentPadding: const EdgeInsets.all(15),
+          ),
+        ),
       ),
     );
   }

@@ -49,37 +49,46 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                   bottom: screenHeight / 40,
                   child: SizedBox(
                     width: screenWidth - screenWidth / 5,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: BottomNavigationBar(
-                        currentIndex: tabsRouter.activeIndex,
-                        onTap: onTap,
-                        showUnselectedLabels: true,
-                        selectedItemColor: const Color(0xFF9C0C04),
-                        unselectedItemColor: Colors.white,
-                        backgroundColor: Colors.black,
-                        unselectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700,
+                    child: SafeArea(
+                      bottom: true, // Only apply SafeArea on the bottom
+                      child: Container(
+                        // Set your desired height
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(18),
+                          color: Colors.black,
                         ),
-                        selectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700,
+                        child: BottomNavigationBar(
+                          type: BottomNavigationBarType.fixed,
+                          currentIndex: tabsRouter.activeIndex,
+                          onTap: onTap,
+                          showUnselectedLabels: true,
+                          selectedItemColor: const Color(0xFF9C0C04),
+                          unselectedItemColor: Colors.white,
+                          backgroundColor: Colors.transparent,
+                          unselectedLabelStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          selectedLabelStyle: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                          items: const [
+                            BottomNavigationBarItem(
+                              icon:
+                                  SizedBox(height: 30, child: Icon(Icons.home)),
+                              label: 'Αρχική',
+                            ),
+                            BottomNavigationBarItem(
+                              icon: SizedBox(
+                                  height: 30, child: Icon(Icons.search)),
+                              label: 'Αναζήτηση',
+                            ),
+                            BottomNavigationBarItem(
+                              icon: SizedBox(
+                                  height: 30, child: Icon(Icons.person)),
+                              label: 'Προφίλ',
+                            ),
+                          ],
                         ),
-                        items: const [
-                          BottomNavigationBarItem(
-                            icon: SizedBox(height: 30, child: Icon(Icons.home)),
-                            label: 'Αρχική',
-                          ),
-                          BottomNavigationBarItem(
-                            icon:
-                                SizedBox(height: 30, child: Icon(Icons.search)),
-                            label: 'Αναζήτηση',
-                          ),
-                          BottomNavigationBarItem(
-                            icon:
-                                SizedBox(height: 30, child: Icon(Icons.person)),
-                            label: 'Προφίλ',
-                          ),
-                        ],
                       ),
                     ),
                   ),

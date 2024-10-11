@@ -81,9 +81,9 @@ class SearchPageState extends State<SearchPage> {
             height: screenHeight,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Colors.black, Color(0xFF9C0C04)],
-                begin: Alignment.center,
-                end: Alignment.bottomCenter,
+                colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
             ),
             child: Padding(
@@ -96,7 +96,7 @@ class SearchPageState extends State<SearchPage> {
                     focusNode: _focusNode,
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: 'Τι ψάχνεις;',
+                      hintText: 'Βρες που θα παρτάρεις',
                       hintStyle: const TextStyle(
                           color: Color.fromARGB(255, 182, 176, 176)),
                       border: const OutlineInputBorder(
@@ -115,44 +115,68 @@ class SearchPageState extends State<SearchPage> {
                           : null,
                     ),
                   ),
-                  if (_isDropdownVisible)
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        border: Border.all(color: Colors.white),
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(8)),
-                      ),
-                      child: SizedBox(
-                        height: screenHeight / 3,
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          shrinkWrap: true,
-                          itemCount: _filteredClubs.length,
-                          itemBuilder: (context, index) {
-                            final clubName = _filteredClubs[index];
+                  const SizedBox(height: 10), // Add spacing
+                  AnimatedSlide(
+                    offset: _isDropdownVisible
+                        ? Offset.zero
+                        : const Offset(0, -0.1),
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: AnimatedOpacity(
+                      opacity: _isDropdownVisible ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          border: Border.all(color: Colors.white),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(8)),
+                        ),
+                        child: SizedBox(
+                          height: screenHeight / 3,
+                          child: ListView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            itemCount: _filteredClubs.length,
+                            itemBuilder: (context, index) {
+                              final clubName = _filteredClubs[index];
 
-                            return ListTile(
-                              title: Text(
-                                clubName,
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              onTap: () {
-                                setState(() {
-                                  _isDropdownVisible = false;
-                                });
-                                AutoRouter.of(context).push(ReservationRoute(
-                                  club: context
-                                      .read<ClubProvider>()
-                                      .getClubByName(clubName),
-                                ));
-                                _controller.clear();
-                              },
-                            );
-                          },
+                              return Column(
+                                children: [
+                                  ListTile(
+                                    title: Text(
+                                      clubName,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                    onTap: () {
+                                      if (_isDropdownVisible) {
+                                        setState(() {
+                                          _isDropdownVisible = false;
+                                        });
+                                        AutoRouter.of(context)
+                                            .push(ReservationRoute(
+                                          club: context
+                                              .read<ClubProvider>()
+                                              .getClubByName(clubName),
+                                        ));
+                                        _controller.clear();
+                                      }
+                                    },
+                                  ),
+                                  if (index != _filteredClubs.length - 1)
+                                    const Divider(
+                                      thickness: 0.6,
+                                      color: Color.fromARGB(189, 110, 110, 110),
+                                    )
+                                ],
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),

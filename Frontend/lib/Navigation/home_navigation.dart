@@ -9,6 +9,6 @@ class HomeNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return AutoRouter(
         placeholder: (context) =>
-            const Scaffold(backgroundColor: Color.fromARGB(197, 40, 40, 40)));
+            const Scaffold(backgroundColor: Colors.black));
   }
 }

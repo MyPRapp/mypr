@@ -26,40 +26,55 @@ class FavoritesPage extends StatelessWidget {
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
+        backgroundColor: Colors.black,
         appBar: _buildAppBar(context, screenHeight, screenWidth),
-        backgroundColor: const Color.fromARGB(155, 51, 51, 51),
-        body: likedClubs.isNotEmpty
-            ? ListView.builder(
-                itemCount: likedClubs.length,
-                itemBuilder: (context, index) {
-                  final club = likedClubs[index];
-                  if (index < likedClubs.length) {
-                    return BigClubCard(
-                      screenHeight: screenHeight,
-                      screenWidth: screenWidth,
-                      club: club,
-                    );
-                  } else {
-                    return Column(
-                      children: [
-                        BigClubCard(
+        body: Padding(
+          padding: const EdgeInsets.only(top: 25),
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black, Color.fromARGB(255, 68, 3, 3)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: likedClubs.isNotEmpty
+                ? ListView.builder(
+                    itemCount: likedClubs.length,
+                    itemBuilder: (context, index) {
+                      final club = likedClubs[index];
+                      if (index < likedClubs.length) {
+                        return BigClubCard(
                           screenHeight: screenHeight,
                           screenWidth: screenWidth,
                           club: club,
-                        ),
-                        SizedBox(
-                          height: screenHeight / 40 * 5,
-                        )
-                      ],
-                    );
-                  }
-                },
-              )
-            : const Center(
-                child: Text(
-                'Δεν υπάρχουν αγαπημένα',
-                style: TextStyle(color: Colors.white),
-              )),
+                        );
+                      } else {
+                        return Column(
+                          children: [
+                            BigClubCard(
+                              screenHeight: screenHeight,
+                              screenWidth: screenWidth,
+                              club: club,
+                            ),
+                            SizedBox(
+                              height: screenHeight / 40 * 5,
+                            )
+                          ],
+                        );
+                      }
+                    },
+                  )
+                : const Center(
+                    child: Padding(
+                    padding: EdgeInsets.only(bottom: 25),
+                    child: Text(
+                      'Δεν υπάρχουν αγαπημένα',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  )),
+          ),
+        ),
       ),
     );
   }
@@ -67,56 +82,58 @@ class FavoritesPage extends StatelessWidget {
   AppBar _buildAppBar(
       BuildContext context, double screenHeight, double screenWidth) {
     return AppBar(
-        centerTitle: false,
-        backgroundColor: const Color.fromARGB(0, 0, 0, 0),
-        elevation: 0,
-        title: const Text(
-          'ΑΓΑΠΗΜΕΝΑ',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
+      centerTitle: false,
+      backgroundColor: Colors.black,
+      elevation: 0,
+      title: const Text(
+        'ΑΓΑΠΗΜΕΝΑ',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
         ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.chevron_left,
-            color: Colors.white,
-            size: 30,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+      ),
+
+      leading: IconButton(
+        icon: const Icon(
+          Icons.chevron_left,
+          color: Colors.white,
+          size: 30,
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: screenWidth * 0.02),
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () {
-                context.read<LikedClubsProvider>().deleteAllLiked();
-              },
-              child: Container(
-                height: screenHeight * 0.046,
-                width: screenWidth / 3.3,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(7),
-                    color: const Color.fromARGB(43, 145, 145, 145),
-                    border: Border.all(
-                        width: 2, color: const Color.fromARGB(209, 0, 0, 0))),
-                alignment: Alignment.center,
-                child: Text(
-                  textAlign: TextAlign.center,
-                  'Αφαίρεση όλων',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.03,
-                    fontWeight: FontWeight.w700,
-                    color: const Color.fromARGB(255, 136, 136, 136),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ]);
+        onPressed: () {
+          Navigator.of(context).pop();
+        },
+      ),
+      // actions: [
+      //   Padding(
+      //     padding: EdgeInsets.only(right: screenWidth * 0.02),
+      //     child: GestureDetector(
+      //       behavior: HitTestBehavior.translucent,
+      //       onTap: () {
+      //         context.read<LikedClubsProvider>().deleteAllLiked();
+      //       },
+      //       child: Container(
+      //         height: screenHeight * 0.046,
+      //         width: screenWidth / 3.3,
+      //         decoration: BoxDecoration(
+      //             borderRadius: BorderRadius.circular(7),
+      //             color: const Color.fromARGB(43, 145, 145, 145),
+      //             border: Border.all(
+      //                 width: 2, color: const Color.fromARGB(209, 0, 0, 0))),
+      //         alignment: Alignment.center,
+      //         child: Text(
+      //           textAlign: TextAlign.center,
+      //           'Αφαίρεση όλων',
+      //           style: TextStyle(
+      //             fontSize: screenWidth * 0.03,
+      //             fontWeight: FontWeight.w700,
+      //             color: const Color.fromARGB(255, 136, 136, 136),
+      //           ),
+      //         ),
+      //       ),
+      //     ),
+      //   ),
+      // ]
+    );
   }
 }

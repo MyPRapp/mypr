@@ -99,110 +99,141 @@ class _HomePageState extends State<HomePage> {
     return PopScope(
       canPop: false,
       child: Scaffold(
-          backgroundColor: const Color.fromARGB(197, 41, 41, 41),
-          body: SizedBox(
-            height: screenHeight,
-            width: screenWidth,
-            child: RefreshIndicator.adaptive(
-              color: const Color(0xFF9C0C04),
-              onRefresh: _initApp,
-              child: ListView(
-                children: [
-                  SizedBox(
-                    height: screenHeight / 13,
-                    width: screenWidth,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: screenWidth * 0.02),
-                          child: Image.asset(
-                            'assets/otherPhotos/Logo_v2.2-removebg(cropped).png', // Replace with your logo asset path
-                            height: screenHeight / 13,
-                            width: screenWidth / 4,
+          body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        height: screenHeight,
+        width: screenWidth,
+        child: RefreshIndicator.adaptive(
+          color: const Color(0xFF9C0C04),
+          onRefresh: _initApp,
+          child: ListView(
+            children: [
+              SizedBox(
+                height: screenHeight / 13,
+                width: screenWidth,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: screenWidth * 0.02),
+                      child: Image.asset(
+                        'assets/otherPhotos/Logo_v2.2-removebg(cropped).png', // Replace with your logo asset path
+                        height: screenHeight / 13,
+                        width: screenWidth / 4,
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: screenWidth * 0.02),
+                      child: Container(
+                        alignment: Alignment.center,
+                        height: screenHeight / 17,
+                        width: screenWidth / 2.65,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          gradient: const LinearGradient(
+                            colors: [
+                              Color.fromARGB(255, 0, 0, 0), // Black base color
+                              Color.fromARGB(150, 55, 55,
+                                  55), // Slightly lighter grey for gloss effect
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.only(right: screenWidth * 0.02),
-                          alignment: Alignment.center,
-                          height: screenHeight / 13,
-                          width: screenWidth / 2.2,
-                          child: GestureDetector(
-                            onTap: () {
-                              navigateToSearchTab(context);
-                            },
-                            child: const TextField(
-                              enabled: false,
-                              style: TextStyle(color: Colors.white),
-                              decoration: InputDecoration(
-                                hintText: 'Αναζήτηση',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                filled: true,
-                                fillColor: Color.fromARGB(255, 0, 0, 0),
-                                border: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(8)),
-                                  borderSide: BorderSide.none,
-                                ),
-                                prefixIcon:
-                                    Icon(Icons.search, color: Colors.grey),
+                        child: GestureDetector(
+                          onTap: () {
+                            navigateToSearchTab(context);
+                          },
+                          child: const TextField(
+                            enabled: false,
+                            decoration: InputDecoration(
+                              hintText: 'Αναζήτηση',
+                              hintStyle: TextStyle(color: Colors.grey),
+                              filled: true,
+                              fillColor: Colors
+                                  .transparent, // Set fillColor to transparent
+                              border: OutlineInputBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(8)),
+                                borderSide: BorderSide.none,
                               ),
+                              prefixIcon:
+                                  Icon(Icons.search, color: Colors.grey),
                             ),
                           ),
                         ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              Padding(
+                  padding: EdgeInsets.only(
+                      left: screenWidth * 0.03,
+                      top: screenHeight * 0.035,
+                      bottom: screenHeight * 0.02),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 56, 56, 56), // Start with black
+                        Color.fromARGB(
+                            255, 162, 162, 162), // Transition to grey
                       ],
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        left: screenWidth * 0.03,
-                        top: screenHeight * 0.035,
-                        bottom: screenHeight * 0.02),
+                      begin: Alignment.centerLeft,
+                      end: Alignment.center,
+                    ).createShader(bounds),
                     child: Text(
                       'Όλα τα αποτελέσματα',
                       style: TextStyle(
                         fontSize: screenWidth * 0.02 + screenHeight * 0.0125,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors
+                            .white, // The color is still required but won't be visible due to the ShaderMask
                       ),
                     ),
-                  ),
-                  Consumer<ClubProvider>(
-                    builder: (context, clubProvider, _) {
-                      return ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: clubProvider.allClubs.length,
-                        itemBuilder: (context, index) {
-                          ClubInfoStruct club = clubProvider.allClubs[index];
-                          if (club.clubPhoto.isNotEmpty ||
-                              club.localPhotoPath.isNotEmpty) {
-                            return BigClubCard(
-                              key: ValueKey(club.clubID),
-                              club: club,
-                              screenHeight: screenHeight,
-                              screenWidth: screenWidth,
-                            );
-                          }
-                          return null;
-                        },
-                      );
+                  )),
+              Consumer<ClubProvider>(
+                builder: (context, clubProvider, _) {
+                  return ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: clubProvider.allClubs.length,
+                    itemBuilder: (context, index) {
+                      ClubInfoStruct club = clubProvider.allClubs[index];
+                      if (club.clubPhoto.isNotEmpty ||
+                          club.localPhotoPath.isNotEmpty) {
+                        return BigClubCard(
+                          key: ValueKey(club.clubID),
+                          club: club,
+                          screenHeight: screenHeight,
+                          screenWidth: screenWidth,
+                        );
+                      }
+                      return null;
                     },
-                  ),
-                  const Text(
-                    textAlign: TextAlign.center,
-                    'Περισσότερα club έρχονται σύντομα...',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(height: screenHeight / 40 * 6)
-                ],
+                  );
+                },
               ),
-            ),
-          )),
+              const Text(
+                textAlign: TextAlign.center,
+                'Περισσότερα club έρχονται σύντομα...',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: screenHeight / 40 * 6)
+            ],
+          ),
+        ),
+      )),
     );
   }
 }
