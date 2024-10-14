@@ -53,7 +53,7 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                       // Set your desired height
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
-                        color: Colors.black,
+                        color: const Color.fromARGB(255, 18, 18, 18),
                       ),
                       child: BottomNavigationBar(
                         type: BottomNavigationBarType.fixed,
@@ -61,13 +61,14 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                         onTap: onTap,
                         showUnselectedLabels: true,
                         selectedItemColor: const Color(0xFF9C0C04),
-                        unselectedItemColor: Colors.white,
+                        unselectedItemColor:
+                            const Color.fromARGB(255, 255, 255, 255),
                         backgroundColor: Colors.transparent,
                         unselectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                         selectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                         items: const [
                           BottomNavigationBarItem(

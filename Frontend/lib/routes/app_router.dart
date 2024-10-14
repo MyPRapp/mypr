@@ -27,6 +27,7 @@ class AppRouter extends RootStackRouter {
             ]),
             AutoRoute(
               page: ProfileNavigation.page,
+              initial: false,
               children: [
                 AutoRoute(page: ProfileRoute.page, initial: true),
                 createSlideFromRightRoute(CustomizeProfileRoute.page, false),

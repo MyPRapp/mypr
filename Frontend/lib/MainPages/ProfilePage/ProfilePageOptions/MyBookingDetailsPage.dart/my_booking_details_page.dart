@@ -48,51 +48,62 @@ class BookingDetailsPage extends StatelessWidget {
       backgroundColor: Colors.black,
       appBar: _buildAppBar(context),
       body: SingleChildScrollView(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: screenHeight,
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: screenWidth * 0.05, // 5% padding on the sides
-              vertical: screenHeight * 0.03, // 3% padding on top/bottom
+        //TODO remove many containers and boxes
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      clubName,
-                      style: TextStyle(
-                        color: const Color(0xFF9C0C04),
-                        fontSize: screenHeight * 0.035, // 3.5% of screen height
-                        fontWeight: FontWeight.bold,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: screenHeight,
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: screenWidth * 0.05, // 5% padding on the sides
+                vertical: screenHeight * 0.03, // 3% padding on top/bottom
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        clubName,
+                        style: TextStyle(
+                          color: const Color(0xFF9C0C04),
+                          fontSize:
+                              screenHeight * 0.035, // 3.5% of screen height
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: screenHeight * 0.02), // 2% height
-                    _buildClubPhoto(
-                        booking.clubID, context.read<ClubProvider>()),
-                    SizedBox(height: screenHeight * 0.03), // 3% height
-                    _buildBookingDetails(formattedDate, screenHeight),
-                  ],
-                ),
-                SizedBox(height: screenHeight * 0.14), // 14% height
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildPriceDetails(earnedPoints, discountPercentage),
-                    SizedBox(height: screenHeight * 0.03), // 3% height
-                    if (booking.status == 2)
-                      _buildHistoryBottomSection(context, clubName)
-                    else
-                      _buildRegularBottomSection(context),
-                    SizedBox(height: screenHeight * 0.05), // 5% height
-                  ],
-                ),
-              ],
+                      SizedBox(height: screenHeight * 0.02), // 2% height
+                      _buildClubPhoto(
+                          booking.clubID, context.read<ClubProvider>()),
+                      SizedBox(height: screenHeight * 0.03), // 3% height
+                      _buildBookingDetails(formattedDate, screenHeight),
+                    ],
+                  ),
+                  SizedBox(height: screenHeight * 0.14), // 14% height
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildPriceDetails(earnedPoints, discountPercentage),
+                      SizedBox(height: screenHeight * 0.03), // 3% height
+                      if (booking.status == 2)
+                        _buildHistoryBottomSection(context, clubName)
+                      else
+                        _buildRegularBottomSection(context),
+                      SizedBox(height: screenHeight * 0.05), // 5% height
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -171,7 +182,7 @@ class BookingDetailsPage extends StatelessWidget {
             const Text(
               'Φιάλες: ',
               style: TextStyle(
-                color: Color(0xFF9C0C04),
+                color: Color.fromARGB(255, 113, 113, 113),
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -264,7 +275,7 @@ class BookingDetailsPage extends StatelessWidget {
                 child: Text(
                   'Συνολική Τιμή: ',
                   style: TextStyle(
-                    color: Color(0xFF9C0C04),
+                    color: Color.fromARGB(255, 113, 113, 113),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -428,7 +439,7 @@ class BuildRichText extends StatelessWidget {
           TextSpan(
             text: '$label ',
             style: const TextStyle(
-              color: Color(0xFF9C0C04),
+              color: Color.fromARGB(255, 113, 113, 113),
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),

@@ -55,7 +55,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
         context.read<BottomNavBarVisibility>().show();
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         appBar: _buildAppBar(context),
         body: Container(
           padding: const EdgeInsets.only(top: 20),
@@ -202,10 +202,11 @@ class BookingCard extends StatelessWidget {
       },
       child: Card(
         color: Colors.black,
-        elevation: 4,
+        elevation: 20,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
-          side: const BorderSide(color: Color(0xFF9C0C04), width: 2),
+          side: const BorderSide(
+              color: Color.fromARGB(255, 42, 42, 42), width: 2),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),

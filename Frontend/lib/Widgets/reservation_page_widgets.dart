@@ -48,10 +48,10 @@ class ReservationReview extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-              _buildInfoRow('Όνομα κράτησης:',
+              buildInfoRow('Όνομα κράτησης:',
                   context.read<ReservationProvider>().reservationInfo[1]),
-              _buildInfoRow('Μαγαζί:', reservationInfo[2]),
-              _buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
+              buildInfoRow('Μαγαζί:', reservationInfo[2]),
+              buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
               const Padding(
                 padding: EdgeInsets.only(top: 10),
                 child: Align(
@@ -67,15 +67,15 @@ class ReservationReview extends StatelessWidget {
                 ),
               ),
               if (reservationInfo[5] > 0)
-                _buildInfoRow('      Απλή:', reservationInfo[5].toString()),
+                buildInfoRow('      Απλή:', reservationInfo[5].toString()),
               if (reservationInfo[6] > 0)
-                _buildInfoRow('      Special:', reservationInfo[6].toString()),
+                buildInfoRow('      Special:', reservationInfo[6].toString()),
               if (reservationInfo[7] > 0)
-                _buildInfoRow('      Premium:', reservationInfo[7].toString()),
-              _buildInfoRow('Ημερομηνία:', formattedDate),
+                buildInfoRow('      Premium:', reservationInfo[7].toString()),
+              buildInfoRow('Ημερομηνία:', formattedDate),
               if (reservationInfo[9].isNotEmpty)
                 _buildCommentSection(reservationInfo[9]),
-              _buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
+              buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
@@ -109,35 +109,6 @@ class ReservationReview extends StatelessWidget {
       return DateFormat('dd/MM').format(DateTime.parse(date));
     }
     return '';
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildCommentSection(String comment) {
@@ -1008,7 +979,6 @@ Widget buildInfoRow(String label, String value) {
           style: const TextStyle(
             color: Colors.white,
             fontSize: 16,
-            fontWeight: FontWeight.bold,
           ),
         ),
         Flexible(
@@ -1017,6 +987,7 @@ Widget buildInfoRow(String label, String value) {
             style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
             overflow: TextOverflow.ellipsis,
           ),

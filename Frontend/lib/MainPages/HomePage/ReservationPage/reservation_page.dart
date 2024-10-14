@@ -192,16 +192,25 @@ class _ReservationPageState extends State<ReservationPage> {
         child: Scaffold(
           appBar: _buildAppBar(
               context, widget.club.clubName, screenHeight, screenWidth),
-          backgroundColor: const Color.fromARGB(218, 31, 31, 31),
+          backgroundColor: const Color.fromARGB(255, 39, 39, 39),
           body: RefreshIndicator.adaptive(
             color: const Color(0xFF9C0C04),
             onRefresh: _refresh, // Handle refresh action
-            child: ListView(
-              children: [
-                // Build page header with club name
-                buildContent(isAuthenticated, screenHeight,
-                    screenWidth), // Build form content and input fields
-              ],
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: ListView(
+                children: [
+                  // Build page header with club name
+                  buildContent(isAuthenticated, screenHeight,
+                      screenWidth), // Build form content and input fields
+                ],
+              ),
             ),
           ),
         ),
@@ -212,7 +221,7 @@ class _ReservationPageState extends State<ReservationPage> {
   AppBar _buildAppBar(BuildContext context, String clubName,
       double screenHeight, double screenWidth) {
     return AppBar(
-        backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+        backgroundColor: Colors.black,
         title: Text(
           clubName,
           style: const TextStyle(
@@ -280,8 +289,8 @@ class _ReservationPageState extends State<ReservationPage> {
                           elevation: 10,
                           foregroundColor: const Color.fromARGB(255, 0, 0, 0),
                           backgroundColor: const Color.fromARGB(
-                              136, 173, 173, 173), // Text color
-                          minimumSize: Size(screenWidth * 0.45,
+                              255, 217, 217, 217), // Text color
+                          minimumSize: Size(screenWidth * 0.42,
                               screenHeight * 0.06), // Button size
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -293,10 +302,10 @@ class _ReservationPageState extends State<ReservationPage> {
                           ),
                         ),
                         child: Text(
-                          'Κάνε εγγραφή/Συνδέσου',
+                          'Εγγραφή / Σύνδεση',
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: screenWidth * 0.028,
+                            fontSize: screenWidth * 0.036,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
@@ -601,7 +610,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   ElevatedButton(
                     onPressed: onCancel,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
+                      backgroundColor: const Color.fromARGB(255, 67, 67, 67),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),

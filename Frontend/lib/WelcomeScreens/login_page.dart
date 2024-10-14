@@ -189,18 +189,19 @@ class LoginBody extends StatelessWidget {
                       padding:
                           EdgeInsets.all(screenHeight * screenWidth * 0.000018),
                       decoration: BoxDecoration(
-                          color: const Color.fromARGB(0, 0, 0, 0),
+                          color: const Color.fromARGB(0, 255, 250, 250),
                           boxShadow: const [
                             BoxShadow(
                                 color: Color.fromARGB(255, 0, 0, 0),
                                 blurRadius: 3,
                                 blurStyle: BlurStyle.outer)
                           ],
-                          border: Border.all(color: Colors.black),
+                          border: Border.all(
+                              color: const Color.fromARGB(255, 255, 255, 255)),
                           borderRadius: BorderRadius.circular(4)),
                       child: const Text('Παράλειψη',
                           style: TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
+                            color: Color.fromARGB(255, 123, 123, 123),
                             fontWeight: FontWeight.w700,
                           )),
                     ),

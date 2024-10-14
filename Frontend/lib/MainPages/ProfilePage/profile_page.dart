@@ -4,13 +4,14 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:glassmorphism_widgets/glassmorphism_widgets.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Providers/booking_provider.dart'; // Import the BookingProvider
 import '../../Providers/global_state_provider.dart';
+import '../../Providers/liked_clubs_provider.dart';
 import '../../Providers/user_provider.dart';
 import '../../global_components.dart';
 import '../../services/auth_service.dart';
@@ -56,6 +57,78 @@ class _ProfilePageState extends State<ProfilePage> {
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
 
+    void signOut() async {
+      try {
+        warningPrint('------------SIGNING OUT------------');
+
+        // Step 1: Get SharedPreferences instance for key-value data
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+
+        // Step 2: Retain specific keys and their values (excluding liked clubs)
+        final String? validatedIp = prefs.getString('validatedIp');
+        final String? savedEmail = prefs.getString('savedEmail');
+        final String? savedPassword = prefs.getString('savedPassword');
+
+        // Step 3: Clear all preferences
+        await prefs.clear();
+        successPrint('Shared preferences cleared.');
+
+        // Step 4: Restore the retained preferences (excluding liked clubs)
+        if (validatedIp != null) {
+          await prefs.setString('validatedIp', validatedIp);
+          successPrint('Retained validatedIp: $validatedIp');
+        }
+        if (savedEmail != null) {
+          await prefs.setString('savedEmail', savedEmail);
+          successPrint('Retained savedEmail: $savedEmail');
+        }
+        if (savedPassword != null) {
+          await prefs.setString('savedPassword', savedPassword);
+          successPrint('Retained savedPassword: $savedPassword');
+        }
+
+        // Step 5: Clear liked clubs
+        if (context.mounted) {
+          warningPrint('Clearing liked clubs...');
+          await context.read<LikedClubsProvider>().deleteAllLiked();
+        }
+
+        // Step 6: Clear bookings and reset flags
+        if (context.mounted) {
+          try {
+            warningPrint('Clearing bookings and resetting flags...');
+            BookingProvider bookingProvider = context.read<BookingProvider>();
+            bookingProvider.bookings.clear();
+            bookingProvider.setLoading(false);
+            successPrint('Bookings cleared');
+          } catch (e) {
+            errorPrint('Error clearing bookings: $e');
+          }
+        }
+
+        // Step 7: Set isAuthenticated to false
+        if (context.mounted) {
+          context.read<GlobalStateProvider>().isAuthenticated = false;
+          successPrint('\'isAuthenticated\' flag set to false.');
+        }
+        // Step 8: Reset saved user details
+        if (context.mounted) {
+          context.read<UserProvider>().resetUserDetails();
+          successPrint('Successfully restored user details.');
+        }
+
+        // Step 9: Navigate to the Login page
+        if (context.mounted) {
+          warningPrint('Navigating to the login page...');
+          AutoRouter.of(context).replaceAll([const LoginRoute()]);
+          successPrint('Navigation to login page successful.');
+        }
+        successPrint('------------SIGNED OUT------------');
+      } catch (e) {
+        errorPrint('Error during sign out: $e');
+      }
+    }
+
     return PopScope(
       canPop: false,
       child: RefreshIndicator.adaptive(
@@ -64,30 +137,28 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Scaffold(
           //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
           backgroundColor: const Color.fromARGB(255, 20, 20, 20),
-          body: ListView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            children: [
-              GlassContainer(
-                border: 0,
-                borderRadius: BorderRadius.circular(0),
-                alignment: Alignment.center,
-                width: screenWidth,
-                blur: 20,
-                linearGradient:
-                    LinearGradient(begin: Alignment.bottomRight, colors: [
-                  const Color.fromARGB(153, 48, 2, 2).withOpacity(.8),
-                  const Color.fromARGB(69, 0, 0, 0).withOpacity(.1)
-                ]),
-                child: Column(
+          body: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(begin: Alignment.bottomRight, colors: [
+                Color.fromARGB(153, 48, 2, 2),
+                Color.fromARGB(69, 0, 0, 0),
+              ]),
+            ),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: screenHeight * 0.02),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 25),
-                      child: Align(
-                          alignment: Alignment.centerRight, child: FadeText()),
-                    ),
+                    if (isAuthenticated)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 25),
+                        child: Align(
+                            alignment: Alignment.centerRight,
+                            child: FadeText()),
+                      ),
                     SizedBox(
                       height: screenWidth * screenHeight * 0.0004,
                       width: screenWidth * screenHeight * 0.0004,
@@ -119,100 +190,219 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: screenHeight * 0.02 + screenWidth * 0.01,
                             color: const Color.fromARGB(255, 255, 255, 255),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     SizedBox(height: screenHeight * 0.04),
-                    const PointsProgressBar(),
+                    // const PointsProgressBar(),
+                    if (isAuthenticated)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: GradientProgressBar(progress: 70),
+                        ),
+                      ),
                   ],
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: screenHeight * 0.05),
-                child: Divider(
-                  height: screenHeight * 0.01,
-                  color: const Color.fromARGB(153, 48, 2, 2).withOpacity(.8),
-                  thickness: 8,
-                ),
-              ),
-              Center(
-                child: Container(
-                  width: screenWidth * 0.85, // Adjust the width as needed
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(7),
-                    color: const Color.fromARGB(255, 34, 34, 34),
-                  ),
-                  child: Column(
-                    children: [
-                      if (isAuthenticated)
-                        profileOptions(
-                            'Επεξεργασία Προφίλ',
-                            const CustomizeProfileRoute(),
-                            screenHeight,
-                            screenWidth),
-                      if (isAuthenticated)
-                        Divider(
-                          color: Colors.white,
-                          thickness: 0.3,
-                          height: screenHeight * 0.01,
-                        ),
-                      if (isAuthenticated)
-                        profileOptions('Οι κρατήσεις μου',
-                            const MyBookingsRoute(), screenHeight, screenWidth),
-                      if (isAuthenticated)
-                        Divider(
-                          color: Colors.white,
-                          thickness: 0.3,
-                          height: screenHeight * 0.01,
-                        ),
-                      profileOptions('Αγαπημένα', const FavoritesRoute(),
-                          screenHeight, screenWidth),
-                      Divider(
-                        color: Colors.white,
-                        thickness: 0.3,
-                        height: screenHeight * 0.01,
+                Padding(
+                  padding: EdgeInsets.only(top: screenHeight * 0.05),
+                  child: Center(
+                    child: SizedBox(
+                      width: screenWidth * 0.85, // Adjust the width as needed
+
+                      child: Column(
+                        children: [
+                          if (isAuthenticated)
+                            GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return ProfileDialog(
+                                      name:
+                                          '${userDetails.firstName} ${userDetails.lastName}',
+                                      email: userDetails.email,
+                                      phone: userDetails.phone,
+                                    );
+                                  },
+                                );
+                              },
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    left: screenWidth * 0.02,
+                                    bottom: screenHeight * 0.02,
+                                    top: screenHeight * 0.02),
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text('Το προφίλ μου',
+                                      style: TextStyle(
+                                          fontSize: screenWidth *
+                                              screenHeight *
+                                              0.00006,
+                                          color: const Color.fromARGB(
+                                              255, 170, 170, 170),
+                                          fontWeight: FontWeight.w500)),
+                                ),
+                              ),
+                            ),
+                          /*
+                    if (isAuthenticated)
+                      profileOptions(
+                          'Το προφίλ μου',
+                          const CustomizeProfileRoute(),
+                          screenHeight,
+                          screenWidth),
+                    */
+                          if (isAuthenticated)
+                            Container(
+                              height: 2,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.red.withOpacity(0.6),
+                                    Colors.black,
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                              ),
+                            ),
+                          // Divider(
+                          //   color: Colors.black,
+                          //   thickness: 2,
+                          //   height: screenHeight * 0.01,
+                          // ),
+                          if (isAuthenticated)
+                            profileOptions(
+                                'Οι κρατήσεις μου',
+                                const MyBookingsRoute(),
+                                screenHeight,
+                                screenWidth),
+                          if (isAuthenticated)
+                            Container(
+                              height: 2,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Colors.red.withOpacity(0.6),
+                                    Colors.black,
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                              ),
+                            ),
+                          // Divider(
+                          //   color: const Color.fromARGB(255, 101, 2, 2),
+                          //   thickness: 2,
+                          //   height: screenHeight * 0.01,
+                          // ),
+                          profileOptions('Αγαπημένα', const FavoritesRoute(),
+                              screenHeight, screenWidth),
+                          Container(
+                            height: 2,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.red.withOpacity(0.6),
+                                  Colors.black,
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                            ),
+                          ),
+                          // Divider(
+                          //   color: Colors.black,
+                          //   thickness: 2,
+                          //   height: screenHeight * 0.01,
+                          // ),
+                          profileOptions(
+                              'Επικοινώνησε μαζί μας',
+                              const ContactUsRoute(),
+                              screenHeight,
+                              screenWidth),
+                        ],
                       ),
-                      profileOptions('Επικοινώνησε μαζί μας',
-                          const ContactUsRoute(), screenHeight, screenWidth),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-              if (!isAuthenticated) SizedBox(height: screenHeight * 0.1),
-              if (!isAuthenticated)
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      AutoRouter.of(context).replaceAll([const SignUpRoute()]);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 10,
-                      foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                      backgroundColor: const Color.fromARGB(
-                          136, 173, 173, 173), // Text color
-                      minimumSize: Size(screenWidth * 0.45,
-                          screenHeight * 0.06), // Button size
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7.5),
-                        side: const BorderSide(
-                          width: 4,
-                          color: Color.fromARGB(255, 0, 0, 0), // Border color
+                if (isAuthenticated) SizedBox(height: screenHeight / 8),
+                if (isAuthenticated)
+                  Center(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () {
+                        signOut();
+                      },
+                      child: Container(
+                        height: screenHeight * 0.07,
+                        width: screenWidth / 2.2,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(30),
+                          gradient: const LinearGradient(
+                              begin: Alignment.topRight,
+                              colors: [
+                                Color.fromARGB(183, 67, 2, 2),
+                                Color.fromARGB(255, 0, 0, 0),
+                              ]),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          textAlign: TextAlign.center,
+                          'Αποσύνδεση',
+                          style: TextStyle(
+                            fontSize: screenWidth * screenHeight * 0.00006,
+                            fontWeight: FontWeight.w700,
+                            color: const Color.fromARGB(255, 145, 145, 145),
+                          ),
                         ),
                       ),
                     ),
-                    child: Text(
-                      'Εγγραφή/Σύνδεση',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: screenWidth * 0.028,
-                        fontWeight: FontWeight.w700,
+                  ),
+                if (isAuthenticated)
+                  SizedBox(
+                    height: screenHeight * 0.12,
+                  ),
+                if (!isAuthenticated) SizedBox(height: screenHeight * 0.1),
+                if (!isAuthenticated)
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        AutoRouter.of(context)
+                            .replaceAll([const SignUpRoute()]);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        elevation: 10,
+                        foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+                        backgroundColor: const Color.fromARGB(
+                            255, 217, 217, 217), // Text color
+                        minimumSize: Size(screenWidth * 0.42,
+                            screenHeight * 0.06), // Button size
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: const BorderSide(
+                            width: 4,
+                            color: Color.fromARGB(255, 0, 0, 0), // Border color
+                          ),
+                        ),
+                      ),
+                      child: Text(
+                        'Εγγραφή / Σύνδεση',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.036,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                     ),
                   ),
-                ),
-            ],
+                if (!isAuthenticated) SizedBox(height: screenHeight * 0.2),
+              ],
+            ),
           ),
         ),
       ),
@@ -296,15 +486,15 @@ class FadeTextState extends State<FadeText> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // AnimatedOpacity for fading effect
-        AnimatedOpacity(
-          opacity: _isVisible ? 1.0 : 0.0,
-          duration: const Duration(seconds: 1), // Fade duration
-          child: const Text(
-            'Shots:',
-            style: TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ),
+        // AnimatedOpacity(
+        //   opacity: _isVisible ? 1.0 : 0.0,
+        //   duration: const Duration(seconds: 1), // Fade duration
+        //   child: const Text(
+        //     'Shots:',
+        //     style: TextStyle(
+        //         color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+        //   ),
+        // ),
         NumberScrollBox(scrollController: _scrollController),
       ],
     );
@@ -528,6 +718,235 @@ class PointsProgressBarState extends State<PointsProgressBar>
           },
         ),
       ],
+    );
+  }
+}
+
+class ProfileDialog extends StatelessWidget {
+  final String name;
+  final String email;
+  final String phone;
+
+  const ProfileDialog(
+      {super.key,
+      required this.name,
+      required this.email,
+      required this.phone});
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      backgroundColor: Colors.grey[900],
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "ΠΡΟΦΙΛ",
+              style: TextStyle(
+                color: Color(0xFF9C0C04),
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Divider(
+              color: Colors.grey,
+              thickness: 0.5,
+            ),
+            const SizedBox(height: 10),
+            ProfileInfoRow(label: "Ονοματεπώνυμο", value: name),
+            const SizedBox(height: 10),
+            ProfileInfoRow(label: "Email", value: email),
+            const SizedBox(height: 10),
+            ProfileInfoRow(label: "Τηλέφωνο", value: phone),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF9C0C04),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text("Close"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProfileInfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const ProfileInfoRow({super.key, required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          "$label:",
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class GradientProgressBar extends StatefulWidget {
+  final int progress;
+
+  const GradientProgressBar({super.key, required this.progress});
+
+  @override
+  GradientProgressBarState createState() => GradientProgressBarState();
+}
+
+class GradientProgressBarState extends State<GradientProgressBar>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  bool _showLabel = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+
+    _animation = Tween<double>(begin: 0, end: widget.progress.toDouble())
+        .animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ))
+      ..addListener(() {
+        setState(() {});
+      })
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _showLabel = true;
+        }
+      });
+
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _showPercentageLabel() {
+    if (_animation.isCompleted) {
+      setState(() {
+        _showLabel = !_showLabel;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double progressWidth = MediaQuery.of(context).size.width;
+    double filledWidth = (progressWidth * _animation.value) / 100;
+
+    return GestureDetector(
+      onTap: _showPercentageLabel,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_showLabel)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Text(
+                "${_animation.value.toInt()}%",
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+          Stack(
+            children: [
+              Container(
+                width: progressWidth,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.grey[800],
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              Container(
+                width: filledWidth,
+                height: 20,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color.fromARGB(255, 87, 1, 1),
+                      Colors.red.shade900
+                    ],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.center,
+                  ),
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: List.generate(6, (index) {
+                  bool isActive = (_animation.value >= (index * 20));
+
+                  return Container(
+                    width: 24,
+                    height: 19,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isActive
+                          ? const Color.fromARGB(162, 152, 16, 6)
+                          : Colors.transparent,
+                      border: Border.all(
+                          color: isActive
+                              ? const Color.fromARGB(255, 0, 0, 0)
+                              : const Color.fromARGB(255, 0, 0, 0),
+                          width: 2),
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
