@@ -60,7 +60,7 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Initializes the reservation page by setting the club's catalogues and resetting form data.
   void _initializePage() {
     final reservationProvider = context.read<ReservationProvider>();
-    final userDetails = context.read<UserProvider>().userDetails;
+    UserInfoStruct userDetails = context.read<UserProvider>().userDetails;
 
     // Reset reservation data
     reservationProvider.resetInfo();
@@ -72,9 +72,11 @@ class _ReservationPageState extends State<ReservationPage> {
       reservationProvider.setInfo(1, initialName);
       nameTextFieldKey.currentState?.setNameText(initialName);
     } else {
-      setState(() {
-        context.read<UserProvider>().fetchUserDetailsFromServer();
-      });
+      if (context.read<GlobalStateProvider>().isAuthenticated) {
+        setState(() {
+          context.read<UserProvider>().fetchUserDetailsFromServer();
+        });
+      }
     }
 
     // Fetch and initialize catalogues for the selected club
@@ -118,15 +120,29 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Calculates the total price based on the selected services and applies any discount.
   void calculatePrice() {
     final reservationProvider = context.read<ReservationProvider>();
+    int regularBottles = reservationProvider.getInfo(5);
+    int specialBottles = reservationProvider.getInfo(6);
+    int premiumBottles = reservationProvider.getInfo(7);
 
-    double price = (reservationProvider.getInfo(5) *
-            safeParse(localCatalogues[0].price)) +
-        (reservationProvider.getInfo(6) * safeParse(localCatalogues[1].price)) +
-        (reservationProvider.getInfo(7) * safeParse(localCatalogues[2].price));
+    double price = (regularBottles * safeParse(localCatalogues[0].price)) +
+        (specialBottles * safeParse(localCatalogues[1].price)) +
+        (premiumBottles * safeParse(localCatalogues[2].price));
 
     // Apply discount if applicable
     if (isDiscountApplied) {
-      price *= (1 - (reservationProvider.getInfo(10) / 100));
+      if (regularBottles >= 1) {
+        price -= (safeParse(localCatalogues[0].price) *
+                reservationProvider.getInfo(10)) /
+            100;
+      } else if (specialBottles >= 1) {
+        price -= (safeParse(localCatalogues[1].price) *
+                reservationProvider.getInfo(10)) /
+            100;
+      } else if (premiumBottles >= 1) {
+        price -= (safeParse(localCatalogues[2].price) *
+                reservationProvider.getInfo(10)) /
+            100;
+      }
     }
 
     // Update the calculated price in the provider
@@ -136,24 +152,23 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
     final clubProvider = context.read<ClubProvider>();
-//TODO Refresh user details too
     try {
       // Fetch updated catalogues
+      await clubProvider.fetchClub(widget.club.clubID);
       await clubProvider.fetchCatalogues(widget.club);
       final catalogues =
           clubProvider.getAllCataloguesForClubWithID(widget.club.clubID);
 
-      if (localCatalogues[0].maxPersons != catalogues[0].maxPersons ||
-          localCatalogues[0].price != catalogues[0].price ||
-          localCatalogues[1].maxPersons != catalogues[1].maxPersons ||
-          localCatalogues[1].price != catalogues[1].price ||
-          localCatalogues[2].maxPersons != catalogues[2].maxPersons ||
-          localCatalogues[2].price != catalogues[2].price) {
-        _updateCatalogues(catalogues);
+      _updateCatalogues(catalogues);
+      successPrint('${widget.club.clubName} is up to date');
+      if (mounted && context.watch<GlobalStateProvider>().isAuthenticated) {
+        setState(() {
+          context.read<UserProvider>().fetchUserDetailsFromServer();
+        });
       }
     } catch (error) {
       // Log error without additional snack bars
-      print("❌Failed to refresh catalogues: $error");
+      errorPrint("Failed to refresh catalogues: $error");
     }
   }
 
@@ -350,18 +365,6 @@ class _ReservationPageState extends State<ReservationPage> {
         ));
   }
 
-  /// Builds a section title.
-  Widget buildTitle(String title) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 25,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
-    );
-  }
-
   /// Builds the package information section with available services.
   Widget buildPackageInfo() {
     return Column(
@@ -416,7 +419,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Builds the discount checkbox if the user has enough points.
   Widget buildDiscountCheckbox() {
-    return context.read<UserProvider>().userDetails.points >= 20 &&
+    return context.read<UserProvider>().userDetails.points >= 400 &&
             buttonIsVisible
         ? Row(
             children: [

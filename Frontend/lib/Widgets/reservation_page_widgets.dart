@@ -588,16 +588,22 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     if (mounted) {
       double price = reservationProvider.getInfo(4);
       int discount = reservationProvider.getInfo(10);
-      if (discount <= 0) {
-        setState(() {
-          priceController.text = '${price.toStringAsFixed(2)} €';
-        });
-      } else {
-        setState(() {
-          priceController.text =
-              '${(price / (1 - (discount / 100))).toStringAsFixed(2)} €';
-        });
+      int regularBottles = reservationProvider.getInfo(5);
+      int specialBottles = reservationProvider.getInfo(6);
+      int premiumBottles = reservationProvider.getInfo(7);
+
+      if (discount > 0) {
+        if (regularBottles >= 1) {
+          price += (safeParse(widget.regularCatalogue.price) * discount) / 100;
+        } else if (specialBottles >= 1) {
+          price += (safeParse(widget.specialCatalogue.price) * discount) / 100;
+        } else if (premiumBottles >= 1) {
+          price += (safeParse(widget.premiumCatalogue.price) * discount) / 100;
+        }
       }
+      setState(() {
+        priceController.text = '${(price).toStringAsFixed(2)} €';
+      });
     }
   }
 

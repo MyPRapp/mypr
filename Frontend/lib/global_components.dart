@@ -414,3 +414,26 @@ void warningPrint(String text) {
 void errorPrint(String text) {
   print('❌$text');
 }
+
+String normalizePhoneNumber(String phoneNumber) {
+  if (phoneNumber.startsWith('+30')) {
+    return phoneNumber.substring(3);
+  } else if (phoneNumber.startsWith('(+30)')) {
+    return phoneNumber.substring(5);
+  } else if (phoneNumber.startsWith('30')) {
+    return phoneNumber.substring(2);
+  }
+  return phoneNumber;
+}
+
+/// Builds a section title.
+Widget buildTitle(String title) {
+  return Text(
+    title,
+    style: const TextStyle(
+      fontSize: 25,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+    ),
+  );
+}
