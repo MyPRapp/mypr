@@ -20,8 +20,10 @@ import '../../../services/booking_service.dart';
 
 @RoutePage()
 class ReservationPage extends StatefulWidget {
-  const ReservationPage({super.key, required this.club});
+  const ReservationPage(
+      {super.key, required this.club, required this.catalogues});
   final ClubInfoStruct club;
+  final List<CatalogueInfoStruct> catalogues;
 
   @override
   State<ReservationPage> createState() => _ReservationPageState();
@@ -64,18 +66,24 @@ class _ReservationPageState extends State<ReservationPage> {
     // Reset reservation data
     reservationProvider.resetInfo();
     reservationProvider.setInfo(2, widget.club.clubName); // Set club name
-    if (userDetails.userID > 0) {
-      reservationProvider.setInfo(0, userDetails.userID); // Set user ID
-      String initialName =
-          formatName('${userDetails.firstName} ${userDetails.lastName}');
-      reservationProvider.setInfo(1, initialName);
-      setState(() {
-        _nameController.text = initialName;
-      });
-    } else {
-      if (context.read<GlobalStateProvider>().isAuthenticated) {
+
+    if (context.read<GlobalStateProvider>().isAuthenticated) {
+      if (userDetails.userID > 0) {
+        reservationProvider.setInfo(0, userDetails.userID); // Set user ID
+        String initialName =
+            formatName('${userDetails.firstName} ${userDetails.lastName}');
+        reservationProvider.setInfo(1, initialName);
+        setState(() {
+          _nameController.text = initialName;
+        });
+      } else {
         setState(() {
           context.read<UserProvider>().fetchUserDetailsFromServer();
+          reservationProvider.setInfo(0, userDetails.userID); // Set user ID
+          String initialName =
+              formatName('${userDetails.firstName} ${userDetails.lastName}');
+          reservationProvider.setInfo(1, initialName);
+          _nameController.text = initialName;
         });
       }
     }
@@ -162,7 +170,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
       _updateCatalogues(catalogues);
       successPrint('${widget.club.clubName} is up to date');
-      if (mounted && context.watch<GlobalStateProvider>().isAuthenticated) {
+      if (mounted && context.read<GlobalStateProvider>().isAuthenticated) {
         setState(() {
           context.read<UserProvider>().fetchUserDetailsFromServer();
         });
@@ -543,11 +551,6 @@ class _ReservationPageState extends State<ReservationPage> {
         return;
       }
 
-      // Retract points if a discount is applied
-      if (isDiscountApplied) {
-        await retractPoints(20);
-      }
-
       // Submit the reservation form
       bool success = await BookingService().submitForm(
         reservationProvider.getInfo(1),
@@ -557,6 +560,10 @@ class _ReservationPageState extends State<ReservationPage> {
         reservationProvider.getInfo(3).toString(),
         reservationProvider.getInfo(9),
       );
+      // Retract points if a discount is applied
+      if (isDiscountApplied && success) {
+        await retractPoints(20);
+      }
       _handleSubmissionResponse(success);
     }
 

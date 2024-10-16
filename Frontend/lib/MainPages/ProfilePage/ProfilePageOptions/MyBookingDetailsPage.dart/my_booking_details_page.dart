@@ -19,12 +19,12 @@ class BookingDetailsPage extends StatelessWidget {
     required this.booking,
   });
 
-  List<int> extractThreeBits(String bitString) {
-    if (bitString.length < 3) {
-      throw ArgumentError("Input must be a string of 3 bits or more.");
+  List<int> extractFourBits(String bitString) {
+    if (bitString.length < 4) {
+      throw ArgumentError("Input must be a string of 4 bits or more.");
     }
     return bitString
-        .substring(0, 3)
+        .substring(0, 4)
         .split('')
         .map((bit) => int.parse(bit))
         .toList();
@@ -43,7 +43,9 @@ class BookingDetailsPage extends StatelessWidget {
     // Caching club data to avoid multiple calls
     final clubProvider = context.read<ClubProvider>();
     final clubName = clubProvider.getClubNameByID(booking.clubID);
-
+    List<CatalogueInfoStruct> catalogues = context
+        .read<ClubProvider>()
+        .getAllCataloguesForClubWithID(booking.clubID);
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: _buildAppBar(context),
@@ -86,7 +88,8 @@ class BookingDetailsPage extends StatelessWidget {
                       _buildClubPhoto(
                           booking.clubID, context.read<ClubProvider>()),
                       SizedBox(height: screenHeight * 0.03), // 3% height
-                      _buildBookingDetails(formattedDate, screenHeight),
+                      _buildBookingDetails(
+                          formattedDate, screenHeight, catalogues),
                     ],
                   ),
                   SizedBox(height: screenHeight * 0.14), // 14% height
@@ -162,12 +165,27 @@ class BookingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBookingDetails(String formattedDate, double screenHeight) {
-    List<int> fourbitIntegers = extractThreeBits(booking.fourbitString);
-    final simple = fourbitIntegers[0];
+  Widget _buildBookingDetails(String formattedDate, double screenHeight,
+      List<CatalogueInfoStruct> catalogues) {
+    List<int> fourbitIntegers = extractFourBits(booking.fourbitString);
+    final regular = fourbitIntegers[0];
     final special = fourbitIntegers[1];
     final premium = fourbitIntegers[2];
+    final discount = fourbitIntegers[3];
 
+    double priceWithDiscount = 0;
+    if (discount > 0) {
+      if (regular >= 1) {
+        priceWithDiscount +=
+            (double.parse(catalogues[0].price) * discount) / 10;
+      } else if (special >= 1) {
+        priceWithDiscount +=
+            (double.parse(catalogues[1].price) * discount) / 10;
+      } else if (premium >= 1) {
+        priceWithDiscount +=
+            (double.parse(catalogues[2].price) * discount) / 10;
+      }
+    }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -194,7 +212,7 @@ class BookingDetailsPage extends StatelessWidget {
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Row(
                     children: [
-                      if (simple == 1)
+                      if (regular == 1)
                         const Text(
                           '1 Απλή',
                           style: TextStyle(
@@ -202,15 +220,15 @@ class BookingDetailsPage extends StatelessWidget {
                             fontSize: 18,
                           ),
                         ),
-                      if (simple > 1)
+                      if (regular > 1)
                         Text(
-                          '$simple Απλές',
+                          '$regular Απλές',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 18,
                           ),
                         ),
-                      if (special > 0 && simple <= 0)
+                      if (special > 0 && regular <= 0)
                         Text(
                           '$special Special',
                           style: const TextStyle(
@@ -218,7 +236,7 @@ class BookingDetailsPage extends StatelessWidget {
                             fontSize: 18,
                           ),
                         ),
-                      if (premium > 0 && simple <= 0 && special <= 0)
+                      if (premium > 0 && regular <= 0 && special <= 0)
                         Text(
                           '$premium Premium',
                           style: const TextStyle(
@@ -232,7 +250,7 @@ class BookingDetailsPage extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (special > 0 && simple > 0)
+                    if (special > 0 && regular > 0)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 5),
                         child: Text(
@@ -243,7 +261,7 @@ class BookingDetailsPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                    if (premium > 0 && (simple > 0 || special > 0))
+                    if (premium > 0 && (regular > 0 || special > 0))
                       Padding(
                         padding: const EdgeInsets.only(bottom: 5),
                         child: Text(
@@ -286,9 +304,9 @@ class BookingDetailsPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (booking.fourbitString[3] != '0')
+                    if (discount > 0)
                       Text(
-                        '${((booking.price) / (1 - (double.parse(booking.fourbitString[3]) / 10))).toStringAsFixed(2)} €',
+                        '${(booking.price + priceWithDiscount).toStringAsFixed(2)} €',
                         style: const TextStyle(
                           decoration: TextDecoration.lineThrough,
                           decorationColor: Colors.red,

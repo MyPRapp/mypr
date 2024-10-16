@@ -166,12 +166,29 @@ class BookingProvider with ChangeNotifier {
     CatalogueInfoStruct specialCatalogue,
     CatalogueInfoStruct premiumCatalogue,
   ) {
-    double price = (double.parse(fourbitString[0]) *
-            double.parse(regularCatalogue.price)) +
-        (double.parse(fourbitString[1]) *
-            double.parse(specialCatalogue.price)) +
-        (double.parse(fourbitString[2]) * double.parse(premiumCatalogue.price));
-    return price * (1 - (double.parse(fourbitString[3]) / 10));
+    double regularBottles = double.parse(fourbitString[0]);
+    double specialBottles = double.parse(fourbitString[1]);
+    double premiumBottles = double.parse(fourbitString[2]);
+    double regularPrice = double.parse(regularCatalogue.price);
+    double specialPrice = double.parse(specialCatalogue.price);
+    double premiumPrice = double.parse(premiumCatalogue.price);
+    double discount = double.parse(fourbitString[3]);
+
+    double price = (regularBottles * regularPrice) +
+        (specialBottles * specialPrice) +
+        (premiumBottles * premiumPrice);
+
+    if (discount > 0) {
+      if (regularBottles >= 1) {
+        price -= (regularPrice * discount) / 10;
+      } else if (specialBottles >= 1) {
+        price -= (specialPrice * discount) / 10;
+      } else if (premiumBottles >= 1) {
+        price -= (premiumPrice * discount) / 10;
+      }
+    }
+
+    return price;
   }
 
   // Helper method to toggle loading state

@@ -275,12 +275,14 @@ class ReservationRoute extends _i16.PageRouteInfo<ReservationRouteArgs> {
   ReservationRoute({
     _i17.Key? key,
     required _i18.ClubInfoStruct club,
+    required List<_i18.CatalogueInfoStruct> catalogues,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           ReservationRoute.name,
           args: ReservationRouteArgs(
             key: key,
             club: club,
+            catalogues: catalogues,
           ),
           initialChildren: children,
         );
@@ -294,6 +296,7 @@ class ReservationRoute extends _i16.PageRouteInfo<ReservationRouteArgs> {
       return _i12.ReservationPage(
         key: args.key,
         club: args.club,
+        catalogues: args.catalogues,
       );
     },
   );
@@ -303,15 +306,18 @@ class ReservationRouteArgs {
   const ReservationRouteArgs({
     this.key,
     required this.club,
+    required this.catalogues,
   });
 
   final _i17.Key? key;
 
   final _i18.ClubInfoStruct club;
 
+  final List<_i18.CatalogueInfoStruct> catalogues;
+
   @override
   String toString() {
-    return 'ReservationRouteArgs{key: $key, club: $club}';
+    return 'ReservationRouteArgs{key: $key, club: $club, catalogues: $catalogues}';
   }
 }
 

@@ -120,21 +120,21 @@ class ClubProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final List<dynamic> data = jsonDecode(decodedBody);
+        if (data.isEmpty) {
+          errorPrint('No data received from the server.');
+          return;
+        }
+        //// Search for the club with the given clubID
+        ClubInfoStruct club;
+        for (var item in data) {
+          club = ClubInfoStruct.fromJson(item);
 
-//// Search for the club with the given clubID
-        final clubData = data.firstWhere(
-          (item) => item['clubID'] == clubID,
-          orElse: () => null,
-        );
-
-        if (clubData != null) {
-          final club = ClubInfoStruct.fromJson(clubData);
-
-          addOrUpdateClub(club);
-          await saveClubsToFile();
-          successPrint('Club with ID $clubID fetched and updated.');
-        } else {
-          errorPrint('Club with ID $clubID not found');
+          if (club.clubID == clubID) {
+            addOrUpdateClub(club);
+            await saveClubsToFile();
+            successPrint('Club with ID $clubID fetched and updated.');
+            break;
+          }
         }
       } else {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');

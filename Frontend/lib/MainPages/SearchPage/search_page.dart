@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/club_provider.dart';
+import '../../global_components.dart';
 import '../../routes/app_router.gr.dart';
 
 @RoutePage()
@@ -160,12 +161,19 @@ class SearchPageState extends State<SearchPage> {
                                           FocusScope.of(context).unfocus();
                                           _controller.clear();
                                         });
-                                        AutoRouter.of(context)
-                                            .push(ReservationRoute(
-                                          club: context
-                                              .read<ClubProvider>()
-                                              .getClubByName(clubName),
-                                        ));
+                                        List<CatalogueInfoStruct> catalogues =
+                                            context
+                                                .read<ClubProvider>()
+                                                .getCataloguesByClubID(context
+                                                    .read<ClubProvider>()
+                                                    .getClubByName(clubName)
+                                                    .clubID);
+                                        AutoRouter.of(context).push(
+                                            ReservationRoute(
+                                                club: context
+                                                    .read<ClubProvider>()
+                                                    .getClubByName(clubName),
+                                                catalogues: catalogues));
                                       } else {
                                         setState(() {
                                           FocusScope.of(context).unfocus();

@@ -2,8 +2,12 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Providers/club_provider.dart';
+import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:provider/provider.dart';
 
 import '../global_components.dart';
 
@@ -61,7 +65,27 @@ class _BigClubCardState extends State<BigClubCard> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        AutoRouter.of(context).push(ReservationRoute(club: widget.club));
+        List<CatalogueInfoStruct> catalogues = context
+            .read<ClubProvider>()
+            .getCataloguesByClubID(widget.club.clubID);
+
+        if (context.read<GlobalStateProvider>().isAuthenticated) {
+          if (context.read<UserProvider>().userDetails.userID > 0) {
+            if (catalogues[0].price != '0' &&
+                catalogues[1].price != '0' &&
+                catalogues[2].price != '0') {
+              AutoRouter.of(context).push(
+                  ReservationRoute(club: widget.club, catalogues: catalogues));
+            }
+          }
+        } else {
+          if (catalogues[0].price != '0' &&
+              catalogues[1].price != '0' &&
+              catalogues[2].price != '0') {
+            AutoRouter.of(context).push(
+                ReservationRoute(club: widget.club, catalogues: catalogues));
+          }
+        }
       },
       child: Padding(
         padding: EdgeInsets.only(
