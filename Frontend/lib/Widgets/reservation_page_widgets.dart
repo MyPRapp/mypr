@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../Providers/reservation_provider.dart';
 import '../Providers/user_provider.dart';
@@ -974,5 +975,88 @@ Future<void> retractPoints(int pointsToRetract) async {
     await PointsService().retractPoints(pointsToRetract);
   } catch (error) {
     print("❌Failed to retract points: $error");
+  }
+}
+
+class LocationWidget extends StatelessWidget {
+  final String locationName;
+
+  const LocationWidget({super.key, required this.locationName});
+
+  Future<void> _openLocation() async {
+    final Uri googleMapsUri = Uri.parse('comgooglemaps://?q=$locationName');
+    final Uri appleMapsUri =
+        Uri.parse('http://maps.apple.com/?q=$locationName');
+    final Uri browserUri = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$locationName');
+
+    try {
+      if (await canLaunchUrl(googleMapsUri)) {
+        await launchUrl(googleMapsUri);
+      } else if (await canLaunchUrl(appleMapsUri)) {
+        await launchUrl(appleMapsUri);
+      } else {
+        await launchUrl(browserUri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      print("Could not open maps: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _openLocation,
+      child: Container(
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 68, 68, 68),
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.location_on, color: Colors.white),
+            const SizedBox(width: 8.0),
+            Text(
+              locationName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class WorkingDays extends StatelessWidget {
+  final String schedule; // Example: "1101010"
+
+  const WorkingDays({super.key, required this.schedule})
+      : assert(
+            schedule.length == 7, 'Schedule string must be 7 characters long.');
+
+  @override
+  Widget build(BuildContext context) {
+    // Greek letters for days of the week starting from Monday
+    final List<String> days = ['Δ', 'T', 'T', 'Π', 'Π', 'Σ', 'Κ'];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(7, (index) {
+        bool isOpen = schedule[index] == '1';
+        return Text(
+          days[index],
+          style: TextStyle(
+            fontSize: 24.0,
+            fontWeight: isOpen ? FontWeight.bold : FontWeight.w600,
+            color: isOpen ? Colors.grey : Colors.black,
+          ),
+        );
+      }),
+    );
   }
 }

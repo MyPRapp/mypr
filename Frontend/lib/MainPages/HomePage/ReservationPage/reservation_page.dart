@@ -286,6 +286,10 @@ class _ReservationPageState extends State<ReservationPage> {
       child: Column(
         children: [
           buildClubImage(), // Display club image
+          const SizedBox(height: 20),
+          WorkingDays(schedule: widget.club.clubAvailability),
+          const SizedBox(height: 20),
+          LocationWidget(locationName: widget.club.clubLocation),
           const SizedBox(height: 50),
           buildTitle('Φιάλες και Τιμές'), // Display packages
           const SizedBox(height: 25),
