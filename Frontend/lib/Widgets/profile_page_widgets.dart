@@ -249,8 +249,17 @@ class GradientProgressBarState extends State<GradientProgressBar>
       parent: _controller,
       curve: Curves.easeInOut,
     ))
-      ..addListener(() {
+      ..addListener(() async {
         setState(() {});
+        if (_animation.isCompleted) {
+          setState(() {
+            _showLabel = true;
+          });
+          await Future.delayed(const Duration(seconds: 4));
+          setState(() {
+            _showLabel = false;
+          });
+        }
       });
 
     _controller.forward();
@@ -304,7 +313,7 @@ class GradientProgressBarState extends State<GradientProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    double progressWidth = MediaQuery.sizeOf(context).width - 45;
+    double progressWidth = MediaQuery.sizeOf(context).width - 50;
     double filledWidth = (progressWidth * _animation.value) / 100;
     return GestureDetector(
       onTap: _showPercentageLabel,
