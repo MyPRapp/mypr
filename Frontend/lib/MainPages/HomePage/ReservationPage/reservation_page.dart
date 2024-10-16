@@ -50,9 +50,8 @@ class _ReservationPageState extends State<ReservationPage> {
 
 ////////////////////TODO CHECK THIS PART
   // Controllers and keys for managing form inputs
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
-  final GlobalKey<NameTextFieldState> nameTextFieldKey =
-      GlobalKey<NameTextFieldState>();
   final GlobalKey<CategoriesTextFieldState> categoriesTextFieldKey =
       GlobalKey<CategoriesTextFieldState>();
 ////////////////////
@@ -70,7 +69,9 @@ class _ReservationPageState extends State<ReservationPage> {
       String initialName =
           formatName('${userDetails.firstName} ${userDetails.lastName}');
       reservationProvider.setInfo(1, initialName);
-      nameTextFieldKey.currentState?.setNameText(initialName);
+      setState(() {
+        _nameController.text = initialName;
+      });
     } else {
       if (context.read<GlobalStateProvider>().isAuthenticated) {
         setState(() {
@@ -185,6 +186,7 @@ class _ReservationPageState extends State<ReservationPage> {
   @override
   void dispose() {
     // Clean up the controllers to free up resources
+    _nameController.dispose();
     _commentController.dispose();
     super.dispose();
   }
@@ -392,9 +394,8 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Builds the reservation form with various input fields.
   Widget buildReservationForm() {
     return Column(
-      //TODO add top/bottom padding of about 25 px
       children: [
-        NameTextField(key: nameTextFieldKey),
+        NameTextField(nameController: _nameController),
         BookingDatePicker(
             days: widget.club.clubAvailability,
             unavailableDays: widget.club.clubNotAvailable),
@@ -488,7 +489,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Handles the form submission process, including validation and API calls.
   Future<void> _handleSubmit() async {
-    String rawName = nameTextFieldKey.currentState?.nameController.text ?? '';
+    String rawName = _nameController.text;
     String formattedName = formatName(rawName);
     if (formattedName.isNotEmpty) {
       context.read<ReservationProvider>().setInfo(1, formattedName);

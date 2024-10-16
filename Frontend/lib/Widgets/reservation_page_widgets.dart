@@ -304,40 +304,19 @@ class PackagesInfo extends StatelessWidget {
 }
 
 class NameTextField extends StatefulWidget {
-  const NameTextField({super.key});
+  const NameTextField({super.key, required this.nameController});
+  final TextEditingController nameController;
 
   @override
   State<NameTextField> createState() => NameTextFieldState();
 }
 
 class NameTextFieldState extends State<NameTextField> {
-  late TextEditingController nameController;
   late FocusNode focusNode;
-  late ReservationProvider reservationProvider;
 
   @override
   void initState() {
     super.initState();
-
-    // Access the provider
-    reservationProvider = context.read<ReservationProvider>();
-
-    // Initialize the text controller with the user's name from the provider
-    final userDetails = context.read<UserProvider>().userDetails;
-    String initialName = '${userDetails.firstName} ${userDetails.lastName}';
-
-    // Set the initial name in the provider if not already set
-    if (reservationProvider.getInfo(1).isEmpty) {
-      // Directly set the provider's info without calling setState
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        reservationProvider.setInfo(1, formatName(initialName));
-        nameController.text = formatName(initialName);
-      });
-    }
-
-    nameController = TextEditingController(
-      text: reservationProvider.getInfo(1),
-    );
 
     focusNode = FocusNode();
 
@@ -347,42 +326,17 @@ class NameTextFieldState extends State<NameTextField> {
         _updateReservationProvider();
       }
     });
-
-    // Listen to changes in the reservation info for the name (index 1)
-    reservationProvider.addListener(_updateTextController);
-  }
-
-  /// Method to set the text in the TextField
-  void setNameText(String name) {
-    nameController.text = name;
-    _updateReservationProvider();
-  }
-
-  @override
-  void dispose() {
-    nameController.dispose();
-    focusNode.dispose();
-    reservationProvider.removeListener(_updateTextController);
-    super.dispose();
   }
 
   void _updateReservationProvider() {
     // Update the provider with the formatted name when the focus is lost
-    String formattedName = formatName(nameController.text);
+    String formattedName = formatName(widget.nameController.text);
     if (formattedName.isEmpty) {
       final userDetails = context.read<UserProvider>().userDetails;
       formattedName = '${userDetails.firstName} ${userDetails.lastName}';
     }
-    reservationProvider.setInfo(1, formattedName);
-    nameController.text = formattedName;
-  }
-
-  void _updateTextController() {
-    // Update the text controller if the name in the provider changes externally
-    String currentName = reservationProvider.getInfo(1);
-    if (nameController.text != currentName) {
-      nameController.text = currentName;
-    }
+    context.read<ReservationProvider>().setInfo(1, formattedName);
+    widget.nameController.text = formattedName;
   }
 
   @override
@@ -390,7 +344,7 @@ class NameTextFieldState extends State<NameTextField> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 25),
       child: TextField(
-        controller: nameController,
+        controller: widget.nameController,
         focusNode: focusNode,
         inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
         decoration: const InputDecoration(
@@ -409,6 +363,13 @@ class NameTextFieldState extends State<NameTextField> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    // Remove the listener when the widget is disposed
+    focusNode.dispose();
+    super.dispose();
+  }
 }
 
 class PersonsTextField extends StatefulWidget {
@@ -426,14 +387,6 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
     super.initState();
 
     myFocusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    // Clean up the focus node when the Form is disposed.
-    myFocusNode.dispose();
-
-    super.dispose();
   }
 
   @override
@@ -526,6 +479,14 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
       return false;
     }
     return true;
+  }
+
+  @override
+  void dispose() {
+    // Clean up the focus node when the Form is disposed.
+    myFocusNode.dispose();
+
+    super.dispose();
   }
 }
 
