@@ -380,13 +380,12 @@ class PersonsTextField extends StatefulWidget {
 }
 
 class _PersonsTextFieldState extends State<PersonsTextField> {
-  late FocusNode myFocusNode;
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
-
-    myFocusNode = FocusNode();
+    _focusNode = FocusNode();
   }
 
   @override
@@ -397,7 +396,7 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: TextField(
-        focusNode: myFocusNode,
+        focusNode: _focusNode,
         readOnly: true,
         controller: TextEditingController(
             text: reservationProvider
@@ -431,13 +430,13 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
   Widget _buildRemoveButton(ReservationProvider reservationProvider) {
     return IconButton(
       onPressed: () async {
+        _focusNode.requestFocus();
         int persons = reservationProvider.getInfo(3);
         if (persons > 1) {
-          myFocusNode.requestFocus();
           reservationProvider.setInfo(3, persons - 1);
-          await Future.delayed(const Duration(seconds: 4));
-          myFocusNode.unfocus();
         }
+        await Future.delayed(const Duration(milliseconds: 2500));
+        _focusNode.unfocus();
       },
       icon: const Icon(Icons.remove, color: Colors.white),
     );
@@ -447,7 +446,7 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
       int maxPersons, BuildContext context) {
     return IconButton(
       onPressed: () async {
-        myFocusNode.requestFocus();
+        _focusNode.requestFocus();
         if (_validateBeforeAdding(reservationProvider, context)) {
           int persons = reservationProvider.getInfo(3);
           if (persons < maxPersons) {
@@ -459,8 +458,11 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
                 context: context,
                 duration: const Duration(milliseconds: 3000));
           }
-          await Future.delayed(const Duration(seconds: 4));
-          myFocusNode.unfocus();
+          await Future.delayed(const Duration(milliseconds: 2500));
+          _focusNode.unfocus();
+        } else {
+          await Future.delayed(const Duration(milliseconds: 1000));
+          _focusNode.unfocus();
         }
       },
       icon: const Icon(Icons.add, color: Colors.white),
@@ -484,7 +486,7 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
   @override
   void dispose() {
     // Clean up the focus node when the Form is disposed.
-    myFocusNode.dispose();
+    _focusNode.dispose();
 
     super.dispose();
   }
