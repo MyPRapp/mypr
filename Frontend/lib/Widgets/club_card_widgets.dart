@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../global_components.dart';
+import '../Globals/structs.dart';
 
 class LikeButton extends StatefulWidget {
   const LikeButton(

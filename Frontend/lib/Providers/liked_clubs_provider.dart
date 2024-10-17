@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:mypr/global_components.dart';
+import 'package:mypr/Globals/global_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Globals/structs.dart';
 
 class LikedClubsProvider extends ChangeNotifier {
   final List<int> _likedClubIDs = [];

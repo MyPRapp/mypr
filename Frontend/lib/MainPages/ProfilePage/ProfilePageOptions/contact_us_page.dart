@@ -8,9 +8,10 @@ import 'package:mypr/Providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../Globals/global_components.dart';
+import '../../../Globals/structs.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/global_state_provider.dart';
-import '../../../global_components.dart';
 
 @RoutePage()
 class ContactUsPage extends StatefulWidget {

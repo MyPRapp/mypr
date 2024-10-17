@@ -5,9 +5,10 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../Globals/global_components.dart';
+import '../Globals/structs.dart';
 import '../Providers/reservation_provider.dart';
 import '../Providers/user_provider.dart';
-import '../global_components.dart';
 import '../services/auth_service.dart';
 import '../services/points_service.dart';
 

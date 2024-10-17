@@ -1,10 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:mypr/Globals/structs.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../global_components.dart';
+import '../Globals/global_components.dart';
 import '../services/booking_service.dart';
 
 class BookingProvider with ChangeNotifier {

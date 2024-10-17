@@ -6,7 +6,7 @@ import 'package:image/image.dart' as img; // For compressing images
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../global_components.dart';
+import '../Globals/global_components.dart';
 
 class PhotoManager {
   // Function to download and save the image to local storage

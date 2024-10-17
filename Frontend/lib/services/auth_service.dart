@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mypr/global_components.dart';
+import 'package:mypr/Globals/global_components.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 Future<String?> getAccessToken() async {

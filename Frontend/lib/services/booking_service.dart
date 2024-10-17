@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mypr/services/auth_service.dart';
 
-import '../global_components.dart';
+import '../Globals/global_components.dart';
 
 class BookingService {
   final AuthService _authService =

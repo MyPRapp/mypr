@@ -2,8 +2,8 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../Globals/structs.dart';
 import '../../Providers/club_provider.dart';
-import '../../global_components.dart';
 import '../../routes/app_router.gr.dart';
 
 @RoutePage()

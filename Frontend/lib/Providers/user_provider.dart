@@ -7,7 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../global_components.dart';
+import '../Globals/global_components.dart';
+import '../Globals/structs.dart';
 import 'photo_manager.dart';
 
 class UserProvider with ChangeNotifier {

@@ -13,7 +13,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../global_components.dart';
+import '../Globals/global_components.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
 

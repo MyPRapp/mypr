@@ -7,11 +7,11 @@ import 'package:mypr/Providers/reservation_provider.dart';
 import 'package:mypr/routes/app_router.dart';
 import 'package:provider/provider.dart';
 
+import 'Globals/global_components.dart';
 import 'Navigation/bottom_nav_bar.dart';
 import 'Providers/booking_provider.dart';
 import 'Providers/club_provider.dart';
 import 'Providers/user_provider.dart';
-import 'global_components.dart';
 
 void main() async {
   // Lock the app to portrait mode only

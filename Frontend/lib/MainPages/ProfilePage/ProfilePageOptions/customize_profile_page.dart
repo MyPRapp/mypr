@@ -7,10 +7,10 @@ import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../Globals/global_components.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/user_provider.dart';
-import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 
 @RoutePage()

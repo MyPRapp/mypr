@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Globals/global_components.dart';
+import '../../../Globals/structs.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
@@ -13,7 +15,6 @@ import '../../../Providers/reservation_provider.dart';
 import '../../../Providers/user_provider.dart';
 import '../../../Widgets/club_card_widgets.dart';
 import '../../../Widgets/reservation_page_widgets.dart';
-import '../../../global_components.dart';
 import '../../../routes/app_router.gr.dart';
 import '../../../services/auth_service.dart';
 import '../../../services/booking_service.dart';

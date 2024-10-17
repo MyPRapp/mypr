@@ -9,7 +9,7 @@ import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
-import '../global_components.dart';
+import '../Globals/structs.dart';
 
 class BigClubCard extends StatefulWidget {
   const BigClubCard(

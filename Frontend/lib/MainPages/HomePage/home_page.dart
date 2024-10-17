@@ -1,11 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
-import 'package:mypr/global_components.dart';
 import 'package:provider/provider.dart';
 
+import '../../Globals/structs.dart';
 import '../../Navigation/bottom_nav_bar.dart';
 import '../../Providers/club_provider.dart';
 import '../../services/auth_service.dart';
@@ -29,26 +30,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initApp() async {
-    _initUser();
+    _syncUser();
     _fetchClubs();
   }
 
   Future<void> _fetchClubs() async {
     warningPrint('------------SYNCING CLUBS------------');
-    if (mounted) {
-      await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
-    }
+    await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
     successPrint('------------SYNCED CLUBS------------');
   }
 
-  Future<void> _initUser() async {
+  Future<void> _syncUser() async {
     GlobalStateProvider globalStateProvider =
         context.read<GlobalStateProvider>();
-    UserProvider userProvider = context.read<UserProvider>();
 
     if (mounted && globalStateProvider.preferencesLoaded) {
       if (globalStateProvider.isAuthenticated) {
         successPrint('------------USER IS AUTHENTICATED------------');
+        UserProvider userProvider = context.read<UserProvider>();
         userProvider.loadUserDetailsFromPreferences();
 
         // Await the Future to resolve and get the String values from shared preferences
@@ -63,22 +62,18 @@ class _HomePageState extends State<HomePage> {
             await userProvider.fetchUserDetailsFromServer();
           } else {
             errorPrint('Email or Password is incorrect');
+            globalStateProvider.isAuthenticated = false;
           }
         } else {
           errorPrint('Email or Password is empty');
-
-          if (mounted) {
-            globalStateProvider.isAuthenticated = false;
-          }
+          globalStateProvider.isAuthenticated = false;
         }
       } else {
         errorPrint('------------USER IS NOT AUTHENTICATED------------');
-        // userProvider.loadUserDetailsFromPreferences();
-        // globalStateProvider.isAuthenticated = true;
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));
-      _initUser();
+      _syncUser();
     }
   }
 
@@ -95,7 +90,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
-    // double statusBarHeight = MediaQuery.viewPaddingOf(context).top;
+
     return PopScope(
       canPop: false,
       child: Scaffold(
@@ -123,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                     Padding(
                       padding: EdgeInsets.only(left: screenWidth * 0.02),
                       child: Image.asset(
-                        'assets/otherPhotos/Logo_v2.2-removebg(cropped).png', // Replace with your logo asset path
+                        'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
                         height: screenHeight / 13,
                         width: screenWidth / 4,
                       ),
@@ -138,9 +133,8 @@ class _HomePageState extends State<HomePage> {
                           borderRadius: BorderRadius.circular(8),
                           gradient: const LinearGradient(
                             colors: [
-                              Color.fromARGB(255, 0, 0, 0), // Black base color
-                              Color.fromARGB(150, 55, 55,
-                                  55), // Slightly lighter grey for gloss effect
+                              Color.fromARGB(255, 0, 0, 0),
+                              Color.fromARGB(150, 55, 55, 55),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,

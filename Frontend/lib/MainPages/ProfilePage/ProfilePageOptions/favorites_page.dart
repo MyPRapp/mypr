@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Globals/structs.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/club_provider.dart';
 import '../../../Widgets/home_page_widgets.dart';
-import '../../../global_components.dart';
 
 @RoutePage()
 class FavoritesPage extends StatelessWidget {

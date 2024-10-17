@@ -10,7 +10,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:auto_route/auto_route.dart' as _i16;
 import 'package:flutter/material.dart' as _i17;
-import 'package:mypr/global_components.dart' as _i18;
+import 'package:mypr/Globals/structs.dart' as _i18;
 import 'package:mypr/MainPages/HomePage/home_page.dart' as _i7;
 import 'package:mypr/MainPages/HomePage/ReservationPage/reservation_page.dart'
     as _i12;

@@ -8,12 +8,12 @@ import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Globals/global_components.dart';
 import '../../Providers/booking_provider.dart'; // Import the BookingProvider
 import '../../Providers/global_state_provider.dart';
 import '../../Providers/liked_clubs_provider.dart';
 import '../../Providers/user_provider.dart';
 import '../../Widgets/profile_page_widgets.dart';
-import '../../global_components.dart';
 import '../../services/auth_service.dart';
 
 @RoutePage()
@@ -80,8 +80,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
         // Step 2: Retain specific keys and their values (excluding liked clubs)
         final String? validatedIp = prefs.getString('validatedIp');
-        final String? savedEmail = prefs.getString('savedEmail');
-        final String? savedPassword = prefs.getString('savedPassword');
+        // final String? savedEmail = prefs.getString('savedEmail');
+        // final String? savedPassword = prefs.getString('savedPassword');
 
         // Step 3: Clear all preferences
         await prefs.clear();
@@ -92,14 +92,14 @@ class _ProfilePageState extends State<ProfilePage> {
           await prefs.setString('validatedIp', validatedIp);
           successPrint('Retained validatedIp: $validatedIp');
         }
-        if (savedEmail != null) {
-          await prefs.setString('savedEmail', savedEmail);
-          successPrint('Retained savedEmail: $savedEmail');
-        }
-        if (savedPassword != null) {
-          await prefs.setString('savedPassword', savedPassword);
-          successPrint('Retained savedPassword: $savedPassword');
-        }
+        // if (savedEmail != null) {
+        //   await prefs.setString('savedEmail', savedEmail);
+        //   successPrint('Retained savedEmail: $savedEmail');
+        // }
+        // if (savedPassword != null) {
+        //   await prefs.setString('savedPassword', savedPassword);
+        //   successPrint('Retained savedPassword: $savedPassword');
+        // }
 
         // Step 5: Clear liked clubs
         if (context.mounted) {
@@ -334,9 +334,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Center(
                     child: GestureDetector(
                       behavior: HitTestBehavior.translucent,
-                      onTap: () {
-                        signOut();
-                      },
+                      onTap: signOut,
                       child: Container(
                         height: screenHeight * 0.07,
                         width: screenWidth / 2.2,
