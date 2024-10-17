@@ -24,15 +24,16 @@ class SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
+    _initializeClubs();
+    _controller.addListener(() => _filterClubs(_controller.text));
+  }
+
+  void _initializeClubs() {
     _clubs = context
         .read<ClubProvider>()
         .allClubs
         .map((club) => club.clubName)
         .toList();
-
-    _controller.addListener(() {
-      filterClubs(_controller.text);
-    });
   }
 
   @override
@@ -42,25 +43,44 @@ class SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
-  void filterClubs(String query) {
-    if (_clubs.isEmpty) {
-      setState(() {
-        _filteredClubs = [];
-        _isDropdownVisible = false;
-      });
-      return;
-    }
-
+  void _filterClubs(String query) {
     setState(() {
-      if (query.isEmpty) {
-        _filteredClubs = _clubs;
-      } else {
-        _filteredClubs = _clubs
-            .where((club) => club.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
+      _filteredClubs = query.isEmpty
+          ? _clubs
+          : _clubs
+              .where((club) => club.toLowerCase().contains(query.toLowerCase()))
+              .toList();
       _isDropdownVisible = _filteredClubs.isNotEmpty;
     });
+  }
+
+  void _clearSearchField() {
+    setState(() {
+      _controller.clear();
+      _filterClubs('');
+      _isDropdownVisible = false;
+      FocusScope.of(context).unfocus();
+    });
+  }
+
+  void _onClubTap(String clubName) {
+    if (_isDropdownVisible) {
+      setState(() {
+        _isDropdownVisible = false;
+        _controller.clear();
+        FocusScope.of(context).unfocus();
+      });
+      List<CatalogueInfoStruct> catalogues = context
+          .read<ClubProvider>()
+          .getCataloguesByClubID(
+              context.read<ClubProvider>().getClubByName(clubName).clubID);
+      AutoRouter.of(context).push(ReservationRoute(
+        club: context.read<ClubProvider>().getClubByName(clubName),
+        catalogues: catalogues,
+      ));
+    } else {
+      FocusManager.instance.primaryFocus?.unfocus();
+    }
   }
 
   @override
@@ -73,10 +93,8 @@ class SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
-            setState(() {
-              FocusScope.of(context).unfocus();
-              _isDropdownVisible = false;
-            });
+            setState(() => _isDropdownVisible = false);
+            FocusManager.instance.primaryFocus?.unfocus();
           },
           child: Container(
             height: screenHeight,
@@ -92,110 +110,77 @@ class SearchPageState extends State<SearchPage> {
               child: Column(
                 children: [
                   SizedBox(height: screenHeight * 0.04),
-                  TextField(
-                    controller: _controller,
-                    focusNode: _focusNode,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: 'Βρες που θα παρτάρεις',
-                      hintStyle: const TextStyle(
-                          color: Color.fromARGB(255, 182, 176, 176)),
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                        borderSide: BorderSide.none,
-                      ),
-                      prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                      suffixIcon: _controller.text.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear, color: Colors.grey),
-                              onPressed: () {
-                                setState(() {
-                                  _controller.clear();
-                                  filterClubs('');
-                                  _isDropdownVisible = !_isDropdownVisible;
-                                  FocusScope.of(context).unfocus();
-                                });
-                              },
-                            )
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(height: 10), // Add spacing
-                  AnimatedSlide(
-                    offset: _isDropdownVisible
-                        ? Offset.zero
-                        : const Offset(0, -0.1),
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: AnimatedOpacity(
-                      opacity: _isDropdownVisible ? 1.0 : 0.0,
-                      duration: const Duration(milliseconds: 300),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.black,
-                          border: Border.all(color: Colors.white),
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(8)),
-                        ),
-                        child: SizedBox(
-                          height: screenHeight / 3,
-                          child: ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            itemCount: _filteredClubs.length,
-                            itemBuilder: (context, index) {
-                              final clubName = _filteredClubs[index];
-
-                              return Column(
-                                children: [
-                                  ListTile(
-                                    title: Text(
-                                      clubName,
-                                      style:
-                                          const TextStyle(color: Colors.white),
-                                    ),
-                                    onTap: () {
-                                      if (_isDropdownVisible) {
-                                        setState(() {
-                                          _isDropdownVisible = false;
-                                          FocusScope.of(context).unfocus();
-                                          _controller.clear();
-                                        });
-                                        List<CatalogueInfoStruct> catalogues =
-                                            context
-                                                .read<ClubProvider>()
-                                                .getCataloguesByClubID(context
-                                                    .read<ClubProvider>()
-                                                    .getClubByName(clubName)
-                                                    .clubID);
-                                        AutoRouter.of(context).push(
-                                            ReservationRoute(
-                                                club: context
-                                                    .read<ClubProvider>()
-                                                    .getClubByName(clubName),
-                                                catalogues: catalogues));
-                                      } else {
-                                        setState(() {
-                                          FocusScope.of(context).unfocus();
-                                        });
-                                      }
-                                    },
-                                  ),
-                                  if (index != _filteredClubs.length - 1)
-                                    const Divider(
-                                      thickness: 0.6,
-                                      color: Color.fromARGB(189, 110, 110, 110),
-                                    )
-                                ],
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+                  _buildSearchField(),
+                  const SizedBox(height: 30),
+                  _buildDropdownList(screenHeight),
                 ],
               ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return TextField(
+      controller: _controller,
+      focusNode: _focusNode,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        hintText: 'Βρες που θα παρτάρεις',
+        hintStyle: const TextStyle(color: Color.fromARGB(255, 182, 176, 176)),
+        border: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderSide: BorderSide.none,
+        ),
+        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+        suffixIcon: _controller.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear, color: Colors.grey),
+                onPressed: _clearSearchField,
+              )
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdownList(double screenHeight) {
+    return AnimatedSlide(
+      offset: _isDropdownVisible ? Offset.zero : const Offset(0, -0.1),
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+      child: AnimatedOpacity(
+        opacity: _isDropdownVisible ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 500),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            border: Border.all(color: Colors.white),
+            borderRadius: const BorderRadius.all(Radius.circular(8)),
+          ),
+          child: SizedBox(
+            height: screenHeight / 3,
+            child: ListView.builder(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemCount: _filteredClubs.length,
+              itemBuilder: (context, index) {
+                final clubName = _filteredClubs[index];
+                return Column(
+                  children: [
+                    ListTile(
+                      title: Text(clubName,
+                          style: const TextStyle(color: Colors.white)),
+                      onTap: () => _onClubTap(clubName),
+                    ),
+                    if (index != _filteredClubs.length - 1)
+                      const Divider(
+                          thickness: 0.6,
+                          color: Color.fromARGB(189, 110, 110, 110)),
+                  ],
+                );
+              },
             ),
           ),
         ),
