@@ -59,7 +59,7 @@ class AuthService {
     }
   }
 
-  Future<bool> register(String username, String password, String firstName,
+  Future<int> register(String username, String password, String firstName,
       String lastName, String email, String phone, int points) async {
     try {
       // Send registration request
@@ -87,14 +87,50 @@ class AuthService {
       // Check if registration was successful
       if (response.statusCode == 201) {
         successPrint('Registration successful');
-        return true;
+        return 1;
       } else {
         errorPrint('Registration failed: ${response.body}');
-        return false;
+
+        // Parse the JSON response
+        Map<String, dynamic> responseMap = json.decode(response.body);
+
+        // Initialize error strings
+        String emailError = '';
+        String phoneError = '';
+
+        // Check if the email key exists and has messages
+        if (responseMap.containsKey('email') &&
+            responseMap['email'] is List &&
+            responseMap['email'].isNotEmpty) {
+          emailError =
+              responseMap['email'][0]; // Get the first email error message
+        }
+
+        // Check if the phone key exists and has messages
+        if (responseMap.containsKey('phone') &&
+            responseMap['phone'] is List &&
+            responseMap['phone'].isNotEmpty) {
+          phoneError =
+              responseMap['phone'][0]; // Get the first phone error message
+        }
+
+        // Determine the output based on the extracted messages
+        if (emailError.isNotEmpty && phoneError.isNotEmpty) {
+          print('Email and Phone: $emailError, $phoneError');
+          return 4; // Both errors exist
+        } else if (emailError.isNotEmpty) {
+          print('Email Error: $emailError');
+          return 2; // Only email error
+        } else if (phoneError.isNotEmpty) {
+          print('Phone Error: $phoneError');
+          return 3; // Only phone error
+        }
+
+        return 1; //No errors
       }
     } catch (e) {
       errorPrint('Exception occurred during registration: $e');
-      return false;
+      return 0;
     }
   }
 

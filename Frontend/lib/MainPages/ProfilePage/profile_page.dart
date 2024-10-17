@@ -63,6 +63,78 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  void signOut() async {
+    try {
+      warningPrint('------------SIGNING OUT------------');
+
+      // Step 1: Get SharedPreferences instance for key-value data
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+
+      // Step 2: Retain specific keys and their values (excluding liked clubs)
+      final String? validatedIp = prefs.getString('validatedIp');
+      // final String? savedEmail = prefs.getString('savedEmail');
+      // final String? savedPassword = prefs.getString('savedPassword');
+
+      // Step 3: Clear all preferences
+      await prefs.clear();
+      successPrint('Shared preferences cleared.');
+
+      // Step 4: Restore the retained preferences (excluding liked clubs)
+      if (validatedIp != null) {
+        await prefs.setString('validatedIp', validatedIp);
+        successPrint('Retained validatedIp: $validatedIp');
+      }
+      // if (savedEmail != null) {
+      //   await prefs.setString('savedEmail', savedEmail);
+      //   successPrint('Retained savedEmail: $savedEmail');
+      // }
+      // if (savedPassword != null) {
+      //   await prefs.setString('savedPassword', savedPassword);
+      //   successPrint('Retained savedPassword: $savedPassword');
+      // }
+
+      // Step 5: Clear liked clubs
+      if (mounted) {
+        warningPrint('Clearing liked clubs...');
+        await context.read<LikedClubsProvider>().deleteAllLiked();
+      }
+
+      // Step 6: Clear bookings and reset flags
+      if (mounted) {
+        try {
+          warningPrint('Clearing bookings and resetting flags...');
+          BookingProvider bookingProvider = context.read<BookingProvider>();
+          bookingProvider.bookings.clear();
+          bookingProvider.setLoading(false);
+          successPrint('Bookings cleared');
+        } catch (e) {
+          errorPrint('Error clearing bookings: $e');
+        }
+      }
+
+      // Step 7: Set isAuthenticated to false
+      if (mounted) {
+        context.read<GlobalStateProvider>().isAuthenticated = false;
+        successPrint('\'isAuthenticated\' flag set to false.');
+      }
+      // Step 8: Reset saved user details
+      if (mounted) {
+        context.read<UserProvider>().resetUserDetails();
+        successPrint('Successfully restored user details.');
+      }
+
+      // Step 9: Navigate to the Login page
+      if (mounted) {
+        warningPrint('Navigating to the login page...');
+        AutoRouter.of(context).replaceAll([const LoginRoute()]);
+        successPrint('Navigation to login page successful.');
+      }
+      successPrint('------------SIGNED OUT------------');
+    } catch (e) {
+      errorPrint('Error during sign out: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.sizeOf(context).height;
@@ -71,77 +143,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
-    void signOut() async {
-      try {
-        warningPrint('------------SIGNING OUT------------');
-
-        // Step 1: Get SharedPreferences instance for key-value data
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-
-        // Step 2: Retain specific keys and their values (excluding liked clubs)
-        final String? validatedIp = prefs.getString('validatedIp');
-        // final String? savedEmail = prefs.getString('savedEmail');
-        // final String? savedPassword = prefs.getString('savedPassword');
-
-        // Step 3: Clear all preferences
-        await prefs.clear();
-        successPrint('Shared preferences cleared.');
-
-        // Step 4: Restore the retained preferences (excluding liked clubs)
-        if (validatedIp != null) {
-          await prefs.setString('validatedIp', validatedIp);
-          successPrint('Retained validatedIp: $validatedIp');
-        }
-        // if (savedEmail != null) {
-        //   await prefs.setString('savedEmail', savedEmail);
-        //   successPrint('Retained savedEmail: $savedEmail');
-        // }
-        // if (savedPassword != null) {
-        //   await prefs.setString('savedPassword', savedPassword);
-        //   successPrint('Retained savedPassword: $savedPassword');
-        // }
-
-        // Step 5: Clear liked clubs
-        if (context.mounted) {
-          warningPrint('Clearing liked clubs...');
-          await context.read<LikedClubsProvider>().deleteAllLiked();
-        }
-
-        // Step 6: Clear bookings and reset flags
-        if (context.mounted) {
-          try {
-            warningPrint('Clearing bookings and resetting flags...');
-            BookingProvider bookingProvider = context.read<BookingProvider>();
-            bookingProvider.bookings.clear();
-            bookingProvider.setLoading(false);
-            successPrint('Bookings cleared');
-          } catch (e) {
-            errorPrint('Error clearing bookings: $e');
-          }
-        }
-
-        // Step 7: Set isAuthenticated to false
-        if (context.mounted) {
-          context.read<GlobalStateProvider>().isAuthenticated = false;
-          successPrint('\'isAuthenticated\' flag set to false.');
-        }
-        // Step 8: Reset saved user details
-        if (context.mounted) {
-          context.read<UserProvider>().resetUserDetails();
-          successPrint('Successfully restored user details.');
-        }
-
-        // Step 9: Navigate to the Login page
-        if (context.mounted) {
-          warningPrint('Navigating to the login page...');
-          AutoRouter.of(context).replaceAll([const LoginRoute()]);
-          successPrint('Navigation to login page successful.');
-        }
-        successPrint('------------SIGNED OUT------------');
-      } catch (e) {
-        errorPrint('Error during sign out: $e');
-      }
-    }
 
     return PopScope(
       canPop: false,

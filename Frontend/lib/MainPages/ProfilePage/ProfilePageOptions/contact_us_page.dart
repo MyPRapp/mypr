@@ -119,7 +119,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                             ),
                             SizedBox(height: screenHeight * 0.015),
                             const Text(
-                              ' 69 43784099\n\n 69 80984213',
+                              ' 698 098 4213\n\n 698 556 7317',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

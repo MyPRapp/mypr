@@ -61,15 +61,15 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _register() async {
-    setState(() {
-      // Reset error states
-      firstnameError = false;
-      lastnameError = false;
-      phoneError = false;
-      emailError = false;
-      passwordError = false;
-      confirmationPasswordError = false;
+    // Reset error states
+    firstnameError = false;
+    lastnameError = false;
+    phoneError = false;
+    emailError = false;
+    passwordError = false;
+    confirmationPasswordError = false;
 
+    setState(() {
       String firstName = _firstNameController.text.trim();
       String lastName = _lastNameController.text.trim();
       String email = _emailController.text.trim();
@@ -84,7 +84,10 @@ class _SignUpPageState extends State<SignUpPage> {
           !RegExp(r'^[\p{L}]+$', unicode: true).hasMatch(lastName);
 
       // Phone validation
-      phoneError = normalizePhoneNumber(phone).length != 10;
+      String phoneNumber = normalizePhoneNumber(phone);
+      phoneError = phoneNumber.length != 10 ||
+          phoneNumber[0] != '6' ||
+          phoneNumber[1] != '9';
 
       // Email validation
       emailError = email.isEmpty ||
@@ -141,9 +144,9 @@ class _SignUpPageState extends State<SignUpPage> {
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
     String phone = _phoneController.text.trim();
-    int points = 20;
+    int points = 400;
 
-    bool registerSuccess = await _authService.register(
+    int registerSuccess = await _authService.register(
       username,
       password,
       firstName,
@@ -153,7 +156,7 @@ class _SignUpPageState extends State<SignUpPage> {
       points,
     );
 
-    if (registerSuccess) {
+    if (registerSuccess == 1) {
       await _clearPreferences();
       await _login();
     } else {
@@ -161,8 +164,19 @@ class _SignUpPageState extends State<SignUpPage> {
         _isRegistering = false;
         _phoneValidating = false;
       });
-      _showSnackBar(
-          'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
+      if (registerSuccess == 0) {
+        _showSnackBar(
+            'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
+      }
+      if (registerSuccess == 2) {
+        _showSnackBar('Το email χρησιμοποιείται ήδη');
+      }
+      if (registerSuccess == 3) {
+        _showSnackBar('Ο αριθμός κινητού χρησιμοποιείται ήδη');
+      }
+      if (registerSuccess == 4) {
+        _showSnackBar('Το email και ο αριθμός κινητού χρησιμοποιούνται ήδη');
+      }
     }
   }
 
@@ -185,14 +199,16 @@ class _SignUpPageState extends State<SignUpPage> {
           context.read<GlobalStateProvider>().isAuthenticated = true;
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
+        await sendVerificationEmail();
+
         successPrint('------------LOGGED IN------------');
       } else {
         _showSnackBar('Λάθος στοιχεία εισόδου');
         errorPrint('------------LOGIN FAILED------------');
+        setState(() {
+          _isRegistering = false;
+        });
       }
-      setState(() {
-        _isRegistering = false;
-      });
     } else {
       FocusManager.instance.primaryFocus?.unfocus();
       floatingSnackBar(
@@ -202,19 +218,54 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
+  Future<void> sendVerificationEmail() async {
+    int counter = 0;
+    var response = await http.get(
+      Uri.parse('$apiUrl/user-auth-status/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${await getAccessToken()}',
+      },
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      successPrint(response.body);
+    } else {
+      errorPrint('${response.statusCode}');
+      errorPrint(response.body);
+    }
+
+    while (response.statusCode != 200 && counter < 5) {
+      await Future.delayed(const Duration(seconds: 30));
+      response = await http.get(
+        Uri.parse('$apiUrl/user-auth-status/'),
+        headers: {
+          'Authorization': 'Bearer ${await getAccessToken()}',
+        },
+      ).timeout(const Duration(seconds: 10));
+      counter++;
+      if (response.statusCode == 200) {
+        successPrint(response.body);
+      } else {
+        errorPrint('${response.statusCode}');
+        errorPrint(response.body);
+      }
+    }
+  }
+
   Future<bool> sendOtp(String phoneNumber, String otpCode) async {
     try {
       final response = await http
           .post(
-            Uri.parse('$apiUrl/send-otpsss/'),
+            Uri.parse('$apiUrl/send-otp/'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'phone_number': '+30$phoneNumber',
               'otp': otpCode,
             }),
           )
-          .timeout(const Duration(seconds: 5));
-
+          .timeout(const Duration(seconds: 10));
+      print(otpCode);
       // Check if the response was successful (status code 200)
       if (response.statusCode == 200) {
         return true; // Request successful
@@ -252,27 +303,21 @@ class _SignUpPageState extends State<SignUpPage> {
 
     int otpCode = generateRandom6DigitNumber();
     if (awaitMinutes == 0) {
-      print(otpCode);
       awaitMinutes++;
     } else {
       if (awaitMinutes == 1) {
         floatingSnackBar(
             message: 'Το sms θα σταλεί σε $awaitMinutes λεπτό',
             context: context);
+        Navigator.of(context).pop(false);
       } else {
         floatingSnackBar(
             message: 'Το sms θα σταλεί σε $awaitMinutes λεπτά',
             context: context);
+        Navigator.of(context).pop(false);
       }
     }
-    await http
-        .post(
-          Uri.parse('$apiUrl/send-otp/'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'phone_number': '+30$phoneNumber', 'otp': otpCode}),
-        )
-        .timeout(const Duration(seconds: 5)); // Adding a 5-second timeout]
-
+    sendOtp(phoneNumber, '$otpCode');
     startTimer();
     if (mounted) {
       await showDialog(
