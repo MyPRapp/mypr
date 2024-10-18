@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 
 import '../../../../Globals/structs.dart';
 import '../../../../Providers/club_provider.dart';
-import '../../../../Widgets/booking_card_widgets.dart';
 import '../../../../routes/app_router.gr.dart';
 
 @RoutePage()
@@ -97,13 +96,9 @@ class BookingDetailsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildPriceDetails(earnedPoints, discountPercentage),
-                      SizedBox(height: screenHeight * 0.03), // 3% height
+                      SizedBox(height: screenHeight * 0.03),
                       _buildRegularBottomSection(context),
-                      // if (booking.status == 2)
-                      //   _buildHistoryBottomSection(context, clubName)
-                      // else
-                      //   _buildRegularBottomSection(context),
-                      SizedBox(height: screenHeight * 0.05), // 5% height
+                      SizedBox(height: screenHeight * 0.05),
                     ],
                   ),
                 ],
@@ -388,53 +383,6 @@ class BookingDetailsPage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 30),
-      ],
-    );
-  }
-
-  Widget _buildHistoryBottomSection(BuildContext context, String clubName) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Για οποιαδήποτε απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-          ),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-            foregroundColor: Colors.white,
-            backgroundColor: const Color(0xFF9C0C04),
-          ),
-          onPressed: () {
-            AutoRouter.of(context).push(const ContactUsRoute());
-          },
-          child: const Text(
-            'Επικοινώνησε μαζί μας',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-          ),
-        ),
-        const SizedBox(height: 50),
-        const Text(
-          'Άφησε μία κριτική:',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 10),
-        InteractiveNameAndStars(
-          clubName: clubName,
-          initialStars: 0, // Replace with actual value if available
-        ),
       ],
     );
   }
