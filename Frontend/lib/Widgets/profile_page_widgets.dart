@@ -250,15 +250,19 @@ class GradientProgressBarState extends State<GradientProgressBar>
       curve: Curves.easeInOut,
     ))
       ..addListener(() async {
-        setState(() {});
-        if (_animation.isCompleted) {
+        if (mounted) {
+          setState(() {});
+        }
+        if (_animation.isCompleted && mounted) {
           setState(() {
             _showLabel = true;
           });
           await Future.delayed(const Duration(seconds: 4));
-          setState(() {
-            _showLabel = false;
-          });
+          if (mounted) {
+            setState(() {
+              _showLabel = false;
+            });
+          }
         }
       });
 
@@ -269,21 +273,22 @@ class GradientProgressBarState extends State<GradientProgressBar>
   void didUpdateWidget(covariant GradientProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.points != widget.points) {
-      // Update the animation end value smoothly
       _animation = Tween<double>(
-        begin: 0, // Start from the current animation value
+        begin: 0,
         end: widget.points / 20,
       ).animate(CurvedAnimation(
         parent: _controller,
         curve: Curves.easeInOut,
       ))
         ..addListener(() {
-          setState(() {});
+          if (mounted) {
+            setState(() {});
+          }
         });
 
       _controller
-        ..reset() // Reset the controller to the beginning
-        ..forward(); // Animate forward from 0 to the new end value
+        ..reset()
+        ..forward();
     }
   }
 
@@ -294,15 +299,17 @@ class GradientProgressBarState extends State<GradientProgressBar>
   }
 
   void _showPercentageLabel() async {
-    if (_animation.isCompleted) {
+    if (_animation.isCompleted && mounted) {
       if (_showLabel == false) {
         setState(() {
           _showLabel = true;
         });
         await Future.delayed(const Duration(seconds: 4));
-        setState(() {
-          _showLabel = false;
-        });
+        if (mounted) {
+          setState(() {
+            _showLabel = false;
+          });
+        }
       } else {
         setState(() {
           _showLabel = false;

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -124,8 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
       _lastNameController.text = _lastNameController.text[0].toUpperCase() +
           _lastNameController.text.substring(1);
     });
-    // If validation is successful
-    _showSnackBar('Στάλθηκε κωδικός με SMS');
+
     setState(() {
       _phoneValidating = true;
     });
@@ -257,8 +257,7 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       final response = await http
           .post(
-            Uri.parse(
-                '$apiUrl/send-otps/'), //TODO Change this back to send-otp/
+            Uri.parse('$apiUrl/send-otp/'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'phone_number': '+30$phoneNumber',
@@ -267,6 +266,7 @@ class _SignUpPageState extends State<SignUpPage> {
           )
           .timeout(const Duration(seconds: 10));
       print(otpCode);
+      _showSnackBar('Στάλθηκε κωδικός με SMS');
       // Check if the response was successful (status code 200)
       if (response.statusCode == 200) {
         return true; // Request successful
@@ -280,57 +280,57 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  int awaitMinutes = 0;
-  bool canSend = false;
+  int awaitMinutes = 1;
+  bool canSend = true;
+  Timer? timer; // Declare a Timer object
+
+  void startTimer() {
+    // Check if the timer is already active
+    if (timer != null && timer!.isActive) {
+      print("A timer is already running. Cannot start a new one.");
+      return; // Exit the function, don't start a new timer
+    }
+    // If no timer is running, proceed with starting a new one
+    canSend = false;
+
+    timer = Timer(Duration(minutes: awaitMinutes), () {
+      if (mounted) {
+        awaitMinutes++;
+        canSend = true;
+      }
+    });
+  }
+
   Future<bool> _showPhoneConfirmationDialog(String phoneNumber) async {
     String codeInput = '';
-    bool isCodeValid = false; // Simulate the validation result
-    bool showError = false; // Track whether to show the error message
-    int attemptCount = 0; // Track the number of attempts
-
-    int generateRandom6DigitNumber() {
-      Random random = Random();
-      int min = 100000; // Smallest 6-digit number
-      int max = 999999; // Largest 6-digit number
-      return min + random.nextInt(max - min + 1);
-    }
-
-    void startTimer() async {
-      canSend = false;
-      await Future.delayed(Duration(minutes: awaitMinutes));
-      awaitMinutes++;
-      canSend = true;
-    }
+    bool isCodeValid = false;
+    bool showError = false;
+    int attemptCount = 0;
 
     int otpCode = generateRandom6DigitNumber();
-    if (awaitMinutes == 0) {
-      awaitMinutes++;
-    } else {
+
+    if (!canSend) {
       if (awaitMinutes == 1) {
-        floatingSnackBar(
-            message: 'Το sms θα σταλεί σε $awaitMinutes λεπτό',
-            context: context);
+        _showSnackBar('Ξαναδοκίμασε σε 1 λεπτό');
       } else {
-        floatingSnackBar(
-            message: 'Το sms θα σταλεί σε $awaitMinutes λεπτά',
-            context: context);
+        _showSnackBar('Ξαναδοκίμασε σε $awaitMinutes λεπτά');
       }
       return false;
     }
     sendOtp(phoneNumber, '$otpCode');
-    startTimer();
+    startTimer(); // Start the timer to handle resending OTP
     if (mounted) {
       await showDialog(
+        barrierDismissible: false, // Prevents closing when tapping outside
         context: context,
         builder: (context) {
           return StatefulBuilder(
             builder: (context, setState) {
               return AlertDialog(
-                backgroundColor:
-                    Colors.black, // Match the dialog's background to your page
+                backgroundColor: Colors.black,
                 title: const Text(
                   'Επιβεβαίωση Κινητού',
-                  style: TextStyle(color: Colors.white), // Set title text color
+                  style: TextStyle(color: Colors.white),
                 ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -339,12 +339,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       keyboardType: TextInputType.number,
                       maxLength: 6,
-                      style: const TextStyle(
-                          color: Colors.white), // Input text color
+                      style: const TextStyle(color: Colors.white),
                       decoration: const InputDecoration(
                         hintText: 'Εισάγετε τον 6-ψήφιο κωδικό',
-                        hintStyle:
-                            TextStyle(color: Colors.grey), // Hint text color
+                        hintStyle: TextStyle(color: Colors.grey),
                         enabledBorder: OutlineInputBorder(
                           borderSide: BorderSide(color: Color(0xFF9C0C04)),
                         ),
@@ -356,7 +354,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         codeInput = value;
                       },
                     ),
-                    if (showError) // Show error message if showError is true
+                    if (showError)
                       const Padding(
                         padding: EdgeInsets.only(top: 8.0),
                         child: Text(
@@ -370,87 +368,92 @@ class _SignUpPageState extends State<SignUpPage> {
                   Column(
                     children: [
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           if (codeInput.length == 6) {
-                            if (attemptCount >= 3) {
-                              // If the user has tried more than 3 times, return false
-
-                              _showSnackBar(
-                                  'Ο αριθμός κινητού δεν επιβεβαιώθηκε');
-                              Navigator.of(context).pop(false);
-                              return;
-                            }
-
-                            // Simulate code validation (Replace with actual code validation)
                             if (codeInput == otpCode.toString()) {
-                              // Replace '123456' with actual logic
                               isCodeValid = true;
-
                               _showSnackBar(
                                   'Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
-                              Navigator.of(context).pop(false);
-                              return;
-                            } else {
-                              // Show the error message if the code is invalid
                               setState(() {
-                                showError = true;
-                                attemptCount++;
+                                showError = false;
                               });
-
-                              // Hide the error message after 4 seconds
-                              Future.delayed(const Duration(seconds: 2), () {
+                              isCodeValid = true;
+                              if (context.mounted) {
+                                Navigator.of(context).pop(true);
+                                return;
+                              }
+                            } else {
+                              if (attemptCount >= 3) {
+                                _showSnackBar(
+                                    'Ο αριθμός κινητού δεν επιβεβαιώθηκε');
                                 setState(() {
                                   showError = false;
                                 });
+                                isCodeValid = false;
+                                if (context.mounted) {
+                                  Navigator.of(context).pop(true);
+                                  return;
+                                }
+                              }
+                              setState(() {
+                                showError = true;
                               });
+                              attemptCount++;
+                              if (mounted) {
+                                if (showError = true) {
+                                  await Future.delayed(
+                                      const Duration(milliseconds: 1350));
+                                  if (showError = true) {
+                                    setState(() {
+                                      showError = false;
+                                    });
+                                  }
+                                }
+                              }
+                              isCodeValid = false;
+                              return;
                             }
                           }
                         },
                         child: const Text(
                           'Επιβεβαίωση',
-                          style: TextStyle(
-                              color:
-                                  Color(0xFF9C0C04)), // Set button text color
+                          style: TextStyle(color: Color(0xFF9C0C04)),
                         ),
                       ),
                       TextButton(
                         onPressed: () async {
                           if (canSend) {
                             sendOtp(phoneNumber, '$otpCode');
-                            floatingSnackBar(
-                                message: 'Στάλθηκε κωδικός με SMS',
-                                context: context);
                             startTimer();
                           } else {
                             if (awaitMinutes == 1) {
                               floatingSnackBar(
-                                  message:
-                                      'Ξαναδοκίμασε σε $awaitMinutes λεπτό',
-                                  context: context);
+                                message: 'Ξαναδοκίμασε σε 1 λεπτό',
+                                context: context,
+                              );
                             } else {
                               floatingSnackBar(
-                                  message:
-                                      'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
-                                  context: context);
+                                message: 'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+                                context: context,
+                              );
                             }
                           }
                         },
                         child: const Text(
                           'Επαναποστολή κωδικού',
-                          style: TextStyle(
-                              color: Color.fromARGB(
-                                  255, 255, 255, 255)), // Set button text color
+                          style: TextStyle(color: Colors.white),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ],
               );
-            }, //TODO Fix dialog when opened second time
+            },
           );
         },
       );
     }
+
     return isCodeValid;
   }
 
@@ -478,12 +481,20 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   void dispose() {
     super.dispose();
+    timer?.cancel();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+  }
+
+  int generateRandom6DigitNumber() {
+    Random random = Random();
+    int min = 100000;
+    int max = 999999;
+    return min + random.nextInt(max - min + 1);
   }
 
   void _togglePasswordVisibility() {

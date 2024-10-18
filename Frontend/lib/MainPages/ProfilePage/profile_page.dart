@@ -217,6 +217,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         children: [
                           if (!isVerified && isAuthenticated)
                             SizedBox(height: screenHeight * 0.02),
+                          if (!isAuthenticated)
+                            SizedBox(height: screenHeight * 0.05),
                           SizedBox(height: screenHeight * 0.02),
                           if (isAuthenticated)
                             Padding(
