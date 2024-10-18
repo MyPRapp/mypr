@@ -257,7 +257,8 @@ class _SignUpPageState extends State<SignUpPage> {
     try {
       final response = await http
           .post(
-            Uri.parse('$apiUrl/send-otp/'),
+            Uri.parse(
+                '$apiUrl/send-otps/'), //TODO Change this back to send-otp/
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               'phone_number': '+30$phoneNumber',
@@ -309,20 +310,18 @@ class _SignUpPageState extends State<SignUpPage> {
         floatingSnackBar(
             message: 'Το sms θα σταλεί σε $awaitMinutes λεπτό',
             context: context);
-        Navigator.of(context).pop(false);
       } else {
         floatingSnackBar(
             message: 'Το sms θα σταλεί σε $awaitMinutes λεπτά',
             context: context);
-        Navigator.of(context).pop(false);
       }
+      return false;
     }
     sendOtp(phoneNumber, '$otpCode');
     startTimer();
     if (mounted) {
       await showDialog(
         context: context,
-        barrierDismissible: false,
         builder: (context) {
           return StatefulBuilder(
             builder: (context, setState) {
@@ -375,9 +374,10 @@ class _SignUpPageState extends State<SignUpPage> {
                           if (codeInput.length == 6) {
                             if (attemptCount >= 3) {
                               // If the user has tried more than 3 times, return false
-                              Navigator.of(context).pop(false);
+
                               _showSnackBar(
                                   'Ο αριθμός κινητού δεν επιβεβαιώθηκε');
+                              Navigator.of(context).pop(false);
                               return;
                             }
 
@@ -385,9 +385,11 @@ class _SignUpPageState extends State<SignUpPage> {
                             if (codeInput == otpCode.toString()) {
                               // Replace '123456' with actual logic
                               isCodeValid = true;
-                              Navigator.of(context).pop(true);
+
                               _showSnackBar(
                                   'Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
+                              Navigator.of(context).pop(false);
+                              return;
                             } else {
                               // Show the error message if the code is invalid
                               setState(() {
@@ -444,7 +446,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 ],
               );
-            },
+            }, //TODO Fix dialog when opened second time
           );
         },
       );

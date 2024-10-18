@@ -1061,3 +1061,51 @@ class WorkingDays extends StatelessWidget {
     );
   }
 }
+
+class EmailConfirmationNotification extends StatelessWidget {
+  final VoidCallback onResendEmail;
+
+  const EmailConfirmationNotification({super.key, required this.onResendEmail});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            color: const Color.fromARGB(255, 255, 187, 0),
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Expanded(
+                  child: Text(
+                    'Για να προχωρήσεις σε κράτηση παρακαλώ επιβεβαίωσε το email σου',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                GestureDetector(
+                  onTap: onResendEmail,
+                  child: const Text(
+                    'Επαναποστολή',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

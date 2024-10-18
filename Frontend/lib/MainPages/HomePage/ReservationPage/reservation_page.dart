@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -43,6 +44,7 @@ class _ReservationPageState extends State<ReservationPage> {
   // State variables for managing the page
   bool isDiscountApplied = false; // Flag to check if discount is applied
   bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
+  bool isVerified = false;
 
 // List of catalogues for different types of services in the club
   List<CatalogueInfoStruct> localCatalogues = [
@@ -182,6 +184,48 @@ class _ReservationPageState extends State<ReservationPage> {
     }
   }
 
+  int awaitMinutes = 1;
+  bool canSend = true;
+  void startTimer() async {
+    setState(() {
+      canSend = false;
+    });
+    await Future.delayed(Duration(minutes: awaitMinutes));
+    setState(() {
+      awaitMinutes++;
+      canSend = true;
+    });
+  }
+
+  Future<void> sendVerificationEmail() async {
+    if (canSend) {
+      startTimer();
+      floatingSnackBar(
+          message: 'Στάλθηκε email επιβεβαίωσης', context: context);
+      var response = await http.get(
+        Uri.parse('$apiUrl/user-auth-status/'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${await getAccessToken()}',
+        },
+      ).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200) {
+        successPrint(response.body);
+      } else {
+        errorPrint('${response.statusCode}');
+        errorPrint(response.body);
+      }
+    } else {
+      if (awaitMinutes == 1) {
+        floatingSnackBar(message: 'Ξαναδοκίμασε σε 1 λεπτό', context: context);
+      } else {
+        floatingSnackBar(
+            message: 'Ξαναδοκίμασε σε $awaitMinutes λεπτά', context: context);
+      }
+    }
+  }
+
   void _updateCatalogues(List<CatalogueInfoStruct> catalogues) {
     setState(() {
       localCatalogues[0] = catalogues[0];
@@ -222,21 +266,28 @@ class _ReservationPageState extends State<ReservationPage> {
           body: RefreshIndicator.adaptive(
             color: const Color(0xFF9C0C04),
             onRefresh: _refresh, // Handle refresh action
-            child: Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+            child: Stack(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Colors.black, Color.fromARGB(255, 39, 39, 39)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: ListView(
+                    children: [
+                      // Build page header with club name
+                      buildContent(isAuthenticated, screenHeight,
+                          screenWidth), // Build form content and input fields
+                    ],
+                  ),
                 ),
-              ),
-              child: ListView(
-                children: [
-                  // Build page header with club name
-                  buildContent(isAuthenticated, screenHeight,
-                      screenWidth), // Build form content and input fields
-                ],
-              ),
+                if (!isVerified && isAuthenticated)
+                  EmailConfirmationNotification(
+                      onResendEmail: sendVerificationEmail)
+              ],
             ),
           ),
         ),
@@ -286,6 +337,7 @@ class _ReservationPageState extends State<ReservationPage> {
       padding: const EdgeInsets.all(15),
       child: Column(
         children: [
+          if (!isVerified && isAuthenticated) const SizedBox(height: 70),
           buildClubImage(), // Display club image
           const SizedBox(height: 20),
           WorkingDays(schedule: widget.club.clubAvailability),
@@ -502,6 +554,11 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Handles the form submission process, including validation and API calls.
   Future<void> _handleSubmit() async {
+    if (!isVerified) {
+      floatingSnackBar(
+          message: 'Επιβεβαίωσε το email σου πρώτα', context: context);
+      return;
+    }
     String rawName = _nameController.text;
     String formattedName = formatName(rawName);
     if (formattedName.isNotEmpty) {
