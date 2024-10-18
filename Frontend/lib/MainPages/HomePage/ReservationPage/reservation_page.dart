@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -186,14 +187,22 @@ class _ReservationPageState extends State<ReservationPage> {
 
   int awaitMinutes = 1;
   bool canSend = true;
-  void startTimer() async {
-    setState(() {
-      canSend = false;
-    });
-    await Future.delayed(Duration(minutes: awaitMinutes));
-    setState(() {
-      awaitMinutes++;
-      canSend = true;
+  Timer? timer; // Declare a Timer object
+
+  void startTimer() {
+    // Check if the timer is already active
+    if (timer != null && timer!.isActive) {
+      print("A timer is already running. Cannot start a new one.");
+      return; // Exit the function, don't start a new timer
+    }
+    // If no timer is running, proceed with starting a new one
+    canSend = false;
+
+    timer = Timer(Duration(minutes: awaitMinutes), () {
+      if (mounted) {
+        awaitMinutes++;
+        canSend = true;
+      }
     });
   }
 
@@ -624,7 +633,7 @@ class _ReservationPageState extends State<ReservationPage> {
       );
       // Retract points if a discount is applied
       if (isDiscountApplied && success) {
-        await retractPoints(20);
+        await retractPoints(400);
       }
       _handleSubmissionResponse(success);
     }
@@ -781,7 +790,9 @@ class _ReservationPageState extends State<ReservationPage> {
         });
         // Show the confirmation dialog and wait for the result
         final bool? result = await reservationReviewDialog();
-
+        if (mounted) {
+          context.read<UserProvider>().fetchUserDetailsFromServer();
+        }
         // If the user confirmed (result == true), perform actions
         if (result == true) {
           if (mounted) {

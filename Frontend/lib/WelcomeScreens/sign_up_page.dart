@@ -157,6 +157,7 @@ class _SignUpPageState extends State<SignUpPage> {
     );
 
     if (registerSuccess == 1) {
+      _showSnackBar('Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
       await _clearPreferences();
       await _login();
     } else {
@@ -372,8 +373,6 @@ class _SignUpPageState extends State<SignUpPage> {
                           if (codeInput.length == 6) {
                             if (codeInput == otpCode.toString()) {
                               isCodeValid = true;
-                              _showSnackBar(
-                                  'Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
                               setState(() {
                                 showError = false;
                               });
@@ -699,41 +698,10 @@ class _SignUpForm extends StatelessWidget {
             ),
           ),
 
-          Row(
-            children: [
-              SizedBox(
-                width: screenWidth * 0.1,
-              ),
-              CheckBoxWidget(
-                isCheckBoxPressed: isCheckBoxPressed,
-                toggleCheckBox: toggleCheckBox,
-                isRegistering: isRegistering,
-              ),
-              Text(
-                'Συμφωνώ με τους ',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              GestureDetector(
-                //TODO Change url
-                onTap: () {
-                  launchUrl(Uri.parse('https://www.instagram.com/mypr_app/'),
-                      mode: LaunchMode.externalApplication);
-                },
-                child: Text(
-                  'όρους χρήσης',
-                  style: TextStyle(
-                      decoration: TextDecoration.underline,
-                      decorationColor: const Color.fromARGB(200, 255, 255, 255),
-                      color: Colors.white,
-                      fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
-                      fontWeight: FontWeight.w800),
-                ),
-              )
-            ],
+          CheckBoxWidget(
+            isCheckBoxPressed: isCheckBoxPressed,
+            toggleCheckBox: toggleCheckBox,
+            isRegistering: isRegistering,
           ),
 
           SizedBox(height: screenHeight / 100),
@@ -1110,27 +1078,61 @@ class CheckBoxWidget extends StatefulWidget {
 class _CheckBoxWidgetState extends State<CheckBoxWidget> {
   @override
   Widget build(BuildContext context) {
-    return Transform.scale(
-      scale: 1.15,
-      child: Checkbox(
-        value: widget.isCheckBoxPressed,
-        fillColor: WidgetStateProperty.resolveWith((states) {
-          if (!states.contains(WidgetState.selected)) {
-            return const Color.fromARGB(94, 255, 255, 255);
-          }
-          return null;
-        }),
-        side: BorderSide.none,
-        checkColor: const Color(0xFF9C0C04),
-        activeColor: Colors.black,
-        onChanged: (newValue) {
-          if (!widget.isRegistering) {
+    return Row(
+      children: [
+        const SizedBox(width: 50),
+        Transform.scale(
+          scale: 1.15,
+          child: Checkbox(
+            value: widget.isCheckBoxPressed,
+            fillColor: WidgetStateProperty.resolveWith((states) {
+              if (!states.contains(WidgetState.selected)) {
+                return const Color.fromARGB(94, 255, 255, 255);
+              }
+              return null;
+            }),
+            side: BorderSide.none,
+            checkColor: const Color(0xFF9C0C04),
+            activeColor: Colors.black,
+            onChanged: (newValue) {
+              if (!widget.isRegistering) {
+                setState(() {
+                  widget.toggleCheckBox();
+                });
+              }
+            },
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
             setState(() {
               widget.toggleCheckBox();
             });
-          }
-        },
-      ),
+          },
+          child: const Text(
+            'Συμφωνώ με τους ',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        GestureDetector(
+          //TODO Change url
+          onTap: () {
+            launchUrl(Uri.parse('https://www.instagram.com/mypr_app/'),
+                mode: LaunchMode.externalApplication);
+          },
+          child: const Text(
+            'όρους χρήσης',
+            style: TextStyle(
+                decoration: TextDecoration.underline,
+                decorationColor: Color.fromARGB(200, 255, 255, 255),
+                color: Colors.white,
+                fontWeight: FontWeight.w800),
+          ),
+        )
+      ],
     );
   }
 }

@@ -35,7 +35,7 @@ class BookingDetailsPage extends StatelessWidget {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
-    const earnedPoints = 5;
+    const earnedPoints = 100;
 
     final discountPercentage =
         (double.parse(booking.fourbitString[3])).toInt() * 10;
@@ -98,10 +98,11 @@ class BookingDetailsPage extends StatelessWidget {
                     children: [
                       _buildPriceDetails(earnedPoints, discountPercentage),
                       SizedBox(height: screenHeight * 0.03), // 3% height
-                      if (booking.status == 2)
-                        _buildHistoryBottomSection(context, clubName)
-                      else
-                        _buildRegularBottomSection(context),
+                      _buildRegularBottomSection(context),
+                      // if (booking.status == 2)
+                      //   _buildHistoryBottomSection(context, clubName)
+                      // else
+                      //   _buildRegularBottomSection(context),
                       SizedBox(height: screenHeight * 0.05), // 5% height
                     ],
                   ),
@@ -280,11 +281,11 @@ class BookingDetailsPage extends StatelessWidget {
         ),
         SizedBox(height: screenHeight * 0.01),
         BuildRichText(label: 'Άτομα:', value: booking.persons.toString()),
-        if (booking.status != 2 && booking.comments.isNotEmpty) ...[
+        if (booking.status <= 1 && booking.comments.isNotEmpty) ...[
           SizedBox(height: screenHeight * 0.015),
           BuildRichText(label: 'Σχόλια:', value: booking.comments),
         ],
-        if (booking.status != 2)
+        if (booking.status <= 1)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

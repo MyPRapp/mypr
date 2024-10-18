@@ -27,13 +27,21 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  int points = 0;
   bool isVerified = false;
 
   @override
   void initState() {
     super.initState();
-    points = context.read<UserProvider>().userDetails.points;
+    _initPage();
+  }
+
+  Future<void> _initPage() async {
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) {
+      setState(() {
+        // points = context.read<UserProvider>().userDetails.points;
+      });
+    }
   }
 
   Future<void> _refresh() async {
@@ -56,15 +64,15 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
     }
-    if (points != 0) {
-      setState(() {
-        points = 0;
-      });
-    }
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() {
-      points = userProvider.userDetails.points;
-    });
+    // if (points != 0) {
+    //   setState(() {
+    //     points = 0;
+    //   });
+    // }
+    // await Future.delayed(const Duration(seconds: 1));
+    // setState(() {
+    //   points = userProvider.userDetails.points;
+    // });
   }
 
   void signOut() async {
@@ -141,14 +149,22 @@ class _ProfilePageState extends State<ProfilePage> {
 
   int awaitMinutes = 1;
   bool canSend = true;
-  void startTimer() async {
-    setState(() {
-      canSend = false;
-    });
-    await Future.delayed(Duration(minutes: awaitMinutes));
-    setState(() {
-      awaitMinutes++;
-      canSend = true;
+  Timer? timer; // Declare a Timer object
+
+  void startTimer() {
+    // Check if the timer is already active
+    if (timer != null && timer!.isActive) {
+      print("A timer is already running. Cannot start a new one.");
+      return; // Exit the function, don't start a new timer
+    }
+    // If no timer is running, proceed with starting a new one
+    canSend = false;
+
+    timer = Timer(Duration(minutes: awaitMinutes), () {
+      if (mounted) {
+        awaitMinutes++;
+        canSend = true;
+      }
     });
   }
 
@@ -189,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
-
+    final int points = context.watch<UserProvider>().userDetails.points;
     return PopScope(
       canPop: false,
       child: RefreshIndicator.adaptive(
