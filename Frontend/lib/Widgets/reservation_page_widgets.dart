@@ -841,7 +841,6 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        FocusManager.instance.primaryFocus?.unfocus();
         final now = DateTime.now();
         final lastDate = now.add(const Duration(days: 30));
 

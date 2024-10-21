@@ -37,9 +37,9 @@ class _BigClubCardState extends State<BigClubCard> {
     });
   }
 
-  List<bool> _daysOpen(String availabilityInBytes) {
-    return availabilityInBytes.split('').map((char) => char == '1').toList();
-  }
+  // List<bool> _daysOpen(String availabilityInBytes) {
+  //   return availabilityInBytes.split('').map((char) => char == '1').toList();
+  // }
 
   String processString(String input) {
     // Check if there are any commas in the string
@@ -59,7 +59,7 @@ class _BigClubCardState extends State<BigClubCard> {
   double _scale = 0;
   @override
   Widget build(BuildContext context) {
-    final daysOpen = _daysOpen(widget.club.clubAvailability);
+    // final daysOpen = _daysOpen(widget.club.clubAvailability);
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
     return GestureDetector(
@@ -159,11 +159,12 @@ class _BigClubCardState extends State<BigClubCard> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.all(screenHeight * 0.01),
-                  child: Column(
+                  child: const Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
+                      //TODO
+                      /*     Column(  
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           NameAndStars(
@@ -211,6 +212,7 @@ class _BigClubCardState extends State<BigClubCard> {
                           ],
                         ),
                       ),
+                    */
                     ],
                   ),
                 ),

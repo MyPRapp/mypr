@@ -141,22 +141,25 @@ class BookingDetailsPage extends StatelessWidget {
       borderRadius: BorderRadius.circular(15),
       child: SizedBox(
         child: Center(
-            child: club.localPhotoPath.isNotEmpty
-                ? Image.file(
-                    File(club.localPhotoPath),
-                    fit: BoxFit.fill,
-                  ) // Load from local file
-                : club.clubPhoto.isNotEmpty
-                    ? Image.network(
-                        club.clubPhoto,
-                        fit: BoxFit.fill,
-                      )
-                    : const Center(
-                        child: CircularProgressIndicator(
-                        color: Color(0xFF9C0C04),
-                        backgroundColor: Colors.black,
-                        strokeWidth: 2,
-                      ))),
+            child: AspectRatio(
+          aspectRatio: 5 / 3,
+          child: club.localPhotoPath.isNotEmpty
+              ? Image.file(
+                  File(club.localPhotoPath),
+                  fit: BoxFit.fill,
+                ) // Load from local file
+              : club.clubPhoto.isNotEmpty
+                  ? Image.network(
+                      club.clubPhoto,
+                      fit: BoxFit.fill,
+                    )
+                  : const Center(
+                      child: CircularProgressIndicator(
+                      color: Color(0xFF9C0C04),
+                      backgroundColor: Colors.black,
+                      strokeWidth: 2,
+                    )),
+        )),
       ),
     );
   }

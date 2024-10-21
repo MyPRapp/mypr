@@ -60,11 +60,11 @@ class FadeTextState extends State<FadeText> {
         AnimatedOpacity(
           opacity: _isVisible ? 1.0 : 0.0,
           duration: const Duration(seconds: 1), // Fade duration
-          child: const Text(
-            'Πόντοι:',
-            style: TextStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          // child: const Text( //TODO
+          //   'Πόντοι:',
+          //   style: TextStyle(
+          //       color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          // ),
         ),
         NumberScrollBox(
             scrollController: _scrollController, points: widget.points),
@@ -84,8 +84,9 @@ class NumberScrollBox extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 60,
+          //TODO add screenWidth in this container
+          width: MediaQuery.sizeOf(context).width * 0.15,
+          height: MediaQuery.sizeOf(context).width * 0.1,
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [Colors.black, Colors.red[900]!],
@@ -104,19 +105,19 @@ class NumberScrollBox extends StatelessWidget {
           child: SingleChildScrollView(
             controller: scrollController, // Use the scroll controller
             physics: const BouncingScrollPhysics(),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 15.0),
-                child: Text(
-                  '$points', // Fixed number to display
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+            child: const Center(
+                //   child: Padding( //TODO
+                //     padding: const EdgeInsets.symmetric(vertical: 15.0),
+                //     child: Text(
+                //       '$points', // Fixed number to display
+                //       style: const TextStyle(
+                //         fontSize: 24,
+                //         fontWeight: FontWeight.bold,
+                //         color: Colors.white,
+                //       ),
+                //     ),
+                //   ),
                 ),
-              ),
-            ),
           ),
         ),
       ],
@@ -138,12 +139,13 @@ class ProfileDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
+      //TODO Change fontsizes
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       backgroundColor: Colors.grey[900],
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.03),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -320,7 +322,9 @@ class GradientProgressBarState extends State<GradientProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    double progressWidth = MediaQuery.sizeOf(context).width - 50;
+    double progressWidth = MediaQuery.sizeOf(context).width -
+        MediaQuery.sizeOf(context).width *
+            0.15; //TODO Pass screenWidth from profile page
     double filledWidth = (progressWidth * _animation.value) / 100;
     return GestureDetector(
       onTap: _showPercentageLabel,
@@ -343,20 +347,21 @@ class GradientProgressBarState extends State<GradientProgressBar>
               ),
             ),
           ),
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                top:
-                    7.5, // Half the height of the circles to center-align the bar
-
-                child: Row(
+          Padding(
+            padding: EdgeInsets.only(
+                left: MediaQuery.sizeOf(context).width * 0.075,
+                right: MediaQuery.sizeOf(context).width * 0.075),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Stack(
                       children: [
                         Container(
                           width: progressWidth,
-                          height: 10,
+                          height: MediaQuery.sizeOf(context).width * 0.0125,
                           decoration: BoxDecoration(
                             color: Colors.grey[800],
                             borderRadius: BorderRadius.circular(10),
@@ -364,7 +369,7 @@ class GradientProgressBarState extends State<GradientProgressBar>
                         ),
                         Container(
                           width: filledWidth,
-                          height: 10,
+                          height: MediaQuery.sizeOf(context).width * 0.0125,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             gradient: LinearGradient(
@@ -381,41 +386,54 @@ class GradientProgressBarState extends State<GradientProgressBar>
                     ),
                   ],
                 ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (index) {
-                  bool isActive = (_animation.value >= (index * 20));
-                  return Column(
-                    children: [
-                      Container(
-                        height: 25,
-                        width: 25,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: List.generate(6, (index) {
+                    bool isActive = (_animation.value >= (index * 20));
+                    return Container(
+                      height: MediaQuery.sizeOf(context).width * 0.025,
+                      width: MediaQuery.sizeOf(context).width * 0.025,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isActive
+                            ? Color.fromARGB(255, (112 + index * 10),
+                                (13 + index), (6 + index))
+                            : Colors.grey[800],
+                        border: Border.all(
                           color: isActive
-                              ? Color.fromARGB(255, (112 + index * 10),
-                                  (13 + index), (6 + index))
-                              : Colors.grey[800],
-                          border: Border.all(
-                            color: isActive
-                                ? const Color.fromARGB(0, 0, 0, 0)
-                                : const Color.fromARGB(255, 0, 0, 0),
-                            width: 0,
-                          ),
+                              ? const Color.fromARGB(0, 0, 0, 0)
+                              : const Color.fromARGB(255, 0, 0, 0),
+                          width: 1,
                         ),
                       ),
-                      Text(
-                        '${index * 20}%',
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w600),
-                      )
-                    ],
-                  );
-                }),
-              ),
-            ],
-          )
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(
+                left: MediaQuery.sizeOf(context).width * 0.065,
+                right: MediaQuery.sizeOf(context).width * 0.05),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: List.generate(6, (index) {
+                return Text(
+                  textAlign: TextAlign.center,
+                  '${index * 20}%',
+                  style: TextStyle(
+                      fontSize: MediaQuery.sizeOf(context)
+                              .width * //TODO DON T CHANGE THIS TO FIXED
+                          0.035,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600),
+                );
+              }),
+            ),
+          ),
         ],
       ),
     );

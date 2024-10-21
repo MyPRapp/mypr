@@ -110,9 +110,9 @@ class _HomePageState extends State<HomePage> {
             child: ListView(
               children: [
                 _buildHeader(screenHeight, screenWidth),
-                _buildResultsTitle(screenHeight, screenWidth),
+                _buildResultsTitle(screenHeight, screenWidth), //TODO
                 _buildClubList(screenHeight, screenWidth),
-                _buildComingSoonText(),
+                // _buildComingSoonText(), //TODO
                 SizedBox(height: screenHeight / 40 * 6),
               ],
             ),
@@ -163,6 +163,7 @@ class _HomePageState extends State<HomePage> {
       child: GestureDetector(
         onTap: () => navigateToSearchTab(context),
         child: Container(
+          //TODO Make this container fixed depending on 3 or 4 screen resolutions
           alignment: Alignment.center,
           height: screenHeight / 17,
           width: screenWidth / 2.65,
@@ -177,20 +178,20 @@ class _HomePageState extends State<HomePage> {
               end: Alignment.bottomRight,
             ),
           ),
-          child: const TextField(
-            enabled: false,
-            decoration: InputDecoration(
-              hintText: 'Αναζήτηση',
-              hintStyle: TextStyle(color: Colors.grey),
-              filled: true,
-              fillColor: Colors.transparent,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8)),
-                borderSide: BorderSide.none,
-              ),
-              prefixIcon: Icon(Icons.search, color: Colors.grey),
-            ),
-          ),
+          // child: const TextField(
+          // enabled: false,
+          // decoration: InputDecoration(
+          //   hintText: 'Αναζήτηση',
+          //   hintStyle: TextStyle(color: Colors.grey),
+          //   filled: true,
+          //   fillColor: Colors.transparent,
+          //   border: OutlineInputBorder(
+          //     borderRadius: BorderRadius.all(Radius.circular(8)),
+          //     borderSide: BorderSide.none,
+          //   ),
+          //   prefixIcon: Icon(Icons.search, color: Colors.grey),
+          // ),
+          // ),
         ),
       ),
     );
@@ -212,14 +213,15 @@ class _HomePageState extends State<HomePage> {
           begin: Alignment.centerLeft,
           end: Alignment.center,
         ).createShader(bounds),
-        child: Text(
-          'Όλα τα αποτελέσματα',
-          style: TextStyle(
-            fontSize: screenWidth * 0.02 + screenHeight * 0.0125,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        // child:
+        //  Text(
+        //   'Όλα τα αποτελέσματα',
+        //   style: TextStyle(
+        //     fontSize: screenWidth * 0.02 + screenHeight * 0.0125,
+        //     fontWeight: FontWeight.bold,
+        //     color: Colors.white,
+        //   ),
+        // ),
       ),
     );
   }
@@ -248,15 +250,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildComingSoonText() {
-    return const Text(
-      textAlign: TextAlign.center,
-      'Περισσότερα club έρχονται σύντομα...',
-      style: TextStyle(
-        color: Colors.grey,
-        fontSize: 15,
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
+  // Widget _buildComingSoonText() {
+  //   return const Text(
+  //     textAlign: TextAlign.center,
+  //     'Περισσότερα club έρχονται σύντομα...',
+  //     style: TextStyle(
+  //       color: Colors.grey,
+  //       fontSize: 15,
+  //       fontWeight: FontWeight.w600,
+  //     ),
+  //   );
+  // }
 }

@@ -88,7 +88,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-            appBar: _buildAppBar(context),
+            appBar: _buildAppBar(context), //TODO Build a main app bar for all
             backgroundColor: const Color.fromARGB(200, 37, 37, 37),
             body: Container(
               decoration: const BoxDecoration(
@@ -134,6 +134,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            //TODO Change fontsizes for this page
                             const Text(
                               'Στείλε ένα email',
                               style: TextStyle(
@@ -220,11 +221,14 @@ class _ContactUsPageState extends State<ContactUsPage> {
                                 SizedBox(height: screenHeight * 0.02),
                                 GestureDetector(
                                   onTap: _launchInstagram,
-                                  child: const ImageIcon(
-                                    AssetImage(
+                                  child: ImageIcon(
+                                    const AssetImage(
                                         'assets/icons/instagram_icon.png'),
-                                    size: 40,
-                                    color: Color(0xFF9C0C04),
+                                    size: MediaQuery.sizeOf(context).height *
+                                            0.05 +
+                                        MediaQuery.sizeOf(context).width *
+                                            0.025,
+                                    color: const Color(0xFF9C0C04),
                                   ),
                                 ),
                               ],

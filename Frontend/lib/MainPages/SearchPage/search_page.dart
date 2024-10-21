@@ -54,14 +54,14 @@ class SearchPageState extends State<SearchPage> {
     });
   }
 
-  void _clearSearchField() {
-    setState(() {
-      _controller.clear();
-      _filterClubs('');
-      _isDropdownVisible = false;
-      FocusScope.of(context).unfocus();
-    });
-  }
+  // void _clearSearchField() {
+  //   setState(() {
+  //     _controller.clear();
+  //     _filterClubs('');
+  //     _isDropdownVisible = false;
+  //     FocusScope.of(context).unfocus();
+  //   });
+  // }
 
   void _onClubTap(String clubName) {
     if (_isDropdownVisible) {
@@ -107,12 +107,26 @@ class SearchPageState extends State<SearchPage> {
             ),
             child: Padding(
               padding: const EdgeInsets.all(20),
-              child: Column(
+              child: Stack(
                 children: [
-                  SizedBox(height: screenHeight * 0.04),
-                  _buildSearchField(),
-                  const SizedBox(height: 30),
-                  _buildDropdownList(screenHeight),
+                  Column(
+                    children: [
+                      SizedBox(height: screenHeight * 0.04),
+                      GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            setState(
+                                () => _isDropdownVisible = !_isDropdownVisible);
+                          },
+                          child: _buildSearchField()),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      SizedBox(height: screenHeight * 0.15),
+                      _buildDropdownList(screenHeight),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -126,22 +140,22 @@ class SearchPageState extends State<SearchPage> {
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        hintText: 'Βρες που θα παρτάρεις',
-        hintStyle: const TextStyle(color: Color.fromARGB(255, 182, 176, 176)),
-        border: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          borderSide: BorderSide.none,
-        ),
-        prefixIcon: const Icon(Icons.search, color: Colors.grey),
-        suffixIcon: _controller.text.isNotEmpty
-            ? IconButton(
-                icon: const Icon(Icons.clear, color: Colors.grey),
-                onPressed: _clearSearchField,
-              )
-            : null,
-      ),
+      // style: const TextStyle(color: Colors.white), //TODO
+      // decoration: InputDecoration(
+      //   hintText: 'Βρες που θα παρτάρεις',
+      //   hintStyle: const TextStyle(color: Color.fromARGB(255, 182, 176, 176)),
+      //   border: const OutlineInputBorder(
+      //     borderRadius: BorderRadius.all(Radius.circular(8)),
+      //     borderSide: BorderSide.none,
+      //   ),
+      //   prefixIcon: const Icon(Icons.search, color: Colors.grey),
+      //   suffixIcon: _controller.text.isNotEmpty
+      //       ? IconButton(
+      //           icon: const Icon(Icons.clear, color: Colors.grey),
+      //           onPressed: _clearSearchField,
+      //         )
+      //       : null,
+      // ),
     );
   }
 
@@ -170,8 +184,8 @@ class SearchPageState extends State<SearchPage> {
                 return Column(
                   children: [
                     ListTile(
-                      title: Text(clubName,
-                          style: const TextStyle(color: Colors.white)),
+                      // title: Text(clubName, //TODO
+                      //     style: const TextStyle(color: Colors.white)),
                       onTap: () => _onClubTap(clubName),
                     ),
                     if (index != _filteredClubs.length - 1)
