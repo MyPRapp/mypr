@@ -49,22 +49,19 @@ class ReservationReview extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
               buildInfoRow('Όνομα κράτησης:',
                   context.read<ReservationProvider>().reservationInfo[1]),
               buildInfoRow('Μαγαζί:', reservationInfo[2]),
-              buildInfoRow('Αριθμός ατόμων:', reservationInfo[3].toString()),
-              const Padding(
-                padding: EdgeInsets.only(top: 10),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Φιάλες',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+              buildInfoRow('Άτομα:', reservationInfo[3].toString()),
+              SizedBox(height: MediaQuery.sizeOf(context).height * 0.015),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: const Text(
+                  'Φιάλες',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
                   ),
                 ),
               ),
@@ -78,7 +75,7 @@ class ReservationReview extends StatelessWidget {
               if (reservationInfo[9].isNotEmpty)
                 _buildCommentSection(reservationInfo[9]),
               buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
-              const SizedBox(height: 20),
+              SizedBox(height: MediaQuery.sizeOf(context).height * 0.03),
               ElevatedButton(
                 onPressed: () {
                   // Close the confirmation dialog and return `true` as a result
@@ -164,7 +161,6 @@ class CommentSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 10),
         const Text(
           'Σχόλια (Προαιρετικό)',
           style: TextStyle(
@@ -173,7 +169,7 @@ class CommentSection extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: MediaQuery.sizeOf(context).height * 0.01),
         TextField(
           controller: commentController,
           maxLength: 200,
@@ -238,17 +234,20 @@ class PackagesInfo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenHeight = MediaQuery.sizeOf(context).height;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.symmetric(
+          vertical: MediaQuery.sizeOf(context).height * 0.015),
       child: Card(
         color: const Color.fromARGB(179, 85, 85, 85),
         elevation: 10,
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.03),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildPackageDetails(),
+              //TODO Change fontsizes
+              _buildPackageDetails(screenHeight),
               _buildPriceDetails(),
             ],
           ),
@@ -257,7 +256,7 @@ class PackagesInfo extends StatelessWidget {
     );
   }
 
-  Widget _buildPackageDetails() {
+  Widget _buildPackageDetails(double screenHeight) {
     return Expanded(
       flex: 1,
       child: Column(
@@ -271,7 +270,7 @@ class PackagesInfo extends StatelessWidget {
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: screenHeight * 0.01),
           Text(
             '$maxPersons άτομα',
             style: const TextStyle(
@@ -343,26 +342,23 @@ class NameTextFieldState extends State<NameTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 25),
-      child: TextField(
-        controller: widget.nameController,
-        focusNode: focusNode,
-        inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
-        decoration: const InputDecoration(
-          labelText: 'Όνομα κράτησης',
-          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
+    return TextField(
+      controller: widget.nameController,
+      focusNode: focusNode,
+      inputFormatters: [AllowSpacesNoEmojisTextInputFormatter()],
+      decoration: const InputDecoration(
+        labelText: 'Όνομα κράτησης',
+        labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        style: const TextStyle(color: Colors.white),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
       ),
+      style: const TextStyle(color: Colors.white),
     );
   }
 
@@ -395,79 +391,83 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
     final reservationProvider = Provider.of<ReservationProvider>(context);
     final maxPersons = reservationProvider.maxPersons;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: TextField(
-        focusNode: _focusNode,
-        readOnly: true,
-        controller: TextEditingController(
-            text: reservationProvider
-                .getInfo(3)
-                .toString()), // Persons at index 3
-        decoration: InputDecoration(
-          suffix: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildRemoveButton(reservationProvider),
-              _buildAddButton(reservationProvider, maxPersons, context),
-            ],
-          ),
-          labelText: 'Αριθμός ατόμων',
-          labelStyle: const TextStyle(color: Color(0xFF9C0C04)),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-            borderRadius: BorderRadius.all(Radius.circular(8)),
-          ),
+    return TextField(
+      focusNode: _focusNode,
+      readOnly: true,
+      controller: TextEditingController(
+          text:
+              reservationProvider.getInfo(3).toString()), // Persons at index 3
+      decoration: InputDecoration(
+        suffix: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildRemoveButton(reservationProvider),
+            _buildAddButton(reservationProvider, maxPersons, context),
+          ],
         ),
-        style: const TextStyle(color: Colors.white),
+        labelText: 'Αριθμός ατόμων',
+        labelStyle: const TextStyle(color: Color(0xFF9C0C04)),
+        enabledBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        focusedBorder: const OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
       ),
+      style: const TextStyle(color: Colors.white),
     );
   }
 
   Widget _buildRemoveButton(ReservationProvider reservationProvider) {
-    return IconButton(
-      onPressed: () async {
-        _focusNode.requestFocus();
-        int persons = reservationProvider.getInfo(3);
-        if (persons > 1) {
-          reservationProvider.setInfo(3, persons - 1);
-        }
-        await Future.delayed(const Duration(milliseconds: 2500));
-        _focusNode.unfocus();
-      },
-      icon: const Icon(Icons.remove, color: Colors.white),
+    return SizedBox(
+      height: 10,
+      width: 30,
+      child: IconButton(
+        onPressed: () async {
+          _focusNode.requestFocus();
+          int persons = reservationProvider.getInfo(3);
+          if (persons > 1) {
+            reservationProvider.setInfo(3, persons - 1);
+          }
+          await Future.delayed(const Duration(milliseconds: 2500));
+          _focusNode.unfocus();
+        },
+        icon: const Icon(Icons.remove, color: Colors.white, size: 15),
+      ),
     );
   }
 
   Widget _buildAddButton(ReservationProvider reservationProvider,
       int maxPersons, BuildContext context) {
-    return IconButton(
-      onPressed: () async {
-        _focusNode.requestFocus();
-        if (_validateBeforeAdding(reservationProvider, context)) {
-          int persons = reservationProvider.getInfo(3);
-          if (persons < maxPersons) {
-            reservationProvider.setInfo(3, persons + 1);
-          } else if (persons == maxPersons) {
-            floatingSnackBar(
-                message:
-                    'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινώνησε μαζί μας.',
-                context: context,
-                duration: const Duration(milliseconds: 3000));
+    return SizedBox(
+      height: 10,
+      width: 30,
+      child: IconButton(
+        onPressed: () async {
+          _focusNode.requestFocus();
+          if (_validateBeforeAdding(reservationProvider, context)) {
+            int persons = reservationProvider.getInfo(3);
+            if (persons < maxPersons) {
+              reservationProvider.setInfo(3, persons + 1);
+            } else if (persons == maxPersons) {
+              floatingSnackBar(
+                  message:
+                      'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινώνησε μαζί μας.',
+                  context: context,
+                  duration: const Duration(milliseconds: 3000));
+            }
+            await Future.delayed(const Duration(milliseconds: 2500));
+            _focusNode.unfocus();
+          } else {
+            await Future.delayed(const Duration(milliseconds: 1000));
+            _focusNode.unfocus();
           }
-          await Future.delayed(const Duration(milliseconds: 2500));
-          _focusNode.unfocus();
-        } else {
-          await Future.delayed(const Duration(milliseconds: 1000));
-          _focusNode.unfocus();
-        }
-      },
-      icon: const Icon(Icons.add, color: Colors.white),
+        },
+        icon: const Icon(Icons.add, color: Colors.white, size: 15),
+      ),
     );
   }
 
@@ -638,7 +638,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
             ),
             child: priceText(),
           ),
-        ),
+        ), // MediaQuery.sizeOf(context).
         const SizedBox(height: 10),
         Padding(
           padding: const EdgeInsets.only(bottom: 25),
@@ -889,28 +889,25 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           }
         }
       },
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 25),
-        child: InputDecorator(
-          decoration: const InputDecoration(
-            labelText: 'Ημερομηνία κράτησης',
-            labelStyle: TextStyle(color: Color(0xFF9C0C04)),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-            ),
+      child: InputDecorator(
+        decoration: const InputDecoration(
+          labelText: 'Ημερομηνία κράτησης',
+          labelStyle: TextStyle(color: Color(0xFF9C0C04)),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0x4C9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
-          child: Text(
-            _selectedDate != null
-                ? DateFormat('dd MMMM, yyyy', 'el')
-                    .format(_selectedDate!) // Greek format
-                : 'Επίλεξε ημερομηνία',
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF9C0C04), width: 4),
+            borderRadius: BorderRadius.all(Radius.circular(8)),
           ),
+        ),
+        child: Text(
+          _selectedDate != null
+              ? DateFormat('dd MMMM, yyyy', 'el')
+                  .format(_selectedDate!) // Greek format
+              : 'Επίλεξε ημερομηνία',
+          style: const TextStyle(color: Colors.white, fontSize: 16),
         ),
       ),
     );
@@ -978,17 +975,25 @@ Future<void> retractPoints(int pointsToRetract) async {
   }
 }
 
-class LocationWidget extends StatelessWidget {
+class LocationWidget extends StatefulWidget {
   final String locationName;
 
-  const LocationWidget({super.key, required this.locationName});
+  LocationWidget({super.key, required this.locationName});
+
+  @override
+  State<LocationWidget> createState() => _LocationWidgetState();
+}
+
+class _LocationWidgetState extends State<LocationWidget> {
+  bool _isPressed = false;
 
   Future<void> _openLocation() async {
-    final Uri googleMapsUri = Uri.parse('comgooglemaps://?q=$locationName');
+    final Uri googleMapsUri =
+        Uri.parse('comgooglemaps://?q=${widget.locationName}');
     final Uri appleMapsUri =
-        Uri.parse('http://maps.apple.com/?q=$locationName');
+        Uri.parse('http://maps.apple.com/?q=${widget.locationName}');
     final Uri browserUri = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=$locationName');
+        'https://www.google.com/maps/search/?api=1&query=${widget.locationName}');
 
     try {
       if (await canLaunchUrl(googleMapsUri)) {
@@ -1005,20 +1010,31 @@ class LocationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: _openLocation,
+    return InkWell(
+      onTap: _openLocation, // Handle the tap
+      onHighlightChanged: (isPressed) {
+        // This changes the state on tap to update color
+        setState(() {
+          _isPressed = isPressed;
+        });
+      },
+      borderRadius: BorderRadius.circular(
+          10.0), // Ensures ripple effect follows the shape
+      splashColor: Colors.redAccent, // Change the splash color if you like
       child: Container(
         padding: const EdgeInsets.all(16.0),
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 68, 68, 68),
+          color: _isPressed
+              ? const Color.fromARGB(255, 49, 49, 49) // Change color on tap
+              : const Color.fromARGB(255, 68, 68, 68),
           borderRadius: BorderRadius.circular(10.0),
         ),
         child: Row(
           children: [
             const Icon(Icons.location_on, color: Colors.white),
-            const SizedBox(width: 8.0),
+            SizedBox(width: MediaQuery.sizeOf(context).width * 0.02),
             Text(
-              locationName,
+              widget.locationName,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16.0,
@@ -1052,8 +1068,10 @@ class WorkingDays extends StatelessWidget {
           days[index],
           style: TextStyle(
             fontSize: 24.0,
-            fontWeight: isOpen ? FontWeight.bold : FontWeight.w600,
-            color: isOpen ? Colors.grey : Colors.black,
+            fontWeight: FontWeight.w700,
+            color: isOpen
+                ? const Color.fromARGB(255, 255, 255, 255)
+                : const Color.fromARGB(255, 59, 59, 59),
           ),
         );
       }),

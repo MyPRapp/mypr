@@ -19,7 +19,6 @@ import '../../../Widgets/club_card_widgets.dart';
 import '../../../Widgets/reservation_page_widgets.dart';
 import '../../../routes/app_router.gr.dart';
 import '../../../services/auth_service.dart';
-import '../../../services/booking_service.dart';
 
 @RoutePage()
 class ReservationPage extends StatefulWidget {
@@ -45,7 +44,7 @@ class _ReservationPageState extends State<ReservationPage> {
   // State variables for managing the page
   bool isDiscountApplied = false; // Flag to check if discount is applied
   bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
-  bool isVerified = false;
+  bool isVerified = true;
 
 // List of catalogues for different types of services in the club
   List<CatalogueInfoStruct> localCatalogues = [
@@ -54,13 +53,11 @@ class _ReservationPageState extends State<ReservationPage> {
     createCatalogue('Premium'),
   ];
 
-////////////////////TODO CHECK THIS PART
   // Controllers and keys for managing form inputs
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _commentController = TextEditingController();
   final GlobalKey<CategoriesTextFieldState> categoriesTextFieldKey =
       GlobalKey<CategoriesTextFieldState>();
-////////////////////
 
   /// Initializes the reservation page by setting the club's catalogues and resetting form data.
   void _initializePage() {
@@ -343,29 +340,35 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget buildContent(
       bool isAuthenticated, double screenHeight, double screenWidth) {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding:
+          EdgeInsets.only(left: screenWidth * 0.04, right: screenWidth * 0.04),
       child: Column(
         children: [
-          if (!isVerified && isAuthenticated) const SizedBox(height: 70),
-          buildClubImage(), // Display club image
-          const SizedBox(height: 20),
+          if (!isVerified && isAuthenticated)
+            SizedBox(height: screenHeight * 0.1)
+          else
+            SizedBox(height: screenHeight * 0.04),
+          buildClubImage(screenHeight, screenWidth), // Display club image
+          SizedBox(height: screenHeight * 0.02),
           WorkingDays(schedule: widget.club.clubAvailability),
-          const SizedBox(height: 20),
+          SizedBox(height: screenHeight * 0.02),
           LocationWidget(locationName: widget.club.clubLocation),
-          const SizedBox(height: 50),
+          SizedBox(height: screenHeight * 0.075),
           buildTitle('Φιάλες και Τιμές'), // Display packages
-          const SizedBox(height: 25),
+          SizedBox(height: screenHeight * 0.03),
           buildPackageInfo(),
-          const SizedBox(height: 40),
+          SizedBox(height: screenHeight * 0.075),
           isAuthenticated
               ? Column(
                   children: [
                     buildTitle('Κάνε κράτηση'), // Display booking form
-                    const SizedBox(height: 50),
-                    buildReservationForm(), const SizedBox(height: 120),
+                    SizedBox(height: screenHeight * 0.045),
+                    buildReservationForm(screenHeight),
+                    SizedBox(height: screenHeight * 0.12),
                   ],
                 )
               : Column(
+                  //TODO Change button's size and its text's fontsize
                   children: [
                     buildTitle(
                         'Ενδιαφέρεσαι για κράτηση;'), // Display booking form
@@ -412,33 +415,31 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the club image or a placeholder in case of an error.
-  Widget buildClubImage() {
-    return Padding(
-        padding: const EdgeInsets.all(15),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: SizedBox(
-            width: 520,
-            height:
-                350, // Display the loaded image (either from the network or local storage)
-            child: widget.club.localPhotoPath.isNotEmpty
-                ? Image.file(
-                    File(widget.club.localPhotoPath),
+  Widget buildClubImage(double screenHeight, double screenWidth) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(screenHeight * screenWidth * 0.00002),
+      child: SizedBox(
+        width: screenWidth * 0.75,
+        height: screenHeight *
+            0.35, // Display the loaded image (either from the network or local storage)
+        child: widget.club.localPhotoPath.isNotEmpty
+            ? Image.file(
+                File(widget.club.localPhotoPath),
+                fit: BoxFit.fill,
+              ) // Load from local file
+            : widget.club.clubPhoto.isNotEmpty
+                ? Image.network(
+                    widget.club.clubPhoto,
                     fit: BoxFit.fill,
-                  ) // Load from local file
-                : widget.club.clubPhoto.isNotEmpty
-                    ? Image.network(
-                        widget.club.clubPhoto,
-                        fit: BoxFit.fill,
-                      )
-                    : const Center(
-                        child: CircularProgressIndicator(
-                        color: Color(0xFF9C0C04),
-                        backgroundColor: Colors.black,
-                        strokeWidth: 2,
-                      )),
-          ),
-        ));
+                  )
+                : const Center(
+                    child: CircularProgressIndicator(
+                    color: Color(0xFF9C0C04),
+                    backgroundColor: Colors.black,
+                    strokeWidth: 2,
+                  )),
+      ),
+    );
   }
 
   /// Builds the package information section with available services.
@@ -464,15 +465,16 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
-//TODO Check the buildReservationForm
   /// Builds the reservation form with various input fields.
-  Widget buildReservationForm() {
+  Widget buildReservationForm(double screenHeight) {
     return Column(
       children: [
         NameTextField(nameController: _nameController),
+        SizedBox(height: screenHeight * 0.025),
         BookingDatePicker(
             days: widget.club.clubAvailability,
             unavailableDays: widget.club.clubNotAvailable),
+        SizedBox(height: screenHeight * 0.025),
         CategoriesTextField(
           key: categoriesTextFieldKey,
           regularCatalogue: localCatalogues[0],
@@ -484,9 +486,12 @@ class _ReservationPageState extends State<ReservationPage> {
           },
         ),
         const PersonsTextField(),
+        SizedBox(height: screenHeight * 0.035),
         CommentSection(
             commentController: _commentController), // Optional comment field
+        SizedBox(height: screenHeight * 0.045),
         buildDiscountCheckbox(), // Discount checkbox
+        SizedBox(height: screenHeight * 0.025),
         buildSubmitButton(), // Submit button
       ],
     );
@@ -623,14 +628,15 @@ class _ReservationPageState extends State<ReservationPage> {
       }
 
       // Submit the reservation form
-      bool success = await BookingService().submitForm(
+      bool success = true;
+      /*  await BookingService().submitForm( //TODO Remove comment
         reservationProvider.getInfo(1),
         reservationProvider.getInfo(2),
         _generateFourBitString(),
         reservationProvider.getInfo(8),
         reservationProvider.getInfo(3).toString(),
         reservationProvider.getInfo(9),
-      );
+      ); */
       // Retract points if a discount is applied
       if (isDiscountApplied && success) {
         await retractPoints(400);
@@ -681,8 +687,8 @@ class _ReservationPageState extends State<ReservationPage> {
               buildInfoRow(
                   'Όνομα κράτησης:', reservationProvider.reservationInfo[1]),
               buildInfoRow('Μαγαζί:', reservationProvider.reservationInfo[2]),
-              buildInfoRow('Αριθμός ατόμων:',
-                  reservationProvider.reservationInfo[3].toString()),
+              buildInfoRow(
+                  'Άτομα:', reservationProvider.reservationInfo[3].toString()),
               buildInfoRow('Ημερομηνία:', formattedDate),
               buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               const SizedBox(height: 20),

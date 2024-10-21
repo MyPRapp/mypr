@@ -202,7 +202,7 @@ class LoginBody extends StatelessWidget {
                       child: const Text('Παράλειψη',
                           style: TextStyle(
                             color: Color.fromARGB(255, 123, 123, 123),
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w700, //TODO Fix fontsize
                           )),
                     ),
                   ),
@@ -240,7 +240,7 @@ class LoginBody extends StatelessWidget {
                         obscureText: obscureText,
                         cursorColor: const Color.fromARGB(125, 244, 67, 54),
                         style: TextStyle(
-                          fontSize: screenHeight * screenWidth * 0.000052,
+                          fontSize: 20,
                           fontWeight: FontWeight.w600,
                           color: Colors.white,
                         ),
@@ -248,7 +248,7 @@ class LoginBody extends StatelessWidget {
                           contentPadding: EdgeInsets.all(screenWidth * 0.02),
                           hintText: 'Κωδικός',
                           hintStyle: TextStyle(
-                            fontSize: screenHeight * screenWidth * 0.000052,
+                            fontSize: 20,
                             fontWeight: FontWeight.w600,
                             color: const Color.fromARGB(132, 199, 199, 199),
                           ),
@@ -259,6 +259,7 @@ class LoginBody extends StatelessWidget {
                     IconButton(
                       onPressed: onTogglePasswordVisibility,
                       icon: Icon(
+                        //TODO
                         size: screenHeight * 0.03,
                         obscureText ? Icons.visibility_off : Icons.visibility,
                         color: const Color(0xFF9C0C04),
@@ -366,7 +367,7 @@ class LoginTextField extends StatelessWidget {
         obscureText: isObscure,
         cursorColor: const Color.fromARGB(125, 244, 67, 54),
         style: TextStyle(
-          fontSize: screenHeight * screenWidth * 0.000052,
+          fontSize: 20, //TODO Fix fontsize
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
@@ -374,7 +375,7 @@ class LoginTextField extends StatelessWidget {
           contentPadding: EdgeInsets.all(screenWidth * 0.02),
           hintText: hintText,
           hintStyle: TextStyle(
-            fontSize: screenHeight * screenWidth * 0.000052,
+            fontSize: 20,
             fontWeight: FontWeight.w600,
             color: const Color.fromARGB(132, 199, 199, 199),
           ),
@@ -413,7 +414,7 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
                   'Πρώτη φορά εδώ;',
                   style: TextStyle(
                     color: const Color.fromARGB(104, 255, 255, 255),
-                    fontSize: screenHeight * screenWidth * 0.000045,
+                    fontSize: 20,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -502,6 +503,7 @@ class LoginFooter extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
               )
             : const Icon(
+                //TODO
                 Icons.arrow_forward,
                 color: Colors.black,
               ));

@@ -201,7 +201,7 @@ class ProfileInfoRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "$label:",
+          "$label:", //TODO Change fontsizes
           style: const TextStyle(
             color: Colors.grey,
             fontSize: 16,

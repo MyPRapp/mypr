@@ -97,7 +97,8 @@ class _BigClubCardState extends State<BigClubCard> {
           height: screenHeight / 6,
           decoration: BoxDecoration(
               color: const Color.fromARGB(57, 0, 0, 0),
-              borderRadius: BorderRadius.circular(7.5)),
+              borderRadius:
+                  BorderRadius.circular(screenHeight * screenWidth * 0.00002)),
           child: Row(
             children: [
               Stack(
@@ -107,11 +108,13 @@ class _BigClubCardState extends State<BigClubCard> {
                     duration: const Duration(milliseconds: 600),
                     curve: Curves.easeOut,
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                          bottomLeft: Radius.circular(7.5),
-                          topLeft: Radius.circular(7.5)),
+                      borderRadius: BorderRadius.only(
+                          bottomLeft: Radius.circular(
+                              screenHeight * screenWidth * 0.00002),
+                          topLeft: Radius.circular(
+                              screenHeight * screenWidth * 0.00002)),
                       child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.17,
+                        height: MediaQuery.of(context).size.height * 0.2,
                         width: MediaQuery.of(context).size.width * 0.3,
                         child: widget.club.localPhotoPath.isNotEmpty
                             ? Image(
@@ -122,7 +125,7 @@ class _BigClubCardState extends State<BigClubCard> {
                             : widget.club.clubPhoto.isNotEmpty
                                 ? Image.network(
                                     widget.club.clubPhoto,
-                                    fit: BoxFit.cover,
+                                    fit: BoxFit.fill,
                                     loadingBuilder: (BuildContext context,
                                         Widget child,
                                         ImageChunkEvent? loadingProgress) {

@@ -398,41 +398,42 @@ class _ProfilePageState extends State<ProfilePage> {
                         ),
                         if (isAuthenticated) SizedBox(height: screenHeight / 8),
                         if (isAuthenticated)
-                          // Center( //TODO
-                          //   child: GestureDetector(
-                          //     behavior: HitTestBehavior.translucent,
-                          //     onTap: signOut,
-                          //     child: Container(
-                          //       height: screenHeight * 0.07,
-                          //       width: screenWidth / 2.2,
-                          //       decoration: BoxDecoration(
-                          //         borderRadius: BorderRadius.circular(30),
-                          //         gradient: const LinearGradient(
-                          //             begin: Alignment.topRight,
-                          //             colors: [
-                          //               Color.fromARGB(183, 67, 2, 2),
-                          //               Color.fromARGB(255, 0, 0, 0),
-                          //             ]),
-                          //       ),
-                          //       alignment: Alignment.center,
-                          //       child: Text(
-                          //         textAlign: TextAlign.center,
-                          //         'Αποσύνδεση',
-                          //         style: TextStyle(
-                          //           fontSize:
-                          //               screenWidth * screenHeight * 0.00006,
-                          //           fontWeight: FontWeight.w700,
-                          //           color: const Color.fromARGB(
-                          //               255, 145, 145, 145),
-                          //         ),
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
-                          if (isAuthenticated)
-                            SizedBox(
-                              height: screenHeight * 0.12,
+                          Center(
+                            //TODO
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.translucent,
+                              onTap: signOut,
+                              child: Container(
+                                height: screenHeight * 0.07,
+                                width: screenWidth / 2.2,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(30),
+                                  gradient: const LinearGradient(
+                                      begin: Alignment.topRight,
+                                      colors: [
+                                        Color.fromARGB(183, 67, 2, 2),
+                                        Color.fromARGB(255, 0, 0, 0),
+                                      ]),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  textAlign: TextAlign.center,
+                                  'Αποσύνδεση',
+                                  style: TextStyle(
+                                    fontSize:
+                                        screenWidth * screenHeight * 0.00006,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color.fromARGB(
+                                        255, 145, 145, 145),
+                                  ),
+                                ),
+                              ),
                             ),
+                          ),
+                        if (isAuthenticated)
+                          SizedBox(
+                            height: screenHeight * 0.12,
+                          ),
                         if (!isAuthenticated)
                           SizedBox(height: screenHeight * 0.1),
                         if (!isAuthenticated)
