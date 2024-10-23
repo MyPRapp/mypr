@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Providers/global_state_provider.dart';
+import '../routes/app_router.gr.dart';
 
 String apiUrl = 'http://${GlobalStateProvider().validatedIp}/api';
 
@@ -173,10 +176,119 @@ String normalizePhoneNumber(String phoneNumber) {
 Widget buildTitle(String title) {
   return Text(
     title,
-    style: const TextStyle(
-      fontSize: 25,
-      fontWeight: FontWeight.bold,
+    style: TextStyle(
+      fontSize: 20.sp,
+      fontWeight: FontWeight.w700,
       color: Colors.white,
     ),
   );
+}
+
+AppBar buildAppBar(BuildContext context, String title) {
+  return AppBar(
+    centerTitle: false,
+    backgroundColor: Colors.black,
+    title: Text(
+      title,
+      style: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    leading: IconButton(
+      icon: const Icon(
+        Icons.chevron_left,
+        color: Colors.white,
+      ),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    ),
+  );
+}
+
+class EmailConfirmationNotification extends StatelessWidget {
+  final VoidCallback onResendEmail;
+  final String text;
+
+  const EmailConfirmationNotification(
+      {super.key, required this.onResendEmail, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color.fromARGB(255, 255, 187, 0),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 12.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          SizedBox(width: 10.w),
+          GestureDetector(
+            onTap: onResendEmail,
+            child: Text(
+              'Επαναποστολή',
+              style: TextStyle(
+                  fontSize: 12.sp,
+                  color: Colors.black,
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 2),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class BuildSignInOrRegisterButton extends StatelessWidget {
+  const BuildSignInOrRegisterButton({
+    super.key,
+    required this.context,
+  });
+
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          AutoRouter.of(context).replaceAll([const SignUpRoute()]);
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 10,
+          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
+          backgroundColor:
+              const Color.fromARGB(255, 217, 217, 217), // Text color
+          minimumSize: Size(25.w, 60.h), // Button size
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+            side: const BorderSide(
+              width: 4,
+              color: Color.fromARGB(255, 0, 0, 0), // Border color
+            ),
+          ),
+        ),
+        child: Text(
+          'Εγγραφή / Σύνδεση',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
 }

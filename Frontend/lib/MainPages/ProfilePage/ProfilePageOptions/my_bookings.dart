@@ -2,14 +2,15 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Globals/constants.dart';
 import '../../../Globals/structs.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/booking_provider.dart';
 import '../../../Providers/club_provider.dart';
-import '../../../Providers/global_state_provider.dart';
 import '../../../Providers/user_provider.dart';
 import '../../../routes/app_router.gr.dart';
 
@@ -33,11 +34,10 @@ class _MyBookingsPageState extends State<MyBookingsPage>
     // Delay fetchBookings until after the first frame is rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
-      if (context.read<GlobalStateProvider>().isAuthenticated) {
-        context.read<BookingProvider>().fetchBookings(
-            context.read<UserProvider>().userDetails,
-            context.read<ClubProvider>());
-      }
+      context.read<BookingProvider>().fetchBookings(
+          context.read<UserProvider>().userDetails,
+          context.read<ClubProvider>());
+      print('aaaa');
     });
   }
 
@@ -58,8 +58,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
         backgroundColor: const Color.fromARGB(255, 17, 17, 17),
         appBar: _buildAppBar(context),
         body: Container(
-          padding:
-              EdgeInsets.only(top: MediaQuery.sizeOf(context).height * 0.02),
+          padding: EdgeInsets.only(top: 20.h),
           child: TabBarView(
             controller: _tabController,
             children: [
@@ -80,7 +79,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           // Show a loading indicator while fetching data
           return const Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF9C0C04),
+              color: appRedColor,
             ),
           );
         }
@@ -105,26 +104,26 @@ class _MyBookingsPageState extends State<MyBookingsPage>
         // Show a message if there are no bookings
         if (filteredBookings.isEmpty) {
           if (status == 0) {
-            return const Center(
+            return Center(
               child: Text(
                 'Δεν βρέθηκε καμία ενεργή κράτηση.',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12.sp),
               ),
             );
           }
           if (status == 1) {
-            return const Center(
+            return Center(
               child: Text(
                 'Δεν βρέθηκε καμία εκκρεμής κράτηση.',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12.sp),
               ),
             );
           }
           if (status == 2) {
-            return const Center(
+            return Center(
               child: Text(
                 'Δεν βρέθηκε καμία κράτηση στο ιστορικό.',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 12.sp),
               ),
             );
           }
@@ -135,11 +134,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
           itemCount: filteredBookings.length,
           itemBuilder: (context, index) {
             final booking = filteredBookings[index];
-            return Padding(
-              padding: EdgeInsets.only(
-                  bottom: MediaQuery.sizeOf(context).width * 0.045),
-              child: BookingCard(booking: booking),
-            );
+            return BookingCard(booking: booking);
           },
         );
       },
@@ -149,13 +144,10 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       backgroundColor: const Color.fromARGB(0, 0, 0, 0),
-      elevation: 0,
       title: const Text(
-        //TODO Change icon sizes and fontsizes
         'ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 22,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -163,7 +155,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
         icon: const Icon(
           Icons.chevron_left,
           color: Colors.white,
-          size: 30,
         ),
         onPressed: () {
           Navigator.of(context).pop();
@@ -172,9 +163,11 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       bottom: TabBar(
         controller: _tabController,
         labelColor: Colors.white,
-        indicatorColor: const Color(0xFF9C0C04),
+        indicatorColor: appRedColor,
         tabs: const [
-          Tab(text: 'Ενεργείς'),
+          Tab(
+            text: 'Ενεργείς',
+          ),
           Tab(text: 'Εκκρεμείς'),
           Tab(text: 'Ιστορικό'),
         ],
@@ -203,26 +196,26 @@ class BookingCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
-        color: Colors.black,
-        elevation: 20,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-          side: const BorderSide(
-              color: Color.fromARGB(255, 42, 42, 42), width: 2),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(MediaQuery.sizeOf(context).width * 0.028),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                    width: MediaQuery.sizeOf(context).height * 0.15,
-                    height: MediaQuery.sizeOf(context).height * 0.15,
-                    child: AspectRatio(
-                      aspectRatio: 1,
+      child: Padding(
+        padding: EdgeInsets.only(bottom: 25.h),
+        child: Card(
+          color: Colors.black,
+          elevation: 20,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15.r),
+            side: BorderSide(
+                color: const Color.fromARGB(255, 42, 42, 42), width: 2.sp),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(10.sp),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8.r),
+                  child: SizedBox(
+                      width: 100.w,
+                      height: 130.h,
                       child: clubProvider
                               .getClubByID(booking.clubID)
                               .localPhotoPath
@@ -231,7 +224,7 @@ class BookingCard extends StatelessWidget {
                               File(clubProvider
                                   .getClubByID(booking.clubID)
                                   .localPhotoPath),
-                              fit: BoxFit.cover,
+                              fit: BoxFit.fill,
                             ) // Load from local file
                           : clubProvider
                                   .getClubByID(booking.clubID)
@@ -241,133 +234,126 @@ class BookingCard extends StatelessWidget {
                                   clubProvider
                                       .getClubByID(booking.clubID)
                                       .clubPhoto,
-                                  fit: BoxFit.cover,
+                                  fit: BoxFit.fill,
                                 )
                               : const Center(
                                   child: CircularProgressIndicator(
-                                  color: Color(0xFF9C0C04),
+                                  color: appRedColor,
                                   backgroundColor: Colors.black,
                                   strokeWidth: 2,
-                                )),
-                    )),
-              ),
-              SizedBox(
-                width: MediaQuery.sizeOf(context).width * 0.05,
-              ),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.15,
-                child: const Expanded(
+                                ))),
+                ),
+                SizedBox(
+                  width: 20.sp,
+                ),
+                SizedBox(
+                  height: 130.h,
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      //TODO
-                      /*  Text(
+                      Text(
                         clubProvider.getClubNameByID(booking.clubID),
-                        style: const TextStyle(
-                          color: Color(0xFF9C0C04),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        style: TextStyle(
+                          color: appRedColor,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.008),
+                      SizedBox(height: 5.h),
                       Text(
                         booking.bookingName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.008),
+                      SizedBox(height: 5.h),
                       if (booking.persons > 1)
                         Text(
                           '$formattedDate - ${booking.persons} άτομα',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 14,
+                            fontSize: 11.sp,
                           ),
                         ),
                       if (booking.persons == 1)
                         Text(
                           '$formattedDate - 1 άτομο',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 14,
+                            fontSize: 11.sp,
                           ),
                         ),
-                      SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.008),
+                      SizedBox(height: 5.h),
                       Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             if (simple == 1)
                               Text(
                                 '$simple Απλή',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 11.sp,
                                 ),
                               ),
                             if (simple > 1)
                               Text(
                                 '$simple Απλές',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 11.sp,
                                 ),
                               ),
                             if (simple > 0 && (special > 0 || premium > 0))
-                              const Text(
+                              Text(
                                 ' | ',
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 14,
+                                    fontSize: 11.sp,
                                     fontWeight: FontWeight.w500),
                               ),
                             if (special > 0)
                               Text(
                                 '$special Special',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 11.sp,
                                 ),
                               ),
                             if (special > 0 && premium > 0)
-                              const Text(
+                              Text(
                                 ' | ',
                                 style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 14,
+                                    fontSize: 11.sp,
                                     fontWeight: FontWeight.w500),
                               ),
                             if (premium != 0)
                               Text(
                                 '$premium Premium',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 14,
+                                  fontSize: 11.sp,
                                 ),
                               ),
                           ]),
-                      SizedBox(
-                          height: MediaQuery.sizeOf(context).height * 0.008),
+                      SizedBox(height: 5.h),
                       if (booking.status != 2)
                         Text(
                           '${(booking.price).toStringAsFixed(2)} €',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 14,
+                            fontSize: 11.sp,
                           ),
-                        ), */
+                        ),
                     ],
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

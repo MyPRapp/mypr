@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
@@ -21,7 +23,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  bool _obscureText = true;
+  bool _isObscure = true;
   bool _isLoginPressed = false;
   String savedEmail = '';
   String savedPassword = '';
@@ -58,6 +60,7 @@ class _LoginPageState extends State<LoginPage> {
           bool authenticated =
               context.read<GlobalStateProvider>().isAuthenticated;
           while (!authenticated) {}
+          FocusManager.instance.primaryFocus?.unfocus();
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
 
@@ -94,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _togglePasswordVisibility() {
     setState(() {
-      _obscureText = !_obscureText;
+      _isObscure = !_isObscure;
     });
   }
 
@@ -107,8 +110,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
     return PopScope(
       canPop: false,
       child: GestureDetector(
@@ -117,12 +118,10 @@ class _LoginPageState extends State<LoginPage> {
           backgroundColor: Colors.black,
           resizeToAvoidBottomInset: false,
           body: LoginBody(
-            screenHeight: screenHeight,
-            screenWidth: screenWidth,
             isLoginPressed: _isLoginPressed,
             emailController: _emailController,
             passwordController: _passwordController,
-            obscureText: _obscureText,
+            isObscure: _isObscure,
             onLogin: _login,
             onTogglePasswordVisibility: _togglePasswordVisibility,
           ),
@@ -133,23 +132,19 @@ class _LoginPageState extends State<LoginPage> {
 }
 
 class LoginBody extends StatelessWidget {
-  final double screenHeight;
-  final double screenWidth;
   final bool isLoginPressed;
   final TextEditingController emailController;
   final TextEditingController passwordController;
-  final bool obscureText;
+  final bool isObscure;
   final VoidCallback onLogin;
   final VoidCallback onTogglePasswordVisibility;
 
   const LoginBody({
     super.key,
-    required this.screenHeight,
-    required this.screenWidth,
     required this.isLoginPressed,
     required this.emailController,
     required this.passwordController,
-    required this.obscureText,
+    required this.isObscure,
     required this.onLogin,
     required this.onTogglePasswordVisibility,
   });
@@ -157,7 +152,6 @@ class LoginBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Colors.black, Color.fromARGB(255, 68, 3, 3)],
@@ -170,6 +164,7 @@ class LoginBody extends StatelessWidget {
         children: [
           Column(
             children: [
+              SizedBox(height: ScreenUtil().statusBarHeight + 10.h),
               GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () {
@@ -178,109 +173,57 @@ class LoginBody extends StatelessWidget {
                         .replaceAll([const BottomNavBarRoute()]);
                   }
                 },
-                child: Padding(
-                  padding: EdgeInsets.only(
-                      top: MediaQuery.paddingOf(context).top +
-                          screenHeight * 0.02,
-                      right: screenWidth * 0.05),
-                  child: Align(
-                    alignment: Alignment.centerRight,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                    padding: EdgeInsets.only(right: 10.w),
                     child: Container(
-                      padding:
-                          EdgeInsets.all(screenHeight * screenWidth * 0.000018),
+                      padding: EdgeInsets.all(5.sp),
                       decoration: BoxDecoration(
-                          color: const Color.fromARGB(0, 255, 250, 250),
-                          boxShadow: const [
-                            BoxShadow(
-                                color: Color.fromARGB(255, 0, 0, 0),
-                                blurRadius: 3,
-                                blurStyle: BlurStyle.outer)
-                          ],
                           border: Border.all(
                               color: const Color.fromARGB(255, 255, 255, 255)),
-                          borderRadius: BorderRadius.circular(4)),
-                      child: const Text('Παράλειψη',
+                          borderRadius: BorderRadius.circular(5.r)),
+                      child: Text('Παράλειψη',
                           style: TextStyle(
-                            color: Color.fromARGB(255, 123, 123, 123),
-                            fontWeight: FontWeight.w700, //TODO Fix fontsize
-                          )),
+                              color: const Color.fromARGB(255, 123, 123, 123),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10.sp)),
                     ),
                   ),
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(
-                    top: screenHeight * 0.03, bottom: screenHeight * 0.05),
-                child: LoginLogo(
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  text: '',
-                  color: Colors.white,
-                ),
+              SizedBox(height: 50.h),
+              const LoginLogo(
+                text: '',
+                color: Colors.white,
               ),
+              SizedBox(height: 80.h),
               LoginTextField(
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
-                controller: emailController,
-                hintText: 'Email/Τηλέφωνο(+30)',
+                  controller: emailController,
+                  hintText: 'Email/Τηλέφωνο(+30)',
+                  isLoginPressed: isLoginPressed,
+                  isObscure: isObscure,
+                  onTogglePasswordVisibility: onTogglePasswordVisibility,
+                  showIcon: false),
+              SizedBox(height: 20.h),
+              LoginTextField(
+                controller: passwordController,
+                hintText: 'Κωδικός',
                 isLoginPressed: isLoginPressed,
+                isObscure: isObscure,
+                onTogglePasswordVisibility: onTogglePasswordVisibility,
+                showIcon: true,
               ),
-              SizedBox(height: screenHeight * 0.02),
-              Container(
-                width: screenWidth * 0.85,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    color: const Color.fromARGB(133, 84, 84, 84)),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        readOnly: isLoginPressed,
-                        controller: passwordController,
-                        obscureText: obscureText,
-                        cursorColor: const Color.fromARGB(125, 244, 67, 54),
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.all(screenWidth * 0.02),
-                          hintText: 'Κωδικός',
-                          hintStyle: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w600,
-                            color: const Color.fromARGB(132, 199, 199, 199),
-                          ),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: onTogglePasswordVisibility,
-                      icon: Icon(
-                        //TODO
-                        size: screenHeight * 0.03,
-                        obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF9C0C04),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.05),
+              SizedBox(height: 20.h),
               LoginFooter(
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
                 isLoginPressed: isLoginPressed,
                 onLogin: onLogin,
               ),
             ],
           ),
           ForgotPasswordAndSignUp(
-              isLoginPressed: isLoginPressed,
-              screenHeight: screenHeight,
-              screenWidth: screenWidth),
+            isLoginPressed: isLoginPressed,
+          ),
         ],
       ),
     );
@@ -288,50 +231,29 @@ class LoginBody extends StatelessWidget {
 }
 
 class LoginLogo extends StatelessWidget {
-  final double screenHeight;
-  final double screenWidth;
   final String text;
   final Color color;
-  const LoginLogo(
-      {super.key,
-      required this.screenHeight,
-      required this.screenWidth,
-      required this.text,
-      required this.color});
+  const LoginLogo({super.key, required this.text, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: screenWidth,
-      height: screenHeight / 5,
-      child: Stack(
-        children: [
-          Align(
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              height: (screenHeight / 5) / 5.5,
-              child: Text(
-                text,
-                style: TextStyle(
-                    color: color, fontSize: 21, fontWeight: FontWeight.w900),
-              ),
-            ),
+    return Column(
+      children: [
+        Text(
+          text,
+          style: TextStyle(
+              color: color, fontSize: 18.sp, fontWeight: FontWeight.w800),
+        ),
+        SizedBox(
+          height: 80.h,
+          child: const Image(
+            alignment: Alignment.center,
+            image: AssetImage(
+                'assets/otherPhotos/Logo_v2.2-removebg(cropped).png'),
+            fit: BoxFit.scaleDown,
           ),
-          Padding(
-            padding: EdgeInsets.only(top: (screenHeight / 5) / 5.5),
-            child: SizedBox(
-              width: screenWidth,
-              height: screenHeight / 10,
-              child: const Image(
-                alignment: Alignment.center,
-                image: AssetImage(
-                    'assets/otherPhotos/Logo_v2.2-removebg(cropped).png'),
-                fit: BoxFit.scaleDown,
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -341,46 +263,55 @@ class LoginTextField extends StatelessWidget {
   final String hintText;
   final bool isObscure;
   final bool isLoginPressed;
-  final double screenHeight;
-  final double screenWidth;
+  final bool showIcon;
+  final VoidCallback onTogglePasswordVisibility;
 
   const LoginTextField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.isLoginPressed,
-    required this.screenHeight,
-    required this.screenWidth,
-    this.isObscure = false,
+    required this.onTogglePasswordVisibility,
+    required this.showIcon,
+    required this.isObscure,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth * 0.85,
+      width: ScreenUtil().screenWidth - 80.w,
+      padding: EdgeInsets.only(left: 10.w),
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           color: const Color.fromARGB(133, 84, 84, 84)),
       child: TextField(
         readOnly: isLoginPressed,
         controller: controller,
-        obscureText: isObscure,
+        obscureText: showIcon && isObscure,
         cursorColor: const Color.fromARGB(125, 244, 67, 54),
         style: TextStyle(
-          fontSize: 20, //TODO Fix fontsize
+          fontSize: 16.sp,
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
         decoration: InputDecoration(
-          contentPadding: EdgeInsets.all(screenWidth * 0.02),
-          hintText: hintText,
-          hintStyle: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-            color: const Color.fromARGB(132, 199, 199, 199),
-          ),
-          border: InputBorder.none,
-        ),
+            hintText: hintText,
+            hintStyle: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color.fromARGB(132, 200, 200, 200),
+            ),
+            border: InputBorder.none,
+            suffixIcon: showIcon
+                ? IconButton(
+                    onPressed: onTogglePasswordVisibility,
+                    icon: Icon(
+                      size: 20.sp,
+                      isObscure ? Icons.visibility_off : Icons.visibility,
+                      color: appRedColor,
+                    ),
+                  )
+                : null),
       ),
     );
   }
@@ -388,90 +319,121 @@ class LoginTextField extends StatelessWidget {
 
 class ForgotPasswordAndSignUp extends StatelessWidget {
   final bool isLoginPressed;
-  final double screenWidth;
-  final double screenHeight;
+
   const ForgotPasswordAndSignUp({
     super.key,
     required this.isLoginPressed,
-    required this.screenHeight,
-    required this.screenWidth,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: screenHeight * 0.05),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: screenWidth,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Πρώτη φορά εδώ;',
-                  style: TextStyle(
-                    color: const Color.fromARGB(104, 255, 255, 255),
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    if (!isLoginPressed) {
-                      AutoRouter.of(context).replaceAll([const SignUpRoute()]);
-                    }
-                  },
-                  child: Text(
-                    'Κάνε εγγραφή',
-                    style: TextStyle(
-                      decoration: TextDecoration.underline,
-                      decorationColor: const Color.fromARGB(200, 255, 255, 255),
-                      color: Colors.white,
-                      fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            width: screenWidth,
-            child: Text(
-              textAlign: TextAlign.center,
-              'ή',
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Πρώτη φορά εδώ;',
               style: TextStyle(
-                color: const Color.fromARGB(200, 255, 255, 255),
-                fontSize: screenHeight * screenWidth * 0.000052,
+                color: const Color.fromARGB(104, 255, 255, 255),
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          TextButton(
-            onPressed: () {
-              if (!isLoginPressed) {
-                floatingSnackBar(
-                    message: 'Στάλθηκε email για επαναφορά κωδικού',
-                    context: context,
-                    duration: const Duration(milliseconds: 4000));
-              }
-            },
-            child: Text(
-              'Επαναφορά κωδικού',
-              style: TextStyle(
-                decoration: TextDecoration.underline,
-                decorationColor: const Color.fromARGB(157, 255, 255, 255),
-                color: Colors.white,
-                fontSize: (screenWidth * 0.01) + (screenHeight * 0.012),
-                fontWeight: FontWeight.w800,
+            TextButton(
+              onPressed: () {
+                if (!isLoginPressed) {
+                  AutoRouter.of(context).replaceAll([const SignUpRoute()]);
+                }
+              },
+              child: Text(
+                'Κάνε εγγραφή',
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 1.sp,
+                  decorationColor: const Color.fromARGB(200, 255, 255, 255),
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
+          ],
+        ),
+        /*
+       SizedBox(
+          child: Text(
+            textAlign: TextAlign.center,
+            'ή',
+            style: TextStyle(
+              color: const Color.fromARGB(104, 255, 255, 255),
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-        ],
-      ),
+        ), 
+        */
+        /*  SizedBox(
+          height: 15.h,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Ξέχασες τον κωδικό;',
+              style: TextStyle(
+                color: const Color.fromARGB(104, 255, 255, 255),
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                if (!isLoginPressed) {
+                  AutoRouter.of(context).push(const ContactUsRoute());
+                }
+              },
+              child: Text(
+                'Στείλε μήνυμα',
+                style: TextStyle(
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 1.sp,
+                  decorationColor: const Color.fromARGB(200, 255, 255, 255),
+                  color: Colors.white,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ],
+        ), */
+        /* 
+        TextButton(
+          onPressed: () {
+            if (!isLoginPressed) {
+              floatingSnackBar(
+                  message: 'Στάλθηκε email για επαναφορά κωδικού',
+                  context: context,
+                  duration: const Duration(milliseconds: 4000));
+            }
+          },
+          child: Text(
+            'Επαναφορά κωδικού',
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              decorationThickness: 1.sp,
+              decorationColor: const Color.fromARGB(157, 255, 255, 255),
+              color: Colors.white,
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ),
+        */
+        SizedBox(height: 60.h)
+      ],
     );
   }
 }
@@ -479,14 +441,11 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
 class LoginFooter extends StatelessWidget {
   final bool isLoginPressed;
   final VoidCallback onLogin;
-  final double screenWidth;
-  final double screenHeight;
+
   const LoginFooter({
     super.key,
     required this.isLoginPressed,
     required this.onLogin,
-    required this.screenHeight,
-    required this.screenWidth,
   });
 
   @override
@@ -494,18 +453,21 @@ class LoginFooter extends StatelessWidget {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
           shape: const CircleBorder(),
-          backgroundColor:
-              isLoginPressed ? Colors.transparent : const Color(0xFF9C0C04),
+          minimumSize: Size(38.w, 38.h),
+          backgroundColor: isLoginPressed ? Colors.transparent : appRedColor,
         ),
         onPressed: onLogin,
         child: isLoginPressed
-            ? const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+            ? Transform.scale(
+                scale: 0.7.sp,
+                child: const CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(appRedColor),
+                ),
               )
-            : const Icon(
-                //TODO
+            : Icon(
                 Icons.arrow_forward,
                 color: Colors.black,
+                size: 25.sp,
               ));
   }
 }

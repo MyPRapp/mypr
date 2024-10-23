@@ -6,6 +6,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
@@ -198,6 +199,7 @@ class _SignUpPageState extends State<SignUpPage> {
       if (success) {
         if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
+          FocusManager.instance.primaryFocus?.unfocus();
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
         await sendVerificationEmail();
@@ -329,44 +331,55 @@ class _SignUpPageState extends State<SignUpPage> {
             builder: (context, setState) {
               return AlertDialog(
                 backgroundColor: Colors.black,
-                title: const Text(
+                title: Text(
+                  textAlign: TextAlign.center,
                   'Επιβεβαίωση Κινητού',
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Colors.white, fontSize: 16.sp),
                 ),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      keyboardType: TextInputType.number,
-                      maxLength: 6,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: const InputDecoration(
-                        hintText: 'Εισάγετε τον 6-ψήφιο κωδικό',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                content: SizedBox(
+                  width: 200.w,
+                  height: 150.h,
+                  child: Column(
+                    children: [
+                      SizedBox(height: 20.h),
+                      TextField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                        decoration: InputDecoration(
+                          hintText: ' Εισάγετε τον 6-ψήφιο κωδικό',
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 12.sp),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.red),
-                        ),
+                        onChanged: (value) {
+                          codeInput = value;
+                        },
                       ),
-                      onChanged: (value) {
-                        codeInput = value;
-                      },
-                    ),
-                    if (showError)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          'Λάθος κωδικός',
-                          style: TextStyle(color: Colors.red),
+                      if (showError)
+                        Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: Text(
+                            'Λάθος κωδικός',
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 214, 20, 6),
+                                fontSize: 12.sp),
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
                 actions: [
                   Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       TextButton(
                         onPressed: () async {
@@ -414,9 +427,10 @@ class _SignUpPageState extends State<SignUpPage> {
                             }
                           }
                         },
-                        child: const Text(
+                        child: Text(
                           'Επιβεβαίωση',
-                          style: TextStyle(color: Color(0xFF9C0C04)),
+                          style: TextStyle(
+                              color: const Color(0xFF9C0C04), fontSize: 13.sp),
                         ),
                       ),
                       TextButton(
@@ -438,9 +452,10 @@ class _SignUpPageState extends State<SignUpPage> {
                             }
                           }
                         },
-                        child: const Text(
+                        child: Text(
                           'Επαναποστολή κωδικού',
-                          style: TextStyle(color: Colors.white),
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 13.sp),
                         ),
                       ),
                     ],
@@ -523,17 +538,16 @@ class _SignUpPageState extends State<SignUpPage> {
             padding: EdgeInsets.zero,
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
-              Stack(
+              const Stack(
                 children: [
-                  Header(screenWidth: screenWidth, screenHeight: screenHeight),
+                  Header(),
                 ],
               ),
-              LoginLogo(
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
+              const LoginLogo(
                 text: 'Καλώς όρισες στην',
-                color: const Color(0xFF9C0C04),
+                color: Color(0xFF9C0C04),
               ),
+              SizedBox(height: 40.h),
               _SignUpForm(
                 phoneValidating: _phoneValidating,
                 firstNameController: _firstNameController,
@@ -620,141 +634,161 @@ class _SignUpForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: screenWidth,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // First and last name fields
-          SizedBox(
-            width: screenWidth * 0.8,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _TextFieldWidget(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  controller: firstNameController,
-                  hintText: 'Όνομα',
-                  isRegistering: isRegistering,
-                  inputFormatters: [NoEmojisTextInputFormatter()],
-                ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // First and last name fields
+        ConstrainedBox(
+          constraints: BoxConstraints(minHeight: screenHeight - 220.h),
+          child: Column(
+            children: [
+              _TextFieldWidget(
+                obscureText: false,
+                toggleVisibility: togglePasswordVisibility,
+                showIcon: false,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+                controller: firstNameController,
+                hintText: 'Όνομα',
+                isRegistering: isRegistering,
+                inputFormatters: [NoEmojisTextInputFormatter()],
+              ),
 
-                _TextFieldWidget(
-                  controller: lastNameController,
-                  hintText: 'Επίθετο',
-                  isRegistering: isRegistering,
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  inputFormatters: [NoEmojisTextInputFormatter()],
-                ),
+              _TextFieldWidget(
+                obscureText: false,
+                toggleVisibility: togglePasswordVisibility,
+                showIcon: false,
+                controller: lastNameController,
+                hintText: 'Επίθετο',
+                isRegistering: isRegistering,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+                inputFormatters: [NoEmojisTextInputFormatter()],
+              ),
 
-                // Phone field
-                _TextFieldWidget(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  controller: phoneController,
-                  hintText: 'Τηλέφωνο(+30)',
-                  isRegistering: isRegistering,
-                  inputFormatters: [
-                    NoEmojisTextInputFormatter(),
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(10),
-                  ],
-                ),
+              // Phone field
+              _TextFieldWidget(
+                obscureText: false,
+                toggleVisibility: togglePasswordVisibility,
+                showIcon: false,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+                controller: phoneController,
+                hintText: 'Τηλέφωνο(+30)',
+                isRegistering: isRegistering,
+                inputFormatters: [
+                  NoEmojisTextInputFormatter(),
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(10),
+                ],
+              ),
 
-                // Email field
-                _TextFieldWidget(
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                  controller: emailController,
-                  hintText: 'Email',
-                  isRegistering: isRegistering,
-                  inputFormatters: [NoEmojisTextInputFormatter()],
-                ),
+              // Email field
+              _TextFieldWidget(
+                obscureText: false,
+                toggleVisibility: togglePasswordVisibility,
+                showIcon: false,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+                controller: emailController,
+                hintText: 'Email',
+                isRegistering: isRegistering,
+                inputFormatters: [NoEmojisTextInputFormatter()],
+              ),
 
-                // Password fields
-                _PasswordField(
-                  controller: passwordController,
-                  hintText: 'Κωδικός',
-                  obscureText: obscureText,
-                  toggleVisibility: togglePasswordVisibility,
-                  isRegistering: isRegistering,
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                ),
-                _PasswordField(
-                  controller: confirmPasswordController,
-                  hintText: 'Επιβεβαίωση κωδικού',
-                  obscureText: obscureText2,
-                  toggleVisibility: togglePasswordVisibility2,
-                  isRegistering: isRegistering,
-                  screenWidth: screenWidth,
-                  screenHeight: screenHeight,
-                ),
-                // Sign up button and login prompt
-              ],
-            ),
+              // Password fields
+              _TextFieldWidget(
+                controller: passwordController,
+                hintText: 'Κωδικός',
+                showIcon: true,
+                obscureText: obscureText,
+                toggleVisibility: togglePasswordVisibility,
+                isRegistering: isRegistering,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+              _TextFieldWidget(
+                controller: confirmPasswordController,
+                hintText: 'Επιβεβαίωση κωδικού',
+                showIcon: true,
+                obscureText: obscureText2,
+                toggleVisibility: togglePasswordVisibility2,
+                isRegistering: isRegistering,
+                screenWidth: screenWidth,
+                screenHeight: screenHeight,
+              ),
+              SizedBox(
+                height: 10.h,
+              ),
+              CheckBoxWidget(
+                isCheckBoxPressed: isCheckBoxPressed,
+                toggleCheckBox: toggleCheckBox,
+                isRegistering: isRegistering,
+              ),
+              SizedBox(height: 10.h),
+              ErrorTexts(
+                firstnameError: firstnameError,
+                lastnameError: lastnameError,
+                phoneError: phoneError,
+                emailError: emailError,
+                passwordError: passwordError,
+                confirmationPasswordError: confirmationPasswordError,
+              ),
+              SizedBox(height: 20.h),
+              _SignUpButton(
+                phoneValidating: phoneValidating,
+                isRegistering: isRegistering,
+                onRegister: onRegister,
+                screenHeight: screenHeight,
+                screenWidth: screenWidth,
+                firstnameError: firstnameError,
+                lastnameError: lastnameError,
+                phoneError: phoneError,
+                emailError: emailError,
+                passwordError: passwordError,
+                confirmationPasswordError: confirmationPasswordError,
+              ),
+            ],
           ),
-
-          CheckBoxWidget(
-            isCheckBoxPressed: isCheckBoxPressed,
-            toggleCheckBox: toggleCheckBox,
-            isRegistering: isRegistering,
-          ),
-
-          SizedBox(height: screenHeight / 100),
-          _SignUpButton(
-            phoneValidating: phoneValidating,
-            isRegistering: isRegistering,
-            onRegister: onRegister,
-            screenHeight: screenHeight,
-            screenWidth: screenWidth,
-            firstnameError: firstnameError,
-            lastnameError: lastnameError,
-            phoneError: phoneError,
-            emailError: emailError,
-            passwordError: passwordError,
-            confirmationPasswordError: confirmationPasswordError,
-          ),
-          SizedBox(height: screenHeight / 15),
-          SizedBox(
-            width: screenWidth,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Έχεις ήδη λογαριασμό;',
+        ),
+        SizedBox(height: 40.h),
+        SizedBox(
+          width: screenWidth,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Έχεις ήδη λογαριασμό;',
+                style: TextStyle(
+                  color: const Color.fromARGB(104, 255, 255, 255),
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (!isRegistering) {
+                    AutoRouter.of(context).replaceAll([const LoginRoute()]);
+                  }
+                },
+                child: Text(
+                  'Συνδέσου',
                   style: TextStyle(
-                    color: const Color.fromARGB(104, 255, 255, 255),
-                    fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
-                    fontWeight: FontWeight.w700,
+                    decoration: TextDecoration.underline,
+                    decorationThickness: 1.sp,
+                    decorationColor: const Color.fromARGB(200, 255, 255, 255),
+                    color: Colors.white,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    if (!isRegistering) {
-                      AutoRouter.of(context).replaceAll([const LoginRoute()]);
-                    }
-                  },
-                  child: Text(
-                    'Συνδέσου',
-                    style: TextStyle(
-                      decoration: TextDecoration.underline,
-                      decorationColor: const Color.fromARGB(157, 255, 255, 255),
-                      color: Colors.white,
-                      fontSize: (screenWidth * 0.012) + (screenHeight * 0.016),
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          SizedBox(height: screenHeight / 20),
-        ],
-      ),
+        ),
+        SizedBox(height: 60.h)
+      ],
     );
   }
 }
@@ -766,125 +800,70 @@ class _TextFieldWidget extends StatelessWidget {
     required this.isRegistering,
     required this.screenWidth,
     required this.screenHeight,
+    required this.obscureText,
+    required this.toggleVisibility,
+    required this.showIcon,
     this.inputFormatters,
   });
 
   final TextEditingController controller;
   final String hintText;
   final double screenHeight;
+  final bool showIcon;
   final double screenWidth;
   final bool isRegistering;
+  final bool obscureText;
+  final VoidCallback toggleVisibility;
   final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+      padding: EdgeInsets.only(
+          bottom: 15.h, left: screenWidth * 0.15, right: screenWidth * 0.15),
       child: Container(
+        padding: EdgeInsets.only(top: showIcon ? 7.h : 0),
         decoration: BoxDecoration(
           color: const Color.fromARGB(96, 63, 63, 63),
           border: Border.all(
             color: const Color.fromARGB(118, 88, 88, 88),
           ),
-          borderRadius: BorderRadius.circular(05),
+          borderRadius: BorderRadius.circular(5.r),
         ),
         child: TextField(
+          keyboardType:
+              hintText == 'Τηλέφωνο(+30)' ? TextInputType.number : null,
+          obscureText: obscureText,
           readOnly: isRegistering,
           controller: controller,
           style: TextStyle(
-            fontSize: (screenWidth * 0.0085) + (screenHeight * 0.022),
+            fontSize: 15.sp,
             fontWeight: FontWeight.w500,
             color: Colors.white,
           ),
           cursorColor: const Color.fromARGB(125, 244, 67, 54),
           decoration: InputDecoration(
+            suffixIcon: showIcon
+                ? IconButton(
+                    onPressed: toggleVisibility,
+                    icon: Icon(
+                      size: 17.sp,
+                      obscureText ? Icons.visibility_off : Icons.visibility,
+                      color: const Color(0xFF9C0C04),
+                    ),
+                  )
+                : null,
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Color(0xFF9C0C04)),
             ),
             contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
             hintText: hintText,
             hintStyle: TextStyle(
-              fontSize: (screenWidth * 0.0078) + (screenHeight * 0.019),
+              fontSize: 15.sp,
               color: const Color.fromARGB(75, 255, 255, 255),
             ),
           ),
           inputFormatters: inputFormatters,
-        ),
-      ),
-    );
-  }
-}
-
-class _PasswordField extends StatelessWidget {
-  const _PasswordField({
-    required this.controller,
-    required this.hintText,
-    required this.obscureText,
-    required this.toggleVisibility,
-    required this.isRegistering,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
-
-  final TextEditingController controller;
-  final String hintText;
-  final bool obscureText;
-  final VoidCallback toggleVisibility;
-  final bool isRegistering;
-  final double screenWidth;
-  final double screenHeight;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(96, 63, 63, 63),
-          border: Border.all(
-            color: const Color.fromARGB(118, 88, 88, 88),
-          ),
-          borderRadius: BorderRadius.circular(05),
-        ),
-        width: screenWidth * 0.8,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: TextField(
-                inputFormatters: [NoEmojisTextInputFormatter()],
-                readOnly: isRegistering,
-                obscureText: obscureText,
-                controller: controller,
-                style: TextStyle(
-                  fontSize: (screenWidth * 0.0085) + (screenHeight * 0.022),
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-                cursorColor: const Color.fromARGB(125, 244, 67, 54),
-                decoration: InputDecoration(
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Color(0xFF9C0C04)),
-                  ),
-                  contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
-                  alignLabelWithHint: true,
-                  hintText: hintText,
-                  hintStyle: TextStyle(
-                    fontSize: (screenWidth * 0.0078) + (screenHeight * 0.019),
-                    color: const Color.fromARGB(75, 255, 255, 255),
-                  ),
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: toggleVisibility,
-              icon: Icon(
-                size: (screenWidth * 0.01) + (screenHeight * 0.025),
-                obscureText ? Icons.visibility_off : Icons.visibility,
-                color: const Color(0xFF9C0C04),
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -922,76 +901,83 @@ class _SignUpButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return Column(
+      children: [
+        isRegistering && phoneValidating
+            ? const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
+              )
+            : ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 30.w, vertical: 20.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15.r),
+                    side: const BorderSide(color: Color(0xFF9C0C04)),
+                  ),
+                  backgroundColor: Colors.transparent,
+                ),
+                onPressed: onRegister,
+                child: Text(
+                  'Εγγραφή',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15.sp,
+                  ),
+                )),
+      ],
+    );
+  }
+}
+
+class ErrorTexts extends StatelessWidget {
+  const ErrorTexts({
+    super.key,
+    required this.firstnameError,
+    required this.lastnameError,
+    required this.phoneError,
+    required this.emailError,
+    required this.passwordError,
+    required this.confirmationPasswordError,
+  });
+
+  // Error states
+  final bool firstnameError;
+  final bool lastnameError;
+  final bool phoneError;
+  final bool emailError;
+  final bool passwordError;
+  final bool confirmationPasswordError;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
-      width: screenWidth,
+      width: ScreenUtil().screenWidth * 0.7,
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: screenWidth * 0.8,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                if (firstnameError || lastnameError)
-                  _ErrorText(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                    text: '- Μόνο γράμματα στο ονοματεπώνυμο',
-                  ),
-                if (phoneError)
-                  _ErrorText(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                    text: '- Δεν βρέθηκε το τηλέφωνο',
-                  ),
-                if (emailError)
-                  _ErrorText(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                    text: '- Δεν βρέθηκε το email',
-                  ),
-                if (passwordError)
-                  _ErrorText(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                    text:
-                        '- Τουλάχιστον 4 λατινικοί χαρακτήρες\n  και 1 αριθμός στον κωδικό',
-                  ),
-                if (confirmationPasswordError)
-                  _ErrorText(
-                    screenWidth: screenWidth,
-                    screenHeight: screenHeight,
-                    text: '- Οι κωδικοί δεν ταιριάζουν',
-                  ),
-              ],
+          if (firstnameError || lastnameError)
+            const _ErrorText(
+              text: '- Μόνο γράμματα στο ονοματεπώνυμο',
             ),
-          ),
-          SizedBox(
-              height: screenHeight * 0.02), // Add space between text and button
-          isRegistering && phoneValidating
-              ? const CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
-                )
-              : ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(
-                        horizontal: screenWidth * 0.07,
-                        vertical: screenHeight * 0.028),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                      side: const BorderSide(color: Color(0xFF9C0C04)),
-                    ),
-                    backgroundColor: Colors.transparent,
-                  ),
-                  onPressed: onRegister,
-                  child: Text(
-                    'Εγγραφή',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      fontSize: screenHeight * screenWidth * 0.000062,
-                    ),
-                  )),
+          if (phoneError)
+            const _ErrorText(
+              text: '- Δεν βρέθηκε το τηλέφωνο',
+            ),
+          if (emailError)
+            const _ErrorText(
+              text: '- Δεν βρέθηκε το email',
+            ),
+          if (passwordError)
+            const _ErrorText(
+              text:
+                  '- Τουλάχιστον 4 λατινικοί χαρακτήρες\n  και 1 αριθμός στον κωδικό',
+            ),
+          if (confirmationPasswordError)
+            const _ErrorText(
+              text: '- Οι κωδικοί δεν ταιριάζουν',
+            ),
         ],
       ),
     );
@@ -1000,43 +986,29 @@ class _SignUpButton extends StatelessWidget {
 
 class _ErrorText extends StatelessWidget {
   const _ErrorText({
-    required this.screenWidth,
-    required this.screenHeight,
     required this.text,
   });
-  final double screenWidth;
-  final double screenHeight;
   final String text;
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: screenWidth,
-      child: Text(
-        text,
-        style: TextStyle(
-            fontSize: (screenWidth * 0.0074) + (screenHeight * 0.0138),
-            color: const Color(0xFF9C0C04),
-            fontWeight: FontWeight.w500),
-      ),
+    return Text(
+      text,
+      style: TextStyle(
+          fontSize: 13.sp,
+          color: const Color(0xFF9C0C04),
+          fontWeight: FontWeight.w500),
     );
   }
 }
 
 class Header extends StatelessWidget {
-  final double screenWidth;
-  final double screenHeight;
-
-  const Header({
-    super.key,
-    required this.screenWidth,
-    required this.screenHeight,
-  });
+  const Header({super.key});
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: screenHeight / 12, // Set the height to screenHeight / 15
-      width: screenWidth, // Full width
+      height: 70.h,
+      width: double.infinity,
       child: ShaderMask(
         shaderCallback: (Rect bounds) {
           return const LinearGradient(
@@ -1080,9 +1052,9 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        const SizedBox(width: 50),
+        SizedBox(width: ScreenUtil().screenWidth * 0.15),
         Transform.scale(
-          scale: 1.15,
+          scale: 1.sp,
           child: Checkbox(
             value: widget.isCheckBoxPressed,
             fillColor: WidgetStateProperty.resolveWith((states) {
@@ -1109,12 +1081,12 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
               widget.toggleCheckBox();
             });
           },
-          child: const Text(
-            'Συμφωνώ με τους ',
+          child: Text(
+            ' Συμφωνώ με τους ',
             style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 13.sp),
           ),
         ),
         GestureDetector(
@@ -1123,13 +1095,14 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
             launchUrl(Uri.parse('https://www.instagram.com/mypr_app/'),
                 mode: LaunchMode.externalApplication);
           },
-          child: const Text(
+          child: Text(
             'όρους χρήσης',
             style: TextStyle(
                 decoration: TextDecoration.underline,
-                decorationColor: Color.fromARGB(200, 255, 255, 255),
+                decorationColor: const Color.fromARGB(200, 255, 255, 255),
                 color: Colors.white,
-                fontWeight: FontWeight.w800),
+                fontWeight: FontWeight.w700,
+                fontSize: 13.sp),
           ),
         )
       ],

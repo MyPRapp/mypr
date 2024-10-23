@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../Globals/global_components.dart';
 import '../../../../Globals/structs.dart';
 import '../../../../Providers/club_provider.dart';
 import '../../../../routes/app_router.gr.dart';
@@ -31,8 +33,6 @@ class BookingDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final screenWidth = MediaQuery.sizeOf(context).width;
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
     const earnedPoints = 100;
 
@@ -47,9 +47,8 @@ class BookingDetailsPage extends StatelessWidget {
         .getAllCataloguesForClubWithID(booking.clubID);
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: _buildAppBar(context),
+      appBar: buildAppBar(context, 'ΠΛΗΡΟΦΟΡΙΕΣ ΚΡΑΤΗΣΗΣ'),
       body: SingleChildScrollView(
-        //TODO remove many containers and boxes
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -60,12 +59,12 @@ class BookingDetailsPage extends StatelessWidget {
           ),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: screenHeight,
+              minHeight: ScreenUtil().screenHeight,
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: screenWidth * 0.05, // 5% padding on the sides
-                vertical: screenHeight * 0.03, // 3% padding on top/bottom
+                horizontal: 30.w,
+                vertical: 20.h,
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -78,27 +77,25 @@ class BookingDetailsPage extends StatelessWidget {
                         clubName,
                         style: TextStyle(
                           color: const Color(0xFF9C0C04),
-                          fontSize:
-                              screenHeight * 0.035, // 3.5% of screen height
-                          fontWeight: FontWeight.bold,
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: screenHeight * 0.02), // 2% height
+                      SizedBox(height: 20.h),
                       _buildClubPhoto(
                           booking.clubID, context.read<ClubProvider>()),
-                      SizedBox(height: screenHeight * 0.03), // 3% height
-                      _buildBookingDetails(
-                          formattedDate, screenHeight, catalogues),
+                      SizedBox(height: 20.h),
+                      _buildBookingDetails(formattedDate, catalogues),
                     ],
                   ),
-                  SizedBox(height: screenHeight * 0.14), // 14% height
+                  SizedBox(height: 100.h),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildPriceDetails(earnedPoints, discountPercentage),
-                      SizedBox(height: screenHeight * 0.03),
+                      SizedBox(height: 30.h),
                       _buildRegularBottomSection(context),
-                      SizedBox(height: screenHeight * 0.05),
+                      SizedBox(height: 50.h),
                     ],
                   ),
                 ],
@@ -110,35 +107,10 @@ class BookingDetailsPage extends StatelessWidget {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.black,
-      elevation: 0,
-      title: const Text(
-        'ΠΛΗΡΟΦΟΡΙΕΣ ΚΡΑΤΗΣΗΣ',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      leading: IconButton(
-        icon: const Icon(
-          Icons.chevron_left,
-          color: Colors.white,
-          size: 30,
-        ),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
-
   Widget _buildClubPhoto(int clubID, ClubProvider clubProvider) {
     ClubInfoStruct club = clubProvider.getClubByID(clubID);
     return ClipRRect(
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(15.r),
       child: SizedBox(
         child: Center(
             child: AspectRatio(
@@ -164,8 +136,8 @@ class BookingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBookingDetails(String formattedDate, double screenHeight,
-      List<CatalogueInfoStruct> catalogues) {
+  Widget _buildBookingDetails(
+      String formattedDate, List<CatalogueInfoStruct> catalogues) {
     List<int> fourbitIntegers = extractFourBits(booking.fourbitString);
     final regular = fourbitIntegers[0];
     final special = fourbitIntegers[1];
@@ -189,62 +161,59 @@ class BookingDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BuildRichText(label: 'Όνομα Κράτησης:', value: booking.bookingName),
-        SizedBox(height: screenHeight * 0.015), // 1.5% of screen height
+        SizedBox(height: 10.h),
         BuildRichText(label: 'Ημερομηνία:', value: formattedDate),
-        SizedBox(height: screenHeight * 0.015),
+        SizedBox(height: 10.h),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Φιάλες: ',
               style: TextStyle(
-                color: Color.fromARGB(255, 113, 113, 113),
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+                color: const Color.fromARGB(255, 113, 113, 113),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
               ),
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Row(
-                    children: [
-                      if (regular == 1)
-                        const Text(
-                          '1 Απλή',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                Row(
+                  children: [
+                    if (regular == 1)
+                      Text(
+                        '1 Απλή',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
                         ),
-                      if (regular > 1)
-                        Text(
-                          '$regular Απλές',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                      ),
+                    if (regular > 1)
+                      Text(
+                        '$regular Απλές',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
                         ),
-                      if (special > 0 && regular <= 0)
-                        Text(
-                          '$special Special',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                      ),
+                    if (special > 0 && regular <= 0)
+                      Text(
+                        '$special Special',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
                         ),
-                      if (premium > 0 && regular <= 0 && special <= 0)
-                        Text(
-                          '$premium Premium',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
+                      ),
+                    if (premium > 0 && regular <= 0 && special <= 0)
+                      Text(
+                        '$premium Premium',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,9 +223,9 @@ class BookingDetailsPage extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 5),
                         child: Text(
                           '$special Special',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ),
@@ -265,9 +234,9 @@ class BookingDetailsPage extends StatelessWidget {
                         padding: const EdgeInsets.only(bottom: 5),
                         child: Text(
                           '$premium Premium',
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 18,
+                            fontSize: 14.sp,
                           ),
                         ),
                       ),
@@ -277,48 +246,48 @@ class BookingDetailsPage extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: screenHeight * 0.01),
+        SizedBox(height: 10.h),
         BuildRichText(label: 'Άτομα:', value: booking.persons.toString()),
         if (booking.status <= 1 && booking.comments.isNotEmpty) ...[
-          SizedBox(height: screenHeight * 0.015),
+          SizedBox(height: 12.h),
           BuildRichText(label: 'Σχόλια:', value: booking.comments),
         ],
         if (booking.status <= 1)
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 10),
+              Padding(
+                padding: EdgeInsets.only(top: 10.h),
                 child: Text(
                   'Συνολική Τιμή: ',
                   style: TextStyle(
-                    color: Color.fromARGB(255, 113, 113, 113),
-                    fontSize: 18,
+                    color: const Color.fromARGB(255, 113, 113, 113),
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 10),
+                padding: EdgeInsets.only(top: 10.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (discount > 0)
                       Text(
                         '${(booking.price + priceWithDiscount).toStringAsFixed(2)} €',
-                        style: const TextStyle(
+                        style: TextStyle(
                           decoration: TextDecoration.lineThrough,
                           decorationColor: Colors.red,
-                          color: Color(0xFF9C0C04),
-                          fontSize: 18,
+                          color: const Color(0xFF9C0C04),
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
                     Text(
                       '${booking.price.toStringAsFixed(2)} €',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
@@ -337,18 +306,18 @@ class BookingDetailsPage extends StatelessWidget {
       children: [
         Text(
           'Από την κράτηση σου κέρδισες $earnedPoints πόντους.',
-          style: const TextStyle(
+          style: TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 14.sp,
           ),
         ),
         if (discountPercentage > 0) ...[
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           Text(
             'Χρησιμοποιήθηκε κουπόνι $discountPercentage%.',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 14.sp,
             ),
           ),
         ],
@@ -360,19 +329,19 @@ class BookingDetailsPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Για οποιαδήποτε αλλαγή ή απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18,
+            fontSize: 14.sp,
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10.r),
             ),
             foregroundColor: Colors.white,
             backgroundColor: const Color(0xFF9C0C04),
@@ -380,12 +349,11 @@ class BookingDetailsPage extends StatelessWidget {
           onPressed: () {
             AutoRouter.of(context).push(const ContactUsRoute());
           },
-          child: const Text(
+          child: Text(
             'Επικοινώνησε μαζί μας',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
           ),
-        ),
-        const SizedBox(height: 30),
+        )
       ],
     );
   }
@@ -408,17 +376,17 @@ class BuildRichText extends StatelessWidget {
         children: [
           TextSpan(
             text: '$label ',
-            style: const TextStyle(
-              color: Color.fromARGB(255, 113, 113, 113),
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              color: const Color.fromARGB(255, 113, 113, 113),
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
           TextSpan(
             text: value,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 18,
+              fontSize: 14.sp,
             ),
           ),
         ],

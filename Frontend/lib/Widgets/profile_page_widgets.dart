@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/constants.dart';
 
 class FadeText extends StatefulWidget {
   const FadeText({super.key, required this.points});
@@ -60,11 +62,13 @@ class FadeTextState extends State<FadeText> {
         AnimatedOpacity(
           opacity: _isVisible ? 1.0 : 0.0,
           duration: const Duration(seconds: 1), // Fade duration
-          // child: const Text( //TODO
-          //   'Πόντοι:',
-          //   style: TextStyle(
-          //       color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
-          // ),
+          child: Text(
+            'Πόντοι:',
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w600),
+          ),
         ),
         NumberScrollBox(
             scrollController: _scrollController, points: widget.points),
@@ -81,43 +85,36 @@ class NumberScrollBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = ScreenUtil().screenWidth;
     return Column(
       children: [
         Container(
-          //TODO add screenWidth in this container
-          width: MediaQuery.sizeOf(context).width * 0.15,
-          height: MediaQuery.sizeOf(context).width * 0.1,
+          width: screenWidth * 0.15,
+          height: 50.h,
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.black, Colors.red[900]!],
+            gradient: const LinearGradient(
+              colors: [Color.fromARGB(255, 0, 0, 0), appRedColor],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
             ),
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.7),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: SingleChildScrollView(
             controller: scrollController, // Use the scroll controller
             physics: const BouncingScrollPhysics(),
-            child: const Center(
-                //   child: Padding( //TODO
-                //     padding: const EdgeInsets.symmetric(vertical: 15.0),
-                //     child: Text(
-                //       '$points', // Fixed number to display
-                //       style: const TextStyle(
-                //         fontSize: 24,
-                //         fontWeight: FontWeight.bold,
-                //         color: Colors.white,
-                //       ),
-                //     ),
-                //   ),
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 15.h),
+                child: Text(
+                  '$points', // Fixed number to display
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
+              ),
+            ),
           ),
         ),
       ],
@@ -139,9 +136,8 @@ class ProfileDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      //TODO Change fontsizes
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(10.r),
       ),
       backgroundColor: Colors.grey[900],
       child: Padding(
@@ -149,38 +145,41 @@ class ProfileDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               "ΠΡΟΦΙΛ",
               style: TextStyle(
-                color: Color(0xFF9C0C04),
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+                color: appRedColor,
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 20),
-            const Divider(
+            SizedBox(height: 20.h),
+            Divider(
               color: Colors.grey,
-              thickness: 0.5,
+              thickness: 1.sp,
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             ProfileInfoRow(label: "Ονοματεπώνυμο", value: name),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             ProfileInfoRow(label: "Email", value: email),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             ProfileInfoRow(label: "Τηλέφωνο", value: phone),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: const Color(0xFF9C0C04),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(15.r),
                 ),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Text("Close"),
+              child: Text(
+                "Close",
+                style: TextStyle(fontSize: 14.sp),
+              ),
             ),
           ],
         ),
@@ -201,20 +200,20 @@ class ProfileInfoRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          "$label:", //TODO Change fontsizes
-          style: const TextStyle(
+          "$label:",
+          style: TextStyle(
             color: Colors.grey,
-            fontSize: 16,
+            fontSize: 12.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.h),
         Flexible(
           child: Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 16,
+              fontSize: 12.sp,
             ),
             overflow: TextOverflow.ellipsis,
           ),
@@ -246,7 +245,8 @@ class GradientProgressBarState extends State<GradientProgressBar>
       duration: const Duration(seconds: 2),
     );
 
-    _animation = Tween<double>(begin: 0, end: widget.points / 20.toDouble())
+    _animation = Tween<double>(
+            begin: 0, end: widget.points <= 2000 ? widget.points / 20 : 100)
         .animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -277,7 +277,7 @@ class GradientProgressBarState extends State<GradientProgressBar>
     if (oldWidget.points != widget.points) {
       _animation = Tween<double>(
         begin: 0,
-        end: widget.points / 20,
+        end: widget.points <= 2000 ? widget.points / 20 : 100,
       ).animate(CurvedAnimation(
         parent: _controller,
         curve: Curves.easeInOut,
@@ -322,101 +322,85 @@ class GradientProgressBarState extends State<GradientProgressBar>
 
   @override
   Widget build(BuildContext context) {
-    double progressWidth = MediaQuery.sizeOf(context).width -
-        MediaQuery.sizeOf(context).width *
-            0.15; //TODO Pass screenWidth from profile page
+    double screenWidth = ScreenUtil().screenWidth;
+    double progressWidth = 280.w;
     double filledWidth = (progressWidth * _animation.value) / 100;
     return GestureDetector(
       onTap: _showPercentageLabel,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedOpacity(
-            opacity: _showLabel ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 500), // Fade duration
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: Text(
-                widget.points >= 400
-                    ? "Έχεις ένα κουπόνι για 20% έκπτωση"
-                    : 'Σε ${400 - widget.points} πόντους κερδίζεις έκπτωση',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-                left: MediaQuery.sizeOf(context).width * 0.075,
-                right: MediaQuery.sizeOf(context).width * 0.075),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          width: progressWidth,
-                          height: MediaQuery.sizeOf(context).width * 0.0125,
-                          decoration: BoxDecoration(
-                            color: Colors.grey[800],
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        Container(
-                          width: filledWidth,
-                          height: MediaQuery.sizeOf(context).width * 0.0125,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            gradient: LinearGradient(
-                              colors: [
-                                const Color.fromARGB(255, 87, 1, 1),
-                                Colors.red.shade900,
-                              ],
-                              begin: Alignment.centerLeft,
-                              end: Alignment.center,
+          Stack(
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Stack(
+                        children: [
+                          Container(
+                            width: progressWidth,
+                            height: 7.5.h,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[800],
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: List.generate(6, (index) {
-                    bool isActive = (_animation.value >= (index * 20));
-                    return Container(
-                      height: MediaQuery.sizeOf(context).width * 0.025,
-                      width: MediaQuery.sizeOf(context).width * 0.025,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isActive
-                            ? Color.fromARGB(255, (112 + index * 10),
-                                (13 + index), (6 + index))
-                            : Colors.grey[800],
-                        border: Border.all(
-                          color: isActive
-                              ? const Color.fromARGB(0, 0, 0, 0)
-                              : const Color.fromARGB(255, 0, 0, 0),
-                          width: 1,
-                        ),
+                          Container(
+                            width: filledWidth,
+                            height: 7.5.h,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              gradient: const LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 85, 1, 1),
+                                  Color.fromARGB(255, 194, 5, 5),
+                                ],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    );
-                  }),
-                ),
-              ],
-            ),
+                    ],
+                  ),
+                  SizedBox(
+                    width: progressWidth,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(6, (index) {
+                        bool isActive = (_animation.value >= (index * 20));
+                        return Container(
+                          height: 15.h,
+                          width: 12.5.w,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: isActive
+                                ? Color.fromARGB(
+                                    255, (80 + index * 20), (13), (6))
+                                : Colors.grey[800],
+                            border: Border.all(
+                              color: isActive
+                                  ? const Color.fromARGB(0, 0, 0, 0)
+                                  : const Color.fromARGB(255, 0, 0, 0),
+                              width: 1.sp,
+                            ),
+                          ),
+                        );
+                      }),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
           Padding(
             padding: EdgeInsets.only(
-                left: MediaQuery.sizeOf(context).width * 0.065,
-                right: MediaQuery.sizeOf(context).width * 0.05),
+                left: (screenWidth - progressWidth) / 2,
+                right: (screenWidth - progressWidth) / 2.5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -425,13 +409,27 @@ class GradientProgressBarState extends State<GradientProgressBar>
                   textAlign: TextAlign.center,
                   '${index * 20}%',
                   style: TextStyle(
-                      fontSize: MediaQuery.sizeOf(context)
-                              .width * //TODO DON T CHANGE THIS TO FIXED
-                          0.035,
+                      fontSize: 10.sp,
                       color: Colors.white,
                       fontWeight: FontWeight.w600),
                 );
               }),
+            ),
+          ),
+          AnimatedOpacity(
+            opacity: _showLabel ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 500), // Fade duration
+            child: Padding(
+              padding: EdgeInsets.only(top: 12.h),
+              child: Text(
+                widget.points >= 400
+                    ? "Έχεις ένα κουπόνι για 20% έκπτωση"
+                    : 'Σε ${400 - widget.points} πόντους κερδίζεις έκπτωση',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w400),
+              ),
             ),
           ),
         ],

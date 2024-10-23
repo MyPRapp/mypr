@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -78,6 +80,9 @@ class _ContactUsPageState extends State<ContactUsPage> {
     if (isAuthenticated) {
       nameController.text =
           '${userProvider.firstName} ${userProvider.lastName}';
+      if (nameController.text == ' ') {
+        nameController.text = '';
+      }
       emailController.text = userProvider.email;
     }
 
@@ -88,7 +93,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-            appBar: _buildAppBar(context), //TODO Build a main app bar for all
+            appBar: buildAppBar(context, 'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ'),
             backgroundColor: const Color.fromARGB(200, 37, 37, 37),
             body: Container(
               decoration: const BoxDecoration(
@@ -100,56 +105,53 @@ class _ContactUsPageState extends State<ContactUsPage> {
               ),
               child: ListView(
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(
-                            top: screenWidth * 0.065, left: screenWidth * 0.1),
-                        child: Column(
+                  Padding(
+                    padding: EdgeInsets.only(left: 30.w, right: 30.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 60.h),
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Τηλεφώνησε μας',
                               style: TextStyle(
-                                color: Color(0xFF9C0C04),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                color: appRedColor,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            SizedBox(height: screenHeight * 0.015),
-                            const Text(
+                            SizedBox(height: 10.h),
+                            Text(
                               ' 698 098 4213\n\n 698 556 7317',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 16,
+                                fontSize: 16.sp,
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(screenWidth * 0.1),
-                        child: Column(
+                        SizedBox(height: 80.h),
+                        Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            //TODO Change fontsizes for this page
-                            const Text(
+                            Text(
                               'Στείλε ένα email',
                               style: TextStyle(
-                                color: Color(0xFF9C0C04),
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                color: appRedColor,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                            SizedBox(height: screenHeight * 0.02),
+                            SizedBox(height: 10.h),
                             _buildTextField('Ονοματεπώνυμο', 1, nameController),
-                            SizedBox(height: screenHeight * 0.022),
+                            SizedBox(height: 20.h),
                             _buildTextField('Το email σου', 1, emailController),
-                            SizedBox(height: screenHeight * 0.022),
+                            SizedBox(height: 20.h),
                             _buildTextField('Μήνυμα', 4, messageController),
-                            SizedBox(height: screenHeight * 0.035),
+                            SizedBox(height: 40.h),
                             ElevatedButton(
                               onPressed: () async {
                                 if (messageController.text.isEmpty) {
@@ -170,7 +172,8 @@ class _ContactUsPageState extends State<ContactUsPage> {
                                   return;
                                 }
 
-                                if (nameController.text.isEmpty) {
+                                if (nameController.text.isEmpty ||
+                                    nameController.text == ' ') {
                                   floatingSnackBar(
                                     message:
                                         'Παρακαλώ συμπληρώστε ονοματεπώνυμο',
@@ -192,61 +195,53 @@ class _ContactUsPageState extends State<ContactUsPage> {
                                   vertical: 15,
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 'Αποστολή',
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: 16),
+                                  color: Colors.white,
+                                  fontSize: 16.sp,
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(left: screenWidth * 0.1),
-                            child: Column(
+                        SizedBox(height: 100.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
                               children: [
-                                const Text(
+                                Text(
                                   'Στείλε μήνυμα\nστο instagram',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 17,
+                                    fontSize: 17.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                                SizedBox(height: screenHeight * 0.02),
+                                SizedBox(height: 15.h),
                                 GestureDetector(
                                   onTap: _launchInstagram,
                                   child: ImageIcon(
                                     const AssetImage(
                                         'assets/icons/instagram_icon.png'),
-                                    size: MediaQuery.sizeOf(context).height *
-                                            0.05 +
-                                        MediaQuery.sizeOf(context).width *
-                                            0.025,
-                                    color: const Color(0xFF9C0C04),
+                                    size: 40.sp,
+                                    color: appRedColor,
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(right: screenWidth * 0.1),
-                            child: SizedBox(
+                            SizedBox(
                               width: screenWidth / 2.5,
                               child: Image.asset(
                                 'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
-                                height: screenHeight / 10,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                   SizedBox(
                     height: screenHeight / 10,
@@ -254,31 +249,6 @@ class _ContactUsPageState extends State<ContactUsPage> {
                 ],
               ),
             )),
-      ),
-    );
-  }
-
-  AppBar _buildAppBar(BuildContext context) {
-    return AppBar(
-      backgroundColor: Colors.black,
-      elevation: 0,
-      title: const Text(
-        'ΕΠΙΚΟΙΝΩΝΗΣΕ ΜΑΖΙ ΜΑΣ',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      leading: IconButton(
-        icon: const Icon(
-          Icons.chevron_left,
-          color: Colors.white,
-          size: 30,
-        ),
-        onPressed: () {
-          Navigator.of(context).pop();
-        },
       ),
     );
   }
@@ -365,44 +335,20 @@ class _ContactUsPageState extends State<ContactUsPage> {
   // TextField builder method for form inputs
   Widget _buildTextField(
       String hintText, int maxLines, TextEditingController controller) {
-    return Focus(
-      onFocusChange: (hasFocus) {
-        // Optionally, you can control animation or other effects here
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.5),
-              spreadRadius: 2,
-              blurRadius: 10,
-              offset: const Offset(3, 3),
-            ),
-            BoxShadow(
-              color: Colors.white.withOpacity(0.05),
-              spreadRadius: -2,
-              blurRadius: 10,
-              offset: const Offset(-3, -3),
-            ),
-          ],
-          borderRadius: BorderRadius.circular(12),
+    return TextField(
+      maxLines: maxLines,
+      controller: controller,
+      style: TextStyle(color: Colors.white, fontSize: 13.sp),
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.2),
+        hintText: hintText,
+        hintStyle: TextStyle(color: Colors.white54, fontSize: 13.sp),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide.none,
         ),
-        child: TextField(
-          maxLines: maxLines,
-          controller: controller,
-          style: const TextStyle(color: Colors.white),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.2),
-            hintText: hintText,
-            hintStyle: const TextStyle(color: Colors.white54),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            contentPadding: const EdgeInsets.all(15),
-          ),
-        ),
+        contentPadding: EdgeInsets.all(13.sp),
       ),
     );
   }

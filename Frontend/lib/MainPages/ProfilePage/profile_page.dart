@@ -4,7 +4,9 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
@@ -190,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return PopScope(
       canPop: false,
       child: RefreshIndicator.adaptive(
-        color: const Color(0xFF9C0C04),
+        color: appRedColor,
         onRefresh: _refresh,
         child: Scaffold(
           //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
@@ -199,217 +201,187 @@ class _ProfilePageState extends State<ProfilePage> {
             bottom: false,
             right: false,
             left: false,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minHeight: screenHeight),
-              child: Container(
-                decoration: const BoxDecoration(
-                  gradient:
-                      LinearGradient(begin: Alignment.bottomRight, colors: [
-                    Color.fromARGB(153, 48, 2, 2),
-                    Color.fromARGB(69, 0, 0, 0),
-                  ]),
-                ),
-                child: Stack(
-                  children: [
-                    ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(begin: Alignment.bottomRight, colors: [
+                  Color.fromARGB(153, 48, 2, 2),
+                  Color.fromARGB(69, 0, 0, 0),
+                ]),
+              ),
+              child: Stack(
+                children: [
+                  ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(minHeight: screenHeight),
+                        child: Column(
                           children: [
-                            if (!isVerified && isAuthenticated)
-                              SizedBox(height: screenHeight * 0.02),
-                            if (!isAuthenticated)
-                              SizedBox(height: screenHeight * 0.05),
-                            SizedBox(height: screenHeight * 0.02),
-                            if (isAuthenticated)
-                              Padding(
-                                padding:
-                                    EdgeInsets.only(right: screenWidth * 0.02),
-                                child: Align(
-                                    alignment: Alignment.centerRight,
-                                    child: FadeText(
-                                      points: userDetails.points,
-                                    )),
-                              ),
-                            SizedBox(
-                              width: screenWidth / 3,
-                              height: screenWidth / 3,
-                              child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(300),
-                                  child: isAuthenticated
-                                      ? userDetails.localPhotoPath.isNotEmpty
-                                          ? Image.file(
-                                              File(userDetails.localPhotoPath),
-                                              fit: BoxFit.cover,
-                                            ) // Load from local file
-                                          : userDetails.photo.isNotEmpty
-                                              ? Image.network(
-                                                  'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : const Image(
-                                                  image: AssetImage(
-                                                      'assets/otherPhotos/Default_User.jpg'))
-                                      : const Image(
-                                          image: AssetImage(
-                                              'assets/otherPhotos/Default_User.jpg'))),
-                            ),
-                            if (isAuthenticated)
-                              // // Padding( //TODO
-                              // //   padding:
-                              // //       EdgeInsets.only(top: screenHeight * 0.03),
-                              // //   child: Text(
-                              // //     '${userDetails.firstName} ${userDetails.lastName}',
-                              // //     style: TextStyle(
-                              // //       fontSize:
-                              // //           screenHeight * 0.02 + screenWidth * 0.01,
-                              // //       color:
-                              // //           const Color.fromARGB(255, 255, 255, 255),
-                              // //       fontWeight: FontWeight.w600,
-                              // //     ),
-                              // //     textAlign: TextAlign.center,
-                              // //   ),
-                              // ),
-                              if (isAuthenticated)
-                                Center(
-                                  child: GradientProgressBar(points: points),
+                            Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  if (!isVerified &&
+                                      isAuthenticated) //top 'resend-email' banner is visible
+                                    SizedBox(height: 40.h),
+                                  SizedBox(height: 20.h),
+                                  if (!isAuthenticated) SizedBox(height: 80.h),
+                                  if (isAuthenticated)
+                                    Padding(
+                                      padding: EdgeInsets.only(right: 10.w),
+                                      child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child: FadeText(
+                                            points: userDetails.points,
+                                          )),
+                                    ),
+                                  SizedBox(
+                                    width: screenWidth / 3.2,
+                                    height: screenWidth / 3.2,
+                                    child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(360.r),
+                                        child: isAuthenticated
+                                            ? userDetails
+                                                    .localPhotoPath.isNotEmpty
+                                                ? Image.file(
+                                                    File(userDetails
+                                                        .localPhotoPath),
+                                                    fit: BoxFit.cover,
+                                                  ) // Load from local file
+                                                : userDetails.photo.isNotEmpty
+                                                    ? Image.network(
+                                                        'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
+                                                        fit: BoxFit.cover,
+                                                      )
+                                                    : const Image(
+                                                        image: AssetImage(
+                                                            'assets/otherPhotos/Default_User.jpg'),
+                                                        fit: BoxFit.cover,
+                                                      )
+                                            : const Image(
+                                                image: AssetImage(
+                                                    'assets/otherPhotos/Default_User.jpg'),
+                                                fit: BoxFit.cover,
+                                              )),
+                                  ),
+                                  if (isAuthenticated) ...[
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 20.h),
+                                      child: Text(
+                                        '${userDetails.firstName} ${userDetails.lastName}',
+                                        style: TextStyle(
+                                          fontSize: 17.sp,
+                                          color: const Color.fromARGB(
+                                              255, 255, 255, 255),
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 20.w),
+                                    Center(
+                                      child:
+                                          GradientProgressBar(points: points),
+                                    ),
+                                  ],
+                                ]),
+                            Padding(
+                              padding: EdgeInsets.only(top: 30.h, left: 25.w),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 260.w,
+                                  child: Column(
+                                    children: [
+                                      if (isAuthenticated)
+                                        Column(
+                                          children: [
+                                            GestureDetector(
+                                              behavior:
+                                                  HitTestBehavior.translucent,
+                                              onTap: () {
+                                                showDialog(
+                                                  context: context,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return ProfileDialog(
+                                                      name:
+                                                          '${userDetails.firstName} ${userDetails.lastName}',
+                                                      email: userDetails.email,
+                                                      phone: userDetails.phone,
+                                                    );
+                                                  },
+                                                );
+                                              },
+                                              child: Align(
+                                                alignment: Alignment.centerLeft,
+                                                child: Text('Το προφίλ μου',
+                                                    style: TextStyle(
+                                                        fontSize: 16.sp,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 170, 170, 170),
+                                                        fontWeight:
+                                                            FontWeight.w600)),
+                                              ),
+                                            ),
+                                            redDivider(),
+                                          ],
+                                        ),
+                                      if (isAuthenticated)
+                                        SizedBox(height: 20.h),
+                                      if (isAuthenticated)
+                                        Column(
+                                          children: [
+                                            profileOptions(
+                                                'Οι κρατήσεις μου',
+                                                const MyBookingsRoute(),
+                                                screenHeight,
+                                                screenWidth),
+                                            redDivider(),
+                                          ],
+                                        ),
+                                      SizedBox(height: 20.h),
+                                      Column(
+                                        children: [
+                                          profileOptions(
+                                              'Αγαπημένα',
+                                              const FavoritesRoute(),
+                                              screenHeight,
+                                              screenWidth),
+                                          redDivider(),
+                                        ],
+                                      ),
+                                      SizedBox(height: 20.h),
+                                      profileOptions(
+                                          'Επικοινώνησε μαζί μας',
+                                          const ContactUsRoute(),
+                                          screenHeight,
+                                          screenWidth),
+                                    ],
+                                  ),
                                 ),
+                              ),
+                            ),
+                            if (!isAuthenticated) SizedBox(height: 100.h),
+                            if (!isAuthenticated)
+                              BuildSignInOrRegisterButton(context: context),
+                            if (!isAuthenticated) SizedBox(height: 50.h),
                           ],
                         ),
-                        Padding(
-                          padding: EdgeInsets.only(top: screenHeight * 0.05),
-                          child: Center(
-                            child: SizedBox(
-                              width: screenWidth *
-                                  0.85, // Adjust the width as needed
-
-                              child: Column(
-                                children: [
-                                  if (isAuthenticated)
-                                    GestureDetector(
-                                      behavior: HitTestBehavior.translucent,
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return ProfileDialog(
-                                              name:
-                                                  '${userDetails.firstName} ${userDetails.lastName}',
-                                              email: userDetails.email,
-                                              phone: userDetails.phone,
-                                            );
-                                          },
-                                        );
-                                      },
-                                      child: Padding(
-                                        padding: EdgeInsets.only(
-                                            left: screenWidth * 0.02,
-                                            bottom: screenHeight * 0.02,
-                                            top: screenHeight * 0.02),
-                                        child: const Align(
-                                          alignment: Alignment.centerLeft,
-                                          //TODO
-                                          /* 
-                                          child: Text('Το προφίλ μου',
-                                              style: TextStyle(
-                                                  fontSize: screenWidth *
-                                                      screenHeight *
-                                                      0.00006,
-                                                  color: const Color.fromARGB(
-                                                      255, 170, 170, 170),
-                                                  fontWeight: FontWeight.w500)), */
-                                        ),
-                                      ),
-                                    ),
-                                  /*
-                            if (isAuthenticated)
-                              profileOptions(
-                                  'Το προφίλ μου',
-                                  const CustomizeProfileRoute(),
-                                  screenHeight,
-                                  screenWidth),
-                            */
-                                  if (isAuthenticated)
-                                    Container(
-                                      height: 2,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.red.withOpacity(0.6),
-                                            Colors.black,
-                                          ],
-                                          begin: Alignment.centerLeft,
-                                          end: Alignment.centerRight,
-                                        ),
-                                      ),
-                                    ),
-                                  if (isAuthenticated)
-                                    profileOptions(
-                                        // 'Οι κρατήσεις μου',
-                                        '',
-                                        const MyBookingsRoute(),
-                                        screenHeight,
-                                        screenWidth),
-                                  if (isAuthenticated)
-                                    Container(
-                                      height: 2,
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            Colors.red.withOpacity(0.6),
-                                            Colors.black,
-                                          ],
-                                          begin: Alignment.centerLeft,
-                                          end: Alignment.centerRight,
-                                        ),
-                                      ),
-                                    ),
-                                  profileOptions(
-                                      // 'Αγαπημένα',
-                                      '',
-                                      const FavoritesRoute(),
-                                      screenHeight,
-                                      screenWidth),
-                                  Container(
-                                    height: 2,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.red.withOpacity(0.6),
-                                          Colors.black,
-                                        ],
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
-                                      ),
-                                    ),
-                                  ),
-                                  profileOptions(
-                                      // 'Επικοινώνησε μαζί μας',
-                                      '',
-                                      const ContactUsRoute(),
-                                      screenHeight,
-                                      screenWidth),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (isAuthenticated) SizedBox(height: screenHeight / 8),
-                        if (isAuthenticated)
+                      ),
+                      if (isAuthenticated)
+                        Column(children: [
                           Center(
-                            //TODO
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
                               onTap: signOut,
                               child: Container(
-                                height: screenHeight * 0.07,
-                                width: screenWidth / 2.2,
+                                height: 45.h,
+                                width: 135.w,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30),
+                                  borderRadius: BorderRadius.circular(30.r),
                                   gradient: const LinearGradient(
-                                      begin: Alignment.topRight,
+                                      begin: Alignment.bottomRight,
                                       colors: [
                                         Color.fromARGB(183, 67, 2, 2),
                                         Color.fromARGB(255, 0, 0, 0),
@@ -420,8 +392,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   textAlign: TextAlign.center,
                                   'Αποσύνδεση',
                                   style: TextStyle(
-                                    fontSize:
-                                        screenWidth * screenHeight * 0.00006,
+                                    fontSize: 15.sp,
                                     fontWeight: FontWeight.w700,
                                     color: const Color.fromARGB(
                                         255, 145, 145, 145),
@@ -430,57 +401,36 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                           ),
-                        if (isAuthenticated)
-                          SizedBox(
-                            height: screenHeight * 0.12,
-                          ),
-                        if (!isAuthenticated)
-                          SizedBox(height: screenHeight * 0.1),
-                        if (!isAuthenticated)
-                          Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                AutoRouter.of(context)
-                                    .replaceAll([const SignUpRoute()]);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                elevation: 10,
-                                foregroundColor:
-                                    const Color.fromARGB(255, 0, 0, 0),
-                                backgroundColor: const Color.fromARGB(
-                                    255, 217, 217, 217), // Text color
-                                minimumSize: Size(screenWidth * 0.42,
-                                    screenHeight * 0.06), // Button size
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  side: const BorderSide(
-                                    width: 4,
-                                    color: Color.fromARGB(
-                                        255, 0, 0, 0), // Border color
-                                  ),
-                                ),
-                              ),
-                              child: Text(
-                                'Εγγραφή / Σύνδεση',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.036,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                        if (!isAuthenticated)
-                          SizedBox(height: screenHeight * 0.2),
-                      ],
-                    ),
-                    if (!isVerified && isAuthenticated)
-                      EmailConfirmationNotification(
-                          onResendEmail: sendVerificationEmail),
-                  ],
-                ),
+                          SizedBox(height: screenHeight / 5),
+                        ])
+                    ],
+                  ),
+                  if (!isVerified && isAuthenticated)
+                    EmailConfirmationNotification(
+                        onResendEmail: sendVerificationEmail,
+                        text: 'Παρακαλώ επιβεβαίωσε το email σου'),
+                ],
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget redDivider() {
+    return Padding(
+      padding: EdgeInsets.only(top: 7.h),
+      child: Container(
+        height: 2.h,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.red.withOpacity(0.6),
+              Colors.black,
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
         ),
       ),
@@ -494,75 +444,14 @@ class _ProfilePageState extends State<ProfilePage> {
       onTap: () {
         AutoRouter.of(context).push(route);
       },
-      child: Padding(
-        padding: EdgeInsets.only(
-            left: screenWidth * 0.02,
-            bottom: screenHeight * 0.02,
-            top: screenHeight * 0.02),
-        child: Align(
-          alignment: Alignment.centerLeft,
-          child: Text(label,
-              style: TextStyle(
-                  fontSize: screenWidth * screenHeight * 0.00006,
-                  color: const Color.fromARGB(255, 170, 170, 170),
-                  fontWeight: FontWeight.w500)),
-        ),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 16.sp,
+                color: const Color.fromARGB(255, 170, 170, 170),
+                fontWeight: FontWeight.w600)),
       ),
-    );
-  }
-}
-
-class EmailConfirmationNotification extends StatelessWidget {
-  final VoidCallback onResendEmail;
-
-  const EmailConfirmationNotification({super.key, required this.onResendEmail});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Stack(
-      children: [
-        //TODO
-        /* 
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: Container(
-            color: const Color.fromARGB(255, 255, 187, 0),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-            child: 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(
-                  child: Text(
-                    'Παρακαλώ επιβεβαίωσε το email σου',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    ),
-                  ), 
-                  //TODO
-                  
-
-                
-                GestureDetector(
-                  onTap: onResendEmail,
-                  child: const Text(
-                    'Επαναποστολή',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w600,
-                      decoration: TextDecoration.underline,
-                    ),
-                ),
-              ],
-            ),
-          ),
-        ),
-                  ), */
-      ],
     );
   }
 }

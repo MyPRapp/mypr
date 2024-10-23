@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
@@ -94,8 +95,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = ScreenUtil().screenHeight;
+    final screenWidth = ScreenUtil().screenWidth;
 
     return PopScope(
       canPop: false,
@@ -107,14 +108,20 @@ class _HomePageState extends State<HomePage> {
           child: RefreshIndicator.adaptive(
             color: const Color(0xFF9C0C04),
             onRefresh: _initApp,
-            child: ListView(
-              children: [
-                _buildHeader(screenHeight, screenWidth),
-                _buildResultsTitle(screenHeight, screenWidth), //TODO
-                _buildClubList(screenHeight, screenWidth),
-                // _buildComingSoonText(), //TODO
-                SizedBox(height: screenHeight / 40 * 6),
-              ],
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.w, right: 10.w),
+              child: ListView(
+                children: [
+                  SizedBox(height: 10.h),
+                  _buildHeader(screenWidth),
+                  SizedBox(height: 40.h),
+                  _buildResultsTitle(),
+                  SizedBox(height: 15.h),
+                  _buildClubList(screenHeight, screenWidth),
+                  _buildComingSoonText(),
+                  SizedBox(height: 140.h),
+                ],
+              ),
             ),
           ),
         ),
@@ -132,96 +139,79 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildHeader(double screenHeight, double screenWidth) {
+  Widget _buildHeader(double screenWidth) {
     return SizedBox(
-      height: screenHeight / 13,
+      height: 50.h,
       width: screenWidth,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildLogo(screenHeight, screenWidth),
-          _buildSearchBox(screenHeight, screenWidth),
+          _buildLogo(),
+          _buildSearchBox(),
         ],
       ),
     );
   }
 
-  Widget _buildLogo(double screenHeight, double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.only(left: screenWidth * 0.02),
-      child: Image.asset(
-        'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
-        height: screenHeight / 13,
-        width: screenWidth / 4,
-      ),
+  Widget _buildLogo() {
+    return Image.asset(
+      'assets/otherPhotos/Logo_v2.2-removebg(cropped).png',
+      width: 120.w,
     );
   }
 
-  Widget _buildSearchBox(double screenHeight, double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.only(right: screenWidth * 0.02),
-      child: GestureDetector(
-        onTap: () => navigateToSearchTab(context),
-        child: Container(
-          //TODO Make this container fixed depending on 3 or 4 screen resolutions
-          alignment: Alignment.center,
-          height: screenHeight / 17,
-          width: screenWidth / 2.65,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            gradient: const LinearGradient(
-              colors: [
-                Color.fromARGB(255, 0, 0, 0),
-                Color.fromARGB(150, 55, 55, 55),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+  Widget _buildSearchBox() {
+    return GestureDetector(
+      onTap: () => navigateToSearchTab(context),
+      child: Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 10.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.r),
+          gradient: const LinearGradient(
+            colors: [
+              Color.fromARGB(255, 0, 0, 0),
+              Color.fromARGB(150, 55, 55, 55),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          // child: const TextField(
-          // enabled: false,
-          // decoration: InputDecoration(
-          //   hintText: 'Αναζήτηση',
-          //   hintStyle: TextStyle(color: Colors.grey),
-          //   filled: true,
-          //   fillColor: Colors.transparent,
-          //   border: OutlineInputBorder(
-          //     borderRadius: BorderRadius.all(Radius.circular(8)),
-          //     borderSide: BorderSide.none,
-          //   ),
-          //   prefixIcon: Icon(Icons.search, color: Colors.grey),
-          // ),
-          // ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search,
+              color: Colors.grey,
+              size: 14.sp,
+            ),
+            Text(
+              ' Αναζήτηση',
+              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildResultsTitle(double screenHeight, double screenWidth) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: screenWidth * 0.03,
-        top: screenHeight * 0.035,
-        bottom: screenHeight * 0.02,
-      ),
-      child: ShaderMask(
-        shaderCallback: (bounds) => const LinearGradient(
-          colors: [
-            Color.fromARGB(255, 56, 56, 56),
-            Color.fromARGB(255, 162, 162, 162),
-          ],
-          begin: Alignment.centerLeft,
-          end: Alignment.center,
-        ).createShader(bounds),
-        // child:
-        //  Text(
-        //   'Όλα τα αποτελέσματα',
-        //   style: TextStyle(
-        //     fontSize: screenWidth * 0.02 + screenHeight * 0.0125,
-        //     fontWeight: FontWeight.bold,
-        //     color: Colors.white,
-        //   ),
-        // ),
+  Widget _buildResultsTitle() {
+    return ShaderMask(
+      shaderCallback: (bounds) => const LinearGradient(
+        colors: [
+          Color.fromARGB(255, 51, 51, 51),
+          Color.fromARGB(255, 194, 194, 194),
+        ],
+        begin: Alignment.centerLeft,
+        end: Alignment.center,
+      ).createShader(bounds),
+      child: Text(
+        ' Όλα τα αποτελέσματα',
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w600,
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -250,15 +240,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Widget _buildComingSoonText() {
-  //   return const Text(
-  //     textAlign: TextAlign.center,
-  //     'Περισσότερα club έρχονται σύντομα...',
-  //     style: TextStyle(
-  //       color: Colors.grey,
-  //       fontSize: 15,
-  //       fontWeight: FontWeight.w600,
-  //     ),
-  //   );
-  // }
+  Widget _buildComingSoonText() {
+    return Text(
+      textAlign: TextAlign.center,
+      'Περισσότερα club έρχονται σύντομα...',
+      style: TextStyle(
+        color: Colors.grey,
+        fontSize: 14.sp,
+        fontWeight: FontWeight.w600,
+      ),
+    );
+  }
 }

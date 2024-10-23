@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import this for setting orientations
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/Providers/reservation_provider.dart';
@@ -66,20 +67,26 @@ class _MyPRState extends State<MyPR> {
   @override
   Widget build(BuildContext context) {
     final appRouter = AppRouter();
-    return MaterialApp.router(
-      title: 'MyPR',
-      debugShowCheckedModeBanner: false,
-      locale: const Locale('el', 'GR'), // Set the default locale to Greek
-      supportedLocales: const [
-        Locale('el', 'GR'), // Greek
-        Locale('en', 'US'), // English (Optional, you can add more locales)
-      ],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      routerConfig: appRouter.config(),
+
+    return ScreenUtilInit(
+      designSize: const Size(375, 812), // Base design size (e.g., iPhone 11)
+      builder: (context, child) {
+        return MaterialApp.router(
+          title: 'MyPR',
+          debugShowCheckedModeBanner: false,
+          locale: const Locale('el', 'GR'), // Set the default locale to Greek
+          supportedLocales: const [
+            Locale('el', 'GR'), // Greek
+            Locale('en', 'US'), // English (Optional, you can add more locales)
+          ],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          routerConfig: appRouter.config(),
+        );
+      },
     );
   }
 }

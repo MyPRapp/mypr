@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../Globals/structs.dart';
@@ -54,14 +55,14 @@ class SearchPageState extends State<SearchPage> {
     });
   }
 
-  // void _clearSearchField() {
-  //   setState(() {
-  //     _controller.clear();
-  //     _filterClubs('');
-  //     _isDropdownVisible = false;
-  //     FocusScope.of(context).unfocus();
-  //   });
-  // }
+  void _clearSearchField() {
+    setState(() {
+      _controller.clear();
+      _filterClubs('');
+      _isDropdownVisible = false;
+      FocusScope.of(context).unfocus();
+    });
+  }
 
   void _onClubTap(String clubName) {
     if (_isDropdownVisible) {
@@ -85,7 +86,7 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.sizeOf(context).height;
+    final double screenHeight = ScreenUtil().screenHeight;
 
     return PopScope(
       canPop: false,
@@ -93,8 +94,10 @@ class SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
-            setState(() => _isDropdownVisible = false);
-            FocusManager.instance.primaryFocus?.unfocus();
+            setState(() {
+              _isDropdownVisible = false;
+              FocusManager.instance.primaryFocus?.unfocus();
+            });
           },
           child: Container(
             height: screenHeight,
@@ -106,27 +109,21 @@ class SearchPageState extends State<SearchPage> {
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 80.h),
               child: Stack(
                 children: [
                   Column(
                     children: [
-                      SizedBox(height: screenHeight * 0.04),
-                      GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            setState(
-                                () => _isDropdownVisible = !_isDropdownVisible);
-                          },
-                          child: _buildSearchField()),
-                    ],
-                  ),
-                  Column(
-                    children: [
-                      SizedBox(height: screenHeight * 0.15),
+                      SizedBox(height: 70.h),
                       _buildDropdownList(screenHeight),
                     ],
                   ),
+                  GestureDetector(
+                      onTap: () {
+                        setState(
+                            () => _isDropdownVisible = !_isDropdownVisible);
+                      },
+                      child: _buildSearchField()),
                 ],
               ),
             ),
@@ -137,25 +134,36 @@ class SearchPageState extends State<SearchPage> {
   }
 
   Widget _buildSearchField() {
-    return TextField(
-      controller: _controller,
-      focusNode: _focusNode,
-      // style: const TextStyle(color: Colors.white), //TODO
-      // decoration: InputDecoration(
-      //   hintText: 'Βρες που θα παρτάρεις',
-      //   hintStyle: const TextStyle(color: Color.fromARGB(255, 182, 176, 176)),
-      //   border: const OutlineInputBorder(
-      //     borderRadius: BorderRadius.all(Radius.circular(8)),
-      //     borderSide: BorderSide.none,
-      //   ),
-      //   prefixIcon: const Icon(Icons.search, color: Colors.grey),
-      //   suffixIcon: _controller.text.isNotEmpty
-      //       ? IconButton(
-      //           icon: const Icon(Icons.clear, color: Colors.grey),
-      //           onPressed: _clearSearchField,
-      //         )
-      //       : null,
-      // ),
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: 50.h),
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        style: TextStyle(
+            color: const Color.fromARGB(255, 255, 255, 255), fontSize: 17.sp),
+        decoration: InputDecoration(
+          hintText: 'Βρες που θα παρτάρεις',
+          hintStyle: TextStyle(
+              color: const Color.fromARGB(255, 182, 176, 176), fontSize: 15.sp),
+          border: const OutlineInputBorder(
+            borderSide: BorderSide.none,
+          ),
+          prefixIcon: Padding(
+            padding: EdgeInsets.only(right: 5.w),
+            child: Icon(Icons.search, color: Colors.grey, size: 15.sp),
+          ),
+          suffixIcon: _controller.text.isNotEmpty
+              ? IconButton(
+                  icon: Icon(
+                    Icons.clear,
+                    color: const Color.fromARGB(255, 158, 158, 158),
+                    size: 15.sp,
+                  ),
+                  onPressed: _clearSearchField,
+                )
+              : null,
+        ),
+      ),
     );
   }
 
@@ -169,9 +177,9 @@ class SearchPageState extends State<SearchPage> {
         duration: const Duration(milliseconds: 500),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.black,
-            border: Border.all(color: Colors.white),
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            color: const Color.fromARGB(255, 0, 0, 0),
+            border: Border.all(color: const Color.fromARGB(255, 255, 255, 255)),
+            borderRadius: BorderRadius.all(Radius.circular(10.r)),
           ),
           child: SizedBox(
             height: screenHeight / 3,
@@ -184,14 +192,17 @@ class SearchPageState extends State<SearchPage> {
                 return Column(
                   children: [
                     ListTile(
-                      // title: Text(clubName, //TODO
-                      //     style: const TextStyle(color: Colors.white)),
+                      contentPadding:
+                          EdgeInsets.only(left: 12.sp, top: 3.sp, bottom: 3.sp),
+                      title: Text(clubName,
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 13.sp)),
                       onTap: () => _onClubTap(clubName),
                     ),
                     if (index != _filteredClubs.length - 1)
-                      const Divider(
-                          thickness: 0.6,
-                          color: Color.fromARGB(189, 110, 110, 110)),
+                      Divider(
+                          thickness: 1.sp,
+                          color: const Color.fromARGB(189, 110, 110, 110)),
                   ],
                 );
               },

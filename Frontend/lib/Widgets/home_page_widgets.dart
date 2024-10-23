@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
@@ -37,10 +39,6 @@ class _BigClubCardState extends State<BigClubCard> {
     });
   }
 
-  // List<bool> _daysOpen(String availabilityInBytes) {
-  //   return availabilityInBytes.split('').map((char) => char == '1').toList();
-  // }
-
   String processString(String input) {
     // Check if there are any commas in the string
     if (!input.contains(',')) {
@@ -59,9 +57,7 @@ class _BigClubCardState extends State<BigClubCard> {
   double _scale = 0;
   @override
   Widget build(BuildContext context) {
-    // final daysOpen = _daysOpen(widget.club.clubAvailability);
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final screenHeight = MediaQuery.sizeOf(context).height;
+    final screenWidth = widget.screenWidth;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -89,16 +85,13 @@ class _BigClubCardState extends State<BigClubCard> {
       },
       child: Padding(
         padding: EdgeInsets.only(
-            bottom: screenHeight * 0.03,
-            left: screenWidth * 0.02,
-            right: screenWidth * 0.02),
+          bottom: 30.h,
+        ),
         child: Container(
-          width: screenWidth * 0.96,
-          height: screenHeight / 6,
+          height: 140.h,
           decoration: BoxDecoration(
               color: const Color.fromARGB(57, 0, 0, 0),
-              borderRadius:
-                  BorderRadius.circular(screenHeight * screenWidth * 0.00002)),
+              borderRadius: BorderRadius.circular(10.r)),
           child: Row(
             children: [
               Stack(
@@ -109,13 +102,11 @@ class _BigClubCardState extends State<BigClubCard> {
                     curve: Curves.easeOut,
                     child: ClipRRect(
                       borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(
-                              screenHeight * screenWidth * 0.00002),
-                          topLeft: Radius.circular(
-                              screenHeight * screenWidth * 0.00002)),
+                          bottomLeft: Radius.circular(10.r),
+                          topLeft: Radius.circular(10.r)),
                       child: SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.2,
-                        width: MediaQuery.of(context).size.width * 0.3,
+                        height: 140.h,
+                        width: screenWidth * 0.3,
                         child: widget.club.localPhotoPath.isNotEmpty
                             ? Image(
                                 fit: BoxFit.fill,
@@ -132,7 +123,7 @@ class _BigClubCardState extends State<BigClubCard> {
                                       if (loadingProgress == null) return child;
                                       return const Center(
                                         child: CircularProgressIndicator(
-                                          color: Color(0xFF9C0C04),
+                                          color: appRedColor,
                                           backgroundColor: Colors.black,
                                           strokeWidth: 2,
                                         ),
@@ -141,7 +132,7 @@ class _BigClubCardState extends State<BigClubCard> {
                                   )
                                 : const Center(
                                     child: CircularProgressIndicator(
-                                      color: Color(0xFF9C0C04),
+                                      color: appRedColor,
                                       backgroundColor: Colors.black,
                                       strokeWidth: 2,
                                     ),
@@ -152,8 +143,6 @@ class _BigClubCardState extends State<BigClubCard> {
                   Container(
                     alignment: Alignment.topLeft,
                     child: LikeButton(
-                      screenHeight: screenHeight,
-                      screenWidth: screenWidth,
                       club: widget.club,
                     ),
                   ),
@@ -161,61 +150,41 @@ class _BigClubCardState extends State<BigClubCard> {
               ),
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.all(screenHeight * 0.01),
-                  child: const Column(
+                  padding: EdgeInsets.all(5.sp),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      //TODO
-                      /*     Column(  
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           NameAndStars(
-                            screenHeight: screenHeight,
-                            screenWidth: screenWidth,
                             clubName: widget.club.clubName,
                             stars: widget.club.clubRating,
                           ),
-                          Padding(
-                            padding: EdgeInsets.only(top: screenHeight * 0.006),
-                            child: Text(
-                              processString(widget.club.clubLocation),
-                              style: TextStyle(
-                                fontSize: screenHeight * 0.015,
-                                fontWeight: FontWeight.w500,
-                                color: const Color.fromARGB(255, 102, 102, 102),
-                              ),
-                              textAlign: TextAlign.start,
+                          SizedBox(height: 3.h),
+                          Text(
+                            processString(widget.club.clubLocation),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color.fromARGB(255, 102, 102, 102),
                             ),
                           ),
                         ],
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 5),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            MinPriceAndMaxPersons(
-                              screenHeight: screenHeight,
-                              screenWidth: screenWidth,
-                              minPrice: widget.club.clubMinPrice,
-                              maxPersons: widget.club.clubMaxPersons,
-                            ),
-                            DaysOpen(
-                              monday: daysOpen[0],
-                              tuesday: daysOpen[1],
-                              wednesday: daysOpen[2],
-                              thursday: daysOpen[3],
-                              friday: daysOpen[4],
-                              saturday: daysOpen[5],
-                              sunday: daysOpen[6],
-                              screenHeight: screenHeight,
-                              screenWidth: screenWidth,
-                            ),
-                          ],
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          MinPriceAndMaxPersons(
+                            minPrice: widget.club.clubMinPrice,
+                            maxPersons: widget.club.clubMaxPersons,
+                          ),
+                          DaysOpen(
+                            openDays: widget.club.clubAvailability,
+                          ),
+                        ],
                       ),
-                    */
                     ],
                   ),
                 ),
@@ -310,7 +279,7 @@ class _SmallClubCardState extends State<SmallClubCard> {
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF9C0C04),
+                            color:appRedColor,
                           ),
                         ),
                       ),

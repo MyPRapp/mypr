@@ -4,10 +4,13 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/services/booking_service.dart';
 import 'package:provider/provider.dart';
 
+import '../../../Globals/constants.dart';
 import '../../../Globals/global_components.dart';
 import '../../../Globals/structs.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
@@ -17,7 +20,6 @@ import '../../../Providers/reservation_provider.dart';
 import '../../../Providers/user_provider.dart';
 import '../../../Widgets/club_card_widgets.dart';
 import '../../../Widgets/reservation_page_widgets.dart';
-import '../../../routes/app_router.gr.dart';
 import '../../../services/auth_service.dart';
 
 @RoutePage()
@@ -44,7 +46,7 @@ class _ReservationPageState extends State<ReservationPage> {
   // State variables for managing the page
   bool isDiscountApplied = false; // Flag to check if discount is applied
   bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
-  bool isVerified = true;
+  bool isVerified = false;
 
 // List of catalogues for different types of services in the club
   List<CatalogueInfoStruct> localCatalogues = [
@@ -252,8 +254,6 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
     return PopScope(
@@ -266,11 +266,10 @@ class _ReservationPageState extends State<ReservationPage> {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Scaffold(
-          appBar: _buildAppBar(
-              context, widget.club.clubName, screenHeight, screenWidth),
+          appBar: _buildAppBar(context, widget.club.clubName),
           backgroundColor: const Color.fromARGB(255, 39, 39, 39),
           body: RefreshIndicator.adaptive(
-            color: const Color(0xFF9C0C04),
+            color: appRedColor,
             onRefresh: _refresh, // Handle refresh action
             child: Stack(
               children: [
@@ -284,15 +283,23 @@ class _ReservationPageState extends State<ReservationPage> {
                   ),
                   child: ListView(
                     children: [
-                      // Build page header with club name
-                      buildContent(isAuthenticated, screenHeight,
-                          screenWidth), // Build form content and input fields
+                      buildContent(isAuthenticated),
+                      if (isAuthenticated) ...[
+                        SizedBox(height: 20.h),
+                        buildDiscountCheckbox(), // Discount checkbox
+                        SizedBox(height: 20.h),
+                        buildSubmitButton(), // Submit button
+                        SizedBox(height: 80.h),
+                      ]
                     ],
                   ),
                 ),
                 if (!isVerified && isAuthenticated)
                   EmailConfirmationNotification(
-                      onResendEmail: sendVerificationEmail)
+                    onResendEmail: sendVerificationEmail,
+                    text:
+                        'Για να προχωρήσεις σε κράτηση παρακαλώ επιβεβαίωσε το email σου',
+                  )
               ],
             ),
           ),
@@ -301,8 +308,7 @@ class _ReservationPageState extends State<ReservationPage> {
     );
   }
 
-  AppBar _buildAppBar(BuildContext context, String clubName,
-      double screenHeight, double screenWidth) {
+  AppBar _buildAppBar(BuildContext context, String clubName) {
     return AppBar(
         backgroundColor: Colors.black,
         title: Text(
@@ -328,85 +334,47 @@ class _ReservationPageState extends State<ReservationPage> {
         actions: [
           LikeButton(
             club: widget.club,
-            big: true,
-            screenHeight: screenHeight,
-            screenWidth: screenWidth,
           ),
-          SizedBox(width: screenWidth * 0.02)
+          SizedBox(width: 5.w)
         ]);
   }
 
   /// Builds the content section with form fields for reservation details.
-  Widget buildContent(
-      bool isAuthenticated, double screenHeight, double screenWidth) {
+  Widget buildContent(bool isAuthenticated) {
     return Container(
-      padding:
-          EdgeInsets.only(left: screenWidth * 0.04, right: screenWidth * 0.04),
+      padding: EdgeInsets.only(left: 25.w, right: 25.w),
       child: Column(
         children: [
-          if (!isVerified && isAuthenticated)
-            SizedBox(height: screenHeight * 0.1)
-          else
-            SizedBox(height: screenHeight * 0.04),
-          buildClubImage(screenHeight, screenWidth), // Display club image
-          SizedBox(height: screenHeight * 0.02),
+          if (!isVerified &&
+              isAuthenticated) //top 'resend-email' banner is visible
+            SizedBox(height: 60.h),
+          SizedBox(height: 20.h),
+          buildClubImage(), // Display club image
+          SizedBox(height: 40.h),
           WorkingDays(schedule: widget.club.clubAvailability),
-          SizedBox(height: screenHeight * 0.02),
+          SizedBox(height: 15.h),
           LocationWidget(locationName: widget.club.clubLocation),
-          SizedBox(height: screenHeight * 0.075),
+          SizedBox(height: 60.h),
           buildTitle('Φιάλες και Τιμές'), // Display packages
-          SizedBox(height: screenHeight * 0.03),
+          SizedBox(height: 10.h),
           buildPackageInfo(),
-          SizedBox(height: screenHeight * 0.075),
+          SizedBox(height: 60.h),
           isAuthenticated
               ? Column(
                   children: [
                     buildTitle('Κάνε κράτηση'), // Display booking form
-                    SizedBox(height: screenHeight * 0.045),
-                    buildReservationForm(screenHeight),
-                    SizedBox(height: screenHeight * 0.12),
+                    SizedBox(height: 10.h),
+                    buildReservationForm(),
                   ],
                 )
               : Column(
-                  //TODO Change button's size and its text's fontsize
                   children: [
                     buildTitle(
                         'Ενδιαφέρεσαι για κράτηση;'), // Display booking form
-                    const SizedBox(height: 50),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          AutoRouter.of(context)
-                              .replaceAll([const SignUpRoute()]);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          elevation: 10,
-                          foregroundColor: const Color.fromARGB(255, 0, 0, 0),
-                          backgroundColor: const Color.fromARGB(
-                              255, 217, 217, 217), // Text color
-                          minimumSize: Size(screenWidth * 0.42,
-                              screenHeight * 0.06), // Button size
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            side: const BorderSide(
-                              width: 4,
-                              color:
-                                  Color.fromARGB(255, 0, 0, 0), // Border color
-                            ),
-                          ),
-                        ),
-                        child: Text(
-                          'Εγγραφή / Σύνδεση',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.036,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
+                    SizedBox(height: 50.h),
+                    BuildSignInOrRegisterButton(context: context),
 
-                    SizedBox(height: screenHeight * 0.1),
+                    SizedBox(height: 100.h),
                   ],
                 ), // Build reservation form
         ],
@@ -415,13 +383,12 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the club image or a placeholder in case of an error.
-  Widget buildClubImage(double screenHeight, double screenWidth) {
+  Widget buildClubImage() {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(screenHeight * screenWidth * 0.00002),
+      borderRadius: BorderRadius.circular(15.r),
       child: SizedBox(
-        width: screenWidth * 0.75,
-        height: screenHeight *
-            0.35, // Display the loaded image (either from the network or local storage)
+        height: 250.h,
+        width: ScreenUtil().screenWidth,
         child: widget.club.localPhotoPath.isNotEmpty
             ? Image.file(
                 File(widget.club.localPhotoPath),
@@ -434,7 +401,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   )
                 : const Center(
                     child: CircularProgressIndicator(
-                    color: Color(0xFF9C0C04),
+                    color: appRedColor,
                     backgroundColor: Colors.black,
                     strokeWidth: 2,
                   )),
@@ -466,15 +433,15 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the reservation form with various input fields.
-  Widget buildReservationForm(double screenHeight) {
+  Widget buildReservationForm() {
     return Column(
       children: [
         NameTextField(nameController: _nameController),
-        SizedBox(height: screenHeight * 0.025),
+        SizedBox(height: 20.h),
         BookingDatePicker(
             days: widget.club.clubAvailability,
             unavailableDays: widget.club.clubNotAvailable),
-        SizedBox(height: screenHeight * 0.025),
+        SizedBox(height: 20.h),
         CategoriesTextField(
           key: categoriesTextFieldKey,
           regularCatalogue: localCatalogues[0],
@@ -485,14 +452,11 @@ class _ReservationPageState extends State<ReservationPage> {
             calculatePrice(); // Recalculate total price
           },
         ),
+        SizedBox(height: 20.h),
         const PersonsTextField(),
-        SizedBox(height: screenHeight * 0.035),
+        SizedBox(height: 20.h),
         CommentSection(
             commentController: _commentController), // Optional comment field
-        SizedBox(height: screenHeight * 0.045),
-        buildDiscountCheckbox(), // Discount checkbox
-        SizedBox(height: screenHeight * 0.025),
-        buildSubmitButton(), // Submit button
       ],
     );
   }
@@ -501,25 +465,26 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget buildDiscountCheckbox() {
     return context.read<UserProvider>().userDetails.points >= 400 &&
             buttonIsVisible
-        ? Row(
-            children: [
-              GestureDetector(
-                onTap: () => _toggleDiscount(), // Toggle discount application
-                child: Row(
-                  children: [
-                    Checkbox(
-                      value: isDiscountApplied,
-                      onChanged: (value) => _toggleDiscount(),
-                      activeColor: const Color(0xFF9C0C04),
-                    ),
-                    const Text(
-                      'Χρήση εκπτωτικού κουπονιού 20%',
-                      style: TextStyle(color: Colors.white, fontSize: 18),
-                    ),
-                  ],
+        ? GestureDetector(
+            onTap: () => _toggleDiscount(), // Toggle discount application
+            child: Row(
+              children: [
+                SizedBox(width: 20.w),
+                Transform.scale(
+                  scale: 0.8.sp,
+                  child: Checkbox(
+                    value: isDiscountApplied,
+                    onChanged: (value) => _toggleDiscount(),
+                    activeColor: appRedColor,
+                  ),
                 ),
-              ),
-            ],
+                SizedBox(width: 5.w),
+                Text(
+                  'Χρήση εκπτωτικού κουπονιού 20%',
+                  style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                ),
+              ],
+            ),
           )
         : const SizedBox.shrink(); // Do not show if points are insufficient
   }
@@ -544,24 +509,25 @@ class _ReservationPageState extends State<ReservationPage> {
                 style: ElevatedButton.styleFrom(
                   elevation: 10,
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 40, vertical: 13),
+                      EdgeInsets.symmetric(horizontal: 30.w, vertical: 15.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
-                  foregroundColor: Colors.white,
-                  backgroundColor: const Color(0xFF9C0C04),
+                  foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+                  backgroundColor: appRedColor,
                 ),
                 onPressed: () async {
                   FocusManager.instance.primaryFocus?.unfocus();
                   _handleSubmit(); // Handle form submission
                 },
-                child: const Text(
+                child: Text(
                   'Κράτηση',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  style:
+                      TextStyle(fontWeight: FontWeight.w600, fontSize: 20.sp),
                 )))
         : const Center(
             child: CircularProgressIndicator(
-              color: Color(0xFF9C0C04),
+              color: appRedColor,
             ),
           );
   }
@@ -628,15 +594,14 @@ class _ReservationPageState extends State<ReservationPage> {
       }
 
       // Submit the reservation form
-      bool success = true;
-      /*  await BookingService().submitForm( //TODO Remove comment
+      bool success = await BookingService().submitForm(
         reservationProvider.getInfo(1),
         reservationProvider.getInfo(2),
         _generateFourBitString(),
         reservationProvider.getInfo(8),
         reservationProvider.getInfo(3).toString(),
         reservationProvider.getInfo(9),
-      ); */
+      );
       // Retract points if a discount is applied
       if (isDiscountApplied && success) {
         await retractPoints(400);
@@ -664,26 +629,25 @@ class _ReservationPageState extends State<ReservationPage> {
       child: Material(
         color: Colors.black.withOpacity(0.8),
         child: Container(
-          padding: const EdgeInsets.all(20),
-          margin: const EdgeInsets.symmetric(horizontal: 30),
+          padding: EdgeInsets.all(15.sp),
           decoration: BoxDecoration(
             color: Colors.black,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF9C0C04), width: 4),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(color: appRedColor, width: 4),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Επιβεβαίωση Κράτησης',
                 style: TextStyle(
-                  color: Color(0xFF9C0C04),
-                  fontSize: 20,
+                  color: appRedColor,
+                  fontSize: 17.sp,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 15.h),
               buildInfoRow(
                   'Όνομα κράτησης:', reservationProvider.reservationInfo[1]),
               buildInfoRow('Μαγαζί:', reservationProvider.reservationInfo[2]),
@@ -691,7 +655,7 @@ class _ReservationPageState extends State<ReservationPage> {
                   'Άτομα:', reservationProvider.reservationInfo[3].toString()),
               buildInfoRow('Ημερομηνία:', formattedDate),
               buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
-              const SizedBox(height: 20),
+              SizedBox(height: 15.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -700,30 +664,36 @@ class _ReservationPageState extends State<ReservationPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 67, 67, 67),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: const Text(
-                      'Ακύρωση',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                    child: Padding(
+                      padding: EdgeInsets.all(5.sp),
+                      child: Text(
+                        'Ακύρωση',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
                   ),
                   ElevatedButton(
                     onPressed: onConfirm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF9C0C04),
+                      backgroundColor: appRedColor,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                     ),
-                    child: const Text(
-                      'Επιβεβαίωση',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                    child: Padding(
+                      padding: EdgeInsets.all(5.sp),
+                      child: Text(
+                        'Επιβεβαίωση',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15.sp,
+                        ),
                       ),
                     ),
                   ),

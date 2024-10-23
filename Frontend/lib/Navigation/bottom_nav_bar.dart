@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
@@ -35,8 +36,6 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
           }
         }
 
-        final double screenHeight = MediaQuery.sizeOf(context).height;
-        final double screenWidth = MediaQuery.sizeOf(context).width;
         return Scaffold(
           backgroundColor: Colors.black,
           body: Stack(
@@ -44,15 +43,15 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
               child,
               if (bottomNavBarVisibility.isVisible && !isKeyboardVisible)
                 Positioned(
-                  left: screenWidth / 10,
-                  right: screenWidth / 10,
-                  bottom: screenHeight / 40,
+                  left: 40.w,
+                  right: 40.w,
+                  bottom: 40.h,
                   child: SafeArea(
                     bottom: true, // Only apply SafeArea on the bottom
                     child: Container(
                       // Set your desired height
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(12.r),
                         color: const Color.fromARGB(255, 18, 18, 18),
                       ),
                       child: BottomNavigationBar(
@@ -70,19 +69,23 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                         selectedLabelStyle: const TextStyle(
                           fontWeight: FontWeight.w600,
                         ),
-                        items: const [
+                        items: [
                           BottomNavigationBarItem(
-                            icon: SizedBox(height: 30, child: Icon(Icons.home)),
+                            icon: SizedBox(
+                                height: 30.h,
+                                child: Icon(Icons.home, size: 18.sp)),
                             label: 'Αρχική',
                           ),
                           BottomNavigationBarItem(
-                            icon:
-                                SizedBox(height: 30, child: Icon(Icons.search)),
+                            icon: SizedBox(
+                                height: 30.h,
+                                child: Icon(Icons.search, size: 18.sp)),
                             label: 'Αναζήτηση',
                           ),
                           BottomNavigationBarItem(
-                            icon:
-                                SizedBox(height: 30, child: Icon(Icons.person)),
+                            icon: SizedBox(
+                                height: 30.h,
+                                child: Icon(Icons.person, size: 18.sp)),
                             label: 'Προφίλ',
                           ),
                         ],
