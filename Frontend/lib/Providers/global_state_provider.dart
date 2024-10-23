@@ -6,6 +6,7 @@ class GlobalStateProvider with ChangeNotifier {
 
   String _validatedIp = '13.38.200.158';
   bool _isAuthenticated = false;
+  bool _hasVerifiedEmail = false;
   bool _preferencesLoaded =
       false; // Add this state to track if preferences are loaded
 
@@ -21,6 +22,8 @@ class GlobalStateProvider with ChangeNotifier {
   String get validatedIp => _validatedIp;
 
   bool get isAuthenticated => _isAuthenticated;
+
+  bool get hasVerifiedEmail => _hasVerifiedEmail;
 
   bool get preferencesLoaded =>
       _preferencesLoaded; // New getter to check if preferences are loaded
@@ -40,11 +43,19 @@ class GlobalStateProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  set hasVerifiedEmail(bool value) {
+    _hasVerifiedEmail = value;
+    _saveToPreferences('hasVerifiedEmail', value);
+
+    notifyListeners();
+  }
+
   // Load values from SharedPreferences
   Future<void> loadFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
     _validatedIp = prefs.getString('validatedIp') ?? '13.38.200.158';
     _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
+    _hasVerifiedEmail = prefs.getBool('hasVerifiedEmail') ?? false;
     // Set the preferences loaded state to true
     _preferencesLoaded = true;
 

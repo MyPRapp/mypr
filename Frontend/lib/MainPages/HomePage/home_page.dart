@@ -68,6 +68,8 @@ class _HomePageState extends State<HomePage> {
 
         if (loggedIn && mounted) {
           globalStateProvider.isAuthenticated = true;
+          fetchVerifiedEmailGlobalVariable(context);
+
           await userProvider.fetchUserDetailsFromServer();
           successPrint('------------USER IS AUTHENTICATED------------');
         } else {

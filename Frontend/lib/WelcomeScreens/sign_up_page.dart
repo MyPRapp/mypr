@@ -202,7 +202,7 @@ class _SignUpPageState extends State<SignUpPage> {
           FocusManager.instance.primaryFocus?.unfocus();
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
-        await sendVerificationEmail();
+        // await sendVerificationEmail();
 
         successPrint('------------LOGGED IN------------');
       } else {
@@ -220,7 +220,7 @@ class _SignUpPageState extends State<SignUpPage> {
           duration: const Duration(milliseconds: 4000));
     }
   }
-
+/* 
   Future<void> sendVerificationEmail() async {
     int counter = 0;
     var response = await http.get(
@@ -254,7 +254,7 @@ class _SignUpPageState extends State<SignUpPage> {
         errorPrint(response.body);
       }
     }
-  }
+  } */
 
   Future<bool> sendOtp(String phoneNumber, String otpCode) async {
     try {

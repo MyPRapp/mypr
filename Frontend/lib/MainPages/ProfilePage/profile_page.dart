@@ -29,8 +29,6 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  bool isVerified = false;
-
   @override
   void initState() {
     super.initState();
@@ -157,7 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
       floatingSnackBar(
           message: 'Στάλθηκε email επιβεβαίωσης', context: context);
       var response = await http.get(
-        Uri.parse('$apiUrl/user-auth-status/'),
+        Uri.parse('$apiUrl/email-resend/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${await getAccessToken()}',
@@ -188,6 +186,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
+    final bool hasVerifiedEmail =
+        context.watch<GlobalStateProvider>().hasVerifiedEmail;
     final int points = context.watch<UserProvider>().userDetails.points;
     return PopScope(
       canPop: false,
@@ -221,7 +221,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  if (!isVerified &&
+                                  if (!hasVerifiedEmail &&
                                       isAuthenticated) //top 'resend-email' banner is visible
                                     SizedBox(height: 40.h),
                                   SizedBox(height: 20.h),
@@ -405,7 +405,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         ])
                     ],
                   ),
-                  if (!isVerified && isAuthenticated)
+                  if (!hasVerifiedEmail && isAuthenticated)
                     EmailConfirmationNotification(
                         onResendEmail: sendVerificationEmail,
                         text: 'Παρακαλώ επιβεβαίωσε το email σου'),

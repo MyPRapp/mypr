@@ -46,7 +46,6 @@ class _ReservationPageState extends State<ReservationPage> {
   // State variables for managing the page
   bool isDiscountApplied = false; // Flag to check if discount is applied
   bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
-  bool isVerified = false;
 
 // List of catalogues for different types of services in the club
   List<CatalogueInfoStruct> localCatalogues = [
@@ -210,8 +209,8 @@ class _ReservationPageState extends State<ReservationPage> {
       startTimer();
       floatingSnackBar(
           message: 'Στάλθηκε email επιβεβαίωσης', context: context);
-      var response = await http.get(
-        Uri.parse('$apiUrl/user-auth-status/'),
+      var response = await http.post(
+        Uri.parse('$apiUrl/email-resend/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${await getAccessToken()}',
@@ -256,6 +255,8 @@ class _ReservationPageState extends State<ReservationPage> {
   Widget build(BuildContext context) {
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
+    final bool hasVerifiedEmail =
+        context.watch<GlobalStateProvider>().hasVerifiedEmail;
     return PopScope(
       canPop: buttonIsVisible,
       onPopInvokedWithResult: (didPop, result) {
@@ -283,18 +284,18 @@ class _ReservationPageState extends State<ReservationPage> {
                   ),
                   child: ListView(
                     children: [
-                      buildContent(isAuthenticated),
+                      buildContent(isAuthenticated, hasVerifiedEmail),
                       if (isAuthenticated) ...[
                         SizedBox(height: 20.h),
                         buildDiscountCheckbox(), // Discount checkbox
                         SizedBox(height: 20.h),
-                        buildSubmitButton(), // Submit button
+                        buildSubmitButton(hasVerifiedEmail), // Submit button
                         SizedBox(height: 80.h),
                       ]
                     ],
                   ),
                 ),
-                if (!isVerified && isAuthenticated)
+                if (!hasVerifiedEmail && isAuthenticated)
                   EmailConfirmationNotification(
                     onResendEmail: sendVerificationEmail,
                     text:
@@ -340,12 +341,12 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the content section with form fields for reservation details.
-  Widget buildContent(bool isAuthenticated) {
+  Widget buildContent(bool isAuthenticated, bool hasVerifiedEmail) {
     return Container(
       padding: EdgeInsets.only(left: 25.w, right: 25.w),
       child: Column(
         children: [
-          if (!isVerified &&
+          if (!hasVerifiedEmail &&
               isAuthenticated) //top 'resend-email' banner is visible
             SizedBox(height: 60.h),
           SizedBox(height: 20.h),
@@ -501,7 +502,7 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the submit button for the reservation form.
-  Widget buildSubmitButton() {
+  Widget buildSubmitButton(bool hasVerifiedEmail) {
     return buttonIsVisible
         ? Container(
             alignment: Alignment.center,
@@ -518,7 +519,7 @@ class _ReservationPageState extends State<ReservationPage> {
                 ),
                 onPressed: () async {
                   FocusManager.instance.primaryFocus?.unfocus();
-                  _handleSubmit(); // Handle form submission
+                  _handleSubmit(hasVerifiedEmail); // Handle form submission
                 },
                 child: Text(
                   'Κράτηση',
@@ -533,8 +534,8 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Handles the form submission process, including validation and API calls.
-  Future<void> _handleSubmit() async {
-    if (!isVerified) {
+  Future<void> _handleSubmit(bool hasVerifiedEmail) async {
+    if (!hasVerifiedEmail) {
       floatingSnackBar(
           message: 'Επιβεβαίωσε το email σου πρώτα', context: context);
       return;

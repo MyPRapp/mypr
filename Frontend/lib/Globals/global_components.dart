@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -5,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart' as http;
+import 'package:mypr/services/auth_service.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Providers/global_state_provider.dart';
@@ -290,5 +294,33 @@ class BuildSignInOrRegisterButton extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
+  var response = await http.get(
+    Uri.parse('$apiUrl/user-auth-status/'),
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${await getAccessToken()}',
+    },
+  ).timeout(const Duration(seconds: 10));
+
+  if (response.statusCode == 200) {
+    successPrint(response.body);
+    String jsonString = response.body;
+    Map<String, dynamic> jsonData = jsonDecode(jsonString); // Decode JSON
+
+    bool isVerified = jsonData['is_verified']; // Extract the boolean value
+    if (context.mounted) {
+      context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
+      return;
+    }
+    errorPrint('Not mounted');
+  }
+  errorPrint('${response.statusCode}');
+  errorPrint(response.body);
+  if (context.mounted) {
+    context.read<GlobalStateProvider>().hasVerifiedEmail = false;
   }
 }
