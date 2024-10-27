@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -114,10 +113,8 @@ class _SignUpPageState extends State<SignUpPage> {
     }
     if (_isCheckBoxPressed == false) {
       FocusManager.instance.primaryFocus?.unfocus();
-      floatingSnackBar(
-          message: 'Δεν έχεις συμφωνήσει με τους όρους χρήσης',
-          context: context,
-          duration: const Duration(milliseconds: 4000));
+      showFloatingSnackBar('Δεν έχεις συμφωνήσει με τους όρους χρήσης',
+          const Duration(milliseconds: 4000), context);
       return;
     }
     setState(() {
@@ -214,47 +211,10 @@ class _SignUpPageState extends State<SignUpPage> {
       }
     } else {
       FocusManager.instance.primaryFocus?.unfocus();
-      floatingSnackBar(
-          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
-          context: context,
-          duration: const Duration(milliseconds: 4000));
+      showFloatingSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία',
+          const Duration(milliseconds: 4000), context);
     }
   }
-/* 
-  Future<void> sendVerificationEmail() async {
-    int counter = 0;
-    var response = await http.get(
-      Uri.parse('$apiUrl/user-auth-status/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${await getAccessToken()}',
-      },
-    ).timeout(const Duration(seconds: 10));
-
-    if (response.statusCode == 200) {
-      successPrint(response.body);
-    } else {
-      errorPrint('${response.statusCode}');
-      errorPrint(response.body);
-    }
-
-    while (response.statusCode != 200 && counter < 5) {
-      await Future.delayed(const Duration(seconds: 30));
-      response = await http.get(
-        Uri.parse('$apiUrl/user-auth-status/'),
-        headers: {
-          'Authorization': 'Bearer ${await getAccessToken()}',
-        },
-      ).timeout(const Duration(seconds: 10));
-      counter++;
-      if (response.statusCode == 200) {
-        successPrint(response.body);
-      } else {
-        errorPrint('${response.statusCode}');
-        errorPrint(response.body);
-      }
-    }
-  } */
 
   Future<bool> sendOtp(String phoneNumber, String otpCode) async {
     try {
@@ -440,15 +400,13 @@ class _SignUpPageState extends State<SignUpPage> {
                             startTimer();
                           } else {
                             if (awaitMinutes == 1) {
-                              floatingSnackBar(
-                                message: 'Ξαναδοκίμασε σε 1 λεπτό',
-                                context: context,
-                              );
+                              showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+                                  const Duration(milliseconds: 4000), context);
                             } else {
-                              floatingSnackBar(
-                                message: 'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
-                                context: context,
-                              );
+                              showFloatingSnackBar(
+                                  'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+                                  const Duration(milliseconds: 4000),
+                                  context);
                             }
                           }
                         },
@@ -486,10 +444,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _showSnackBar(String message) {
     FocusManager.instance.primaryFocus?.unfocus();
-    floatingSnackBar(
-        message: message,
-        context: context,
-        duration: const Duration(milliseconds: 4000));
+    showFloatingSnackBar(message, const Duration(milliseconds: 4000), context);
   }
 
   @override
@@ -843,20 +798,23 @@ class _TextFieldWidget extends StatelessWidget {
           ),
           cursorColor: const Color.fromARGB(125, 244, 67, 54),
           decoration: InputDecoration(
+            contentPadding: EdgeInsets.all(10.sp),
             suffixIcon: showIcon
-                ? IconButton(
-                    onPressed: toggleVisibility,
-                    icon: Icon(
-                      size: 17.sp,
-                      obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: const Color(0xFF9C0C04),
+                ? Padding(
+                    padding: EdgeInsets.only(right: 5.sp),
+                    child: IconButton(
+                      onPressed: toggleVisibility,
+                      icon: Icon(
+                        size: 17.sp,
+                        obscureText ? Icons.visibility_off : Icons.visibility,
+                        color: const Color(0xFF9C0C04),
+                      ),
                     ),
                   )
                 : null,
             focusedBorder: const UnderlineInputBorder(
               borderSide: BorderSide(color: Color(0xFF9C0C04)),
             ),
-            contentPadding: EdgeInsets.only(left: screenWidth * 0.035),
             hintText: hintText,
             hintStyle: TextStyle(
               fontSize: 15.sp,

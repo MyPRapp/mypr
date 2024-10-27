@@ -1,78 +1,27 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
 
-class FadeText extends StatefulWidget {
-  const FadeText({super.key, required this.points});
+class FadeText extends StatelessWidget {
+  const FadeText(this.isVisible, this.text, {super.key});
 
-  final int points;
-
-  @override
-  FadeTextState createState() => FadeTextState();
-}
-
-class FadeTextState extends State<FadeText> {
-  bool _isVisible = false;
-  final ScrollController _scrollController = ScrollController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Listen for scroll events on the controller
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection !=
-          ScrollDirection.idle) {
-        _toggleTextVisibility();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
-  void _toggleTextVisibility() {
-    // Check if it's already visible to avoid triggering again
-    if (!_isVisible) {
-      setState(() {
-        _isVisible = true;
-      });
-
-      // Set a timer to automatically hide the text after 4 seconds
-      Timer(const Duration(seconds: 1), () {
-        setState(() {
-          _isVisible = false;
-        });
-      });
-    }
-  }
+  final bool isVisible;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
+    return
         // AnimatedOpacity for fading effect
         AnimatedOpacity(
-          opacity: _isVisible ? 1.0 : 0.0,
-          duration: const Duration(seconds: 1), // Fade duration
-          child: Text(
-            'Πόντοι:',
-            style: TextStyle(
-                color: Colors.white,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600),
-          ),
-        ),
-        NumberScrollBox(
-            scrollController: _scrollController, points: widget.points),
-      ],
+      opacity: isVisible ? 1.0 : 0.0,
+      duration: const Duration(seconds: 1), // Fade duration
+      child: Text(
+        text,
+        style: TextStyle(
+            color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.w600),
+      ),
     );
   }
 }
@@ -177,7 +126,7 @@ class ProfileDialog extends StatelessWidget {
                 Navigator.of(context).pop();
               },
               child: Text(
-                "Close",
+                "Κλείσιμο",
                 style: TextStyle(fontSize: 14.sp),
               ),
             ),
@@ -225,8 +174,14 @@ class ProfileInfoRow extends StatelessWidget {
 
 class GradientProgressBar extends StatefulWidget {
   final int points;
+  final bool isVisible;
+  final bool restartAnimation;
 
-  const GradientProgressBar({super.key, required this.points});
+  const GradientProgressBar(
+      {super.key,
+      required this.points,
+      required this.isVisible,
+      required this.restartAnimation});
 
   @override
   GradientProgressBarState createState() => GradientProgressBarState();
@@ -236,6 +191,7 @@ class GradientProgressBarState extends State<GradientProgressBar>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+  bool restartAnimation = false;
   bool _showLabel = false;
   @override
   void initState() {
@@ -274,7 +230,7 @@ class GradientProgressBarState extends State<GradientProgressBar>
   @override
   void didUpdateWidget(covariant GradientProgressBar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.points != widget.points) {
+    if (oldWidget.points != widget.points || widget.restartAnimation) {
       _animation = Tween<double>(
         begin: 0,
         end: widget.points <= 2000 ? widget.points / 20 : 100,
@@ -300,140 +256,108 @@ class GradientProgressBarState extends State<GradientProgressBar>
     super.dispose();
   }
 
-  void _showPercentageLabel() async {
-    if (_animation.isCompleted && mounted) {
-      if (_showLabel == false) {
-        setState(() {
-          _showLabel = true;
-        });
-        await Future.delayed(const Duration(seconds: 4));
-        if (mounted) {
-          setState(() {
-            _showLabel = false;
-          });
-        }
-      } else {
-        setState(() {
-          _showLabel = false;
-        });
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = ScreenUtil().screenWidth;
     double progressWidth = 280.w;
     double filledWidth = (progressWidth * _animation.value) / 100;
-    return GestureDetector(
-      onTap: _showPercentageLabel,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Stack(
-            children: [
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Stack(
-                        children: [
-                          Container(
-                            width: progressWidth,
-                            height: 7.5.h,
-                            decoration: BoxDecoration(
-                              color: Colors.grey[800],
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          Container(
-                            width: filledWidth,
-                            height: 7.5.h,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color.fromARGB(255, 85, 1, 1),
-                                  Color.fromARGB(255, 194, 5, 5),
-                                ],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: progressWidth,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(6, (index) {
-                        bool isActive = (_animation.value >= (index * 20));
-                        return Container(
-                          height: 15.h,
-                          width: 12.5.w,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Stack(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Stack(
+                      children: [
+                        Container(
+                          width: progressWidth,
+                          height: 7.5.h,
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: isActive
-                                ? Color.fromARGB(
-                                    255, (80 + index * 20), (13), (6))
-                                : Colors.grey[800],
-                            border: Border.all(
-                              color: isActive
-                                  ? const Color.fromARGB(0, 0, 0, 0)
-                                  : const Color.fromARGB(255, 0, 0, 0),
-                              width: 1.sp,
+                            color: Colors.grey[800],
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        Container(
+                          width: filledWidth,
+                          height: 7.5.h,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color.fromARGB(255, 85, 1, 1),
+                                Color.fromARGB(255, 194, 5, 5),
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
                             ),
                           ),
-                        );
-                      }),
+                        ),
+                      ],
                     ),
+                  ],
+                ),
+                SizedBox(
+                  width: progressWidth,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(6, (index) {
+                      bool isActive = (_animation.value >= (index * 20));
+                      return Container(
+                        height: 15.h,
+                        width: 12.5.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isActive
+                              ? Color.fromARGB(
+                                  255, (80 + index * 20), (13), (6))
+                              : Colors.grey[800],
+                          border: Border.all(
+                            color: isActive
+                                ? const Color.fromARGB(0, 0, 0, 0)
+                                : const Color.fromARGB(255, 0, 0, 0),
+                            width: 1.sp,
+                          ),
+                        ),
+                      );
+                    }),
                   ),
-                ],
-              ),
-            ],
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-                left: (screenWidth - progressWidth) / 2,
-                right: (screenWidth - progressWidth) / 2.5),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: List.generate(6, (index) {
-                return Text(
-                  textAlign: TextAlign.center,
-                  '${index * 20}%',
-                  style: TextStyle(
-                      fontSize: 10.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600),
-                );
-              }),
+                ),
+              ],
             ),
-          ),
-          AnimatedOpacity(
-            opacity: _showLabel ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 500), // Fade duration
-            child: Padding(
-              padding: EdgeInsets.only(top: 12.h),
-              child: Text(
-                widget.points >= 400
-                    ? "Έχεις ένα κουπόνι για 20% έκπτωση"
-                    : 'Σε ${400 - widget.points} πόντους κερδίζεις έκπτωση',
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+              left: (screenWidth - progressWidth) / 2,
+              right: (screenWidth - progressWidth) / 2.5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: List.generate(6, (index) {
+              return Text(
+                textAlign: TextAlign.center,
+                '${index * 20}%',
                 style: TextStyle(
+                    fontSize: 10.sp,
                     color: Colors.white,
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w400),
-              ),
-            ),
+                    fontWeight: FontWeight.w600),
+              );
+            }),
           ),
-        ],
-      ),
+        ),
+        SizedBox(height: 12.h),
+        FadeText(
+          (_showLabel || widget.isVisible) && _animation.isCompleted,
+          widget.points >= 400
+              ? "Έχεις ένα κουπόνι για 20% έκπτωση"
+              : 'Σε ${400 - widget.points} πόντους κερδίζεις έκπτωση',
+        ),
+      ],
     );
   }
 }

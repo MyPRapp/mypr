@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -190,19 +191,22 @@ Widget buildTitle(String title) {
 
 AppBar buildAppBar(BuildContext context, String title) {
   return AppBar(
+    toolbarHeight: 60.h,
+    leadingWidth: 50.w,
+    iconTheme: IconThemeData(
+      color: Colors.white,
+      size: 30.sp,
+    ),
+    titleTextStyle: TextStyle(
+        color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.sp),
     centerTitle: false,
     backgroundColor: Colors.black,
     title: Text(
       title,
-      style: const TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold,
-      ),
     ),
     leading: IconButton(
       icon: const Icon(
         Icons.chevron_left,
-        color: Colors.white,
       ),
       onPressed: () {
         Navigator.of(context).pop();
@@ -323,4 +327,14 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
   if (context.mounted) {
     context.read<GlobalStateProvider>().hasVerifiedEmail = false;
   }
+}
+
+void showFloatingSnackBar(
+    String message, Duration duration, BuildContext context) {
+  floatingSnackBar(
+      message: message,
+      context: context,
+      duration: duration,
+      backgroundColor: const Color.fromARGB(255, 70, 6, 1),
+      textStyle: TextStyle(fontSize: 14.sp, color: Colors.white));
 }

@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Globals/global_components.dart';
@@ -90,6 +88,7 @@ class UserProvider with ChangeNotifier {
     if (userDetailsString != null) {
       _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
 
+      /* 
       final directory = await getApplicationDocumentsDirectory();
       final Directory userPhotosDirectory =
           Directory('${directory.path}/mypDirectory/user_photos');
@@ -100,7 +99,8 @@ class UserProvider with ChangeNotifier {
       } else {
         errorPrint('User photos directory doesn\'t exist');
         _userDetails.localPhotoPath = 'assets/otherPhotos/Default_User.jpg';
-      }
+      } 
+      */
 
       successPrint('Loaded user details from preferences');
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
@@ -37,10 +36,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _login() async {
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       FocusManager.instance.primaryFocus?.unfocus();
-      floatingSnackBar(
-          message: 'Παρακαλώ συμπλήρωσε όλα τα πεδία',
-          context: context,
-          duration: const Duration(milliseconds: 4000));
+      showFloatingSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία',
+          const Duration(milliseconds: 4000), context);
       return;
     } else {
       successPrint('------------LOGGING IN------------');
@@ -88,10 +85,8 @@ class _LoginPageState extends State<LoginPage> {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
       FocusManager.instance.primaryFocus?.unfocus();
-      floatingSnackBar(
-          message: 'Λάθος στοιχεία εισόδου',
-          context: context,
-          duration: const Duration(milliseconds: 4000));
+      showFloatingSnackBar('Λάθος στοιχεία εισόδου',
+          const Duration(milliseconds: 4000), context);
     }
   }
 
@@ -181,13 +176,13 @@ class LoginBody extends StatelessWidget {
                       padding: EdgeInsets.all(5.sp),
                       decoration: BoxDecoration(
                           border: Border.all(
-                              color: const Color.fromARGB(255, 255, 255, 255)),
+                              color: const Color.fromARGB(255, 105, 105, 105)),
                           borderRadius: BorderRadius.circular(5.r)),
                       child: Text('Παράλειψη',
                           style: TextStyle(
-                              color: const Color.fromARGB(255, 123, 123, 123),
+                              color: const Color.fromARGB(255, 133, 132, 132),
                               fontWeight: FontWeight.w700,
-                              fontSize: 10.sp)),
+                              fontSize: 14.sp)),
                     ),
                   ),
                 ),
@@ -214,7 +209,7 @@ class LoginBody extends StatelessWidget {
                 onTogglePasswordVisibility: onTogglePasswordVisibility,
                 showIcon: true,
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 50.h),
               LoginFooter(
                 isLoginPressed: isLoginPressed,
                 onLogin: onLogin,
@@ -280,7 +275,7 @@ class LoginTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: ScreenUtil().screenWidth - 80.w,
-      padding: EdgeInsets.only(left: 10.w),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
           color: const Color.fromARGB(133, 84, 84, 84)),
@@ -413,10 +408,9 @@ class ForgotPasswordAndSignUp extends StatelessWidget {
         TextButton(
           onPressed: () {
             if (!isLoginPressed) {
-              floatingSnackBar(
-                  message: 'Στάλθηκε email για επαναφορά κωδικού',
-                  context: context,
-                  duration: const Duration(milliseconds: 4000));
+              showFloatingSnackBar(
+               'Στάλθηκε email για επαναφορά κωδικού',
+                const Duration(milliseconds: 4000), context);
             }
           },
           child: Text(

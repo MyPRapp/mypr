@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
@@ -123,8 +122,16 @@ class _ContactUsPageState extends State<ContactUsPage> {
                               ),
                             ),
                             SizedBox(height: 10.h),
-                            Text(
-                              ' 698 098 4213\n\n 698 556 7317',
+                            SelectableText(
+                              ' 698 098 4213',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16.sp,
+                              ),
+                            ),
+                            SizedBox(height: 20.h),
+                            SelectableText(
+                              ' 698 556 7317',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.sp,
@@ -155,30 +162,27 @@ class _ContactUsPageState extends State<ContactUsPage> {
                             ElevatedButton(
                               onPressed: () async {
                                 if (messageController.text.isEmpty) {
-                                  floatingSnackBar(
-                                    message:
-                                        'Το μήνυμα δεν μπορεί να είναι άδειο',
-                                    context: context,
-                                  );
+                                  showFloatingSnackBar(
+                                      'Το μήνυμα δεν μπορεί να είναι άδειο',
+                                      const Duration(milliseconds: 4000),
+                                      context);
                                   return;
                                 }
 
                                 if (!_isValidEmail(emailController.text)) {
-                                  floatingSnackBar(
-                                    message:
-                                        'Παρακαλώ συμπληρώστε email επικοινωνίας',
-                                    context: context,
-                                  );
+                                  showFloatingSnackBar(
+                                      'Παρακαλώ συμπλήρωσε email επικοινωνίας',
+                                      const Duration(milliseconds: 4000),
+                                      context);
                                   return;
                                 }
 
                                 if (nameController.text.isEmpty ||
                                     nameController.text == ' ') {
-                                  floatingSnackBar(
-                                    message:
-                                        'Παρακαλώ συμπληρώστε ονοματεπώνυμο',
-                                    context: context,
-                                  );
+                                  showFloatingSnackBar(
+                                      'Παρακαλώ συμπλήρωσε ονοματεπώνυμο',
+                                      const Duration(milliseconds: 4000),
+                                      context);
                                   return;
                                 }
 
@@ -258,20 +262,22 @@ class _ContactUsPageState extends State<ContactUsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Επιβεβαίωση'),
-          content: const Text('Αποστολή μηνύματος;'),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          title: Text('Επιβεβαίωση', style: TextStyle(fontSize: 22.sp)),
+          content:
+              Text('Αποστολή μηνύματος;', style: TextStyle(fontSize: 15.sp)),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false); // User chose "Cancel"
               },
-              child: const Text('Ακύρωση'),
+              child: Text('Ακύρωση', style: TextStyle(fontSize: 18.sp)),
             ),
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop(true); // User chose "Send"
               },
-              child: const Text('Αποστολή'),
+              child: Text('Αποστολή', style: TextStyle(fontSize: 18.sp)),
             ),
           ],
         );
@@ -308,26 +314,20 @@ class _ContactUsPageState extends State<ContactUsPage> {
       if (response.statusCode == 200) {
         if (mounted) {
           successPrint('Email sent successfully');
-          floatingSnackBar(
-            message: 'Το μήνυμα στάλθηκε',
-            context: context,
-          );
+          showFloatingSnackBar('Το μήνυμα στάλθηκε',
+              const Duration(milliseconds: 4000), context);
         }
       } else {
         if (mounted) {
           errorPrint('Error on email sending: ${response.body}');
-          floatingSnackBar(
-            message: 'Σφάλμα κατά την αποστολή του μηνύματος',
-            context: context,
-          );
+          showFloatingSnackBar('Σφάλμα κατά την αποστολή του μηνύματος',
+              const Duration(milliseconds: 4000), context);
         }
       }
     } catch (e) {
       if (mounted) {
-        floatingSnackBar(
-          message: 'Σφάλμα κατά την αποστολή του μηνύματος',
-          context: context,
-        );
+        showFloatingSnackBar('Σφάλμα κατά την αποστολή του μηνύματος',
+            const Duration(milliseconds: 4000), context);
       }
     }
   }

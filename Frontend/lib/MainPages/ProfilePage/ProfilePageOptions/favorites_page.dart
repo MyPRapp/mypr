@@ -68,12 +68,12 @@ class FavoritesPage extends StatelessWidget {
                       }
                     },
                   )
-                : const Center(
+                : Center(
                     child: Padding(
-                    padding: EdgeInsets.only(bottom: 25),
+                    padding: const EdgeInsets.only(bottom: 25),
                     child: Text(
                       'Δεν υπάρχουν αγαπημένα',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(color: Colors.white, fontSize: 12.sp),
                     ),
                   )),
           ),

@@ -70,10 +70,11 @@ class _MyPRState extends State<MyPR> {
 
     return ScreenUtilInit(
       designSize: const Size(375, 812), // Base design size (e.g., iPhone 11)
+      minTextAdapt: true, splitScreenMode: false,
       builder: (context, child) {
         return MaterialApp.router(
           title: 'MyPR',
-          debugShowCheckedModeBanner: false,
+          debugShowCheckedModeBanner: false, theme: appTheme,
           locale: const Locale('el', 'GR'), // Set the default locale to Greek
           supportedLocales: const [
             Locale('el', 'GR'), // Greek
@@ -90,3 +91,7 @@ class _MyPRState extends State<MyPR> {
     );
   }
 }
+
+final appTheme = ThemeData(
+  fontFamily: 'TimesSansSerrif',
+);

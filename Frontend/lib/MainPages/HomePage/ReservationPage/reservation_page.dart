@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
@@ -207,8 +206,8 @@ class _ReservationPageState extends State<ReservationPage> {
   Future<void> sendVerificationEmail() async {
     if (canSend) {
       startTimer();
-      floatingSnackBar(
-          message: 'Στάλθηκε email επιβεβαίωσης', context: context);
+      showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
+          const Duration(milliseconds: 4000), context);
       var response = await http.post(
         Uri.parse('$apiUrl/email-resend/'),
         headers: {
@@ -225,10 +224,11 @@ class _ReservationPageState extends State<ReservationPage> {
       }
     } else {
       if (awaitMinutes == 1) {
-        floatingSnackBar(message: 'Ξαναδοκίμασε σε 1 λεπτό', context: context);
+        showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+            const Duration(milliseconds: 4000), context);
       } else {
-        floatingSnackBar(
-            message: 'Ξαναδοκίμασε σε $awaitMinutes λεπτά', context: context);
+        showFloatingSnackBar('Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+            const Duration(milliseconds: 4000), context);
       }
     }
   }
@@ -536,8 +536,8 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Handles the form submission process, including validation and API calls.
   Future<void> _handleSubmit(bool hasVerifiedEmail) async {
     if (!hasVerifiedEmail) {
-      floatingSnackBar(
-          message: 'Επιβεβαίωσε το email σου πρώτα', context: context);
+      showFloatingSnackBar('Επιβεβαίωσε το email σου πρώτα',
+          const Duration(milliseconds: 4000), context);
       return;
     }
     String rawName = _nameController.text;
@@ -582,11 +582,10 @@ class _ReservationPageState extends State<ReservationPage> {
           buttonIsVisible = true;
         });
         if (mounted) {
-          floatingSnackBar(
-              message:
-                  'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
-              context: context,
-              duration: const Duration(milliseconds: 1500));
+          showFloatingSnackBar(
+              'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
+              const Duration(milliseconds: 2000),
+              context);
         }
 
         // Log error or handle failure in a way without more snack bars
@@ -737,13 +736,12 @@ class _ReservationPageState extends State<ReservationPage> {
     final bool isNameValid = RegExp(r'^[\p{L}]+(\s+)[\p{L}]+$', unicode: true)
         .hasMatch(context.read<ReservationProvider>().getInfo(1));
 
-    // Display a snack bar error message based on validation results
-    floatingSnackBar(
-        message: isNameValid
+    showFloatingSnackBar(
+        isNameValid
             ? 'Παρακαλώ συμπλήρωσε όλα τα πεδία'
             : 'Μόνο ονοματεπώνυμο στο όνομα κράτησης',
-        context: context,
-        duration: const Duration(milliseconds: 2000));
+        const Duration(milliseconds: 2000),
+        context);
 
     setState(() {
       buttonIsVisible = true;
@@ -779,10 +777,10 @@ class _ReservationPageState extends State<ReservationPage> {
         }
       }
     } else {
-      floatingSnackBar(
-          message:
-              'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
-          context: context);
+      showFloatingSnackBar(
+          'Υπήρξε κάποιο σφάλμα στην κράτησή. Παρακαλώ προσπάθησε ξανά ή επικοινώνησε μαζί μας',
+          const Duration(milliseconds: 2000),
+          context);
       setState(() {
         buttonIsVisible = true; // Show the button again
       });

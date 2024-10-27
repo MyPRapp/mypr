@@ -1,9 +1,8 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
@@ -29,19 +28,61 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    // Listen for scroll events on the controller
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection !=
+          ScrollDirection.idle) {
+        _toggleTextVisibility();
+      }
+    });
+  }
+
+  bool _isVisible = false;
+  bool _restartAnimation = false;
+
+  void _toggleTextVisibility() {
+    // Check if it's already visible to avoid triggering again
+    if (!_isVisible) {
+      setState(() {
+        _isVisible = true;
+      });
+
+      // Set a timer to automatically hide the text after 4 seconds
+      Timer(const Duration(seconds: 1), () {
+        setState(() {
+          _isVisible = false;
+        });
+      });
+    }
+  }
+
+  void _triggerAnimation() {
+    setState(() {
+      _restartAnimation = true;
+    });
+
+    Timer(const Duration(seconds: 1), () {
+      setState(() {
+        _restartAnimation = false;
+      });
+    });
   }
 
   Future<void> _refresh() async {
     UserProvider userProvider = context.read<UserProvider>();
-
     // Await the Future to resolve and get the String values from shared preferences
     String savedEmail = await getSavedEmail();
     String savedPassword = await getSavedPassword();
 
-    if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+    if (savedEmail.isNotEmpty &&
+        savedPassword.isNotEmpty &&
+        mounted &&
+        !context.read<GlobalStateProvider>().isAuthenticated) {
       bool loggedIn = await AuthService().login(savedEmail, savedPassword);
 
       if (loggedIn && mounted) {
@@ -53,7 +94,49 @@ class _ProfilePageState extends State<ProfilePage> {
               userProvider.userDetails, context.read<ClubProvider>());
         }
       }
+    } else {
+      if (mounted && context.read<GlobalStateProvider>().isAuthenticated) {
+        _triggerAnimation();
+      }
     }
+  }
+
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.all(20.sp),
+          actionsPadding: EdgeInsets.all(20.sp),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          title: Text(
+            'Είσαι σίγουρος ότι θέλεις να αποσυνδεθείς;',
+            style: TextStyle(fontSize: 17.sp),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Ακύρωση',
+                style: TextStyle(fontSize: 15.sp),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Αποσύνδεση',
+                style: TextStyle(fontSize: 15.sp),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                signOut();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void signOut() async {
@@ -152,8 +235,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> sendVerificationEmail() async {
     if (canSend) {
       startTimer();
-      floatingSnackBar(
-          message: 'Στάλθηκε email επιβεβαίωσης', context: context);
+      showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
+          const Duration(milliseconds: 4000), context);
+
       var response = await http.get(
         Uri.parse('$apiUrl/email-resend/'),
         headers: {
@@ -170,12 +254,19 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     } else {
       if (awaitMinutes == 1) {
-        floatingSnackBar(message: 'Ξαναδοκίμασε σε 1 λεπτό', context: context);
+        showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+            const Duration(milliseconds: 4000), context);
       } else {
-        floatingSnackBar(
-            message: 'Ξαναδοκίμασε σε $awaitMinutes λεπτά', context: context);
+        showFloatingSnackBar('Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+            const Duration(milliseconds: 4000), context);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -227,13 +318,37 @@ class _ProfilePageState extends State<ProfilePage> {
                                   SizedBox(height: 20.h),
                                   if (!isAuthenticated) SizedBox(height: 80.h),
                                   if (isAuthenticated)
-                                    Padding(
-                                      padding: EdgeInsets.only(right: 10.w),
-                                      child: Align(
-                                          alignment: Alignment.centerRight,
-                                          child: FadeText(
-                                            points: userDetails.points,
-                                          )),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(top: 25.h),
+                                          child: IconButton(
+                                              onPressed: () {
+                                                _toggleTextVisibility();
+                                              },
+                                              icon: const Icon(
+                                                  Icons.info_outline),
+                                              color: const Color.fromARGB(
+                                                  255, 88, 88, 88),
+                                              iconSize: 18.sp),
+                                        ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            FadeText(
+                                              _isVisible,
+                                              'Πόντοι:',
+                                            ),
+                                            NumberScrollBox(
+                                                scrollController:
+                                                    _scrollController,
+                                                points: userDetails.points),
+                                          ],
+                                        ),
+                                        SizedBox(width: 10.w)
+                                      ],
                                     ),
                                   SizedBox(
                                     width: screenWidth / 3.2,
@@ -241,29 +356,31 @@ class _ProfilePageState extends State<ProfilePage> {
                                     child: ClipRRect(
                                         borderRadius:
                                             BorderRadius.circular(360.r),
-                                        child: isAuthenticated
-                                            ? userDetails
-                                                    .localPhotoPath.isNotEmpty
-                                                ? Image.file(
-                                                    File(userDetails
-                                                        .localPhotoPath),
-                                                    fit: BoxFit.cover,
-                                                  ) // Load from local file
-                                                : userDetails.photo.isNotEmpty
-                                                    ? Image.network(
-                                                        'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
-                                                        fit: BoxFit.cover,
-                                                      )
-                                                    : const Image(
-                                                        image: AssetImage(
-                                                            'assets/otherPhotos/Default_User.jpg'),
-                                                        fit: BoxFit.cover,
-                                                      )
-                                            : const Image(
-                                                image: AssetImage(
-                                                    'assets/otherPhotos/Default_User.jpg'),
-                                                fit: BoxFit.cover,
-                                              )),
+                                        child:
+                                            //  isAuthenticated
+                                            // ? userDetails
+                                            //         .localPhotoPath.isNotEmpty
+                                            //     ? Image.file(
+                                            //         File(userDetails
+                                            //             .localPhotoPath),
+                                            //         fit: BoxFit.cover,
+                                            //       ) // Load from local file
+                                            //     : userDetails.photo.isNotEmpty
+                                            //         ? Image.network(
+                                            //             'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
+                                            //             fit: BoxFit.cover,
+                                            //           )
+                                            //         : const Image(
+                                            //             image: AssetImage(
+                                            //                 'assets/otherPhotos/Default_User.jpg'),
+                                            //             fit: BoxFit.cover,
+                                            //           )
+                                            // :
+                                            const Image(
+                                          image: AssetImage(
+                                              'assets/otherPhotos/Default_User.jpg'),
+                                          fit: BoxFit.cover,
+                                        )),
                                   ),
                                   if (isAuthenticated) ...[
                                     Padding(
@@ -280,8 +397,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                     ),
                                     SizedBox(height: 20.w),
                                     Center(
-                                      child:
-                                          GradientProgressBar(points: points),
+                                      child: GradientProgressBar(
+                                        points: points,
+                                        isVisible: _isVisible,
+                                        restartAnimation: _restartAnimation,
+                                      ),
                                     ),
                                   ],
                                 ]),
@@ -374,14 +494,16 @@ class _ProfilePageState extends State<ProfilePage> {
                           Center(
                             child: GestureDetector(
                               behavior: HitTestBehavior.translucent,
-                              onTap: signOut,
+                              onTap: () {
+                                _showSignOutDialog(context);
+                              },
                               child: Container(
                                 height: 45.h,
                                 width: 135.w,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(30.r),
+                                  borderRadius: BorderRadius.circular(15.r),
                                   gradient: const LinearGradient(
-                                      begin: Alignment.bottomRight,
+                                      begin: Alignment.topRight,
                                       colors: [
                                         Color.fromARGB(183, 67, 2, 2),
                                         Color.fromARGB(255, 0, 0, 0),

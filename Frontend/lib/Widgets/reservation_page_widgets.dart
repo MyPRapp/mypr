@@ -1,4 +1,3 @@
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -438,7 +437,7 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
           await Future.delayed(const Duration(milliseconds: 2500));
           _focusNode.unfocus();
         },
-        icon: Icon(Icons.remove, color: Colors.white, size: 12.sp),
+        icon: Icon(Icons.remove, color: Colors.white, size: 15.sp),
       ),
     );
   }
@@ -455,11 +454,10 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
             if (persons < maxPersons) {
               reservationProvider.setInfo(3, persons + 1);
             } else if (persons == maxPersons) {
-              floatingSnackBar(
-                  message:
-                      'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινώνησε μαζί μας.',
-                  context: context,
-                  duration: const Duration(milliseconds: 3000));
+              showFloatingSnackBar(
+                  'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινώνησε μαζί μας.',
+                  const Duration(milliseconds: 3000),
+                  context);
             }
             await Future.delayed(const Duration(milliseconds: 2500));
             _focusNode.unfocus();
@@ -468,7 +466,7 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
             _focusNode.unfocus();
           }
         },
-        icon: Icon(Icons.add, color: Colors.white, size: 12.sp),
+        icon: Icon(Icons.add, color: Colors.white, size: 15.sp),
       ),
     );
   }
@@ -478,10 +476,8 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
     if (reservationProvider.getInfo(5) == 0 &&
         reservationProvider.getInfo(6) == 0 &&
         reservationProvider.getInfo(7) == 0) {
-      floatingSnackBar(
-          message: 'Παρακαλώ επίλεξε φιάλη πρώτα',
-          context: context,
-          duration: const Duration(milliseconds: 3000));
+      showFloatingSnackBar('Παρακαλώ επίλεξε φιάλη πρώτα',
+          const Duration(milliseconds: 4000), context);
       return false;
     }
     return true;
@@ -592,10 +588,10 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
         widget.onCountersChanged();
       });
     } else {
-      floatingSnackBar(
-          message: 'Για παραπάνω φιάλες παρακαλώ επικοινώνησε μαζί μας.',
-          context: context,
-          duration: const Duration(milliseconds: 3000));
+      showFloatingSnackBar(
+          'Για παραπάνω φιάλες παρακαλώ επικοινώνησε μαζί μας.',
+          const Duration(milliseconds: 4000),
+          context);
     }
   }
 
@@ -692,7 +688,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
             children: [
               IconButton(
                 onPressed: () => decrement(index),
-                icon: Icon(Icons.remove, color: Colors.white, size: 20.sp),
+                icon: Icon(Icons.remove, color: Colors.white, size: 18.sp),
               ),
               Text(
                 reservationProvider.reservationInfo[index].toString(),
@@ -700,7 +696,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
               ),
               IconButton(
                 onPressed: () => increment(index),
-                icon: Icon(Icons.add, color: Colors.white, size: 20.sp),
+                icon: Icon(Icons.add, color: Colors.white, size: 18.sp),
               ),
             ],
           ),

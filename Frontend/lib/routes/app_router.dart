@@ -7,14 +7,23 @@ class AppRouter extends RootStackRouter {
   // RootStackRouter provides router configuration
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(page: LoginRoute.page, initial: false),
-        AutoRoute(page: SignUpRoute.page, initial: false),
+        AutoRoute(
+          page: LoginRoute.page,
+          initial: false,
+          // initial:true,
+        ),
+        AutoRoute(
+          page: SignUpRoute.page, initial: false,
+          // initial:true,
+        ),
         AutoRoute(
           page: BottomNavBarRoute.page,
+          // initial: false,
           initial: true,
           children: [
             AutoRoute(
               page: HomeNavigation.page,
+              // initial: false,
               initial: true,
               children: [
                 AutoRoute(page: HomeRoute.page, initial: true),
@@ -28,6 +37,7 @@ class AppRouter extends RootStackRouter {
             AutoRoute(
               page: ProfileNavigation.page,
               initial: false,
+              // initial:true,
               children: [
                 AutoRoute(page: ProfileRoute.page, initial: true),
                 createSlideFromRightRoute(CustomizeProfileRoute.page, false),

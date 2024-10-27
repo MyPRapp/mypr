@@ -49,7 +49,6 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                   child: SafeArea(
                     bottom: true, // Only apply SafeArea on the bottom
                     child: Container(
-                      // Set your desired height
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(12.r),
                         color: const Color.fromARGB(255, 18, 18, 18),
@@ -63,30 +62,26 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                         unselectedItemColor:
                             const Color.fromARGB(255, 255, 255, 255),
                         backgroundColor: Colors.transparent,
-                        unselectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
-                        selectedLabelStyle: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        unselectedLabelStyle: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 15.sp),
+                        selectedLabelStyle: TextStyle(
+                            fontWeight: FontWeight.w600, fontSize: 15.sp),
                         items: [
                           BottomNavigationBarItem(
-                            icon: SizedBox(
-                                height: 30.h,
-                                child: Icon(Icons.home, size: 18.sp)),
-                            label: 'Αρχική',
+                            icon: Icon(Icons.home, size: 18.sp),
+
+                            label:
+                                'Αρχική', // This label will use the responsive font size
                           ),
                           BottomNavigationBarItem(
-                            icon: SizedBox(
-                                height: 30.h,
-                                child: Icon(Icons.search, size: 18.sp)),
-                            label: 'Αναζήτηση',
+                            icon: Icon(Icons.search, size: 18.sp),
+
+                            label: 'Αναζήτηση', // Responsive label
                           ),
                           BottomNavigationBarItem(
-                            icon: SizedBox(
-                                height: 30.h,
-                                child: Icon(Icons.person, size: 18.sp)),
-                            label: 'Προφίλ',
+                            icon: Icon(Icons.person, size: 18.sp),
+
+                            label: 'Προφίλ', // Responsive label
                           ),
                         ],
                       ),

@@ -143,18 +143,22 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 
   AppBar _buildAppBar(BuildContext context) {
     return AppBar(
+      toolbarHeight: 60.h,
+      leadingWidth: 50.w,
+      iconTheme: IconThemeData(
+        color: Colors.white,
+        size: 30.sp,
+      ),
+      titleTextStyle: TextStyle(
+          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.sp),
+      centerTitle: false,
       backgroundColor: const Color.fromARGB(0, 0, 0, 0),
       title: const Text(
         'ΟΙ ΚΡΑΤΗΣΕΙΣ ΜΟΥ',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
       ),
       leading: IconButton(
         icon: const Icon(
           Icons.chevron_left,
-          color: Colors.white,
         ),
         onPressed: () {
           Navigator.of(context).pop();
@@ -164,12 +168,16 @@ class _MyBookingsPageState extends State<MyBookingsPage>
         controller: _tabController,
         labelColor: Colors.white,
         indicatorColor: appRedColor,
-        tabs: const [
+        tabs: [
           Tab(
-            text: 'Ενεργείς',
-          ),
-          Tab(text: 'Εκκρεμείς'),
-          Tab(text: 'Ιστορικό'),
+              height: 30.h,
+              child: Text('Ενεργείς', style: TextStyle(fontSize: 15.sp))),
+          Tab(
+              height: 30.h,
+              child: Text('Εκκρεμείς', style: TextStyle(fontSize: 15.sp))),
+          Tab(
+              height: 30.h,
+              child: Text('Ιστορικό', style: TextStyle(fontSize: 15.sp))),
         ],
       ),
     );
@@ -197,7 +205,7 @@ class BookingCard extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: EdgeInsets.only(bottom: 25.h),
+        padding: EdgeInsets.only(bottom: 15.h),
         child: Card(
           color: Colors.black,
           elevation: 20,
@@ -341,7 +349,7 @@ class BookingCard extends StatelessWidget {
                               ),
                           ]),
                       SizedBox(height: 5.h),
-                      if (booking.status != 2)
+                      if (booking.status < 2)
                         Text(
                           '${(booking.price).toStringAsFixed(2)} €',
                           style: TextStyle(
