@@ -311,20 +311,22 @@ class _ReservationPageState extends State<ReservationPage> {
 
   AppBar _buildAppBar(BuildContext context, String clubName) {
     return AppBar(
+        toolbarHeight: 60.h,
+        leadingWidth: 50.w,
+        iconTheme: IconThemeData(
+          color: Colors.white,
+          size: 30.sp,
+        ),
+        titleTextStyle: TextStyle(
+            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20.sp),
+        centerTitle: false,
         backgroundColor: Colors.black,
         title: Text(
           clubName,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
         ),
         leading: IconButton(
           icon: const Icon(
             Icons.chevron_left,
-            color: Colors.white,
-            size: 30,
           ),
           onPressed: () {
             if (buttonIsVisible) {

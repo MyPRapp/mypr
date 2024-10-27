@@ -55,6 +55,7 @@ dependencies:
   path_provider: ^2.1.4
   internet_connection_checker: ^1.0.0+1
   floating_snackbar: ^1.0.5
+  table_calendar: ^3.0.0 
   flutter_localizations:
     sdk: flutter
   archive: ^3.6.1
