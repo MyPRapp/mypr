@@ -857,22 +857,25 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
               _isDaySelectable, // Only allow selectable days
           locale: const Locale('el', 'GR'), // Set the locale to Greek
           builder: (BuildContext context, Widget? child) {
-            return Theme(
-              data: ThemeData.dark().copyWith(
-                colorScheme: const ColorScheme.dark(
-                  primary: appRedColor,
-                  onPrimary: Colors.white,
-                  surface: Colors.black,
-                  onSurface: Colors.white,
-                ),
-                dialogBackgroundColor: Colors.black,
-                textTheme: TextTheme(
-                  bodySmall: TextStyle(
-                    fontSize: 14.sp, // Adjust font size to make year smaller
+            return Transform.scale(
+              scale: 0.8.sp,
+              child: Theme(
+                data: ThemeData.dark().copyWith(
+                  colorScheme: const ColorScheme.dark(
+                    primary: appRedColor,
+                    onPrimary: Colors.white,
+                    surface: Colors.black,
+                    onSurface: Colors.white,
+                  ),
+                  dialogBackgroundColor: Colors.black,
+                  textTheme: TextTheme(
+                    bodySmall: TextStyle(
+                      fontSize: 14.sp, // Adjust font size to make year smaller
+                    ),
                   ),
                 ),
+                child: child!,
               ),
-              child: child!,
             );
           },
         );

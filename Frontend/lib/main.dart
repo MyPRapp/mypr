@@ -93,5 +93,5 @@ class _MyPRState extends State<MyPR> {
 }
 
 final appTheme = ThemeData(
-  fontFamily: 'TimesSansSerrif',
+  fontFamily: 'LosAngelenoSans',
 );

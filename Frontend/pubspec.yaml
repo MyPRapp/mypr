@@ -135,5 +135,11 @@ flutter:
     - family: coolvetica-regular
       fonts:
         - asset: fonts/coolvetica-regular.otf
+    - family: CALIBRI
+      fonts:
+        - asset: fonts/CALIBRI.ttf
+    - family: CAMBRIA
+      fonts:
+        - asset: fonts/CAMBRIA.ttc
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

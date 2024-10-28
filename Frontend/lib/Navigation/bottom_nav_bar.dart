@@ -63,9 +63,13 @@ class _BottomNavBarPageState extends State<BottomNavBarPage> {
                             const Color.fromARGB(255, 255, 255, 255),
                         backgroundColor: Colors.transparent,
                         unselectedLabelStyle: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 15.sp),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 15.sp,
+                            fontFamily: 'CALIBRI'),
                         selectedLabelStyle: TextStyle(
-                            fontWeight: FontWeight.w600, fontSize: 15.sp),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15.sp,
+                            fontFamily: 'CALIBRI'),
                         items: [
                           BottomNavigationBarItem(
                             icon: Icon(Icons.home, size: 18.sp),

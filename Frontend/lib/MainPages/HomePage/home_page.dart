@@ -189,7 +189,8 @@ class _HomePageState extends State<HomePage> {
             ),
             Text(
               ' Αναζήτηση',
-              style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+              style: TextStyle(
+                  color: Colors.grey, fontSize: 14.sp, fontFamily: 'CAMBRIA'),
             ),
           ],
         ),
@@ -210,7 +211,8 @@ class _HomePageState extends State<HomePage> {
       child: Text(
         ' Όλα τα αποτελέσματα',
         style: TextStyle(
-          fontSize: 15.sp,
+          fontSize: 18.sp,
+          fontFamily: 'CAMBRIA',
           fontWeight: FontWeight.w600,
           color: Colors.white,
         ),
