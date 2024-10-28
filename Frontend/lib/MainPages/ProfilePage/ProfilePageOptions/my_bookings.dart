@@ -184,23 +184,35 @@ class _MyBookingsPageState extends State<MyBookingsPage>
   }
 }
 
-class BookingCard extends StatelessWidget {
+class BookingCard extends StatefulWidget {
+  const BookingCard({super.key, required this.booking});
+
   final BookingInfoStruct booking;
 
-  const BookingCard({super.key, required this.booking});
+  @override
+  State<BookingCard> createState() => _BookingCardState();
+}
+
+class _BookingCardState extends State<BookingCard> {
+  String localPhotoPath = '';
+
+  String clubPhoto = '';
 
   @override
   Widget build(BuildContext context) {
-    final formattedDate = DateFormat('dd/MM').format(booking.date);
+    final formattedDate = DateFormat('dd/MM').format(widget.booking.date);
     final clubProvider = context.read<ClubProvider>();
-    int simple = double.parse(booking.fourbitString[0]).toInt();
-    int special = double.parse(booking.fourbitString[1]).toInt();
-    int premium = double.parse(booking.fourbitString[2]).toInt();
+    localPhotoPath =
+        clubProvider.getClubByID(widget.booking.clubID).localPhotoPath;
+    clubPhoto = clubProvider.getClubByID(widget.booking.clubID).clubPhoto;
+    int simple = double.parse(widget.booking.fourbitString[0]).toInt();
+    int special = double.parse(widget.booking.fourbitString[1]).toInt();
+    int premium = double.parse(widget.booking.fourbitString[2]).toInt();
     return GestureDetector(
       onTap: () {
         AutoRouter.of(context).push(
           BookingDetailsRoute(
-            booking: booking,
+            booking: widget.booking,
           ),
         );
       },
@@ -222,34 +234,7 @@ class BookingCard extends StatelessWidget {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8.r),
                   child: SizedBox(
-                      width: 100.w,
-                      height: 130.h,
-                      child: clubProvider
-                              .getClubByID(booking.clubID)
-                              .localPhotoPath
-                              .isNotEmpty
-                          ? Image.file(
-                              File(clubProvider
-                                  .getClubByID(booking.clubID)
-                                  .localPhotoPath),
-                              fit: BoxFit.fill,
-                            ) // Load from local file
-                          : clubProvider
-                                  .getClubByID(booking.clubID)
-                                  .clubPhoto
-                                  .isNotEmpty
-                              ? Image.network(
-                                  clubProvider
-                                      .getClubByID(booking.clubID)
-                                      .clubPhoto,
-                                  fit: BoxFit.fill,
-                                )
-                              : const Center(
-                                  child: CircularProgressIndicator(
-                                  color: appRedColor,
-                                  backgroundColor: Colors.black,
-                                  strokeWidth: 2,
-                                ))),
+                      width: 100.w, height: 130.h, child: buildImage()),
                 ),
                 SizedBox(
                   width: 20.sp,
@@ -262,7 +247,7 @@ class BookingCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text(
-                        clubProvider.getClubNameByID(booking.clubID),
+                        clubProvider.getClubNameByID(widget.booking.clubID),
                         style: TextStyle(
                           color: appRedColor,
                           fontSize: 14.sp,
@@ -271,7 +256,7 @@ class BookingCard extends StatelessWidget {
                       ),
                       SizedBox(height: 5.h),
                       Text(
-                        booking.bookingName,
+                        widget.booking.bookingName,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 11.sp,
@@ -279,15 +264,15 @@ class BookingCard extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 5.h),
-                      if (booking.persons > 1)
+                      if (widget.booking.persons > 1)
                         Text(
-                          '$formattedDate - ${booking.persons} άτομα',
+                          '$formattedDate - ${widget.booking.persons} άτομα',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 11.sp,
                           ),
                         ),
-                      if (booking.persons == 1)
+                      if (widget.booking.persons == 1)
                         Text(
                           '$formattedDate - 1 άτομο',
                           style: TextStyle(
@@ -349,9 +334,9 @@ class BookingCard extends StatelessWidget {
                               ),
                           ]),
                       SizedBox(height: 5.h),
-                      if (booking.status < 2)
+                      if (widget.booking.status < 2)
                         Text(
-                          '${(booking.price).toStringAsFixed(2)} €',
+                          '${(widget.booking.price).toStringAsFixed(2)} €',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 11.sp,
@@ -366,5 +351,59 @@ class BookingCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget buildImage() {
+    return localPhotoPath.isNotEmpty
+        ? Image(
+            fit: BoxFit.fill,
+            image: FileImage(File(localPhotoPath)),
+            errorBuilder:
+                (BuildContext context, Object error, StackTrace? stackTrace) {
+              // If loading from the file fails, attempt to load from the network
+              return loadNetworkImage();
+            },
+          )
+        : loadNetworkImage();
+  }
+
+  Widget loadNetworkImage() {
+    if (clubPhoto.isNotEmpty) {
+      return Image.network(
+        clubPhoto,
+        fit: BoxFit.fill,
+        loadingBuilder: (BuildContext context, Widget child,
+            ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+        errorBuilder:
+            (BuildContext context, Object error, StackTrace? stackTrace) {
+          // If loading from the network fails, show the loading indicator
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+      );
+    } else {
+      // If there's no image path, just show a loading indicator
+      return const Center(
+        child: CircularProgressIndicator(
+          color: appRedColor,
+          backgroundColor: Colors.black,
+          strokeWidth: 2,
+        ),
+      );
+    }
   }
 }

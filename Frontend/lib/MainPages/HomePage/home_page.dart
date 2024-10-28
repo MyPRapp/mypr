@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _initApp();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      checkAppVersion(context);
       context.read<BottomNavBarVisibility>().show();
     });
   }

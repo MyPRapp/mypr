@@ -105,39 +105,9 @@ class _BigClubCardState extends State<BigClubCard> {
                           bottomLeft: Radius.circular(10.r),
                           topLeft: Radius.circular(10.r)),
                       child: SizedBox(
-                        height: 140.h,
-                        width: screenWidth * 0.3,
-                        child: widget.club.localPhotoPath.isNotEmpty
-                            ? Image(
-                                fit: BoxFit.fill,
-                                image:
-                                    FileImage(File(widget.club.localPhotoPath)),
-                              )
-                            : widget.club.clubPhoto.isNotEmpty
-                                ? Image.network(
-                                    widget.club.clubPhoto,
-                                    fit: BoxFit.fill,
-                                    loadingBuilder: (BuildContext context,
-                                        Widget child,
-                                        ImageChunkEvent? loadingProgress) {
-                                      if (loadingProgress == null) return child;
-                                      return const Center(
-                                        child: CircularProgressIndicator(
-                                          color: appRedColor,
-                                          backgroundColor: Colors.black,
-                                          strokeWidth: 2,
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : const Center(
-                                    child: CircularProgressIndicator(
-                                      color: appRedColor,
-                                      backgroundColor: Colors.black,
-                                      strokeWidth: 2,
-                                    ),
-                                  ),
-                      ),
+                          height: 140.h,
+                          width: screenWidth * 0.3,
+                          child: buildImage()),
                     ),
                   ),
                   Container(
@@ -195,9 +165,61 @@ class _BigClubCardState extends State<BigClubCard> {
       ),
     );
   }
+
+  Widget buildImage() {
+    return widget.club.localPhotoPath.isNotEmpty
+        ? Image(
+            fit: BoxFit.fill,
+            image: FileImage(File(widget.club.localPhotoPath)),
+            errorBuilder:
+                (BuildContext context, Object error, StackTrace? stackTrace) {
+              // If loading from the file fails, attempt to load from the network
+              return loadNetworkImage();
+            },
+          )
+        : loadNetworkImage();
+  }
+
+  Widget loadNetworkImage() {
+    if (widget.club.clubPhoto.isNotEmpty) {
+      return Image.network(
+        widget.club.clubPhoto,
+        fit: BoxFit.fill,
+        loadingBuilder: (BuildContext context, Widget child,
+            ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+        errorBuilder:
+            (BuildContext context, Object error, StackTrace? stackTrace) {
+          // If loading from the network fails, show the loading indicator
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+      );
+    } else {
+      // If there's no image path, just show a loading indicator
+      return const Center(
+        child: CircularProgressIndicator(
+          color: appRedColor,
+          backgroundColor: Colors.black,
+          strokeWidth: 2,
+        ),
+      );
+    }
+  }
 }
-
-
 /* 
 class SmallClubCard extends StatefulWidget {
   const SmallClubCard({

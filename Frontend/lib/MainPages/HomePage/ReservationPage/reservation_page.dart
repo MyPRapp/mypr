@@ -390,26 +390,62 @@ class _ReservationPageState extends State<ReservationPage> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15.r),
       child: SizedBox(
-        height: 250.h,
-        width: ScreenUtil().screenWidth,
-        child: widget.club.localPhotoPath.isNotEmpty
-            ? Image.file(
-                File(widget.club.localPhotoPath),
-                fit: BoxFit.fill,
-              ) // Load from local file
-            : widget.club.clubPhoto.isNotEmpty
-                ? Image.network(
-                    widget.club.clubPhoto,
-                    fit: BoxFit.fill,
-                  )
-                : const Center(
-                    child: CircularProgressIndicator(
-                    color: appRedColor,
-                    backgroundColor: Colors.black,
-                    strokeWidth: 2,
-                  )),
-      ),
+          height: 250.h, width: ScreenUtil().screenWidth, child: buildImage()),
     );
+  }
+
+  Widget buildImage() {
+    return widget.club.localPhotoPath.isNotEmpty
+        ? Image(
+            fit: BoxFit.fill,
+            image: FileImage(File(widget.club.localPhotoPath)),
+            errorBuilder:
+                (BuildContext context, Object error, StackTrace? stackTrace) {
+              // If loading from the file fails, attempt to load from the network
+              return loadNetworkImage();
+            },
+          )
+        : loadNetworkImage();
+  }
+
+  Widget loadNetworkImage() {
+    if (widget.club.clubPhoto.isNotEmpty) {
+      return Image.network(
+        widget.club.clubPhoto,
+        fit: BoxFit.fill,
+        loadingBuilder: (BuildContext context, Widget child,
+            ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+        errorBuilder:
+            (BuildContext context, Object error, StackTrace? stackTrace) {
+          // If loading from the network fails, show the loading indicator
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+      );
+    } else {
+      // If there's no image path, just show a loading indicator
+      return const Center(
+        child: CircularProgressIndicator(
+          color: appRedColor,
+          backgroundColor: Colors.black,
+          strokeWidth: 2,
+        ),
+      );
+    }
   }
 
   /// Builds the package information section with available services.

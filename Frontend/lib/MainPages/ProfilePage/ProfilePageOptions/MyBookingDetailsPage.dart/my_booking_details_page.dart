@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../Globals/constants.dart';
 import '../../../../Globals/global_components.dart';
 import '../../../../Globals/structs.dart';
 import '../../../../Providers/club_provider.dart';
@@ -112,28 +113,65 @@ class BookingDetailsPage extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(15.r),
       child: SizedBox(
-        child: Center(
-            child: AspectRatio(
-          aspectRatio: 5 / 3,
-          child: club.localPhotoPath.isNotEmpty
-              ? Image.file(
-                  File(club.localPhotoPath),
-                  fit: BoxFit.fill,
-                ) // Load from local file
-              : club.clubPhoto.isNotEmpty
-                  ? Image.network(
-                      club.clubPhoto,
-                      fit: BoxFit.fill,
-                    )
-                  : const Center(
-                      child: CircularProgressIndicator(
-                      color: Color(0xFF9C0C04),
-                      backgroundColor: Colors.black,
-                      strokeWidth: 2,
-                    )),
-        )),
+        height: 250.h,
+        width: ScreenUtil().screenWidth,
+        child: buildImage(club),
       ),
     );
+  }
+
+  Widget buildImage(ClubInfoStruct club) {
+    return club.localPhotoPath.isNotEmpty
+        ? Image(
+            fit: BoxFit.fill,
+            image: FileImage(File(club.localPhotoPath)),
+            errorBuilder:
+                (BuildContext context, Object error, StackTrace? stackTrace) {
+              // If loading from the file fails, attempt to load from the network
+              return loadNetworkImage(club);
+            },
+          )
+        : loadNetworkImage(club);
+  }
+
+  Widget loadNetworkImage(ClubInfoStruct club) {
+    if (club.clubPhoto.isNotEmpty) {
+      return Image.network(
+        club.clubPhoto,
+        fit: BoxFit.fill,
+        loadingBuilder: (BuildContext context, Widget child,
+            ImageChunkEvent? loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+        errorBuilder:
+            (BuildContext context, Object error, StackTrace? stackTrace) {
+          // If loading from the network fails, show the loading indicator
+          return const Center(
+            child: CircularProgressIndicator(
+              color: appRedColor,
+              backgroundColor: Colors.black,
+              strokeWidth: 2,
+            ),
+          );
+        },
+      );
+    } else {
+      // If there's no image path, just show a loading indicator
+      return const Center(
+        child: CircularProgressIndicator(
+          color: appRedColor,
+          backgroundColor: Colors.black,
+          strokeWidth: 2,
+        ),
+      );
+    }
   }
 
   Widget _buildBookingDetails(

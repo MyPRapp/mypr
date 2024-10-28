@@ -8,10 +8,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/services/auth_service.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../Providers/global_state_provider.dart';
 import '../routes/app_router.gr.dart';
@@ -337,4 +340,132 @@ void showFloatingSnackBar(
       duration: duration,
       backgroundColor: const Color.fromARGB(255, 70, 6, 1),
       textStyle: TextStyle(fontSize: 14.sp, color: Colors.white));
+}
+
+String minimumAndroidVersion =
+    '1.0.0'; //TODO Remove these from code and get the minimum versions from server
+String minimumIOSVersion = '1.0.0';
+// Utility function to compare two version strings
+int compareVersions(String currentVersion, String minimumVersion) {
+  List<String> currentParts = currentVersion.split('.'); // Split by '.'
+  List<String> minimumParts = minimumVersion.split('.');
+
+  for (int i = 0; i < 3; i++) {
+    int currentPart = int.parse(currentParts[i]);
+    int minimumPart = int.parse(minimumParts[i]);
+
+    if (currentPart > minimumPart) {
+      return 1; // Current version is newer
+    } else if (currentPart < minimumPart) {
+      return -1; // Current version is older
+    }
+  }
+  return 0; // Versions are equal
+}
+
+Future<String> getCurrentAppVersion() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  return packageInfo.version; // Get the current version (e.g., "1.0.0")
+}
+
+Future<void> checkAppVersion(BuildContext context) async {
+  String currentVersion = await getCurrentAppVersion();
+  int comparison = 0;
+  if (Platform.isAndroid) {
+    comparison = compareVersions(currentVersion, minimumAndroidVersion);
+  } else {
+    if (Platform.isIOS) {
+      comparison = compareVersions(currentVersion, minimumIOSVersion);
+    } else {
+      errorPrint('$comparison');
+      comparison = -1;
+    }
+  }
+  if (comparison < 0 && context.mounted) {
+    // If the current version is older than the minimum version
+    showUpdateDialog(context);
+    errorPrint('App must be updated');
+  } else {
+    successPrint('Your app is up-to-date!');
+  }
+}
+
+void showUpdateDialog(context) {
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (context) => AlertDialog(
+      backgroundColor: const Color.fromARGB(255, 141, 14, 5),
+      shadowColor: appRedColor,
+      elevation: 30,
+      title: Text('Ενημέρωση διαθέσιμη!',
+          style: TextStyle(
+              fontSize: 25.sp,
+              color: Colors.black,
+              fontFamily: 'CALIBRI',
+              fontWeight: FontWeight.bold)),
+      content: Text(
+        'Παρακαλώ ενημέρωσε την εφαρμογή για να συνεχίσεις.',
+        style: TextStyle(
+            fontSize: 20.sp,
+            color: Colors.black,
+            fontFamily: 'CALIBRI',
+            fontWeight: FontWeight.w500),
+      ),
+      actions: [
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.all(10.sp), // Custom padding
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.r), // Rounded corners
+            ),
+            elevation: 10, // Shadow depth
+            shadowColor: Colors.black.withOpacity(0.5), // Shadow color
+            backgroundColor: Colors.black, // Default background color
+          ),
+          onPressed: openStore,
+          child: ShaderMask(
+            shaderCallback: (bounds) => const LinearGradient(
+              colors: [Colors.red, appRedColor], // Gradient for text color
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ).createShader(bounds),
+            child: Text(
+              'Ενημέρωση',
+              style: TextStyle(
+                fontSize: 25.sp,
+                color: Colors
+                    .white, // Placeholder color (overwritten by ShaderMask)
+                fontFamily: 'CALIBRI',
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+// Function to open the Play Store or App Store
+Future<void> openStore() async {
+  String url;
+  if (Platform.isAndroid) {
+    // Android: Play Store URL with the app package ID
+    url =
+        'https://play.google.com/store/apps/details?id=com.example.your_app_id';
+  } else if (Platform.isIOS) {
+    //TODO Change urls
+    // iOS: App Store URL with the app ID
+    url = 'https://apps.apple.com/app/id1234567890';
+  } else {
+    throw 'Unsupported platform';
+  }
+
+  final Uri uri = Uri.parse(url); // Create a Uri object
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri); // Use launchUrl instead of launch
+  } else {
+    throw 'Could not launch $url';
+  }
 }
