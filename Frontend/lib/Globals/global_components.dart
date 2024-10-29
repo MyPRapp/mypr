@@ -342,9 +342,6 @@ void showFloatingSnackBar(
       textStyle: TextStyle(fontSize: 14.sp, color: Colors.white));
 }
 
-String minimumAndroidVersion =
-    '1.0.0'; //TODO Remove these from code and get the minimum versions from server
-String minimumIOSVersion = '1.0.0';
 // Utility function to compare two version strings
 int compareVersions(String currentVersion, String minimumVersion) {
   List<String> currentParts = currentVersion.split('.'); // Split by '.'
@@ -370,6 +367,24 @@ Future<String> getCurrentAppVersion() async {
 
 Future<void> checkAppVersion(BuildContext context) async {
   String currentVersion = await getCurrentAppVersion();
+
+  String minimumAndroidVersion =
+      '1.0.0'; //TODO Hold these values in global statement and manage what happens when there is no internet
+  String minimumIOSVersion = '1.0.0';
+
+  warningPrint('Fetching clubs from server...');
+  final url = '$apiUrl/version_control_ios/'; //TODO DO THE SAME FOR ANDROID
+
+  try {
+    final response =
+        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+    if (response.statusCode == 200) {
+      minimumIOSVersion = response.body.replaceAll('"', '');
+    } else {}
+  } catch (e) {
+    errorPrint('ERROR');
+  }
+
   int comparison = 0;
   if (Platform.isAndroid) {
     comparison = compareVersions(currentVersion, minimumAndroidVersion);

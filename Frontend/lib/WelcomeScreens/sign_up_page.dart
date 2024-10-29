@@ -493,9 +493,40 @@ class _SignUpPageState extends State<SignUpPage> {
             padding: EdgeInsets.zero,
             children: [
               // HEADER: TOP PICTURE AND LOGO PICTURE
-              const Stack(
+              Stack(
                 children: [
-                  Header(),
+                  const Header(),
+                  GestureDetector(
+                    behavior: HitTestBehavior.translucent,
+                    onTap: () {
+                      if (!_isRegistering) {
+                        AutoRouter.of(context)
+                            .replaceAll([const BottomNavBarRoute()]);
+                      }
+                    },
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            right: 10.w,
+                            top: ScreenUtil().statusBarHeight + 10.h),
+                        child: Container(
+                          padding: EdgeInsets.all(5.sp),
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                                  color:
+                                      const Color.fromARGB(255, 105, 105, 105)),
+                              borderRadius: BorderRadius.circular(5.r)),
+                          child: Text('Παράλειψη',
+                              style: TextStyle(
+                                  color:
+                                      const Color.fromARGB(255, 133, 132, 132),
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14.sp)),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               const LoginLogo(
@@ -1048,9 +1079,8 @@ class _CheckBoxWidgetState extends State<CheckBoxWidget> {
           ),
         ),
         GestureDetector(
-          //TODO Change url
           onTap: () {
-            launchUrl(Uri.parse('https://www.instagram.com/mypr_app/'),
+            launchUrl(Uri.parse('https://mypr-app.com/terms-of-use/'),
                 mode: LaunchMode.externalApplication);
           },
           child: Text(
