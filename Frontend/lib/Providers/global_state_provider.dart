@@ -9,6 +9,7 @@ class GlobalStateProvider with ChangeNotifier {
   bool _hasVerifiedEmail = false;
   bool _preferencesLoaded =
       false; // Add this state to track if preferences are loaded
+  final bool _hasCheckedAppVersion = false;
 
   GlobalStateProvider._internal() {
     loadFromPreferences(); // Load initial values from SharedPreferences
@@ -24,6 +25,8 @@ class GlobalStateProvider with ChangeNotifier {
   bool get isAuthenticated => _isAuthenticated;
 
   bool get hasVerifiedEmail => _hasVerifiedEmail;
+
+  bool get hasCheckedAppVersion => _hasCheckedAppVersion;
 
   bool get preferencesLoaded =>
       _preferencesLoaded; // New getter to check if preferences are loaded

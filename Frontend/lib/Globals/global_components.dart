@@ -368,28 +368,42 @@ Future<String> getCurrentAppVersion() async {
 Future<void> checkAppVersion(BuildContext context) async {
   String currentVersion = await getCurrentAppVersion();
 
-  String minimumAndroidVersion =
-      '1.0.0'; //TODO Hold these values in global statement and manage what happens when there is no internet
+  String minimumAndroidVersion = '1.0.0';
   String minimumIOSVersion = '1.0.0';
 
   warningPrint('Fetching clubs from server...');
-  final url = '$apiUrl/version_control_ios/'; //TODO DO THE SAME FOR ANDROID
-
-  try {
-    final response =
-        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      minimumIOSVersion = response.body.replaceAll('"', '');
-    } else {}
-  } catch (e) {
-    errorPrint('ERROR');
-  }
 
   int comparison = 0;
   if (Platform.isAndroid) {
-    comparison = compareVersions(currentVersion, minimumAndroidVersion);
+    final url = '$apiUrl/version_control_android/';
+
+    try {
+      final response =
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        minimumAndroidVersion = response.body.replaceAll('"', '');
+        comparison = compareVersions(currentVersion, minimumAndroidVersion);
+      } else {
+        errorPrint('Couldn\'t check version via server');
+      }
+    } catch (e) {
+      errorPrint('Couldn\'t check version via server');
+    }
   } else {
     if (Platform.isIOS) {
+      final url = '$apiUrl/version_control_ios/';
+
+      try {
+        final response =
+            await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+        if (response.statusCode == 200) {
+          minimumIOSVersion = response.body.replaceAll('"', '');
+        } else {
+          errorPrint('Couldn\'t check version via server');
+        }
+      } catch (e) {
+        errorPrint('Couldn\'t check version via server');
+      }
       comparison = compareVersions(currentVersion, minimumIOSVersion);
     } else {
       errorPrint('$comparison');
@@ -401,7 +415,10 @@ Future<void> checkAppVersion(BuildContext context) async {
     showUpdateDialog(context);
     errorPrint('App must be updated');
   } else {
-    successPrint('Your app is up-to-date!');
+    if (context.mounted) {
+      context.read<GlobalStateProvider>().hasCheckedAppVersion;
+      successPrint('Your app is up-to-date!');
+    }
   }
 }
 

@@ -40,6 +40,11 @@ class _ProfilePageState extends State<ProfilePage> {
         _toggleTextVisibility();
       }
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (context.read<GlobalStateProvider>().hasCheckedAppVersion == false) {
+        checkAppVersion(context);
+      }
+    });
   }
 
   bool _isVisible = false;

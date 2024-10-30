@@ -38,6 +38,9 @@ class _ReservationPageState extends State<ReservationPage> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializePage();
+      if (context.read<GlobalStateProvider>().hasCheckedAppVersion == false) {
+        checkAppVersion(context);
+      }
       context.read<BottomNavBarVisibility>().hide();
     });
   }
