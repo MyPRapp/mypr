@@ -405,7 +405,7 @@ Future<void> checkAppVersion(BuildContext context) async {
       comparison = compareVersions(currentVersion, minimumIOSVersion);
     } else {
       errorPrint('$comparison');
-      comparison = 1; //TODO Change this to -1
+      comparison = -1;
     }
   }
   if (comparison < 0 && context.mounted) {
