@@ -800,8 +800,8 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
 
     // Ensure we have pairs of month and day
     if (unavailablePairs.length % 2 != 0) {
-      print(
-          '❌Invalid unavailableDays format: Each month must be paired with a day.');
+      // print(
+      //     '❌Invalid unavailableDays format: Each month must be paired with a day.');
       return false;
     }
 
@@ -816,8 +816,8 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
           return true;
         }
       } catch (e) {
-        print(
-            '❌Invalid unavailableDays data: Unable to parse month/day at index $i');
+        // print(
+        //     '❌Invalid unavailableDays data: Unable to parse month/day at index $i');
         return false;
       }
     }
@@ -842,7 +842,18 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final now = DateTime.now();
+        DateTime lowerLimit = DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+          22, // Sets hour to 10 PM
+          0, // Sets minute to 0
+          0, // Sets second to 0
+        );
+        if (DateTime.now().hour >= 22) {
+          lowerLimit = lowerLimit.add(const Duration(days: 1));
+        }
+        final now = lowerLimit;
         final lastDate = now.add(const Duration(days: 30));
 
         // Find the next open day if today is closed or unavailable
@@ -976,7 +987,9 @@ Future<void> retractPoints(int pointsToRetract) async {
         .refreshAccessToken(); // Ensure token is valid before retracting points
     await PointsService().retractPoints(pointsToRetract);
   } catch (error) {
-    print("❌Failed to retract points: $error");
+    // print("❌Failed to retract points: $error");
+    await Future.delayed(const Duration(seconds: 5));
+    retractPoints(pointsToRetract);
   }
 }
 
@@ -1009,7 +1022,7 @@ class _LocationWidgetState extends State<LocationWidget> {
         await launchUrl(browserUri, mode: LaunchMode.externalApplication);
       }
     } catch (e) {
-      print("Could not open maps: $e");
+      // print("Could not open maps: $e");
     }
   }
 

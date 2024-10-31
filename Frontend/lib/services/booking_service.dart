@@ -35,7 +35,7 @@ class BookingService {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        print("❌Can't connect to server. Request timed out.");
+        // print("❌Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 
@@ -47,7 +47,7 @@ class BookingService {
         return false;
       }
     } catch (e) {
-      print("❌Booking failed: $e");
+      // print("❌Booking failed: $e");
       return false;
     }
   }
@@ -69,7 +69,7 @@ class BookingService {
       ).timeout(
         const Duration(seconds: 5),
         onTimeout: () {
-          print("❌Can't connect to server. Request timed out.");
+          // print("❌Can't connect to server. Request timed out.");
           return http.Response('Error: Timeout', 408); // 408 Request Timeout
         },
       );
@@ -85,7 +85,7 @@ class BookingService {
         return null;
       }
     } catch (e) {
-      print("❌Booking retrieval failed: $e");
+      // print("❌Booking retrieval failed: $e");
       return null;
     }
   }

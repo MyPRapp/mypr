@@ -116,13 +116,13 @@ class AuthService {
 
         // Determine the output based on the extracted messages
         if (emailError.isNotEmpty && phoneError.isNotEmpty) {
-          print('Email and Phone: $emailError, $phoneError');
+          // print('Email and Phone: $emailError, $phoneError');
           return 4; // Both errors exist
         } else if (emailError.isNotEmpty) {
-          print('Email Error: $emailError');
+          // print('Email Error: $emailError');
           return 2; // Only email error
         } else if (phoneError.isNotEmpty) {
-          print('Phone Error: $phoneError');
+          // print('Phone Error: $phoneError');
           return 3; // Only phone error
         }
 
@@ -150,7 +150,7 @@ class AuthService {
         body: jsonEncode({'refresh': refreshToken}),
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
-        print("❌Can't connect to server. Refresh token request timed out.");
+        // print("❌Can't connect to server. Refresh token request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 

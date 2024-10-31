@@ -89,7 +89,6 @@ class NameAndStars extends StatelessWidget {
           clubName,
           style: TextStyle(
             fontSize: 16.sp,
-            fontFamily: 'CALIBRI',
             fontWeight: FontWeight.w600,
             color: Colors.white,
           ),
@@ -120,10 +119,10 @@ class RatingStars extends StatelessWidget {
       Text(
         '($stars)',
         style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 13.sp,
-            fontFamily: 'CALIBRI'),
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+          fontSize: 13.sp,
+        ),
       )
     ]);
   }

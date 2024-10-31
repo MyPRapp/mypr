@@ -84,8 +84,8 @@ class ClubProvider with ChangeNotifier {
         throw Exception('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print(
-          '❌Error fetching clubs from server, loading from local storage: $e');
+      // print(
+      //     '❌Error fetching clubs from server, loading from local storage: $e');
       throw Exception('Failed to load clubs');
     }
   }
@@ -357,7 +357,7 @@ class ClubProvider with ChangeNotifier {
       if (index != -1) {
         // Club exists, update the existing entry
         _clubs[index] = club;
-        // successPrint(' \'${club.clubName}\' is up to date.');
+        successPrint(' \'${club.clubName}\' is up to date.');
       } else {
         // Club does not exist, add it to the list
         _clubs.add(club);
@@ -395,8 +395,7 @@ class ClubProvider with ChangeNotifier {
         //     '✅${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} added.');
       }
     } catch (e) {
-      print(
-          '❌Error in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
+      //  print(   '❌Error in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
     }
   }
 

@@ -143,18 +143,18 @@ Future<String> getSavedEmail() async {
 }
 
 void printReservationInfo(List<dynamic> reservationInfo) {
-  print('\x1B[37mReservation Info:');
-  print('UserID: ${reservationInfo[0]}');
-  print('ReservationName: ${reservationInfo[1]}');
-  print('ClubName: ${reservationInfo[2]}');
-  print('Persons: ${reservationInfo[3]}');
-  print('Price: ${reservationInfo[4]}');
-  print('Regular: ${reservationInfo[5]}');
-  print('Special: ${reservationInfo[6]}');
-  print('Premium: ${reservationInfo[7]}');
-  print('Date: ${reservationInfo[8]}');
-  print('Comment: ${reservationInfo[9]}');
-  print('Discount(%): ${reservationInfo[10]}');
+  // print('\x1B[37mReservation Info:');
+  // print('UserID: ${reservationInfo[0]}');
+  // print('ReservationName: ${reservationInfo[1]}');
+  // print('ClubName: ${reservationInfo[2]}');
+  // print('Persons: ${reservationInfo[3]}');
+  // print('Price: ${reservationInfo[4]}');
+  // print('Regular: ${reservationInfo[5]}');
+  // print('Special: ${reservationInfo[6]}');
+  // print('Premium: ${reservationInfo[7]}');
+  // print('Date: ${reservationInfo[8]}');
+  // print('Comment: ${reservationInfo[9]}');
+  // print('Discount(%): ${reservationInfo[10]}');
 }
 
 void successPrint(String text) {
@@ -432,15 +432,11 @@ void showUpdateDialog(context) {
           style: TextStyle(
               fontSize: 25.sp,
               color: Colors.black,
-              fontFamily: 'CALIBRI',
               fontWeight: FontWeight.bold)),
       content: Text(
         'Παρακαλώ ενημέρωσε την εφαρμογή για να συνεχίσεις.',
         style: TextStyle(
-            fontSize: 20.sp,
-            color: Colors.black,
-            fontFamily: 'CALIBRI',
-            fontWeight: FontWeight.w500),
+            fontSize: 20.sp, color: Colors.black, fontWeight: FontWeight.w500),
       ),
       actions: [
         ElevatedButton(
@@ -466,7 +462,7 @@ void showUpdateDialog(context) {
                 fontSize: 25.sp,
                 color: Colors
                     .white, // Placeholder color (overwritten by ShaderMask)
-                fontFamily: 'CALIBRI',
+
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -497,5 +493,60 @@ Future<void> openStore() async {
     await launchUrl(uri); // Use launchUrl instead of launch
   } else {
     throw 'Could not launch $url';
+  }
+}
+
+class TermsAndPrivacyPolicy extends StatelessWidget {
+  const TermsAndPrivacyPolicy({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        GestureDetector(
+          onTap: () {
+            launchUrl(Uri.parse('https://mypr-app.com/terms-of-use/'),
+                mode: LaunchMode.externalApplication);
+          },
+          child: Text(
+            'Όροι χρήσης',
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              color: Colors.grey,
+              decorationColor: const Color.fromARGB(200, 255, 255, 255),
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Text(
+          ' & ',
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            launchUrl(Uri.parse('https://mypr-app.com/privacy-policy/'),
+                mode: LaunchMode.externalApplication);
+          },
+          child: Text(
+            'πολιτική απορρήτου',
+            style: TextStyle(
+              decoration: TextDecoration.underline,
+              decorationColor: const Color.fromARGB(200, 255, 255, 255),
+              color: Colors.grey,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

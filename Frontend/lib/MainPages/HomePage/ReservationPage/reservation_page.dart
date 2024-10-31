@@ -192,7 +192,7 @@ class _ReservationPageState extends State<ReservationPage> {
   void startTimer() {
     // Check if the timer is already active
     if (timer != null && timer!.isActive) {
-      print("A timer is already running. Cannot start a new one.");
+      // print("A timer is already running. Cannot start a new one.");
       return; // Exit the function, don't start a new timer
     }
     // If no timer is running, proceed with starting a new one
@@ -630,7 +630,7 @@ class _ReservationPageState extends State<ReservationPage> {
         }
 
         // Log error or handle failure in a way without more snack bars
-        print("❌Booking submission failed.");
+        // print("❌Booking submission failed.");
         return;
       }
 

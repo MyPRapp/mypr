@@ -117,14 +117,23 @@ class _HomePageState extends State<HomePage> {
               padding: EdgeInsets.only(left: 10.w, right: 10.w),
               child: ListView(
                 children: [
-                  SizedBox(height: 10.h),
-                  _buildHeader(screenWidth),
-                  SizedBox(height: 40.h),
-                  _buildResultsTitle(),
-                  SizedBox(height: 15.h),
-                  _buildClubList(screenHeight, screenWidth),
-                  _buildComingSoonText(),
-                  SizedBox(height: 140.h),
+                  ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: ScreenUtil().screenHeight),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10.h),
+                        _buildHeader(screenWidth),
+                        SizedBox(height: 40.h),
+                        _buildResultsTitle(),
+                        SizedBox(height: 15.h),
+                        _buildClubList(screenHeight, screenWidth),
+                        _buildComingSoonText(),
+                        SizedBox(height: 140.h),
+                      ],
+                    ),
+                  ),
+                  const TermsAndPrivacyPolicy()
                 ],
               ),
             ),
@@ -193,7 +202,9 @@ class _HomePageState extends State<HomePage> {
             Text(
               ' Αναζήτηση',
               style: TextStyle(
-                  color: Colors.grey, fontSize: 14.sp, fontFamily: 'CAMBRIA'),
+                color: Colors.grey,
+                fontSize: 14.sp,
+              ),
             ),
           ],
         ),
@@ -202,22 +213,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildResultsTitle() {
-    return ShaderMask(
-      shaderCallback: (bounds) => const LinearGradient(
-        colors: [
-          Color.fromARGB(255, 51, 51, 51),
-          Color.fromARGB(255, 194, 194, 194),
-        ],
-        begin: Alignment.centerLeft,
-        end: Alignment.center,
-      ).createShader(bounds),
-      child: Text(
-        ' Όλα τα αποτελέσματα',
-        style: TextStyle(
-          fontSize: 18.sp,
-          fontFamily: 'CAMBRIA',
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: ShaderMask(
+        shaderCallback: (bounds) => const LinearGradient(
+          colors: [
+            Color.fromARGB(255, 51, 51, 51),
+            Color.fromARGB(255, 194, 194, 194),
+          ],
+          begin: Alignment.centerLeft,
+          end: Alignment.center,
+        ).createShader(bounds),
+        child: Text(
+          ' Όλα τα αποτελέσματα',
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
         ),
       ),
     );
@@ -249,7 +262,6 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildComingSoonText() {
     return Text(
-      textAlign: TextAlign.center,
       'Περισσότερα club έρχονται σύντομα...',
       style: TextStyle(
         color: Colors.grey,
@@ -265,9 +277,9 @@ class _HomePageState extends State<HomePage> {
     final storageStatus = await Permission.storage.request();
     if (storageStatus.isDenied) {
       // Handle the case when the user denies the permission
-      print('Storage permission denied');
+      // print('Storage permission denied');
     } else if (storageStatus.isGranted) {
-      print('Storage permission granted');
+      // print('Storage permission granted');
     }
 
     // Check and request notification permission for Android 13 and above

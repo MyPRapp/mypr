@@ -111,18 +111,25 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 125, 9, 3),
           titlePadding: EdgeInsets.all(20.sp),
           actionsPadding: EdgeInsets.all(20.sp),
           actionsAlignment: MainAxisAlignment.spaceBetween,
           title: Text(
             'Είσαι σίγουρος ότι θέλεις να αποσυνδεθείς;',
-            style: TextStyle(fontSize: 17.sp),
+            style: TextStyle(
+                fontSize: 18.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.w700),
           ),
           actions: <Widget>[
             TextButton(
               child: Text(
                 'Ακύρωση',
-                style: TextStyle(fontSize: 15.sp),
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600),
               ),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
@@ -131,7 +138,10 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton(
               child: Text(
                 'Αποσύνδεση',
-                style: TextStyle(fontSize: 15.sp),
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600),
               ),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
@@ -223,7 +233,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void startTimer() {
     // Check if the timer is already active
     if (timer != null && timer!.isActive) {
-      print("A timer is already running. Cannot start a new one.");
+      // print("A timer is already running. Cannot start a new one.");
       return; // Exit the function, don't start a new timer
     }
     // If no timer is running, proceed with starting a new one
@@ -489,7 +499,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             if (!isAuthenticated) SizedBox(height: 100.h),
                             if (!isAuthenticated)
-                              BuildSignInOrRegisterButton(context: context),
+                              GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () => _showSignOutDialog(context),
+                                  child: BuildSignInOrRegisterButton(
+                                      context: context)),
                             if (!isAuthenticated) SizedBox(height: 50.h),
                           ],
                         ),
@@ -529,7 +543,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                           SizedBox(height: screenHeight / 5),
-                        ])
+                        ]),
+                      const TermsAndPrivacyPolicy(),
                     ],
                   ),
                   if (!hasVerifiedEmail && isAuthenticated)

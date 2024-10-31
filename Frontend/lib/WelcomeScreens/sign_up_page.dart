@@ -228,7 +228,7 @@ class _SignUpPageState extends State<SignUpPage> {
             }),
           )
           .timeout(const Duration(seconds: 10));
-      print(otpCode);
+      // print(otpCode);
       _showSnackBar('Στάλθηκε κωδικός με SMS');
       // Check if the response was successful (status code 200)
       if (response.statusCode == 200) {
@@ -238,7 +238,7 @@ class _SignUpPageState extends State<SignUpPage> {
       }
     } catch (e) {
       // Handle errors, such as timeout or connection error
-      print('Error sending OTP: $e');
+      // print('Error sending OTP: $e');
       return false; // Return false in case of error
     }
   }
@@ -250,7 +250,7 @@ class _SignUpPageState extends State<SignUpPage> {
   void startTimer() {
     // Check if the timer is already active
     if (timer != null && timer!.isActive) {
-      print("A timer is already running. Cannot start a new one.");
+      // print("A timer is already running. Cannot start a new one.");
       return; // Exit the function, don't start a new timer
     }
     // If no timer is running, proceed with starting a new one
