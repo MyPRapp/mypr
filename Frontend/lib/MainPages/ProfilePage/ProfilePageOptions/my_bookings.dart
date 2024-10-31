@@ -37,7 +37,6 @@ class _MyBookingsPageState extends State<MyBookingsPage>
       context.read<BookingProvider>().fetchBookings(
           context.read<UserProvider>().userDetails,
           context.read<ClubProvider>());
-      print('aaaa');
     });
   }
 

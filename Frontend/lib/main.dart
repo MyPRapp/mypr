@@ -57,7 +57,6 @@ class _MyPRState extends State<MyPR> {
     if (mounted) {
       ClubProvider clubProvider = context.read<ClubProvider>();
       await clubProvider.loadClubsFromFile();
-      clubProvider.loadCataloguesFromFile();
     }
     if (mounted) {
       context.read<LikedClubsProvider>().loadLikedClubsFromPreferences();

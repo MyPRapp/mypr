@@ -5,6 +5,7 @@ import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import '../../Navigation/bottom_nav_bar.dart';
@@ -25,12 +26,13 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _initApp();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      checkAppVersion(context);
       context.read<BottomNavBarVisibility>().show();
     });
   }
 
   Future<void> _initApp() async {
+    checkAppVersion(context);
+    _requestPermissions();
     await Future.wait([_syncUser(), _fetchClubs()]);
   }
 
@@ -255,5 +257,29 @@ class _HomePageState extends State<HomePage> {
         fontWeight: FontWeight.w600,
       ),
     );
+  }
+
+  Future<void> _requestPermissions() async {
+    // Request internet permission (not required at runtime)
+    // Check and request storage permission
+    final storageStatus = await Permission.storage.request();
+    if (storageStatus.isDenied) {
+      // Handle the case when the user denies the permission
+      print('Storage permission denied');
+    } else if (storageStatus.isGranted) {
+      print('Storage permission granted');
+    }
+
+    // Check and request notification permission for Android 13 and above
+    if (await Permission.notification.isGranted) {
+      print('Notification permission granted');
+    } else if (await Permission.notification.isDenied) {
+      final notificationStatus = await Permission.notification.request();
+      if (notificationStatus.isGranted) {
+        print('Notification permission granted after request');
+      } else {
+        print('Notification permission denied');
+      }
+    }
   }
 }

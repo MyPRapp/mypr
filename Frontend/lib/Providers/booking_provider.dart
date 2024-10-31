@@ -102,7 +102,8 @@ class BookingProvider with ChangeNotifier {
   int _determineStatus(String status, String bookedAt) {
     final DateTime bookingDate = DateTime.parse(bookedAt);
 
-    if (bookingDate.isBefore(DateTime.now())) {
+    if (bookingDate.isBefore(DateTime(DateTime.now().year, DateTime.now().month,
+        DateTime.now().subtract(const Duration(days: 1)).day, 5, 0))) {
       if (status == 'Pending') {
         return 3;
       } else {

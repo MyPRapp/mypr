@@ -65,22 +65,14 @@ class _BigClubCardState extends State<BigClubCard> {
             .read<ClubProvider>()
             .getCataloguesByClubID(widget.club.clubID);
 
-        if (context.read<GlobalStateProvider>().isAuthenticated) {
-          if (context.read<UserProvider>().userDetails.userID > 0) {
-            if (catalogues[0].price != '0' &&
-                catalogues[1].price != '0' &&
-                catalogues[2].price != '0') {
-              AutoRouter.of(context).push(
-                  ReservationRoute(club: widget.club, catalogues: catalogues));
-            }
-          }
-        } else {
-          if (catalogues[0].price != '0' &&
-              catalogues[1].price != '0' &&
-              catalogues[2].price != '0') {
-            AutoRouter.of(context).push(
-                ReservationRoute(club: widget.club, catalogues: catalogues));
-          }
+        if (catalogues[0].price != '0' &&
+            catalogues[1].price != '0' &&
+            catalogues[2].price != '0' &&
+            ((context.read<GlobalStateProvider>().isAuthenticated &&
+                    context.read<UserProvider>().userDetails.userID > 0) ||
+                !context.read<GlobalStateProvider>().isAuthenticated)) {
+          AutoRouter.of(context).push(
+              ReservationRoute(club: widget.club, catalogues: catalogues));
         }
       },
       child: Padding(

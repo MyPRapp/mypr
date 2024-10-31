@@ -158,15 +158,15 @@ void printReservationInfo(List<dynamic> reservationInfo) {
 }
 
 void successPrint(String text) {
-  print('✅$text');
+  // print('✅$text');
 }
 
 void warningPrint(String text) {
-  print('🟡$text');
+  // print('🟡$text');
 }
 
 void errorPrint(String text) {
-  print('❌$text');
+  // print('❌$text');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
@@ -371,8 +371,6 @@ Future<void> checkAppVersion(BuildContext context) async {
   String minimumAndroidVersion = '1.0.0';
   String minimumIOSVersion = '1.0.0';
 
-  warningPrint('Fetching clubs from server...');
-
   int comparison = 0;
   if (Platform.isAndroid) {
     final url = '$apiUrl/version_control_android/';
@@ -407,7 +405,7 @@ Future<void> checkAppVersion(BuildContext context) async {
       comparison = compareVersions(currentVersion, minimumIOSVersion);
     } else {
       errorPrint('$comparison');
-      comparison = -1;
+      comparison = 1; //TODO Change this to -1
     }
   }
   if (comparison < 0 && context.mounted) {

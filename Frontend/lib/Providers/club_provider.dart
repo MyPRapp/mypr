@@ -14,6 +14,9 @@ class ClubProvider with ChangeNotifier {
   final List<CatalogueInfoStruct> _catalogues = [];
   final PhotoManager _photoManager = PhotoManager();
 
+  final List<ClubInfoStruct> _tempClubs = [];
+  final List<CatalogueInfoStruct> _tempCatalogues = [];
+
   List<ClubInfoStruct> get allClubs => _clubs;
   List<CatalogueInfoStruct> get allCatalogues => _catalogues;
 
@@ -33,19 +36,24 @@ class ClubProvider with ChangeNotifier {
 //// Fetch From Server Functions
   Future<void> fetchAndSaveClubsAndCatalogues() async {
     warningPrint('Fetching clubs from server...');
-    final url = '$apiUrl/clubs/print/';
 
     try {
+      final url = '$apiUrl/clubs/print/';
       final response =
           await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+
+      // If there's no error proceed
       if (response.statusCode == 200) {
+        _tempClubs.clear();
+        _tempCatalogues.clear();
         final decodedBody = utf8.decode(response.bodyBytes);
         final List<dynamic> data = jsonDecode(decodedBody);
 
         for (var item in data) {
           final club = ClubInfoStruct.fromJson(item);
+
+          // Download and save club photo
           if (club.clubID >= 0) {
-            // Download and save club photo
             if (club.clubPhoto.isNotEmpty) {
               String localPath = await _photoManager.downloadAndSaveClubPhoto(
                   club.clubPhoto, 'club_${club.clubID}_photo');
@@ -55,14 +63,21 @@ class ClubProvider with ChangeNotifier {
             } else {
               errorPrint('Club photo URL is empty');
             }
-            await fetchCatalogues(club); // Fetch catalogues for the club
-            addOrUpdateClub(club); // Save club details
+
+            // Save club details
+            _tempClubs.add(club);
+
+            // Fetch catalogues for the club
+            await fetchCatalogues(club);
           }
         }
 
-//// Save fetched clubs and catalogues locally for offline use
-        await saveClubsToFile();
-        await saveCataloguesToFile();
+        await checkForRemovedClubs();
+
+        await addNewClubs();
+
+        // Save fetched clubs and catalogues locally for offline use
+        await Future.wait([saveClubsToFile(), saveCataloguesToFile()]);
       } else {
         errorPrint(
             'Error fetching clubs from server, loading from local storage');
@@ -82,21 +97,31 @@ class ClubProvider with ChangeNotifier {
     }
 
     warningPrint('Fetching catalogues for ${club.clubName} from server...');
-    final url = '$apiUrl/clubs/${club.clubID}/catalogue';
     try {
+      final url = '$apiUrl/clubs/${club.clubID}/catalogue';
       final response =
           await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
+
         for (var item in data) {
           final catalogue = CatalogueInfoStruct.fromJson(item);
-          addOrUpdateCatalogue(catalogue);
+          _tempCatalogues.add(catalogue);
 
           if (catalogue.serviceType == 'Regular') {
             club.clubMinPrice =
                 (double.tryParse(catalogue.price)?.toInt() ?? 0);
             club.clubMaxPersons = catalogue.maxPersons;
-            addOrUpdateClub(club);
+            int index = _tempClubs.indexWhere((c) => c.clubID == club.clubID);
+
+            if (index != -1) {
+              // Club exists, update the existing entry
+              _tempClubs[index] = club;
+            } else {
+              // Club does not exist, add it to the list
+              _tempClubs.add(club);
+            }
           }
         }
       } else {
@@ -104,6 +129,100 @@ class ClubProvider with ChangeNotifier {
       }
     } catch (e) {
       errorPrint('Error fetching catalogues, loading from local storage: $e');
+    }
+  }
+
+  Future<void> checkForRemovedClubs() async {
+    // Store clubs to remove in a temporary list
+    List<ClubInfoStruct> clubsToRemove = [];
+
+    // Collect clubs that need to be removed
+    for (var club in _clubs) {
+      bool clubFound = false;
+      for (var tempClub in _tempClubs) {
+        if (tempClub.clubID == club.clubID) {
+          clubFound = true;
+          break;
+        }
+      }
+      if (!clubFound) {
+        clubsToRemove.add(club); // Add to the list of clubs to be removed
+        errorPrint("We remove ${club.clubName}");
+      }
+    }
+    // Remove clubs after iteration
+    _clubs.removeWhere((club) => clubsToRemove.contains(club));
+
+    List<CatalogueInfoStruct> cataloguesToRemove = [];
+
+    for (var catalogue in _catalogues) {
+      bool catalogueFound = false;
+
+      for (var club in clubsToRemove) {
+        if (catalogue.clubID == club.clubID) {
+          catalogueFound = true;
+          break;
+        }
+      }
+
+      if (catalogueFound) {
+        cataloguesToRemove
+            .add(catalogue); // Add to the list of clubs to be removed
+        errorPrint("We remove ${catalogue.serviceType} catalogue");
+      }
+    }
+
+    _catalogues
+        .removeWhere((catalogue) => cataloguesToRemove.contains(catalogue));
+
+    await deleteUnusedClubPhotos();
+  }
+
+  Future<void> deleteUnusedClubPhotos() async {
+    try {
+      // Get the app's cache directory to find the folder where club photos are stored
+      final directory = await getApplicationDocumentsDirectory();
+      final Directory clubPhotosDirectory =
+          Directory('${directory.path}/mypDirectory/club_photos');
+
+      // Check if the directory exists
+      if (await clubPhotosDirectory.exists()) {
+        // List all files in the directory
+        List<FileSystemEntity> files = clubPhotosDirectory.listSync();
+
+        // Get the list of club IDs from the _clubs list
+        List<int> existingClubIDs = _clubs.map((club) => club.clubID).toList();
+
+        // Iterate over the files and delete those whose clubID is not in the _clubs list
+        for (FileSystemEntity file in files) {
+          if (file is File) {
+            // Extract the clubID from the file name (assumes format: club_$clubID_photo.jpg)
+            final RegExp exp = RegExp(r'club_(\d+)_photo\.jpg$');
+            final Match? match = exp.firstMatch(file.path);
+
+            if (match != null) {
+              int clubID = int.parse(match.group(1)!);
+              if (!existingClubIDs.contains(clubID)) {
+                await file.delete();
+                successPrint('Deleted unused club photo: ${file.path}');
+              }
+            }
+          }
+        }
+      } else {
+        errorPrint('Directory does not exist: ${clubPhotosDirectory.path}');
+      }
+    } catch (e) {
+      errorPrint('Error deleting unused club photos: $e');
+    }
+  }
+
+  Future<void> addNewClubs() async {
+    for (var club in _tempClubs) {
+      addOrUpdateClub(club);
+    }
+    for (var catalogue in _tempCatalogues) {
+      addOrUpdateCatalogue(catalogue);
     }
   }
 
@@ -145,6 +264,7 @@ class ClubProvider with ChangeNotifier {
           'Error fetching club from server, loading from local storage: $e');
     }
   }
+
 ////////////////////////////////////////////////////////////////
 
 //// Saving To File Functions
@@ -231,22 +351,21 @@ class ClubProvider with ChangeNotifier {
       return;
     }
     try {
-//// Try to find if the club already exists in the list by its clubID
+      // Try to find if the club already exists in the list by its clubID
       int index = _clubs.indexWhere((c) => c.clubID == club.clubID);
 
       if (index != -1) {
-//// Club exists, update the existing entry
+        // Club exists, update the existing entry
         _clubs[index] = club;
-        successPrint(' \'${club.clubName}\' is up to date.');
+        // successPrint(' \'${club.clubName}\' is up to date.');
       } else {
-//// Club does not exist, add it to the list
+        // Club does not exist, add it to the list
         _clubs.add(club);
         successPrint('Club \'${club.clubName}\' added.');
       }
 
       notifyListeners();
     } catch (e) {
-//// Catch any unexpected errors
       errorPrint('Error in addOrUpdateClub for clubID ${club.clubID}: $e');
     }
   }
@@ -258,24 +377,24 @@ class ClubProvider with ChangeNotifier {
     }
     try {
       int index = -1;
-//// Try to find if the catalogue for the specific clubID and serviceType already exists
+
+      // Try to find if the catalogue for the specific clubID and serviceType already exists
       index = _catalogues.indexWhere((c) =>
           c.clubID == catalogue.clubID &&
           c.serviceType == catalogue.serviceType);
 
       if (index > 0) {
-//// Catalogue exists, update the existing entry
+        // Catalogue exists, update the existing entry
         _catalogues[index] = catalogue;
-        print(
-            '✅${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} are up to date.');
+        // print(
+        //     '✅${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} are up to date.');
       } else {
-//// Catalogue does not exist, add it to the list
+        // Catalogue does not exist, add it to the list
         _catalogues.add(catalogue);
-        print(
-            '✅${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} added.');
+        // print(
+        //     '✅${catalogue.serviceType} catalogues for clubID: ${catalogue.clubID} added.');
       }
     } catch (e) {
-//// Catch any unexpected errors during the operation
       print(
           '❌Error in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
     }
@@ -332,9 +451,14 @@ class ClubProvider with ChangeNotifier {
   }
 
   List<CatalogueInfoStruct> getCataloguesByClubID(int clubID) {
-    return _catalogues
-        .where((catalogue) => catalogue.clubID == clubID)
-        .toList();
+    List<CatalogueInfoStruct> tempCatalogues = [];
+
+    for (int i = 0; i < _catalogues.length; i++) {
+      if (_catalogues[i].clubID == clubID) {
+        tempCatalogues.add(_catalogues[i]);
+      }
+    }
+    return tempCatalogues;
   }
 ////////////////////////////////////////////////////////////////
 
