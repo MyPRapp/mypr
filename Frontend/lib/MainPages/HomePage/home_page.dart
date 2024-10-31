@@ -271,15 +271,15 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Check and request notification permission for Android 13 and above
-    if (await Permission.notification.isGranted) {
-      print('Notification permission granted');
-    } else if (await Permission.notification.isDenied) {
-      final notificationStatus = await Permission.notification.request();
-      if (notificationStatus.isGranted) {
-        print('Notification permission granted after request');
-      } else {
-        print('Notification permission denied');
-      }
-    }
+    // if (await Permission.notification.isGranted) {
+    //   print('Notification permission granted');
+    // } else if (await Permission.notification.isDenied) {
+    //   final notificationStatus = await Permission.notification.request();
+    //   if (notificationStatus.isGranted) {
+    //     print('Notification permission granted after request');
+    //   } else {
+    //     print('Notification permission denied');
+    //   }
+    // }
   }
 }

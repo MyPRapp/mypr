@@ -368,8 +368,8 @@ Future<String> getCurrentAppVersion() async {
 Future<void> checkAppVersion(BuildContext context) async {
   String currentVersion = await getCurrentAppVersion();
 
-  String minimumAndroidVersion = '1.0.0';
-  String minimumIOSVersion = '1.0.0';
+  String minimumAndroidVersion = currentVersion;
+  String minimumIOSVersion = currentVersion;
 
   int comparison = 0;
   if (Platform.isAndroid) {
