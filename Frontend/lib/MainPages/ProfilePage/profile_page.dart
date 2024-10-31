@@ -80,30 +80,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _refresh() async {
     UserProvider userProvider = context.read<UserProvider>();
-    // Await the Future to resolve and get the String values from shared preferences
-    String savedEmail = await getSavedEmail();
-    String savedPassword = await getSavedPassword();
 
-    if (savedEmail.isNotEmpty &&
-        savedPassword.isNotEmpty &&
-        mounted &&
-        !context.read<GlobalStateProvider>().isAuthenticated) {
-      bool loggedIn = await AuthService().login(savedEmail, savedPassword);
+    if (context.read<GlobalStateProvider>().isAuthenticated) {
+      context.read<GlobalStateProvider>().isAuthenticated = true;
+      await userProvider.fetchUserDetailsFromServer();
 
-      if (loggedIn && mounted) {
-        context.read<GlobalStateProvider>().isAuthenticated = true;
-        await userProvider.fetchUserDetailsFromServer();
-
-        if (mounted) {
-          await context.read<BookingProvider>().fetchBookings(
-              userProvider.userDetails, context.read<ClubProvider>());
-        }
-      }
-    } else {
-      if (mounted && context.read<GlobalStateProvider>().isAuthenticated) {
-        _triggerAnimation();
+      if (mounted) {
+        await context.read<BookingProvider>().fetchBookings(
+            userProvider.userDetails, context.read<ClubProvider>());
       }
     }
+
+    _triggerAnimation();
   }
 
   void _showSignOutDialog(BuildContext context) {
