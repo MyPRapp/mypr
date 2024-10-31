@@ -253,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
       showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
           const Duration(milliseconds: 4000), context);
 
-      var response = await http.get(
+      var response = await http.post(
         Uri.parse('$apiUrl/email-resend/'),
         headers: {
           'Content-Type': 'application/json',
