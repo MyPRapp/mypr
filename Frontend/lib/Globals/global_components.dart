@@ -483,7 +483,7 @@ Future<void> openStore() async {
   } else if (Platform.isIOS) {
     //TODO Change urls
     // iOS: App Store URL with the app ID
-    url = 'https://apps.apple.com/app/id1234567890';
+    url = 'https://apps.apple.com/app/id6711330363';
   } else {
     throw 'Unsupported platform';
   }
