@@ -45,6 +45,17 @@ class BookingProvider with ChangeNotifier {
       UserInfoStruct? userDetails, ClubProvider clubProvider) async {
     _bookings.clear();
     for (var bookingData in bookingsData) {
+      bool clubFound = false;
+      int clubID = bookingData['club'];
+      for (int i = 0; i < clubProvider.allClubs.length; i++) {
+        if (clubProvider.allClubs[i].clubID == clubID) {
+          clubFound = true;
+          break;
+        }
+      }
+      if (clubFound == false) {
+        return;
+      }
       List<CatalogueInfoStruct> catalogues =
           clubProvider.getAllCataloguesForClubWithID(bookingData['club']);
       final regularCatalogue =
@@ -57,7 +68,7 @@ class BookingProvider with ChangeNotifier {
       _bookings.add(BookingInfoStruct(
         bookingID: bookingData['id'],
         userID: bookingData['user'],
-        clubID: bookingData['club'],
+        clubID: clubID,
         bookingName: bookingData['reservation_name'], // Use server booking name
         date: DateTime.parse(bookingData['booked_at']),
         persons: bookingData['number_of_people'],

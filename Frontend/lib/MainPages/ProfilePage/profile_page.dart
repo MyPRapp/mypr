@@ -10,6 +10,7 @@ import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../Globals/global_components.dart';
 import '../../Providers/booking_provider.dart'; // Import the BookingProvider
@@ -532,6 +533,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           SizedBox(height: screenHeight / 5),
                         ]),
+                      deleteAccountRequest(),
                       const TermsAndPrivacyPolicy(),
                     ],
                   ),
@@ -581,6 +583,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 fontSize: 16.sp,
                 color: const Color.fromARGB(255, 170, 170, 170),
                 fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  Widget deleteAccountRequest() {
+    return TextButton(
+      onPressed: () {
+        launchUrl(
+            Uri.parse(
+                'https://docs.google.com/forms/d/e/1FAIpQLSepD1scoNXAQw_-t_NIt7iwkXN3Zd-OqIAQBKjjUwoabS2KXQ/viewform'),
+            mode: LaunchMode.externalApplication);
+      },
+      child: Text(
+        'Διαγραφή λογαριασμού',
+        style: TextStyle(
+          decoration: TextDecoration.underline,
+          color: Colors.grey,
+          decorationColor: const Color.fromARGB(200, 255, 255, 255),
+          fontSize: 14.sp,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     );
   }

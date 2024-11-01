@@ -78,8 +78,8 @@ flutter_launcher_icons:
   remove_alpha_ios: true
   min_sdk_android: 21
   background_color_ios: '#000000'
-  # adaptive_icon_foreground: "assets/otherPhotos/Logo_v2.2-removebg.png"
-  image_path: "assets/otherPhotos/LogoForAppIcon.png"
+  adaptive_icon_foreground: "assets/otherPhotos/Default_User.jpg"
+  image_path: "assets/otherPhotos/LogoForAppIcon.png" 
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
