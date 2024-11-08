@@ -2,6 +2,7 @@
     "java.compile.nullAnalysis.mode": "automatic",
     "files.exclude": {
         "**/build": false,
+	"**/ios":true,
         "**/.dart_tool":true,
         "**/.idea":true,
         "**/linux":true,
