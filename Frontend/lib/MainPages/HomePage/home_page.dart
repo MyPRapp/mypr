@@ -27,11 +27,11 @@ class _HomePageState extends State<HomePage> {
     _initApp();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
+      context.read<GlobalStateProvider>().refreshHomePage = false;
     });
   }
 
   Future<void> _initApp() async {
-    context.read<GlobalStateProvider>().refreshHomePage = false;
     checkAppVersion(context);
     _requestPermissions();
     await Future.wait([_syncUser(), _fetchClubs()]);
