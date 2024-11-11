@@ -80,6 +80,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _refresh() async {
+    context.read<GlobalStateProvider>().refreshProfilePage = false;
     UserProvider userProvider = context.read<UserProvider>();
 
     if (context.read<GlobalStateProvider>().isAuthenticated) {
@@ -91,7 +92,10 @@ class _ProfilePageState extends State<ProfilePage> {
             userProvider.userDetails, context.read<ClubProvider>());
       }
     }
-
+    if (mounted) {
+      fetchVerifiedEmailGlobalVariable(context);
+    }
+    setState(() {});
     _triggerAnimation();
   }
 
@@ -278,6 +282,10 @@ class _ProfilePageState extends State<ProfilePage> {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final userDetails = context.watch<UserProvider>().userDetails;
+
+    if (context.watch<GlobalStateProvider>().refreshProfilePage) {
+      _refresh();
+    }
 
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;

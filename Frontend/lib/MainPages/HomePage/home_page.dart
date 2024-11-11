@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initApp() async {
+    context.read<GlobalStateProvider>().refreshHomePage = false;
     checkAppVersion(context);
     _requestPermissions();
     await Future.wait([_syncUser(), _fetchClubs()]);

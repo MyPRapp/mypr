@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/services/auth_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +23,7 @@ import '../Providers/global_state_provider.dart';
 import '../routes/app_router.gr.dart';
 
 String apiUrl = 'http://${GlobalStateProvider().validatedIp}/api';
+OtpService otpService = OtpService();
 
 class NoEmojisTextInputFormatter extends TextInputFormatter {
   // RegExp to allow Greek and English letters, numbers, and specific symbols
@@ -158,15 +162,16 @@ void printReservationInfo(List<dynamic> reservationInfo) {
 }
 
 void successPrint(String text) {
-  // print('✅$text');
+  print('✅$text');
 }
 
+//TODO Comment prints
 void warningPrint(String text) {
-  // print('🟡$text');
+  print('🟡$text');
 }
 
 void errorPrint(String text) {
-  // print('❌$text');
+  print('❌$text');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
@@ -382,7 +387,7 @@ Future<void> checkAppVersion(BuildContext context) async {
         minimumAndroidVersion = response.body.replaceAll('"', '');
         comparison = compareVersions(currentVersion, minimumAndroidVersion);
       } else {
-        errorPrint('Couldn\'t check version via server');
+        errorPrint('Couldn\'t check version via server: ${response.body}');
       }
     } catch (e) {
       errorPrint('Couldn\'t check version via server');
@@ -549,4 +554,571 @@ class TermsAndPrivacyPolicy extends StatelessWidget {
       ],
     );
   }
+}
+
+class CustomPhoneButton extends StatefulWidget {
+  const CustomPhoneButton({
+    super.key,
+  });
+
+  @override
+  CustomPhoneButtonState createState() => CustomPhoneButtonState();
+}
+
+class CustomPhoneButtonState extends State<CustomPhoneButton> {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(Colors.black),
+        ),
+        onPressed: () async {
+          if (!otpService.canSend) {
+            if (otpService.awaitMinutes == 1) {
+              floatingSnackBar(
+                  message: 'Ξαναδοκίμασε σε 1 λεπτό',
+                  duration: Duration(seconds: 4),
+                  context: context);
+            } else {
+              floatingSnackBar(
+                  message: 'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+                  duration: Duration(seconds: 4),
+                  context: context);
+            }
+          } else {
+            var isPhoneValid = await showFillPhoneDialog(context);
+            if (isPhoneValid.isSuccess) {
+              var phone = isPhoneValid.phone;
+              if (phone.length == 10 && phone.startsWith('69')) {
+                int result = await AuthService().changePhoneOnServerOnly(phone);
+                if (result == 0) {
+                  if (context.mounted) {
+                    context.read<UserProvider>().fetchUserDetailsFromServer();
+                    context.read<GlobalStateProvider>().refreshProfilePage =
+                        true;
+                    Navigator.pop(context);
+                    floatingSnackBar(
+                        message: 'Επιτυχής προσθήκη κινητού',
+                        duration: Duration(seconds: 4),
+                        context: context);
+                  }
+                } else {
+                  if (result == 2) {
+                    if (context.mounted) {
+                      Navigator.pop(context);
+                      floatingSnackBar(
+                          message:
+                              'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
+                          duration: Duration(seconds: 4),
+                          context: context);
+                    }
+                  }
+                }
+              } else {
+                if (context.mounted) {
+                  floatingSnackBar(
+                      message:
+                          'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
+                      duration: Duration(seconds: 4),
+                      context: context);
+                }
+              }
+            }
+          }
+        },
+        child: Text(
+          'Προσθήκη κινητού',
+          style: TextStyle(color: appRedColor, fontSize: 15.sp),
+        ));
+  }
+}
+
+class CustomEmailButton extends StatefulWidget {
+  final String label;
+
+  const CustomEmailButton({
+    super.key,
+    required this.label,
+  });
+
+  @override
+  CustomEmailButtonState createState() => CustomEmailButtonState();
+}
+
+class CustomEmailButtonState extends State<CustomEmailButton> {
+  bool isExpanded = false;
+  final TextEditingController _controller = TextEditingController();
+
+  void _toggleExpansion() {
+    setState(() {
+      isExpanded = !isExpanded;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        width: isExpanded ? 400.w : 130.w,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 47, 47, 47),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: isExpanded
+            ? Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Πληκτρολόγησε το νέο email',
+                        hintStyle:
+                            TextStyle(color: Colors.grey, fontSize: 12.sp),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10.w),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.send, color: Colors.white, size: 15.sp),
+                    onPressed: () async {
+                      if (_controller.text ==
+                          context.read<UserProvider>().userDetails.email) {
+                        showFloatingSnackBar("Το email χρησιμοποιείται ήδη",
+                            Duration(seconds: 3), context);
+                        return;
+                      }
+
+                      String currentEmail =
+                          context.read<UserProvider>().userDetails.email;
+                      bool success = await AuthService()
+                          .changeEmailOnServerOnly(_controller.text);
+                      if (success && context.mounted) {
+                        context.read<GlobalStateProvider>().hasVerifiedEmail =
+                            false;
+                      }
+
+                      var response = await http.post(
+                        Uri.parse('$apiUrl/email-resend/'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer ${await getAccessToken()}',
+                        },
+                      ).timeout(const Duration(seconds: 10));
+
+                      if (response.statusCode == 200) {
+                        successPrint(response.body);
+                      } else {
+                        bool success = await AuthService()
+                            .changeEmailOnServerOnly(currentEmail);
+                        while (!success) {
+                          await Future.delayed(Duration(seconds: 5));
+                          success = await AuthService()
+                              .changeEmailOnServerOnly(currentEmail);
+                        }
+                        errorPrint('${response.statusCode}');
+                        errorPrint(response.body);
+                        if (context.mounted) {
+                          showFloatingSnackBar(
+                              "Το email χρησιμοποιείται ήδη ή δεν υπάρχει",
+                              Duration(seconds: 3),
+                              context);
+                        }
+                      }
+
+                      _controller.clear();
+                      _toggleExpansion();
+                    },
+                  ),
+                ],
+              )
+            : TextButton(
+                onPressed: _toggleExpansion,
+                style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    overlayColor: const Color.fromARGB(255, 0, 0, 0)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.black,
+                      size: 15.sp,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+class OtpService {
+  bool canSend = true;
+  int awaitMinutes = 1;
+  Timer? timer;
+
+  Future<bool> sendOtp(
+      String phoneNumber, int otpCode, BuildContext context) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$apiUrl/send-otp/'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'phone_number': '+30$phoneNumber',
+              'otp': otpCode,
+            }),
+          )
+          .timeout(const Duration(seconds: 10));
+
+      if (response.statusCode == 200 && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Στάλθηκε κωδικός με SMS')),
+        );
+        startTimer();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
+  void startTimer() {
+    if (timer != null && timer!.isActive) return;
+
+    canSend = false;
+    timer = Timer(Duration(minutes: awaitMinutes), () {
+      awaitMinutes++;
+      canSend = true;
+    });
+  }
+}
+
+int generateRandom6DigitNumber() {
+  Random random = Random();
+  int min = 100000;
+  int max = 999999;
+  return min + random.nextInt(max - min + 1);
+}
+
+Future<IsPhoneValid> showFillPhoneDialog(BuildContext context) async {
+  bool phoneError = false;
+  String phoneInput = '';
+  bool isCodeValid = false;
+  bool showError = false;
+  int attemptCount = 0;
+  String codeInput = '';
+  bool initialPage = true;
+  int otpCode = generateRandom6DigitNumber();
+  String tempPhoneNumber = '';
+
+  if (!otpService.canSend && initialPage == false) {
+    if (otpService.awaitMinutes == 1) {
+      floatingSnackBar(
+          message: 'Ξαναδοκίμασε σε 1 λεπτό',
+          duration: Duration(seconds: 4),
+          context: context);
+    } else {
+      floatingSnackBar(
+          message: 'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+          duration: Duration(seconds: 4),
+          context: context);
+    }
+    return IsPhoneValid('', false);
+  }
+
+  PageController pageController = PageController();
+
+  await showDialog(
+    barrierDismissible: false,
+    barrierColor: const Color.fromARGB(150, 0, 0, 0),
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 28, 28, 28),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white, size: 17.sp),
+                  onPressed: () {
+                    if (initialPage) {
+                      Navigator.pop(context);
+                    } else {
+                      attemptCount = 0;
+                      pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut);
+                      initialPage = true;
+                    }
+                  },
+                ),
+                SizedBox(width: 20.w),
+                Text(
+                  'Επιβεβαίωση Κινητού',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: ScreenUtil().screenWidth - 30.w,
+              height: 100.h,
+              child: PageView(
+                controller: pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  // First page for phone number input
+                  Column(
+                    children: [
+                      TextField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        keyboardType: TextInputType.number,
+                        maxLength: 10,
+                        style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                        decoration: InputDecoration(
+                          hintText: ' Συμπλήρωσε το κινητό σου',
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 12.sp),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          phoneInput = value;
+                        },
+                      ),
+                      if (phoneError)
+                        Text(
+                          "Μη έγκυρος αριθμός τηλεφώνου",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 211, 32, 20),
+                              fontSize: 14.sp),
+                        ),
+                    ],
+                  ),
+                  // Second page for OTP input
+                  Column(
+                    children: [
+                      TextField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                        decoration: InputDecoration(
+                          hintText: ' Εισάγετε τον 6-ψήφιο κωδικό',
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 12.sp),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          codeInput = value;
+                        },
+                      ),
+                      if (showError)
+                        Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: Text(
+                            'Λάθος κωδικός',
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 211, 32, 20),
+                                fontSize: 14.sp),
+                          ),
+                        )
+                      else
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Κινητό: $phoneInput',
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 80, 80, 80),
+                                fontSize: 14.sp),
+                          ),
+                        )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              if (initialPage)
+                ElevatedButton(
+                    onPressed: () async {
+                      // Phone validation
+                      tempPhoneNumber = normalizePhoneNumber(phoneInput);
+                      phoneError = tempPhoneNumber.length != 10 ||
+                          !tempPhoneNumber.startsWith('69');
+                      if (phoneError == false) {
+                        if (!otpService.canSend) {
+                          if (otpService.awaitMinutes == 1) {
+                            showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+                                const Duration(milliseconds: 4000), context);
+                          } else {
+                            showFloatingSnackBar(
+                                'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+                                const Duration(milliseconds: 4000),
+                                context);
+                          }
+                        } else {
+                          otpCode = generateRandom6DigitNumber();
+                          OtpService()
+                              .sendOtp(tempPhoneNumber, otpCode, context);
+                          otpService
+                              .startTimer(); // Start the timer to handle resending OTP
+                          setState(() {
+                            initialPage = false;
+                          });
+                          await pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      } else {
+                        setState(() {
+                          phoneError = true;
+                        });
+                        if (context.mounted) {
+                          if (phoneError == true) {
+                            await Future.delayed(const Duration(seconds: 2));
+                            if (phoneError == true) {
+                              setState(() {
+                                phoneError = false;
+                              });
+                            }
+                          }
+                        }
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all<Color>(Colors.black),
+                    ),
+                    child: Text(
+                      "Συνέχεια",
+                      style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                    )),
+              if (!initialPage)
+                Column(
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        if (codeInput.length == 6) {
+                          if (codeInput == otpCode.toString()) {
+                            isCodeValid = true;
+                            setState(() {
+                              showError = false;
+                            });
+                            if (context.mounted) {
+                              Navigator.of(context).pop(true);
+                            }
+                          } else {
+                            if (attemptCount >= 2) {
+                              floatingSnackBar(
+                                  message:
+                                      'Ο αριθμός κινητού δεν επιβεβαιώθηκε',
+                                  duration: Duration(seconds: 4),
+                                  context: context);
+                              setState(() {
+                                showError = false;
+                              });
+                              isCodeValid = false;
+                              if (context.mounted) {
+                                Navigator.of(context).pop(true);
+                              }
+                            }
+                            setState(() {
+                              showError = true;
+                            });
+                            attemptCount++;
+                            if (context.mounted) {
+                              if (showError == true) {
+                                await Future.delayed(
+                                    const Duration(milliseconds: 1350));
+                                if (showError == true) {
+                                  setState(() {
+                                    showError = false;
+                                  });
+                                }
+                              }
+                            }
+                            isCodeValid = false;
+                            return;
+                          }
+                        }
+                      },
+                      child: Text(
+                        'Επιβεβαίωση',
+                        style: TextStyle(
+                            color: const Color(0xFF9C0C04), fontSize: 13.sp),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        if (otpService.canSend) {
+                          OtpService()
+                              .sendOtp(tempPhoneNumber, otpCode, context);
+                          otpService.startTimer();
+                        } else {
+                          if (otpService.awaitMinutes == 1) {
+                            showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+                                const Duration(milliseconds: 4000), context);
+                          } else {
+                            showFloatingSnackBar(
+                                'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+                                const Duration(milliseconds: 4000),
+                                context);
+                          }
+                        }
+                      },
+                      child: Text(
+                        'Επαναποστολή κωδικού',
+                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          );
+        },
+      );
+    },
+  );
+  var result = IsPhoneValid(tempPhoneNumber, isCodeValid);
+  return result;
+}
+
+class IsPhoneValid {
+  final String phone;
+  final bool isSuccess;
+  IsPhoneValid(this.phone, this.isSuccess);
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
+import 'package:mypr/Globals/global_components.dart';
 
 class FadeText extends StatelessWidget {
   const FadeText(this.isVisible, this.text, {super.key});
@@ -112,7 +113,11 @@ class ProfileDialog extends StatelessWidget {
             SizedBox(height: 10.h),
             ProfileInfoRow(label: "Email", value: email),
             SizedBox(height: 10.h),
-            ProfileInfoRow(label: "Τηλέφωνο", value: phone),
+            if (phone.length == 10 && phone.startsWith("69"))
+              ProfileInfoRow(label: "Κινητό", value: phone)
+            else
+              CustomPhoneButton(),
+            // CustomEmailButton(label: 'Αλλαγή email'),
             SizedBox(height: 20.h),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -148,7 +153,7 @@ class ProfileInfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        SelectableText(
           "$label:",
           style: TextStyle(
             color: Colors.grey,

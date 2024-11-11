@@ -10,6 +10,9 @@ class GlobalStateProvider with ChangeNotifier {
   bool _preferencesLoaded =
       false; // Add this state to track if preferences are loaded
   final bool _hasCheckedAppVersion = false;
+  bool _refreshProfilePage = false;
+  bool _refreshHomePage = false;
+  bool _refreshReservationPage = false;
 
   GlobalStateProvider._internal() {
     loadFromPreferences(); // Load initial values from SharedPreferences
@@ -31,6 +34,12 @@ class GlobalStateProvider with ChangeNotifier {
   bool get preferencesLoaded =>
       _preferencesLoaded; // New getter to check if preferences are loaded
 
+  bool get refreshProfilePage => _refreshProfilePage;
+
+  bool get refreshHomePage => _refreshHomePage;
+
+  bool get refreshReservationPage => _refreshReservationPage;
+
   // Setters
   set validatedIp(String value) {
     _validatedIp = value;
@@ -50,6 +59,21 @@ class GlobalStateProvider with ChangeNotifier {
     _hasVerifiedEmail = value;
     _saveToPreferences('hasVerifiedEmail', value);
 
+    notifyListeners();
+  }
+
+  set refreshProfilePage(bool value) {
+    _refreshProfilePage = value;
+    notifyListeners();
+  }
+
+  set refreshHomePage(bool value) {
+    _refreshHomePage = value;
+    notifyListeners();
+  }
+
+  set refreshReservationPage(bool value) {
+    _refreshReservationPage = value;
     notifyListeners();
   }
 

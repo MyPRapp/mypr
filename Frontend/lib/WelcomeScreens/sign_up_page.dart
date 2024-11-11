@@ -1,12 +1,9 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
@@ -33,62 +30,43 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
   final AuthService _authService = AuthService();
+
+  String phoneNumber = '';
 
   bool _obscureText = true;
   bool _obscureText2 = true;
   bool _isRegistering = false;
-  bool _phoneValidating = false;
 
   // Error state variables
   bool firstnameError = false;
   bool lastnameError = false;
-  bool phoneError = false;
   bool emailError = false;
   bool passwordError = false;
   bool confirmationPasswordError = false;
   bool _isCheckBoxPressed = false;
 
-  void _toggleCheckBox() {
-    setState(() {
-      _isCheckBoxPressed = !_isCheckBoxPressed;
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Future<void> _register() async {
     // Reset error states
     firstnameError = false;
     lastnameError = false;
-    phoneError = false;
     emailError = false;
     passwordError = false;
     confirmationPasswordError = false;
+    phoneNumber = "";
+
+    String firstName = _firstNameController.text.trim();
+    String lastName = _lastNameController.text.trim();
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+    String confirmPassword = _confirmPasswordController.text.trim();
 
     setState(() {
-      String firstName = _firstNameController.text.trim();
-      String lastName = _lastNameController.text.trim();
-      String email = _emailController.text.trim();
-      String password = _passwordController.text.trim();
-      String confirmPassword = _confirmPasswordController.text.trim();
-      String phone = _phoneController.text.trim();
-
       // Name and surname validation
       firstnameError = firstName.isEmpty ||
           !RegExp(r'^[\p{L}]+$', unicode: true).hasMatch(firstName);
       lastnameError = lastName.isEmpty ||
           !RegExp(r'^[\p{L}]+$', unicode: true).hasMatch(lastName);
-
-      // Phone validation
-      String phoneNumber = normalizePhoneNumber(phone);
-      phoneError = phoneNumber.length != 10 ||
-          phoneNumber[0] != '6' ||
-          phoneNumber[1] != '9';
 
       // Email validation
       emailError = email.isEmpty ||
@@ -105,18 +83,21 @@ class _SignUpPageState extends State<SignUpPage> {
     // If there are any errors, do not proceed with registration
     if (firstnameError ||
         lastnameError ||
-        phoneError ||
         emailError ||
         passwordError ||
         confirmationPasswordError) {
       return;
     }
+
     if (_isCheckBoxPressed == false) {
       FocusManager.instance.primaryFocus?.unfocus();
-      showFloatingSnackBar('Δεν έχεις συμφωνήσει με τους όρους χρήσης',
-          const Duration(milliseconds: 4000), context);
+      if (mounted) {
+        showFloatingSnackBar('Δεν έχεις συμφωνήσει με τους όρους χρήσης',
+            const Duration(milliseconds: 4000), context);
+      }
       return;
     }
+
     setState(() {
       _firstNameController.text = _firstNameController.text[0].toUpperCase() +
           _firstNameController.text.substring(1);
@@ -124,48 +105,41 @@ class _SignUpPageState extends State<SignUpPage> {
           _lastNameController.text.substring(1);
     });
 
-    setState(() {
-      _phoneValidating = true;
-    });
-    if (!await _showPhoneConfirmationDialog(_phoneController.text)) {
-      setState(() {
-        _phoneValidating = false;
-      });
+    if (!await _showFillPhoneDialog()) {
       return;
     }
+
     setState(() {
       _isRegistering = true;
     });
-    String firstName = _firstNameController.text.trim();
-    String lastName = _lastNameController.text.trim();
-    String username = "$firstName$lastName";
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-    String phone = _phoneController.text.trim();
-    int points = 400;
 
+    String username = "$firstName$lastName";
+    int points = 400;
+    phoneNumber = ' ';
     int registerSuccess = await _authService.register(
       username,
       password,
       firstName,
       lastName,
       email,
-      phone,
+      phoneNumber,
       points,
     );
 
+    errorPrint(phoneNumber);
+
     if (registerSuccess == 1) {
-      _showSnackBar('Ο αριθμός κινητού επιβεβαιώθηκε με επιτυχία');
+      _showSnackBar('Επιτυχής εγγραφή');
       await _clearPreferences();
       await _login();
     } else {
       setState(() {
         _isRegistering = false;
-        _phoneValidating = false;
+        phoneNumber = '';
       });
       if (registerSuccess == 0) {
         _showSnackBar(
-            'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά');
+            'Υπήρξε κάποιο σφάλμα κατά την εγγραφή. Παρακαλώ προσπάθησε ξανά σε λίγο');
       }
       if (registerSuccess == 2) {
         _showSnackBar('Το email χρησιμοποιείται ήδη');
@@ -199,8 +173,6 @@ class _SignUpPageState extends State<SignUpPage> {
           FocusManager.instance.primaryFocus?.unfocus();
           context.router.replaceAll([const BottomNavBarRoute()]);
         }
-        // await sendVerificationEmail();
-
         successPrint('------------LOGGED IN------------');
       } else {
         _showSnackBar('Λάθος στοιχεία εισόδου');
@@ -213,33 +185,6 @@ class _SignUpPageState extends State<SignUpPage> {
       FocusManager.instance.primaryFocus?.unfocus();
       showFloatingSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία',
           const Duration(milliseconds: 4000), context);
-    }
-  }
-
-  Future<bool> sendOtp(String phoneNumber, String otpCode) async {
-    try {
-      final response = await http
-          .post(
-            Uri.parse('$apiUrl/send-otp/'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'phone_number': '+30$phoneNumber',
-              'otp': otpCode,
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
-      // print(otpCode);
-      _showSnackBar('Στάλθηκε κωδικός με SMS');
-      // Check if the response was successful (status code 200)
-      if (response.statusCode == 200) {
-        return true; // Request successful
-      } else {
-        return false; // Request failed
-      }
-    } catch (e) {
-      // Handle errors, such as timeout or connection error
-      // print('Error sending OTP: $e');
-      return false; // Return false in case of error
     }
   }
 
@@ -264,15 +209,18 @@ class _SignUpPageState extends State<SignUpPage> {
     });
   }
 
-  Future<bool> _showPhoneConfirmationDialog(String phoneNumber) async {
-    String codeInput = '';
+  Future<bool> _showFillPhoneDialog() async {
+    bool phoneError = false;
+    String phoneInput = '';
     bool isCodeValid = false;
     bool showError = false;
     int attemptCount = 0;
-
+    String codeInput = '';
+    bool initialPage = true;
     int otpCode = generateRandom6DigitNumber();
+    String tempPhoneNumber = phoneNumber;
 
-    if (!canSend) {
+    if (!canSend && initialPage == false) {
       if (awaitMinutes == 1) {
         _showSnackBar('Ξαναδοκίμασε σε 1 λεπτό');
       } else {
@@ -280,66 +228,223 @@ class _SignUpPageState extends State<SignUpPage> {
       }
       return false;
     }
-    sendOtp(phoneNumber, '$otpCode');
-    startTimer(); // Start the timer to handle resending OTP
-    if (mounted) {
-      await showDialog(
-        barrierDismissible: false, // Prevents closing when tapping outside
-        context: context,
-        builder: (context) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                backgroundColor: Colors.black,
-                title: Text(
-                  textAlign: TextAlign.center,
-                  'Επιβεβαίωση Κινητού',
-                  style: TextStyle(color: Colors.white, fontSize: 16.sp),
-                ),
-                content: SizedBox(
-                  width: 200.w,
-                  height: 150.h,
-                  child: Column(
-                    children: [
-                      SizedBox(height: 20.h),
-                      TextField(
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        style: TextStyle(color: Colors.white, fontSize: 15.sp),
-                        decoration: InputDecoration(
-                          hintText: ' Εισάγετε τον 6-ψήφιο κωδικό',
-                          hintStyle:
-                              TextStyle(color: Colors.grey, fontSize: 12.sp),
-                          enabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF9C0C04)),
+
+    PageController pageController = PageController();
+
+    await showDialog(
+      barrierDismissible: false,
+      barrierColor: const Color.fromARGB(150, 0, 0, 0),
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: const Color.fromARGB(255, 28, 28, 28),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.white, size: 17.sp),
+                    onPressed: () {
+                      if (initialPage) {
+                        Navigator.pop(context);
+                      } else {
+                        attemptCount = 0;
+                        pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut);
+                        initialPage = true;
+                      }
+                    },
+                  ),
+                  SizedBox(width: 20.w),
+                  Text(
+                    'Επιβεβαίωση Κινητού',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                  ),
+                ],
+              ),
+              content: SizedBox(
+                width: ScreenUtil().screenWidth - 30.w,
+                height: 100.h,
+                child: PageView(
+                  controller: pageController,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: [
+                    // First page for phone number input
+                    Column(
+                      children: [
+                        TextField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          keyboardType: TextInputType.number,
+                          maxLength: 10,
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 15.sp),
+                          decoration: InputDecoration(
+                            hintText: ' Συμπλήρωσε το κινητό σου',
+                            hintStyle:
+                                TextStyle(color: Colors.grey, fontSize: 12.sp),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red),
+                            ),
                           ),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(color: Colors.red),
-                          ),
+                          onChanged: (value) {
+                            phoneInput = value;
+                          },
                         ),
-                        onChanged: (value) {
-                          codeInput = value;
-                        },
-                      ),
-                      if (showError)
-                        Padding(
-                          padding: EdgeInsets.only(top: 10.h),
-                          child: Text(
-                            'Λάθος κωδικός',
+                        if (phoneError)
+                          Text(
+                            "Μη έγκυρος αριθμός τηλεφώνου",
                             style: TextStyle(
-                                color: const Color.fromARGB(255, 214, 20, 6),
-                                fontSize: 12.sp),
+                                color: const Color.fromARGB(255, 211, 32, 20),
+                                fontSize: 14.sp),
                           ),
+                      ],
+                    ),
+                    // Second page for OTP input
+                    Column(
+                      children: [
+                        TextField(
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly
+                          ],
+                          keyboardType: TextInputType.number,
+                          maxLength: 6,
+                          style:
+                              TextStyle(color: Colors.white, fontSize: 15.sp),
+                          decoration: InputDecoration(
+                            hintText: ' Εισάγετε τον 6-ψήφιο κωδικό',
+                            hintStyle:
+                                TextStyle(color: Colors.grey, fontSize: 12.sp),
+                            enabledBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                            ),
+                            focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.red),
+                            ),
+                          ),
+                          onChanged: (value) {
+                            codeInput = value;
+                          },
                         ),
+                        if (showError)
+                          Padding(
+                            padding: EdgeInsets.only(top: 10.h),
+                            child: Text(
+                              'Λάθος κωδικός',
+                              style: TextStyle(
+                                  color: const Color.fromARGB(255, 211, 32, 20),
+                                  fontSize: 14.sp),
+                            ),
+                          )
+                        else
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              'Κινητό: $phoneInput',
+                              style: TextStyle(
+                                  color: const Color.fromARGB(255, 80, 80, 80),
+                                  fontSize: 14.sp),
+                            ),
+                          )
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                if (initialPage)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SizedBox(
+                        width: 140.w,
+                        child: TextButton(
+                            onPressed: () async {
+                              isCodeValid = true;
+                              Navigator.of(context).pop(true);
+                            },
+                            child: Text(
+                              "Ολοκλήρωση αργότερα",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.grey,
+                                decorationThickness: 1,
+                                color: Colors.grey,
+                                fontSize: 12.sp,
+                              ),
+                            )),
+                      ),
+                      ElevatedButton(
+                          onPressed: () async {
+                            // Phone validation
+                            tempPhoneNumber = normalizePhoneNumber(phoneInput);
+                            phoneError = tempPhoneNumber.length != 10 ||
+                                !tempPhoneNumber.startsWith('69');
+
+                            if (phoneError == false) {
+                              if (!canSend) {
+                                if (awaitMinutes == 1) {
+                                  showFloatingSnackBar(
+                                      'Ξαναδοκίμασε σε 1 λεπτό',
+                                      const Duration(milliseconds: 4000),
+                                      context);
+                                } else {
+                                  showFloatingSnackBar(
+                                      'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+                                      const Duration(milliseconds: 4000),
+                                      context);
+                                }
+                              } else {
+                                otpCode = generateRandom6DigitNumber();
+                                OtpService()
+                                    .sendOtp(tempPhoneNumber, otpCode, context);
+                                startTimer(); // Start the timer to handle resending OTP
+                                setState(() {
+                                  initialPage = false;
+                                });
+                                await pageController.nextPage(
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            } else {
+                              setState(() {
+                                phoneError = true;
+                              });
+                              if (mounted) {
+                                if (phoneError == true) {
+                                  await Future.delayed(
+                                      const Duration(seconds: 2));
+                                  if (phoneError == true) {
+                                    setState(() {
+                                      phoneError = false;
+                                    });
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          style: ButtonStyle(
+                            backgroundColor:
+                                WidgetStateProperty.all<Color>(Colors.black),
+                          ),
+                          child: Text(
+                            "Συνέχεια",
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 13.sp),
+                          )),
                     ],
                   ),
-                ),
-                actions: [
+                if (!initialPage)
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       TextButton(
                         onPressed: () async {
@@ -349,13 +454,12 @@ class _SignUpPageState extends State<SignUpPage> {
                               setState(() {
                                 showError = false;
                               });
-                              isCodeValid = true;
+                              phoneNumber = tempPhoneNumber;
                               if (context.mounted) {
                                 Navigator.of(context).pop(true);
-                                return;
                               }
                             } else {
-                              if (attemptCount >= 3) {
+                              if (attemptCount >= 2) {
                                 _showSnackBar(
                                     'Ο αριθμός κινητού δεν επιβεβαιώθηκε');
                                 setState(() {
@@ -364,7 +468,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                 isCodeValid = false;
                                 if (context.mounted) {
                                   Navigator.of(context).pop(true);
-                                  return;
                                 }
                               }
                               setState(() {
@@ -372,10 +475,10 @@ class _SignUpPageState extends State<SignUpPage> {
                               });
                               attemptCount++;
                               if (mounted) {
-                                if (showError = true) {
+                                if (showError == true) {
                                   await Future.delayed(
                                       const Duration(milliseconds: 1350));
-                                  if (showError = true) {
+                                  if (showError == true) {
                                     setState(() {
                                       showError = false;
                                     });
@@ -396,7 +499,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       TextButton(
                         onPressed: () async {
                           if (canSend) {
-                            sendOtp(phoneNumber, '$otpCode');
+                            OtpService()
+                                .sendOtp(tempPhoneNumber, otpCode, context);
                             startTimer();
                           } else {
                             if (awaitMinutes == 1) {
@@ -418,13 +522,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                     ],
                   ),
-                ],
-              );
-            },
-          );
-        },
-      );
-    }
+              ],
+            );
+          },
+        );
+      },
+    );
 
     return isCodeValid;
   }
@@ -447,23 +550,10 @@ class _SignUpPageState extends State<SignUpPage> {
     showFloatingSnackBar(message, const Duration(milliseconds: 4000), context);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    timer?.cancel();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-  }
-
-  int generateRandom6DigitNumber() {
-    Random random = Random();
-    int min = 100000;
-    int max = 999999;
-    return min + random.nextInt(max - min + 1);
+  void _toggleCheckBox() {
+    setState(() {
+      _isCheckBoxPressed = !_isCheckBoxPressed;
+    });
   }
 
   void _togglePasswordVisibility() {
@@ -530,15 +620,13 @@ class _SignUpPageState extends State<SignUpPage> {
                 ],
               ),
               const LoginLogo(
-                text: 'Καλώς όρισες στην',
+                text: 'Καλωσόρισες στην',
                 color: Color(0xFF9C0C04),
               ),
               SizedBox(height: 40.h),
               _SignUpForm(
-                phoneValidating: _phoneValidating,
                 firstNameController: _firstNameController,
                 lastNameController: _lastNameController,
-                phoneController: _phoneController,
                 emailController: _emailController,
                 passwordController: _passwordController,
                 confirmPasswordController: _confirmPasswordController,
@@ -552,7 +640,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 onRegister: _register,
                 firstnameError: firstnameError,
                 lastnameError: lastnameError,
-                phoneError: phoneError,
                 emailError: emailError,
                 passwordError: passwordError,
                 confirmationPasswordError: confirmationPasswordError,
@@ -565,18 +652,27 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+    timer?.cancel();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+  }
 }
 
 class _SignUpForm extends StatelessWidget {
   const _SignUpForm({
     required this.firstNameController,
     required this.lastNameController,
-    required this.phoneController,
     required this.emailController,
     required this.passwordController,
     required this.confirmPasswordController,
     required this.isRegistering,
-    required this.phoneValidating,
     required this.obscureText,
     required this.obscureText2,
     required this.togglePasswordVisibility,
@@ -586,7 +682,6 @@ class _SignUpForm extends StatelessWidget {
     required this.onRegister,
     required this.firstnameError,
     required this.lastnameError,
-    required this.phoneError,
     required this.emailError,
     required this.passwordError,
     required this.confirmationPasswordError,
@@ -596,14 +691,12 @@ class _SignUpForm extends StatelessWidget {
 
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
-  final TextEditingController phoneController;
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
   final double screenHeight;
   final double screenWidth;
   final bool isRegistering;
-  final bool phoneValidating;
   final bool obscureText;
   final bool obscureText2;
   final VoidCallback togglePasswordVisibility;
@@ -611,7 +704,6 @@ class _SignUpForm extends StatelessWidget {
   final VoidCallback onRegister;
   final bool firstnameError;
   final bool lastnameError;
-  final bool phoneError;
   final bool emailError;
   final bool passwordError;
   final bool confirmationPasswordError;
@@ -646,13 +738,13 @@ class _SignUpForm extends StatelessWidget {
                 toggleVisibility: togglePasswordVisibility,
                 showIcon: false,
                 controller: lastNameController,
-                hintText: 'Επίθετο',
+                hintText: 'Επώνυμο',
                 isRegistering: isRegistering,
                 screenWidth: screenWidth,
                 screenHeight: screenHeight,
                 inputFormatters: [NoEmojisTextInputFormatter()],
               ),
-
+              /*
               // Phone field
               _TextFieldWidget(
                 obscureText: false,
@@ -669,7 +761,7 @@ class _SignUpForm extends StatelessWidget {
                   LengthLimitingTextInputFormatter(10),
                 ],
               ),
-
+              */
               // Email field
               _TextFieldWidget(
                 obscureText: false,
@@ -716,21 +808,18 @@ class _SignUpForm extends StatelessWidget {
               ErrorTexts(
                 firstnameError: firstnameError,
                 lastnameError: lastnameError,
-                phoneError: phoneError,
                 emailError: emailError,
                 passwordError: passwordError,
                 confirmationPasswordError: confirmationPasswordError,
               ),
               SizedBox(height: 20.h),
               _SignUpButton(
-                phoneValidating: phoneValidating,
                 isRegistering: isRegistering,
                 onRegister: onRegister,
                 screenHeight: screenHeight,
                 screenWidth: screenWidth,
                 firstnameError: firstnameError,
                 lastnameError: lastnameError,
-                phoneError: phoneError,
                 emailError: emailError,
                 passwordError: passwordError,
                 confirmationPasswordError: confirmationPasswordError,
@@ -862,20 +951,17 @@ class _TextFieldWidget extends StatelessWidget {
 class _SignUpButton extends StatelessWidget {
   const _SignUpButton({
     required this.isRegistering,
-    required this.phoneValidating,
     required this.onRegister,
     required this.screenHeight,
     required this.screenWidth,
     required this.firstnameError,
     required this.lastnameError,
-    required this.phoneError,
     required this.emailError,
     required this.passwordError,
     required this.confirmationPasswordError,
   });
 
   final bool isRegistering;
-  final bool phoneValidating;
   final double screenHeight;
   final double screenWidth;
   final VoidCallback onRegister;
@@ -883,7 +969,6 @@ class _SignUpButton extends StatelessWidget {
   // Error states
   final bool firstnameError;
   final bool lastnameError;
-  final bool phoneError;
   final bool emailError;
   final bool passwordError;
   final bool confirmationPasswordError;
@@ -892,7 +977,7 @@ class _SignUpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        isRegistering && phoneValidating
+        isRegistering
             ? const CircularProgressIndicator(
                 valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9C0C04)),
               )
@@ -925,7 +1010,6 @@ class ErrorTexts extends StatelessWidget {
     super.key,
     required this.firstnameError,
     required this.lastnameError,
-    required this.phoneError,
     required this.emailError,
     required this.passwordError,
     required this.confirmationPasswordError,
@@ -934,7 +1018,6 @@ class ErrorTexts extends StatelessWidget {
   // Error states
   final bool firstnameError;
   final bool lastnameError;
-  final bool phoneError;
   final bool emailError;
   final bool passwordError;
   final bool confirmationPasswordError;
@@ -949,10 +1032,6 @@ class ErrorTexts extends StatelessWidget {
           if (firstnameError || lastnameError)
             const _ErrorText(
               text: '- Μόνο γράμματα στο ονοματεπώνυμο',
-            ),
-          if (phoneError)
-            const _ErrorText(
-              text: '- Δεν βρέθηκε το τηλέφωνο',
             ),
           if (emailError)
             const _ErrorText(

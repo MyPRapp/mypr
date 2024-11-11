@@ -1,34 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <supports-screens
-        android:smallScreens="true"
-        android:normalScreens="true"
-        android:largeScreens="false"
-        android:xlargeScreens="false"
-        android:resizeable="false"/>
-    <compatible-screens>
-        <!-- For phones with medium density -->
-        <screen
-            android:screenSize="normal"
-            android:screenDensity="mdpi"/>
-        <!-- For phones with high density -->
-        <screen
-            android:screenSize="normal"
-            android:screenDensity="hdpi"/>
-        <!-- For phones with extra high density -->
-        <screen
-            android:screenSize="normal"
-            android:screenDensity="xhdpi"/>
-        <!-- For phones with extra extra high density -->
-        <screen
-            android:screenSize="normal"
-            android:screenDensity="xxhdpi"/>
-        <!-- For phones with extra extra extra high density -->
-        <screen
-            android:screenSize="normal"
-            android:screenDensity="xxxhdpi"/>
-    </compatible-screens>
-    <uses-permission
-        android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Restrict to devices with a touchscreen (excludes most desktops and some tablets) -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
+
+    <!-- Restrict to devices with telephony capabilities (excludes tablets and Chrome OS devices) -->
+    <uses-feature android:name="android.hardware.telephony" android:required="true" />
     <application
         android:label="MyPR"
         android:icon="@mipmap/ic_launcher">
@@ -41,7 +18,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
-            android:screenOrientation="sensorPortrait">
+            android:screenOrientation="portrait">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

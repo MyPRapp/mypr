@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
+import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
@@ -164,6 +165,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
+    context.read<GlobalStateProvider>().refreshProfilePage = false;
     final clubProvider = context.read<ClubProvider>();
     try {
       // Fetch updated catalogues
@@ -577,10 +579,65 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Handles the form submission process, including validation and API calls.
   Future<void> _handleSubmit(bool hasVerifiedEmail) async {
     if (!hasVerifiedEmail) {
-      showFloatingSnackBar('Επιβεβαίωσε το email σου πρώτα',
+      showFloatingSnackBar('Παρακαλώ επιβεβαίωσε πρώτα το email σου',
           const Duration(milliseconds: 4000), context);
       return;
     }
+
+    String phone = context.read<UserProvider>().userDetails.phone;
+
+    if (phone.length != 10 || !phone.startsWith('69')) {
+      if (!otpService.canSend) {
+        if (otpService.awaitMinutes == 1) {
+          floatingSnackBar(
+              message: 'Ξαναδοκίμασε σε 1 λεπτό',
+              duration: Duration(seconds: 4),
+              context: context);
+        } else {
+          floatingSnackBar(
+              message: 'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+              duration: Duration(seconds: 4),
+              context: context);
+        }
+      } else {
+        var isPhoneValid = await showFillPhoneDialog(context);
+        if (isPhoneValid.isSuccess) {
+          var phone = isPhoneValid.phone;
+          if (phone.length == 10 && phone.startsWith('69')) {
+            int result = await AuthService().changePhoneOnServerOnly(phone);
+            if (result == 0) {
+              if (mounted) {
+                context.read<UserProvider>().fetchUserDetailsFromServer();
+                context.read<GlobalStateProvider>().refreshProfilePage = true;
+
+                floatingSnackBar(
+                    message: 'Επιτυχής προσθήκη κινητού',
+                    duration: Duration(seconds: 4),
+                    context: context);
+              }
+            } else {
+              if (result == 2) {
+                if (mounted) {
+                  floatingSnackBar(
+                      message: 'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
+                      duration: Duration(seconds: 4),
+                      context: context);
+                }
+              }
+            }
+          } else {
+            if (mounted) {
+              floatingSnackBar(
+                  message: 'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
+                  duration: Duration(seconds: 4),
+                  context: context);
+            }
+          }
+        }
+      }
+      return;
+    }
+
     String rawName = _nameController.text;
     String formattedName = formatName(rawName);
     if (formattedName.isNotEmpty) {
@@ -808,6 +865,7 @@ class _ReservationPageState extends State<ReservationPage> {
         final bool? result = await reservationReviewDialog();
         if (mounted) {
           context.read<UserProvider>().fetchUserDetailsFromServer();
+          context.read<GlobalStateProvider>().refreshProfilePage = true;
         }
         // If the user confirmed (result == true), perform actions
         if (result == true) {
