@@ -162,16 +162,16 @@ void printReservationInfo(List<dynamic> reservationInfo) {
 }
 
 void successPrint(String text) {
-  print('✅$text');
+  // print('✅$text');
 }
 
 //TODO Comment prints
 void warningPrint(String text) {
-  print('🟡$text');
+  // print('🟡$text');
 }
 
 void errorPrint(String text) {
-  print('❌$text');
+  // print('❌$text');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
