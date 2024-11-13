@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
@@ -72,7 +73,11 @@ class _HomePageState extends State<HomePage> {
 
         if (loggedIn && mounted) {
           globalStateProvider.isAuthenticated = true;
-          fetchVerifiedEmailGlobalVariable(context);
+
+          if (context.read<GlobalStateProvider>().justRegistered) {
+            context.read<GlobalStateProvider>().justRegistered = false;
+            emailLoop(context);
+          }
 
           await userProvider.fetchUserDetailsFromServer();
           successPrint('------------USER IS AUTHENTICATED------------');
@@ -254,7 +259,64 @@ class _HomePageState extends State<HomePage> {
                 screenWidth: screenWidth,
               );
             }
-            return const SizedBox.shrink();
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: 30.h,
+              ),
+              child: Container(
+                height: 140.h,
+                decoration: BoxDecoration(
+                    color: const Color.fromARGB(57, 61, 61, 61),
+                    borderRadius: BorderRadius.circular(10.r)),
+                child: Row(
+                  children: [
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(10.r),
+                              topLeft: Radius.circular(10.r)),
+                          child: SizedBox(
+                              height: 140.h,
+                              width: screenWidth * 0.3,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: appRedColor,
+                                  backgroundColor: Colors.black,
+                                  strokeWidth: 2,
+                                ),
+                              )),
+                        ),
+                      ],
+                    ),
+                    VerticalDivider(
+                        color: const Color.fromARGB(141, 34, 34, 34),
+                        thickness: 2.sp),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.all(5.sp),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 3.h),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           },
         );
       },

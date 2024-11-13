@@ -13,6 +13,7 @@ class GlobalStateProvider with ChangeNotifier {
   bool _refreshProfilePage = false;
   bool _refreshHomePage = false;
   bool _refreshReservationPage = false;
+  bool _justRegistered = false;
 
   GlobalStateProvider._internal() {
     loadFromPreferences(); // Load initial values from SharedPreferences
@@ -39,6 +40,8 @@ class GlobalStateProvider with ChangeNotifier {
   bool get refreshHomePage => _refreshHomePage;
 
   bool get refreshReservationPage => _refreshReservationPage;
+
+  bool get justRegistered => _justRegistered;
 
   // Setters
   set validatedIp(String value) {
@@ -74,6 +77,11 @@ class GlobalStateProvider with ChangeNotifier {
 
   set refreshReservationPage(bool value) {
     _refreshReservationPage = value;
+    notifyListeners();
+  }
+
+  set justRegistered(bool value) {
+    _justRegistered = value;
     notifyListeners();
   }
 

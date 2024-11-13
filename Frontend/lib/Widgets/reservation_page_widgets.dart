@@ -221,7 +221,81 @@ class MaxLinesAndLengthFormatter extends TextInputFormatter {
   }
 }
 
-class PackagesInfo extends StatelessWidget {
+// class PackagesInfo extends StatelessWidget {
+//   const PackagesInfo({
+//     super.key,
+//     required this.package,
+//     required this.maxPersons,
+//     required this.minPrice,
+//   });
+
+//   final String package;
+//   final int maxPersons;
+//   final int minPrice;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: EdgeInsets.only(bottom: 15.h),
+//       child: Card(
+//         color: const Color.fromARGB(179, 85, 85, 85),
+//         elevation: 10,
+//         child: Padding(
+//           padding: EdgeInsets.all(10.sp),
+//           child: Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               _buildPackageDetails(),
+//               _buildPriceDetails(),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// Widget _buildPackageDetails() {
+//   return Column(
+//     crossAxisAlignment: CrossAxisAlignment.start,
+//     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//     children: [
+//       Text(
+//         widget.package,
+//         style: TextStyle(
+//           fontSize: 18.sp,
+//           fontWeight: FontWeight.w700,
+//           color: Colors.black,
+//         ),
+//       ),
+//       SizedBox(height: 5.sp),
+//       Text(
+//         '${widget.maxPersons} άτομα',
+//         style: TextStyle(
+//           fontSize: 16.sp,
+//           fontWeight: FontWeight.w500,
+//           color: Colors.black,
+//         ),
+//       ),
+//     ],
+//   );
+// }
+
+// Widget _buildPriceDetails() {
+//   return Column(
+//     crossAxisAlignment: CrossAxisAlignment.end,
+//     children: [
+//       Text(
+//         '${widget.minPrice} €',
+//         style: TextStyle(
+//           fontSize: 18.sp,
+//           fontWeight: FontWeight.w700,
+//           color: Colors.black,
+//         ),
+//       ),
+//     ],
+//   );
+// }
+
+class PackagesInfo extends StatefulWidget {
   const PackagesInfo({
     super.key,
     required this.package,
@@ -234,65 +308,93 @@ class PackagesInfo extends StatelessWidget {
   final int minPrice;
 
   @override
+  PackagesInfoState createState() => PackagesInfoState();
+}
+
+class PackagesInfoState extends State<PackagesInfo> {
+  bool isExpanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 15.h),
-      child: Card(
-        color: const Color.fromARGB(179, 85, 85, 85),
-        elevation: 10,
-        child: Padding(
-          padding: EdgeInsets.all(10.sp),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildPackageDetails(),
-              _buildPriceDetails(),
-            ],
-          ),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          isExpanded = !isExpanded;
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 600),
+        height: isExpanded ? 100.h : 60.h,
+        width: double.infinity,
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.only(top: 10.sp, left: 10.sp, right: 10.sp),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(179, 85, 85, 85), // Dark grey background
+          borderRadius: BorderRadius.circular(10.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10.sp,
+              spreadRadius: 2.sp,
+            ),
+          ],
+        ),
+        child: Column(
+          // mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.package,
+                  style: TextStyle(
+                    color: const Color.fromARGB(255, 0, 0, 0),
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Icon(
+                  isExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                  size: 25.sp,
+                  color: const Color.fromARGB(255, 0, 0, 0),
+                )
+              ],
+            ),
+            SizedBox(height: 5.h),
+            // Delay rendering of expanded content
+            if (isExpanded)
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        '${widget.maxPersons} άτομα', // Display max persons
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w400),
+                      ),
+                    ),
+                    Flexible(
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 5.sp),
+                        child: Text(
+                          '${widget.minPrice} €', // Display price
+                          style: TextStyle(
+                              color: const Color.fromARGB(179, 255, 255, 255),
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget _buildPackageDetails() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          package,
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
-        ),
-        SizedBox(height: 5.sp),
-        Text(
-          '$maxPersons άτομα',
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceDetails() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Text(
-          '$minPrice €',
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: Colors.black,
-          ),
-        ),
-      ],
     );
   }
 }

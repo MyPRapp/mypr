@@ -359,7 +359,9 @@ class GradientProgressBarState extends State<GradientProgressBar>
         FadeText(
           (_showLabel || widget.isVisible) && _animation.isCompleted,
           widget.points >= 400
-              ? "Έχεις ένα κουπόνι για 20% έκπτωση"
+              ? widget.points < 800
+                  ? "Έχεις ένα κουπόνι για 20% έκπτωση"
+                  : "Έχεις ${widget.points ~/ 400} κουπόνια για 20% έκπτωση"
               : 'Σε ${400 - widget.points} πόντους κερδίζεις έκπτωση',
         ),
       ],

@@ -1,11 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET"/>
 
-    <!-- Restrict to devices with a touchscreen (excludes most desktops and some tablets) -->
-    <uses-feature android:name="android.hardware.touchscreen" android:required="true" />
+     <supports-screens
+            android:smallScreens="true"
+            android:normalScreens="true"
+            android:largeScreens="true"
+            android:xlargeScreens="false"/>
 
-    <!-- Restrict to devices with telephony capabilities (excludes tablets and Chrome OS devices) -->
-    <uses-feature android:name="android.hardware.telephony" android:required="true" />
     <application
         android:label="MyPR"
         android:icon="@mipmap/ic_launcher">

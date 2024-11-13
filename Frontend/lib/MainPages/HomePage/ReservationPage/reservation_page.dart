@@ -2,10 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
-import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/services/booking_service.dart';
 import 'package:provider/provider.dart';
@@ -165,7 +163,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
-    context.read<GlobalStateProvider>().refreshProfilePage = false;
+    context.read<GlobalStateProvider>().refreshReservationPage = false;
     final clubProvider = context.read<ClubProvider>();
     try {
       // Fetch updated catalogues
@@ -184,57 +182,6 @@ class _ReservationPageState extends State<ReservationPage> {
     } catch (error) {
       // Log error without additional snack bars
       errorPrint("Failed to refresh catalogues: $error");
-    }
-  }
-
-  int awaitMinutes = 1;
-  bool canSend = true;
-  Timer? timer; // Declare a Timer object
-
-  void startTimer() {
-    // Check if the timer is already active
-    if (timer != null && timer!.isActive) {
-      // print("A timer is already running. Cannot start a new one.");
-      return; // Exit the function, don't start a new timer
-    }
-    // If no timer is running, proceed with starting a new one
-    canSend = false;
-
-    timer = Timer(Duration(minutes: awaitMinutes), () {
-      if (mounted) {
-        awaitMinutes++;
-        canSend = true;
-      }
-    });
-  }
-
-  Future<void> sendVerificationEmail() async {
-    if (canSend) {
-      startTimer();
-      showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
-          const Duration(milliseconds: 4000), context);
-      var response = await http.post(
-        Uri.parse('$apiUrl/email-resend/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${await getAccessToken()}',
-        },
-      ).timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        successPrint(response.body);
-      } else {
-        errorPrint('${response.statusCode}');
-        errorPrint(response.body);
-      }
-    } else {
-      if (awaitMinutes == 1) {
-        showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
-            const Duration(milliseconds: 4000), context);
-      } else {
-        showFloatingSnackBar('Ξαναδοκίμασε σε $awaitMinutes λεπτά',
-            const Duration(milliseconds: 4000), context);
-      }
     }
   }
 
@@ -302,7 +249,6 @@ class _ReservationPageState extends State<ReservationPage> {
                 ),
                 if (!hasVerifiedEmail && isAuthenticated)
                   EmailConfirmationNotification(
-                    onResendEmail: sendVerificationEmail,
                     text:
                         'Για να προχωρήσεις σε κράτηση παρακαλώ επιβεβαίωσε το email σου',
                   )
@@ -462,16 +408,19 @@ class _ReservationPageState extends State<ReservationPage> {
           maxPersons: localCatalogues[0].maxPersons,
           minPrice: safeParse(localCatalogues[0].price).toInt(),
         ),
+        SizedBox(height: 15.h),
         PackagesInfo(
           package: 'Special',
           maxPersons: localCatalogues[1].maxPersons,
           minPrice: safeParse(localCatalogues[1].price).toInt(),
         ),
+        SizedBox(height: 15.h),
         PackagesInfo(
           package: 'Premium',
           maxPersons: localCatalogues[2].maxPersons,
           minPrice: safeParse(localCatalogues[2].price).toInt(),
         ),
+        SizedBox(height: 15.h),
       ],
     );
   }
@@ -527,6 +476,16 @@ class _ReservationPageState extends State<ReservationPage> {
                   'Χρήση εκπτωτικού κουπονιού 20%',
                   style: TextStyle(color: Colors.white, fontSize: 15.sp),
                 ),
+                IconButton(
+                    onPressed: () {
+                      showFloatingSnackBar(
+                          "Η έκπτωση εφαρμόζεται στην πρώτη φιάλη της κράτησης",
+                          Duration(seconds: 4),
+                          context);
+                    },
+                    icon: const Icon(Icons.info_outline),
+                    color: const Color.fromARGB(255, 88, 88, 88),
+                    iconSize: 18.sp),
               ],
             ),
           )
@@ -587,17 +546,15 @@ class _ReservationPageState extends State<ReservationPage> {
     String phone = context.read<UserProvider>().userDetails.phone;
 
     if (phone.length != 10 || !phone.startsWith('69')) {
-      if (!otpService.canSend) {
-        if (otpService.awaitMinutes == 1) {
-          floatingSnackBar(
-              message: 'Ξαναδοκίμασε σε 1 λεπτό',
-              duration: Duration(seconds: 4),
-              context: context);
+      if (!phoneOtpService.canSend) {
+        if (phoneOtpService.awaitMinutes == 1) {
+          showFloatingSnackBar(
+              'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
         } else {
-          floatingSnackBar(
-              message: 'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
-              duration: Duration(seconds: 4),
-              context: context);
+          showFloatingSnackBar(
+              'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+              Duration(seconds: 4),
+              context);
         }
       } else {
         var isPhoneValid = await showFillPhoneDialog(context);
@@ -610,27 +567,25 @@ class _ReservationPageState extends State<ReservationPage> {
                 context.read<UserProvider>().fetchUserDetailsFromServer();
                 context.read<GlobalStateProvider>().refreshProfilePage = true;
 
-                floatingSnackBar(
-                    message: 'Επιτυχής προσθήκη κινητού',
-                    duration: Duration(seconds: 4),
-                    context: context);
+                showFloatingSnackBar(
+                    'Επιτυχής προσθήκη κινητού', Duration(seconds: 4), context);
               }
             } else {
               if (result == 2) {
                 if (mounted) {
-                  floatingSnackBar(
-                      message: 'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
-                      duration: Duration(seconds: 4),
-                      context: context);
+                  showFloatingSnackBar(
+                      'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
+                      Duration(seconds: 4),
+                      context);
                 }
               }
             }
           } else {
             if (mounted) {
-              floatingSnackBar(
-                  message: 'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
-                  duration: Duration(seconds: 4),
-                  context: context);
+              showFloatingSnackBar(
+                  'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
+                  Duration(seconds: 4),
+                  context);
             }
           }
         }

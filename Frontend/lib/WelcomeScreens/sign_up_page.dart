@@ -115,7 +115,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
     String username = "$firstName$lastName";
     int points = 400;
-    phoneNumber = ' ';
+
     int registerSuccess = await _authService.register(
       username,
       password,
@@ -170,8 +170,13 @@ class _SignUpPageState extends State<SignUpPage> {
       if (success) {
         if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
+          context.read<GlobalStateProvider>().justRegistered = true;
           FocusManager.instance.primaryFocus?.unfocus();
-          context.router.replaceAll([const BottomNavBarRoute()]);
+          await Future.delayed(Duration(seconds: 1));
+
+          if (mounted) {
+            context.router.replaceAll([const BottomNavBarRoute()]);
+          }
         }
         successPrint('------------LOGGED IN------------');
       } else {
@@ -188,27 +193,6 @@ class _SignUpPageState extends State<SignUpPage> {
     }
   }
 
-  int awaitMinutes = 1;
-  bool canSend = true;
-  Timer? timer; // Declare a Timer object
-
-  void startTimer() {
-    // Check if the timer is already active
-    if (timer != null && timer!.isActive) {
-      // print("A timer is already running. Cannot start a new one.");
-      return; // Exit the function, don't start a new timer
-    }
-    // If no timer is running, proceed with starting a new one
-    canSend = false;
-
-    timer = Timer(Duration(minutes: awaitMinutes), () {
-      if (mounted) {
-        awaitMinutes++;
-        canSend = true;
-      }
-    });
-  }
-
   Future<bool> _showFillPhoneDialog() async {
     bool phoneError = false;
     String phoneInput = '';
@@ -218,13 +202,13 @@ class _SignUpPageState extends State<SignUpPage> {
     String codeInput = '';
     bool initialPage = true;
     int otpCode = generateRandom6DigitNumber();
-    String tempPhoneNumber = phoneNumber;
+    String tempPhoneNumber = '';
 
-    if (!canSend && initialPage == false) {
-      if (awaitMinutes == 1) {
+    if (!phoneOtpService.canSend && initialPage == false) {
+      if (phoneOtpService.awaitMinutes == 1) {
         _showSnackBar('Ξαναδοκίμασε σε 1 λεπτό');
       } else {
-        _showSnackBar('Ξαναδοκίμασε σε $awaitMinutes λεπτά');
+        _showSnackBar('Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά');
       }
       return false;
     }
@@ -390,23 +374,24 @@ class _SignUpPageState extends State<SignUpPage> {
                                 !tempPhoneNumber.startsWith('69');
 
                             if (phoneError == false) {
-                              if (!canSend) {
-                                if (awaitMinutes == 1) {
+                              if (!phoneOtpService.canSend) {
+                                if (phoneOtpService.awaitMinutes == 1) {
                                   showFloatingSnackBar(
                                       'Ξαναδοκίμασε σε 1 λεπτό',
                                       const Duration(milliseconds: 4000),
                                       context);
                                 } else {
                                   showFloatingSnackBar(
-                                      'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+                                      'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
                                       const Duration(milliseconds: 4000),
                                       context);
                                 }
                               } else {
                                 otpCode = generateRandom6DigitNumber();
-                                OtpService()
-                                    .sendOtp(tempPhoneNumber, otpCode, context);
-                                startTimer(); // Start the timer to handle resending OTP
+                                phoneOtpService.sendOtp(
+                                    tempPhoneNumber, otpCode, context);
+                                phoneOtpService
+                                    .startTimer(); // Start the timer to handle resending OTP
                                 setState(() {
                                   initialPage = false;
                                 });
@@ -498,17 +483,17 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       TextButton(
                         onPressed: () async {
-                          if (canSend) {
-                            OtpService()
-                                .sendOtp(tempPhoneNumber, otpCode, context);
-                            startTimer();
+                          if (phoneOtpService.canSend) {
+                            phoneOtpService.sendOtp(
+                                tempPhoneNumber, otpCode, context);
+                            phoneOtpService.startTimer();
                           } else {
-                            if (awaitMinutes == 1) {
+                            if (phoneOtpService.awaitMinutes == 1) {
                               showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
                                   const Duration(milliseconds: 4000), context);
                             } else {
                               showFloatingSnackBar(
-                                  'Ξαναδοκίμασε σε $awaitMinutes λεπτά',
+                                  'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
                                   const Duration(milliseconds: 4000),
                                   context);
                             }
@@ -547,7 +532,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   void _showSnackBar(String message) {
     FocusManager.instance.primaryFocus?.unfocus();
-    showFloatingSnackBar(message, const Duration(milliseconds: 4000), context);
+    showFloatingSnackBar(message, const Duration(seconds: 3), context);
   }
 
   void _toggleCheckBox() {
@@ -656,7 +641,6 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   void dispose() {
     super.dispose();
-    timer?.cancel();
     _firstNameController.dispose();
     _lastNameController.dispose();
     _emailController.dispose();

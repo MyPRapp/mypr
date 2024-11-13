@@ -4,13 +4,13 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../Globals/constants.dart';
 import '../../../../Globals/global_components.dart';
 import '../../../../Globals/structs.dart';
 import '../../../../Providers/club_provider.dart';
-import '../../../../routes/app_router.gr.dart';
 
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
@@ -375,6 +375,60 @@ class BookingDetailsPage extends StatelessWidget {
           ),
         ),
         SizedBox(height: 20.h),
+        // ElevatedButton(
+        //   style: ElevatedButton.styleFrom(
+        //     padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(10.r),
+        //     ),
+        //     foregroundColor: Colors.white,
+        //     backgroundColor: const Color(0xFF9C0C04),
+        //   ),
+        //   onPressed: () async {
+        //     try {
+        //       var response = await http
+        //           .post(
+        //             Uri.parse('$apiUrl/bookings/delete/${booking.bookingID}/'),
+        //             headers: {
+        //               'Content-Type': 'application/json',
+        //               'Authorization': 'Bearer ${await getAccessToken()}',
+        //             },
+        //             body: jsonEncode({
+        //               'reservation_name': booking.bookingName,
+        //               'club_name': context.mounted
+        //                   ? context
+        //                       .read<ClubProvider>()
+        //                       .getClubByID(booking.clubID)
+        //                       .clubName
+        //                   : '',
+        //               'booking_type': '3121',
+        //               'booked_at': ' ',
+        //               'number_of_people': booking.persons,
+        //               'comments': booking.comments,
+        //             }),
+        //           )
+        //           .timeout(const Duration(seconds: 10));
+        //       if (response.statusCode == 200 && context.mounted) {
+        //         showFloatingSnackBar(
+        //             'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
+        //       } else {
+        //         print(response.body);
+        //         if (context.mounted) {
+        //           showFloatingSnackBar(
+        //               'Σφάλμα κατά την ακύρωση της κράτησης. Προσπάθησε ξανά σε λίγο',
+        //               Duration(seconds: 3),
+        //               context);
+        //         }
+        //       }
+        //     } catch (e) {
+        //       throw Exception(e);
+        //     }
+        //   },
+        //   child: Text(
+        //     'Ακύρωση κράτησης',
+        //     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+        //   ),
+        // )
         ElevatedButton(
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),

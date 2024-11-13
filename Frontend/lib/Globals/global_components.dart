@@ -23,7 +23,8 @@ import '../Providers/global_state_provider.dart';
 import '../routes/app_router.gr.dart';
 
 String apiUrl = 'http://${GlobalStateProvider().validatedIp}/api';
-OtpService otpService = OtpService();
+OtpService emailOtpService = OtpService();
+OtpService phoneOtpService = OtpService();
 
 class NoEmojisTextInputFormatter extends TextInputFormatter {
   // RegExp to allow Greek and English letters, numbers, and specific symbols
@@ -222,12 +223,45 @@ AppBar buildAppBar(BuildContext context, String title) {
   );
 }
 
+Future<void> sendVerificationEmail(BuildContext context) async {
+  if (emailOtpService.canSend) {
+    emailOtpService.startTimer();
+    showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
+        const Duration(milliseconds: 4000), context);
+    var response = await http.post(
+      Uri.parse('$apiUrl/email-resend/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${await getAccessToken()}',
+      },
+    ).timeout(const Duration(seconds: 10));
+
+    if (response.statusCode == 200) {
+      successPrint(response.body);
+      if (context.mounted) {
+        emailLoop(context);
+      }
+    } else {
+      errorPrint('${response.statusCode}');
+      errorPrint(response.body);
+    }
+  } else {
+    if (emailOtpService.awaitMinutes == 1) {
+      showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+          const Duration(milliseconds: 4000), context);
+    } else {
+      showFloatingSnackBar(
+          'Ξαναδοκίμασε σε ${emailOtpService.awaitMinutes} λεπτά',
+          const Duration(milliseconds: 4000),
+          context);
+    }
+  }
+}
+
 class EmailConfirmationNotification extends StatelessWidget {
-  final VoidCallback onResendEmail;
   final String text;
 
-  const EmailConfirmationNotification(
-      {super.key, required this.onResendEmail, required this.text});
+  const EmailConfirmationNotification({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -248,8 +282,10 @@ class EmailConfirmationNotification extends StatelessWidget {
             ),
           ),
           SizedBox(width: 10.w),
-          GestureDetector(
-            onTap: onResendEmail,
+          TextButton(
+            onPressed: () {
+              sendVerificationEmail(context);
+            },
             child: Text(
               'Επαναποστολή',
               style: TextStyle(
@@ -325,6 +361,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
     bool isVerified = jsonData['is_verified']; // Extract the boolean value
     if (context.mounted) {
       context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
+
       return;
     }
     errorPrint('Not mounted');
@@ -432,7 +469,7 @@ void showUpdateDialog(context) {
       backgroundColor: const Color.fromARGB(255, 141, 14, 5),
       shadowColor: appRedColor,
       elevation: 30,
-      title: Text('Ενημέρωση διαθέσιμη!',
+      title: Text('Νέα έκδοση διαθέσιμη!',
           style: TextStyle(
               fontSize: 25.sp,
               color: Colors.black,
@@ -572,17 +609,15 @@ class CustomPhoneButtonState extends State<CustomPhoneButton> {
           backgroundColor: WidgetStatePropertyAll(Colors.black),
         ),
         onPressed: () async {
-          if (!otpService.canSend) {
-            if (otpService.awaitMinutes == 1) {
-              floatingSnackBar(
-                  message: 'Ξαναδοκίμασε σε 1 λεπτό',
-                  duration: Duration(seconds: 4),
-                  context: context);
+          if (!phoneOtpService.canSend) {
+            if (phoneOtpService.awaitMinutes == 1) {
+              showFloatingSnackBar(
+                  'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
             } else {
-              floatingSnackBar(
-                  message: 'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
-                  duration: Duration(seconds: 4),
-                  context: context);
+              showFloatingSnackBar(
+                  'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+                  Duration(seconds: 4),
+                  context);
             }
           } else {
             var isPhoneValid = await showFillPhoneDialog(context);
@@ -596,30 +631,26 @@ class CustomPhoneButtonState extends State<CustomPhoneButton> {
                     context.read<GlobalStateProvider>().refreshProfilePage =
                         true;
                     Navigator.pop(context);
-                    floatingSnackBar(
-                        message: 'Επιτυχής προσθήκη κινητού',
-                        duration: Duration(seconds: 4),
-                        context: context);
+                    showFloatingSnackBar('Επιτυχής προσθήκη κινητού',
+                        Duration(seconds: 4), context);
                   }
                 } else {
                   if (result == 2) {
                     if (context.mounted) {
                       Navigator.pop(context);
-                      floatingSnackBar(
-                          message:
-                              'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
-                          duration: Duration(seconds: 4),
-                          context: context);
+                      showFloatingSnackBar(
+                          'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
+                          Duration(seconds: 4),
+                          context);
                     }
                   }
                 }
               } else {
                 if (context.mounted) {
-                  floatingSnackBar(
-                      message:
-                          'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
-                      duration: Duration(seconds: 4),
-                      context: context);
+                  showFloatingSnackBar(
+                      'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
+                      Duration(seconds: 4),
+                      context);
                 }
               }
             }
@@ -784,9 +815,9 @@ class OtpService {
           .timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200 && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Στάλθηκε κωδικός με SMS')),
-        );
+        showFloatingSnackBar(
+            'Στάλθηκε κωδικός με SMS', Duration(seconds: 3), context);
+
         startTimer();
         return true;
       } else {
@@ -826,17 +857,15 @@ Future<IsPhoneValid> showFillPhoneDialog(BuildContext context) async {
   int otpCode = generateRandom6DigitNumber();
   String tempPhoneNumber = '';
 
-  if (!otpService.canSend && initialPage == false) {
-    if (otpService.awaitMinutes == 1) {
-      floatingSnackBar(
-          message: 'Ξαναδοκίμασε σε 1 λεπτό',
-          duration: Duration(seconds: 4),
-          context: context);
+  if (!phoneOtpService.canSend && initialPage == false) {
+    if (phoneOtpService.awaitMinutes == 1) {
+      showFloatingSnackBar(
+          'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
     } else {
-      floatingSnackBar(
-          message: 'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
-          duration: Duration(seconds: 4),
-          context: context);
+      showFloatingSnackBar(
+          'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+          Duration(seconds: 4),
+          context);
     }
     return IsPhoneValid('', false);
   }
@@ -978,21 +1007,21 @@ Future<IsPhoneValid> showFillPhoneDialog(BuildContext context) async {
                       phoneError = tempPhoneNumber.length != 10 ||
                           !tempPhoneNumber.startsWith('69');
                       if (phoneError == false) {
-                        if (!otpService.canSend) {
-                          if (otpService.awaitMinutes == 1) {
+                        if (!phoneOtpService.canSend) {
+                          if (phoneOtpService.awaitMinutes == 1) {
                             showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
                                 const Duration(milliseconds: 4000), context);
                           } else {
                             showFloatingSnackBar(
-                                'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+                                'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
                                 const Duration(milliseconds: 4000),
                                 context);
                           }
                         } else {
                           otpCode = generateRandom6DigitNumber();
-                          OtpService()
-                              .sendOtp(tempPhoneNumber, otpCode, context);
-                          otpService
+                          phoneOtpService.sendOtp(
+                              tempPhoneNumber, otpCode, context);
+                          phoneOtpService
                               .startTimer(); // Start the timer to handle resending OTP
                           setState(() {
                             initialPage = false;
@@ -1042,11 +1071,10 @@ Future<IsPhoneValid> showFillPhoneDialog(BuildContext context) async {
                             }
                           } else {
                             if (attemptCount >= 2) {
-                              floatingSnackBar(
-                                  message:
-                                      'Ο αριθμός κινητού δεν επιβεβαιώθηκε',
-                                  duration: Duration(seconds: 4),
-                                  context: context);
+                              showFloatingSnackBar(
+                                  'Ο αριθμός κινητού δεν επιβεβαιώθηκε',
+                                  Duration(seconds: 4),
+                                  context);
                               setState(() {
                                 showError = false;
                               });
@@ -1083,17 +1111,17 @@ Future<IsPhoneValid> showFillPhoneDialog(BuildContext context) async {
                     ),
                     TextButton(
                       onPressed: () async {
-                        if (otpService.canSend) {
-                          OtpService()
-                              .sendOtp(tempPhoneNumber, otpCode, context);
-                          otpService.startTimer();
+                        if (phoneOtpService.canSend) {
+                          phoneOtpService.sendOtp(
+                              tempPhoneNumber, otpCode, context);
+                          phoneOtpService.startTimer();
                         } else {
-                          if (otpService.awaitMinutes == 1) {
+                          if (phoneOtpService.awaitMinutes == 1) {
                             showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
                                 const Duration(milliseconds: 4000), context);
                           } else {
                             showFloatingSnackBar(
-                                'Ξαναδοκίμασε σε ${otpService.awaitMinutes} λεπτά',
+                                'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
                                 const Duration(milliseconds: 4000),
                                 context);
                           }
@@ -1120,4 +1148,26 @@ class IsPhoneValid {
   final String phone;
   final bool isSuccess;
   IsPhoneValid(this.phone, this.isSuccess);
+}
+
+Future<void> emailLoop(BuildContext context) async {
+  final startTime = DateTime.now();
+
+  while (context.mounted &&
+      !context.read<GlobalStateProvider>().hasVerifiedEmail) {
+    // Check if 5 minutes (300 seconds) have passed since start
+    final elapsedTime = DateTime.now().difference(startTime);
+    if (elapsedTime.inSeconds >= 300) {
+      // Exit the loop if 5 minutes have passed
+      break;
+    }
+
+    // Fetch email verification status
+    if (context.mounted) {
+      fetchVerifiedEmailGlobalVariable(context);
+    }
+
+    // Wait for 5 seconds before the next iteration
+    await Future.delayed(Duration(seconds: 5));
+  }
 }

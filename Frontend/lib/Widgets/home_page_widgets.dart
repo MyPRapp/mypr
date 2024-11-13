@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/club_provider.dart';
-import 'package:mypr/Providers/global_state_provider.dart';
-import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
@@ -67,10 +65,7 @@ class _BigClubCardState extends State<BigClubCard> {
 
         if (catalogues[0].price != '0' &&
             catalogues[1].price != '0' &&
-            catalogues[2].price != '0' &&
-            ((context.read<GlobalStateProvider>().isAuthenticated &&
-                    context.read<UserProvider>().userDetails.userID > 0) ||
-                !context.read<GlobalStateProvider>().isAuthenticated)) {
+            catalogues[2].price != '0') {
           AutoRouter.of(context).push(
               ReservationRoute(club: widget.club, catalogues: catalogues));
         }

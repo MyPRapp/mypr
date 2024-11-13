@@ -4,7 +4,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
@@ -18,7 +17,6 @@ import '../../Providers/global_state_provider.dart';
 import '../../Providers/liked_clubs_provider.dart';
 import '../../Providers/user_provider.dart';
 import '../../Widgets/profile_page_widgets.dart';
-import '../../services/auth_service.dart';
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -41,11 +39,26 @@ class _ProfilePageState extends State<ProfilePage> {
         _toggleTextVisibility();
       }
     });
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.read<GlobalStateProvider>().hasCheckedAppVersion == false) {
         checkAppVersion(context);
       }
     });
+
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   // Check if refreshProfilePage is true when the widget loads
+    //   if (context.read<GlobalStateProvider>().refreshProfilePage) {
+    //     _refresh();
+    //   }
+    // });
+
+    // // Listen for further changes to refreshProfilePage
+    // context.read<GlobalStateProvider>().addListener(() {
+    //   if (context.read<GlobalStateProvider>().refreshProfilePage) {
+    //     _refresh();
+    //   }
+    // });
   }
 
   bool _isVisible = false;
@@ -59,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
       });
 
       // Set a timer to automatically hide the text after 4 seconds
-      Timer(const Duration(seconds: 1), () {
+      Timer(const Duration(seconds: 2), () {
         setState(() {
           _isVisible = false;
         });
@@ -81,6 +94,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _refresh() async {
     context.read<GlobalStateProvider>().refreshProfilePage = false;
+
     UserProvider userProvider = context.read<UserProvider>();
 
     if (context.read<GlobalStateProvider>().isAuthenticated) {
@@ -92,11 +106,16 @@ class _ProfilePageState extends State<ProfilePage> {
             userProvider.userDetails, context.read<ClubProvider>());
       }
     }
-    if (mounted) {
+    if (mounted && !context.read<GlobalStateProvider>().hasVerifiedEmail) {
       fetchVerifiedEmailGlobalVariable(context);
+      print('FETCHED');
     }
-    setState(() {});
+
     _triggerAnimation();
+    // if (mounted) {
+    //   context.read<GlobalStateProvider>().refreshProfilePage = false;
+    //   print('CANCELED');
+    // }
   }
 
   void _showSignOutDialog(BuildContext context) {
@@ -219,58 +238,6 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  int awaitMinutes = 1;
-  bool canSend = true;
-  Timer? timer; // Declare a Timer object
-
-  void startTimer() {
-    // Check if the timer is already active
-    if (timer != null && timer!.isActive) {
-      // print("A timer is already running. Cannot start a new one.");
-      return; // Exit the function, don't start a new timer
-    }
-    // If no timer is running, proceed with starting a new one
-    canSend = false;
-
-    timer = Timer(Duration(minutes: awaitMinutes), () {
-      if (mounted) {
-        awaitMinutes++;
-        canSend = true;
-      }
-    });
-  }
-
-  Future<void> sendVerificationEmail() async {
-    if (canSend) {
-      startTimer();
-      showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
-          const Duration(milliseconds: 4000), context);
-
-      var response = await http.post(
-        Uri.parse('$apiUrl/email-resend/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${await getAccessToken()}',
-        },
-      ).timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200) {
-        successPrint(response.body);
-      } else {
-        errorPrint('${response.statusCode}');
-        errorPrint(response.body);
-      }
-    } else {
-      if (awaitMinutes == 1) {
-        showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
-            const Duration(milliseconds: 4000), context);
-      } else {
-        showFloatingSnackBar('Ξαναδοκίμασε σε $awaitMinutes λεπτά',
-            const Duration(milliseconds: 4000), context);
-      }
-    }
-  }
-
   @override
   void dispose() {
     _scrollController.dispose();
@@ -282,10 +249,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final double screenHeight = MediaQuery.sizeOf(context).height;
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final userDetails = context.watch<UserProvider>().userDetails;
-
-    if (context.watch<GlobalStateProvider>().refreshProfilePage) {
-      _refresh();
-    }
 
     final bool isAuthenticated =
         context.watch<GlobalStateProvider>().isAuthenticated;
@@ -547,7 +510,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   if (!hasVerifiedEmail && isAuthenticated)
                     EmailConfirmationNotification(
-                        onResendEmail: sendVerificationEmail,
                         text: 'Παρακαλώ επιβεβαίωσε το email σου'),
                 ],
               ),
