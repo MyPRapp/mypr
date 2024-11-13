@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
@@ -439,10 +440,8 @@ class BookingDetailsPage extends StatelessWidget {
 
     // Check if `nowDateOnly` is equal to `threeDaysBefore`
     if (nowDateOnly.isBefore(threeDaysBefore)) {
-      print("Today is 3 days before the booking date.");
       return true;
     } else {
-      print("Today is NOT 3 days before the booking date.");
       return false;
     }
   }
@@ -494,12 +493,21 @@ class BookingDetailsPage extends StatelessWidget {
                     },
                   ).timeout(const Duration(seconds: 10));
                   if (response.statusCode == 204 && context.mounted) {
-                    showFloatingSnackBar(
-                        'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
                     await context.read<BookingProvider>().fetchBookings(
                         context.read<UserProvider>().userDetails,
                         context.read<ClubProvider>());
-                    await retractPoints(100);
+                    await retractPoints(
+                        100); //TODO If user had used his points for discount then return those points back to him
+                    if (context.mounted) {
+                      ClubInfoStruct club = context
+                          .read<ClubProvider>()
+                          .getClubByID(booking.clubID);
+                      await _sendMessage(context, club);
+                    }
+                    if (context.mounted) {
+                      showFloatingSnackBar(
+                          'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
+                    }
                     if (context.mounted) {
                       await context
                           .read<UserProvider>()
@@ -531,6 +539,40 @@ class BookingDetailsPage extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _sendMessage(BuildContext context, ClubInfoStruct club) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    try {
+      final response = await http
+          .post(Uri.parse('$apiUrl/send-email/'),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: jsonEncode({
+                'subject': 'ΑΚΥΡΩΣΗ ΚΡΑΤΗΣΗΣ',
+                'sender_email': 'info@mypr-app.com',
+                'message':
+                    'Ακυρώθηκε η κράτηση με bookingID: ${booking.bookingID} από τον χρήστη με ID: ${booking.userID}\nΜαγαζί: ${club.clubName}\nΌνομα κράτησης: ${booking.bookingName}\nΗμερομηνία κράτησης: ${booking.date}\nΚατηγορία: ${booking.fourbitString}\nΆτομα: ${booking.persons}\nΤιμή: ${booking.price}\n'
+              }))
+          .timeout(const Duration(seconds: 8), onTimeout: () {
+        errorPrint('Error on email sending: Timeout exception');
+        return http.Response('Error: Timeout', 408);
+      });
+
+      if (response.statusCode == 200) {
+        if (context.mounted) {
+          successPrint('Email sent successfully');
+        }
+      } else {
+        if (context.mounted) {
+          errorPrint('Error on email sending: ${response.body}');
+        }
+      }
+    } catch (e) {
+      errorPrint('$e');
+    }
   }
 }
 
