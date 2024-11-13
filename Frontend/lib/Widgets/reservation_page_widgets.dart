@@ -372,9 +372,9 @@ class PackagesInfoState extends State<PackagesInfo> {
                       child: Text(
                         '${widget.maxPersons} άτομα', // Display max persons
                         style: TextStyle(
-                            color: Colors.white,
+                            color: const Color.fromARGB(255, 17, 17, 17),
                             fontSize: 15.sp,
-                            fontWeight: FontWeight.w400),
+                            fontWeight: FontWeight.w600),
                       ),
                     ),
                     Flexible(
@@ -383,9 +383,9 @@ class PackagesInfoState extends State<PackagesInfo> {
                         child: Text(
                           '${widget.minPrice} €', // Display price
                           style: TextStyle(
-                              color: const Color.fromARGB(179, 255, 255, 255),
+                              color: const Color.fromARGB(255, 17, 17, 17),
                               fontSize: 16.sp,
-                              fontWeight: FontWeight.w500),
+                              fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),

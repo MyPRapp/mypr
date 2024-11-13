@@ -250,16 +250,19 @@ class _HomePageState extends State<HomePage> {
         return ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          itemCount: clubProvider.allClubs.length,
+          itemCount:
+              clubProvider.allClubs.isEmpty ? 8 : clubProvider.allClubs.length,
           itemBuilder: (context, index) {
-            final club = clubProvider.allClubs[index];
-            if (club.clubPhoto.isNotEmpty || club.localPhotoPath.isNotEmpty) {
-              return BigClubCard(
-                key: ValueKey(club.clubID),
-                club: club,
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
-              );
+            if (clubProvider.allClubs.isNotEmpty) {
+              final club = clubProvider.allClubs[index];
+              if (club.clubPhoto.isNotEmpty || club.localPhotoPath.isNotEmpty) {
+                return BigClubCard(
+                  key: ValueKey(club.clubID),
+                  club: club,
+                  screenHeight: screenHeight,
+                  screenWidth: screenWidth,
+                );
+              }
             }
             return Padding(
               padding: EdgeInsets.only(
