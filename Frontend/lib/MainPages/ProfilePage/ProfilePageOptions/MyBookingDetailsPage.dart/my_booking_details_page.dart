@@ -3,14 +3,20 @@ import 'dart:io';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:mypr/Providers/booking_provider.dart';
+import 'package:mypr/Widgets/reservation_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../Globals/constants.dart';
 import '../../../../Globals/global_components.dart';
 import '../../../../Globals/structs.dart';
 import '../../../../Providers/club_provider.dart';
+import '../../../../Providers/global_state_provider.dart';
+import '../../../../Providers/user_provider.dart';
 
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
@@ -368,85 +374,162 @@ class BookingDetailsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Για οποιαδήποτε αλλαγή ή απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.',
+          checkIfThreeDaysBefore(booking.date)
+              ? 'Η ακύρωση της κράτησης θα πρέπει να γίνεται μόνο όταν είναι απολύτως απαραίτητο'
+              : booking.status < 2
+                  ? 'Για οποιαδήποτε αλλαγή ή απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.'
+                  : 'Για οποιαδήποτε απορία σχετικά με την κράτηση, παρακαλώ επικοινώνησε μαζί μας.',
           style: TextStyle(
             color: Colors.white,
             fontSize: 14.sp,
           ),
         ),
         SizedBox(height: 20.h),
-        // ElevatedButton(
-        //   style: ElevatedButton.styleFrom(
-        //     padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-        //     shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(10.r),
-        //     ),
-        //     foregroundColor: Colors.white,
-        //     backgroundColor: const Color(0xFF9C0C04),
-        //   ),
-        //   onPressed: () async {
-        //     try {
-        //       var response = await http
-        //           .post(
-        //             Uri.parse('$apiUrl/bookings/delete/${booking.bookingID}/'),
-        //             headers: {
-        //               'Content-Type': 'application/json',
-        //               'Authorization': 'Bearer ${await getAccessToken()}',
-        //             },
-        //             body: jsonEncode({
-        //               'reservation_name': booking.bookingName,
-        //               'club_name': context.mounted
-        //                   ? context
-        //                       .read<ClubProvider>()
-        //                       .getClubByID(booking.clubID)
-        //                       .clubName
-        //                   : '',
-        //               'booking_type': '3121',
-        //               'booked_at': ' ',
-        //               'number_of_people': booking.persons,
-        //               'comments': booking.comments,
-        //             }),
-        //           )
-        //           .timeout(const Duration(seconds: 10));
-        //       if (response.statusCode == 200 && context.mounted) {
-        //         showFloatingSnackBar(
-        //             'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
-        //       } else {
-        //         print(response.body);
-        //         if (context.mounted) {
-        //           showFloatingSnackBar(
-        //               'Σφάλμα κατά την ακύρωση της κράτησης. Προσπάθησε ξανά σε λίγο',
-        //               Duration(seconds: 3),
-        //               context);
-        //         }
-        //       }
-        //     } catch (e) {
-        //       throw Exception(e);
-        //     }
-        //   },
-        //   child: Text(
-        //     'Ακύρωση κράτησης',
-        //     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
-        //   ),
-        // )
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10.r),
+        if (checkIfThreeDaysBefore(booking.date))
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF9C0C04),
             ),
-            foregroundColor: Colors.white,
-            backgroundColor: const Color(0xFF9C0C04),
-          ),
-          onPressed: () {
-            AutoRouter.of(context).push(const ContactUsRoute());
-          },
-          child: Text(
-            'Επικοινώνησε μαζί μας',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
-          ),
-        )
+            onPressed: () {
+              _showSignOutDialog(context);
+            },
+            child: Text(
+              'Ακύρωση κράτησης',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+            ),
+          )
+        else
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF9C0C04),
+            ),
+            onPressed: () {
+              AutoRouter.of(context).push(const ContactUsRoute());
+            },
+            child: Text(
+              'Επικοινώνησε μαζί μας',
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
+            ),
+          )
       ],
+    );
+  }
+
+  bool checkIfThreeDaysBefore(DateTime bookingDate) {
+    // Get the current date
+    DateTime now = DateTime.now();
+
+    // Strip time from both dates by creating new DateTime instances with only the date components
+    DateTime bookingDateOnly =
+        DateTime(bookingDate.year, bookingDate.month, bookingDate.day);
+    DateTime nowDateOnly = DateTime(now.year, now.month, now.day);
+
+    // Calculate the date that is 3 days before the booking date
+    DateTime threeDaysBefore = bookingDateOnly.subtract(Duration(days: 3));
+
+    // Check if `nowDateOnly` is equal to `threeDaysBefore`
+    if (nowDateOnly.isBefore(threeDaysBefore)) {
+      print("Today is 3 days before the booking date.");
+      return true;
+    } else {
+      print("Today is NOT 3 days before the booking date.");
+      return false;
+    }
+  }
+
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 125, 9, 3),
+          titlePadding: EdgeInsets.all(20.sp),
+          actionsPadding: EdgeInsets.all(20.sp),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          title: Text(
+            'Είσαι σίγουρος ότι θέλεις να ακυρώσεις την κράτηση;',
+            style: TextStyle(
+                fontSize: 18.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.w700),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Επιστροφή',
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Ακύρωση κράτησης',
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600),
+              ),
+              onPressed: () async {
+                try {
+                  var response = await http.delete(
+                    Uri.parse('$apiUrl/bookings/delete/${booking.bookingID}/'),
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': 'Bearer ${await getAccessToken()}',
+                    },
+                  ).timeout(const Duration(seconds: 10));
+                  if (response.statusCode == 204 && context.mounted) {
+                    showFloatingSnackBar(
+                        'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
+                    await context.read<BookingProvider>().fetchBookings(
+                        context.read<UserProvider>().userDetails,
+                        context.read<ClubProvider>());
+                    await retractPoints(100);
+                    if (context.mounted) {
+                      await context
+                          .read<UserProvider>()
+                          .fetchUserDetailsFromServer();
+                    }
+                    if (context.mounted) {
+                      context.read<GlobalStateProvider>().refreshProfilePage =
+                          true;
+                    }
+                    if (context.mounted) {
+                      Navigator.of(context).pop(); // Close the dialog
+                      AutoRouter.of(context).back();
+                    } // Close the dialog
+                  } else {
+                    print(response.body);
+                    if (context.mounted) {
+                      showFloatingSnackBar(
+                          'Σφάλμα κατά την ακύρωση της κράτησης. Προσπάθησε ξανά σε λίγο',
+                          Duration(seconds: 3),
+                          context);
+                    }
+                  }
+                } catch (e) {
+                  throw Exception(e);
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

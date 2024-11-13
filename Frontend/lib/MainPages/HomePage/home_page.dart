@@ -77,6 +77,8 @@ class _HomePageState extends State<HomePage> {
           if (context.read<GlobalStateProvider>().justRegistered) {
             context.read<GlobalStateProvider>().justRegistered = false;
             emailLoop(context);
+          } else {
+            fetchVerifiedEmailGlobalVariable(context);
           }
 
           await userProvider.fetchUserDetailsFromServer();

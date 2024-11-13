@@ -361,7 +361,6 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
     bool isVerified = jsonData['is_verified']; // Extract the boolean value
     if (context.mounted) {
       context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
-
       return;
     }
     errorPrint('Not mounted');
@@ -446,7 +445,7 @@ Future<void> checkAppVersion(BuildContext context) async {
       comparison = compareVersions(currentVersion, minimumIOSVersion);
     } else {
       errorPrint('$comparison');
-      comparison = -1;
+      comparison = 1; //TODO Fix this
     }
   }
   if (comparison < 0 && context.mounted) {
