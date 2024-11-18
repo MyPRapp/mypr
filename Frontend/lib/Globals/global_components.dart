@@ -518,12 +518,11 @@ Future<void> openStore() async {
   String url;
   if (Platform.isAndroid) {
     // Android: Play Store URL with the app package ID
-    url =
-        'https://play.google.com/store/apps/details?id=com.example.your_app_id';
+    url = 'https://play.google.com/store/apps/details?id=com.etairia.mypr';
   } else if (Platform.isIOS) {
     //TODO Change urls
-    // iOS: App Store URL with the app ID
-    url = 'https://apps.apple.com/app/id6711330363';
+    // iOS: Play Store URL with the app ID
+    url = 'https://apps.apple.com/gr/app/mypr/id6711330363';
   } else {
     throw 'Unsupported platform';
   }
@@ -603,62 +602,88 @@ class CustomPhoneButton extends StatefulWidget {
 class CustomPhoneButtonState extends State<CustomPhoneButton> {
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-        style: ButtonStyle(
-          backgroundColor: WidgetStatePropertyAll(Colors.black),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Container(
+        width: 130.w,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 47, 47, 47),
+          borderRadius: BorderRadius.circular(8.r),
         ),
-        onPressed: () async {
-          if (!phoneOtpService.canSend) {
-            if (phoneOtpService.awaitMinutes == 1) {
-              showFloatingSnackBar(
-                  'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
+        child: TextButton(
+          onPressed: () async {
+            if (!phoneOtpService.canSend) {
+              if (phoneOtpService.awaitMinutes == 1) {
+                showFloatingSnackBar(
+                    'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
+              } else {
+                showFloatingSnackBar(
+                    'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+                    Duration(seconds: 4),
+                    context);
+              }
             } else {
-              showFloatingSnackBar(
-                  'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
-                  Duration(seconds: 4),
-                  context);
-            }
-          } else {
-            var isPhoneValid = await showFillPhoneDialog(context);
-            if (isPhoneValid.isSuccess) {
-              var phone = isPhoneValid.phone;
-              if (phone.length == 10 && phone.startsWith('69')) {
-                int result = await AuthService().changePhoneOnServerOnly(phone);
-                if (result == 0) {
-                  if (context.mounted) {
-                    context.read<UserProvider>().fetchUserDetailsFromServer();
-                    context.read<GlobalStateProvider>().refreshProfilePage =
-                        true;
-                    Navigator.pop(context);
-                    showFloatingSnackBar('Επιτυχής προσθήκη κινητού',
-                        Duration(seconds: 4), context);
-                  }
-                } else {
-                  if (result == 2) {
+              var isPhoneValid = await showFillPhoneDialog(context);
+              if (isPhoneValid.isSuccess) {
+                var phone = isPhoneValid.phone;
+                if (phone.length == 10 && phone.startsWith('69')) {
+                  int result =
+                      await AuthService().changePhoneOnServerOnly(phone);
+                  if (result == 0) {
                     if (context.mounted) {
+                      context.read<UserProvider>().fetchUserDetailsFromServer();
+                      context.read<GlobalStateProvider>().refreshProfilePage =
+                          true;
                       Navigator.pop(context);
-                      showFloatingSnackBar(
-                          'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
-                          Duration(seconds: 4),
-                          context);
+                      showFloatingSnackBar('Επιτυχής προσθήκη κινητού',
+                          Duration(seconds: 4), context);
+                    }
+                  } else {
+                    if (result == 2) {
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        showFloatingSnackBar(
+                            'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
+                            Duration(seconds: 4),
+                            context);
+                      }
                     }
                   }
-                }
-              } else {
-                if (context.mounted) {
-                  showFloatingSnackBar(
-                      'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
-                      Duration(seconds: 4),
-                      context);
+                } else {
+                  if (context.mounted) {
+                    showFloatingSnackBar(
+                        'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
+                        Duration(seconds: 4),
+                        context);
+                  }
                 }
               }
             }
-          }
-        },
-        child: Text(
-          'Προσθήκη κινητού',
-          style: TextStyle(color: appRedColor, fontSize: 15.sp),
-        ));
+          },
+          style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              overlayColor: const Color.fromARGB(255, 0, 0, 0)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                "Προσθήκη κινητού",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.black,
+                size: 15.sp,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

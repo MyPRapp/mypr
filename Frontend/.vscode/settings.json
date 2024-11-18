@@ -1,7 +1,7 @@
 {
     "java.compile.nullAnalysis.mode": "automatic",
     "files.exclude": {
-        "**/build": false,
+        "**/build": true,
         "**/.dart_tool":true,
         "**/.idea":true,
         "**/linux":true,

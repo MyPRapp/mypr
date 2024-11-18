@@ -7,7 +7,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mypr/Providers/booking_provider.dart';
-import 'package:mypr/Widgets/reservation_page_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
@@ -387,22 +386,8 @@ class BookingDetailsPage extends StatelessWidget {
         ),
         SizedBox(height: 20.h),
         if (checkIfThreeDaysBefore(booking.date))
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-              foregroundColor: Colors.white,
-              backgroundColor: const Color(0xFF9C0C04),
-            ),
-            onPressed: () {
-              _showSignOutDialog(context);
-            },
-            child: Text(
-              'Ακύρωση κράτησης',
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
-            ),
+          CancelReservationButton(
+            booking: booking,
           )
         else
           ElevatedButton(
@@ -445,135 +430,6 @@ class BookingDetailsPage extends StatelessWidget {
       return false;
     }
   }
-
-  void _showSignOutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color.fromARGB(255, 125, 9, 3),
-          titlePadding: EdgeInsets.all(20.sp),
-          actionsPadding: EdgeInsets.all(20.sp),
-          actionsAlignment: MainAxisAlignment.spaceBetween,
-          title: Text(
-            'Είσαι σίγουρος ότι θέλεις να ακυρώσεις την κράτηση;',
-            style: TextStyle(
-                fontSize: 18.sp,
-                color: Colors.black,
-                fontWeight: FontWeight.w700),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text(
-                'Επιστροφή',
-                style: TextStyle(
-                    fontSize: 17.sp,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-            TextButton(
-              child: Text(
-                'Ακύρωση κράτησης',
-                style: TextStyle(
-                    fontSize: 17.sp,
-                    color: Colors.black,
-                    fontWeight: FontWeight.w600),
-              ),
-              onPressed: () async {
-                try {
-                  var response = await http.delete(
-                    Uri.parse('$apiUrl/bookings/delete/${booking.bookingID}/'),
-                    headers: {
-                      'Content-Type': 'application/json',
-                      'Authorization': 'Bearer ${await getAccessToken()}',
-                    },
-                  ).timeout(const Duration(seconds: 10));
-                  if (response.statusCode == 204 && context.mounted) {
-                    await context.read<BookingProvider>().fetchBookings(
-                        context.read<UserProvider>().userDetails,
-                        context.read<ClubProvider>());
-                    await retractPoints(
-                        100); //TODO If user had used his points for discount then return those points back to him
-                    if (context.mounted) {
-                      ClubInfoStruct club = context
-                          .read<ClubProvider>()
-                          .getClubByID(booking.clubID);
-                      await _sendMessage(context, club);
-                    }
-                    if (context.mounted) {
-                      showFloatingSnackBar(
-                          'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
-                    }
-                    if (context.mounted) {
-                      await context
-                          .read<UserProvider>()
-                          .fetchUserDetailsFromServer();
-                    }
-                    if (context.mounted) {
-                      context.read<GlobalStateProvider>().refreshProfilePage =
-                          true;
-                    }
-                    if (context.mounted) {
-                      Navigator.of(context).pop(); // Close the dialog
-                      AutoRouter.of(context).back();
-                    } // Close the dialog
-                  } else {
-                    print(response.body);
-                    if (context.mounted) {
-                      showFloatingSnackBar(
-                          'Σφάλμα κατά την ακύρωση της κράτησης. Προσπάθησε ξανά σε λίγο',
-                          Duration(seconds: 3),
-                          context);
-                    }
-                  }
-                } catch (e) {
-                  throw Exception(e);
-                }
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<void> _sendMessage(BuildContext context, ClubInfoStruct club) async {
-    FocusManager.instance.primaryFocus?.unfocus();
-
-    try {
-      final response = await http
-          .post(Uri.parse('$apiUrl/send-email/'),
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: jsonEncode({
-                'subject': 'ΑΚΥΡΩΣΗ ΚΡΑΤΗΣΗΣ',
-                'sender_email': 'info@mypr-app.com',
-                'message':
-                    'Ακυρώθηκε η κράτηση με bookingID: ${booking.bookingID} από τον χρήστη με ID: ${booking.userID}\nΜαγαζί: ${club.clubName}\nΌνομα κράτησης: ${booking.bookingName}\nΗμερομηνία κράτησης: ${booking.date}\nΚατηγορία: ${booking.fourbitString}\nΆτομα: ${booking.persons}\nΤιμή: ${booking.price}\n'
-              }))
-          .timeout(const Duration(seconds: 8), onTimeout: () {
-        errorPrint('Error on email sending: Timeout exception');
-        return http.Response('Error: Timeout', 408);
-      });
-
-      if (response.statusCode == 200) {
-        if (context.mounted) {
-          successPrint('Email sent successfully');
-        }
-      } else {
-        if (context.mounted) {
-          errorPrint('Error on email sending: ${response.body}');
-        }
-      }
-    } catch (e) {
-      errorPrint('$e');
-    }
-  }
 }
 
 class BuildRichText extends StatelessWidget {
@@ -609,5 +465,198 @@ class BuildRichText extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class CancelReservationButton extends StatefulWidget {
+  const CancelReservationButton({super.key, required this.booking});
+
+  final BookingInfoStruct booking;
+
+  @override
+  State<CancelReservationButton> createState() =>
+      _CancelReservationButtonState();
+}
+
+class _CancelReservationButtonState extends State<CancelReservationButton> {
+  bool cancelling = false;
+
+  void _showCancelDialog(BuildContext context) {
+    showDialog(
+      barrierDismissible: cancelling,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 125, 9, 3),
+          titlePadding: EdgeInsets.all(20.sp),
+          actionsPadding: EdgeInsets.all(20.sp),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          title: Text(
+            'Είσαι σίγουρος ότι θέλεις να ακυρώσεις την κράτηση;',
+            style: TextStyle(
+                fontSize: 18.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.w700),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Επιστροφή',
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600),
+              ),
+              onPressed: () {
+                if (!cancelling) {
+                  Navigator.of(context).pop(); // Close the dialog
+                }
+              },
+            ),
+            TextButton(
+              child: Text(
+                'Ακύρωση κράτησης',
+                style: TextStyle(
+                    fontSize: 17.sp,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600),
+              ),
+              onPressed: () async {
+                if (!cancelling) {
+                  setState(() {
+                    cancelling = true;
+                  });
+
+                  try {
+                    var response = await http.delete(
+                      Uri.parse(
+                          '$apiUrl/bookings/delete/${widget.booking.bookingID}/'),
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ${await getAccessToken()}',
+                      },
+                    ).timeout(const Duration(seconds: 10));
+                    if (response.statusCode == 204 && context.mounted) {
+                      await context.read<BookingProvider>().fetchBookings(
+                          context.read<UserProvider>().userDetails,
+                          context.read<ClubProvider>());
+
+                      ////TODO Fix points return issue
+
+                      if (context.mounted) {
+                        ClubInfoStruct club = context
+                            .read<ClubProvider>()
+                            .getClubByID(widget.booking.clubID);
+                        await _sendMessage(context, club);
+                      }
+                    }
+                    if (context.mounted) {
+                      await context
+                          .read<UserProvider>()
+                          .fetchUserDetailsFromServer();
+                    }
+                    if (context.mounted) {
+                      context.read<GlobalStateProvider>().refreshProfilePage =
+                          true;
+                    }
+                    if (context.mounted) {
+                      showFloatingSnackBar(
+                          'Η κράτηση ακυρώθηκε', Duration(seconds: 3), context);
+                    }
+                    if (context.mounted) {
+                      Navigator.of(context).pop(); // Close the dialog
+                      AutoRouter.of(context).back();
+                    } // Close the dialog
+                    else {
+                      //   print(response.body);
+                      if (context.mounted) {
+                        showFloatingSnackBar(
+                            'Σφάλμα κατά την ακύρωση της κράτησης. Προσπάθησε ξανά σε λίγο',
+                            Duration(seconds: 3),
+                            context);
+                      }
+                    }
+                  } catch (e) {
+                    throw Exception(e);
+                  }
+                  setState(() {
+                    cancelling = false;
+                  });
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _sendMessage(BuildContext context, ClubInfoStruct club) async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
+    try {
+      final response = await http
+          .post(Uri.parse('$apiUrl/send-email/'),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: jsonEncode({
+                'subject': 'ΑΚΥΡΩΣΗ ΚΡΑΤΗΣΗΣ',
+                'sender_email': 'info@mypr-app.com',
+                'message':
+                    'Ακυρώθηκε η κράτηση με bookingID: ${widget.booking.bookingID} από τον χρήστη με ID: ${widget.booking.userID}\nΜαγαζί: ${club.clubName}\nΌνομα κράτησης: ${widget.booking.bookingName}\nΗμερομηνία κράτησης: ${widget.booking.date}\nΚατηγορία: ${widget.booking.fourbitString}\nΆτομα: ${widget.booking.persons}\nΤιμή: ${widget.booking.price}\n'
+              }))
+          .timeout(const Duration(seconds: 8), onTimeout: () {
+        errorPrint('Error on email sending: Timeout exception');
+        return http.Response('Error: Timeout', 408);
+      });
+
+      if (response.statusCode == 200) {
+        if (context.mounted) {
+          successPrint('Email sent successfully');
+        }
+      } else {
+        if (context.mounted) {
+          errorPrint('Error on email sending: ${response.body}');
+        }
+      }
+    } catch (e) {
+      errorPrint('$e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+        alignment: Alignment.centerLeft,
+        child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 15.w, vertical: 15.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFF9C0C04),
+            ),
+            onPressed: () {
+              _showCancelDialog(context);
+            },
+            child: SizedBox(
+              width: 150.w,
+              height: 30.h,
+              child: !cancelling
+                  ? Text(
+                      'Ακύρωση κράτησης',
+                      style: TextStyle(
+                          fontSize: 18.sp, fontWeight: FontWeight.w600),
+                    )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth:
+                            2.0, // Optional: Adjust thickness if needed
+                      ),
+                    ),
+            )));
   }
 }
