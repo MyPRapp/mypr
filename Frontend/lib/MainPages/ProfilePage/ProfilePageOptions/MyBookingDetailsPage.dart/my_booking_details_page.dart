@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:mypr/Providers/booking_provider.dart';
+import 'package:mypr/Providers/club_provider.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
@@ -14,9 +16,7 @@ import 'package:provider/provider.dart';
 import '../../../../Globals/constants.dart';
 import '../../../../Globals/global_components.dart';
 import '../../../../Globals/structs.dart';
-import '../../../../Providers/club_provider.dart';
 import '../../../../Providers/global_state_provider.dart';
-import '../../../../Providers/user_provider.dart';
 
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
@@ -540,8 +540,6 @@ class _CancelReservationButtonState extends State<CancelReservationButton> {
                       await context.read<BookingProvider>().fetchBookings(
                           context.read<UserProvider>().userDetails,
                           context.read<ClubProvider>());
-
-                      ////TODO Fix points return issue
 
                       if (context.mounted) {
                         ClubInfoStruct club = context
