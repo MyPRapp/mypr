@@ -221,80 +221,6 @@ class MaxLinesAndLengthFormatter extends TextInputFormatter {
   }
 }
 
-// class PackagesInfo extends StatelessWidget {
-//   const PackagesInfo({
-//     super.key,
-//     required this.package,
-//     required this.maxPersons,
-//     required this.minPrice,
-//   });
-
-//   final String package;
-//   final int maxPersons;
-//   final int minPrice;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Padding(
-//       padding: EdgeInsets.only(bottom: 15.h),
-//       child: Card(
-//         color: const Color.fromARGB(179, 85, 85, 85),
-//         elevation: 10,
-//         child: Padding(
-//           padding: EdgeInsets.all(10.sp),
-//           child: Row(
-//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//             children: [
-//               _buildPackageDetails(),
-//               _buildPriceDetails(),
-//             ],
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// Widget _buildPackageDetails() {
-//   return Column(
-//     crossAxisAlignment: CrossAxisAlignment.start,
-//     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//     children: [
-//       Text(
-//         widget.package,
-//         style: TextStyle(
-//           fontSize: 18.sp,
-//           fontWeight: FontWeight.w700,
-//           color: Colors.black,
-//         ),
-//       ),
-//       SizedBox(height: 5.sp),
-//       Text(
-//         '${widget.maxPersons} άτομα',
-//         style: TextStyle(
-//           fontSize: 16.sp,
-//           fontWeight: FontWeight.w500,
-//           color: Colors.black,
-//         ),
-//       ),
-//     ],
-//   );
-// }
-
-// Widget _buildPriceDetails() {
-//   return Column(
-//     crossAxisAlignment: CrossAxisAlignment.end,
-//     children: [
-//       Text(
-//         '${widget.minPrice} €',
-//         style: TextStyle(
-//           fontSize: 18.sp,
-//           fontWeight: FontWeight.w700,
-//           color: Colors.black,
-//         ),
-//       ),
-//     ],
-//   );
-// }
-
 class PackagesInfo extends StatefulWidget {
   const PackagesInfo({
     super.key,
@@ -1203,6 +1129,37 @@ class WorkingDays extends StatelessWidget {
             ),
           );
         }),
+      ),
+    );
+  }
+}
+
+class BottomAnchorIcon extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const BottomAnchorIcon({super.key, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.bottomRight,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: 20.h),
+          child: Container(
+            padding: EdgeInsets.all(5.sp),
+            decoration: BoxDecoration(
+              color: Colors.black,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.arrow_downward,
+              color: Colors.grey,
+              size: 35.sp,
+            ),
+          ),
+        ),
       ),
     );
   }

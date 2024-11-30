@@ -73,8 +73,8 @@ class ClubProvider with ChangeNotifier {
         }
 
         await checkForRemovedClubs();
-
         await addNewClubs();
+        await sortClubs(_clubs);
 
         // Save fetched clubs and catalogues locally for offline use
         await Future.wait([saveClubsToFile(), saveCataloguesToFile()]);
@@ -167,7 +167,7 @@ class ClubProvider with ChangeNotifier {
 
       if (catalogueFound) {
         cataloguesToRemove
-            .add(catalogue); // Add to the list of clubs to be removed
+            .add(catalogue); // Add to the list of catalogues to be removed
         errorPrint("We remove ${catalogue.serviceType} catalogue");
       }
     }
@@ -224,6 +224,16 @@ class ClubProvider with ChangeNotifier {
     for (var catalogue in _tempCatalogues) {
       addOrUpdateCatalogue(catalogue);
     }
+  }
+
+  Future<void> sortClubs(List<ClubInfoStruct> clubList) async {
+    clubList.sort((a, b) {
+      if (a.clubPriority == -1) return 1; // Place -1 last
+      if (b.clubPriority == -1) return -1; // Place -1 last
+
+      // Otherwise, sort in ascending order
+      return a.clubPriority.compareTo(b.clubPriority);
+    });
   }
 
   Future<void> fetchClub(int clubID) async {

@@ -41,8 +41,6 @@ class BookingDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final formattedDate = DateFormat('dd/MM/yyyy').format(booking.date);
-    const earnedPoints = 100;
-
     final discountPercentage =
         (double.parse(booking.fourbitString[3])).toInt() * 10;
 
@@ -99,7 +97,8 @@ class BookingDetailsPage extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildPriceDetails(earnedPoints, discountPercentage),
+                      if (booking.status == 1) _buildAlertMessage(),
+                      _buildPointsAndDiscount(booking.date, discountPercentage),
                       SizedBox(height: 30.h),
                       _buildRegularBottomSection(context),
                       SizedBox(height: 50.h),
@@ -344,12 +343,47 @@ class BookingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceDetails(int earnedPoints, int discountPercentage) {
+  Widget _buildAlertMessage() {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 30.h),
+      child: Text(
+        'Η κατάσταση της κράτησης θα αλλάξει σε ενεργής μόλις επιβεβαιώσουμε τα στοιχεία της.',
+        style: TextStyle(
+          color: const Color.fromARGB(255, 173, 190, 73),
+          fontSize: 16.sp,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPointsAndDiscount(DateTime bookingDate, int discountPercentage) {
+    int getDayOfWeekFromDateString(String dateString) {
+      if (dateString.isEmpty || dateString == "") {
+        return -1;
+      }
+      // Parse the string to a DateTime object
+      DateTime date = DateTime.parse(dateString);
+
+      // Get the weekday (1 = Monday, 7 = Sunday)
+      int weekday = date.weekday;
+
+      // Return the weekday as 1 (Monday) to 7 (Sunday)
+      return weekday;
+    }
+
+    int day = getDayOfWeekFromDateString(bookingDate.toString());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Από την κράτηση σου κέρδισες $earnedPoints πόντους.',
+          day == 7 // Sunday
+              ? 'Από την κράτηση σου κέρδισες 100 πόντους.'
+              : day == 6 // Saturday
+                  ? 'Από την κράτηση σου κέρδισες 50 πόντους.'
+                  : day == 5 // Friday
+                      ? 'Από την κράτηση σου κέρδισες 75 πόντους.'
+                      : 'Από την κράτηση σου κέρδισες 150 πόντους.', // All the rest
+
           style: TextStyle(
             color: Colors.white,
             fontSize: 14.sp,

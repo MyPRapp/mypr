@@ -92,30 +92,36 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
-  Future<void> _refresh() async {
-    context.read<GlobalStateProvider>().refreshProfilePage = false;
+  Future<void> _refresh(bool useAwaitFuture) async {
+    if (useAwaitFuture) {
+      await Future.delayed(Duration(seconds: 3));
+    }
+    if (mounted) {
+      context.read<GlobalStateProvider>().refreshProfilePage = false;
 
-    UserProvider userProvider = context.read<UserProvider>();
+      UserProvider userProvider = context.read<UserProvider>();
 
-    if (context.read<GlobalStateProvider>().isAuthenticated) {
-      context.read<GlobalStateProvider>().isAuthenticated = true;
-      await userProvider.fetchUserDetailsFromServer();
+      if (context.read<GlobalStateProvider>().isAuthenticated) {
+        context.read<GlobalStateProvider>().isAuthenticated = true;
+        await userProvider.fetchUserDetailsFromServer();
 
-      if (mounted) {
-        await context.read<BookingProvider>().fetchBookings(
-            userProvider.userDetails, context.read<ClubProvider>());
+        if (mounted) {
+          await context.read<BookingProvider>().fetchBookings(
+              userProvider.userDetails, context.read<ClubProvider>());
+        }
       }
-    }
-    if (mounted && !context.read<GlobalStateProvider>().hasVerifiedEmail) {
-      fetchVerifiedEmailGlobalVariable(context);
-      print('FETCHED');
-    }
+      if (mounted && !context.read<GlobalStateProvider>().hasVerifiedEmail) {
+        emailLoop(context);
+      }
 
-    _triggerAnimation();
-    // if (mounted) {
-    //   context.read<GlobalStateProvider>().refreshProfilePage = false;
-    //   print('CANCELED');
-    // }
+      if (!useAwaitFuture) {
+        _triggerAnimation();
+      }
+      // if (mounted) {
+      //   context.read<GlobalStateProvider>().refreshProfilePage = false;
+      //   print('CANCELED');
+      // }
+    }
   }
 
   void _showSignOutDialog(BuildContext context) {
@@ -255,11 +261,17 @@ class _ProfilePageState extends State<ProfilePage> {
     final bool hasVerifiedEmail =
         context.watch<GlobalStateProvider>().hasVerifiedEmail;
     final int points = context.watch<UserProvider>().userDetails.points;
+
+    if (context.watch<GlobalStateProvider>().refreshProfilePage == true) {
+      _refresh(true);
+    }
     return PopScope(
       canPop: false,
       child: RefreshIndicator.adaptive(
         color: appRedColor,
-        onRefresh: _refresh,
+        onRefresh: () {
+          return _refresh(false);
+        },
         child: Scaffold(
           //  backgroundColor: const Color.fromARGB(192, 37, 37, 37),
           backgroundColor: const Color.fromARGB(255, 20, 20, 20),

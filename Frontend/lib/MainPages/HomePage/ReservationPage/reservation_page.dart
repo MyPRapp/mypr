@@ -47,6 +47,7 @@ class _ReservationPageState extends State<ReservationPage> {
   // State variables for managing the page
   bool isDiscountApplied = false; // Flag to check if discount is applied
   bool buttonIsVisible = true; // Flag to toggle the visibility of submit button
+  final ScrollController _scrollController = ScrollController();
 
 // List of catalogues for different types of services in the club
   List<CatalogueInfoStruct> localCatalogues = [
@@ -209,6 +210,9 @@ class _ReservationPageState extends State<ReservationPage> {
         context.watch<GlobalStateProvider>().isAuthenticated;
     final bool hasVerifiedEmail =
         context.watch<GlobalStateProvider>().hasVerifiedEmail;
+    if (context.watch<GlobalStateProvider>().refreshReservationPage == true) {
+      _refresh();
+    }
     return PopScope(
       canPop: buttonIsVisible,
       onPopInvokedWithResult: (didPop, result) {
@@ -235,6 +239,7 @@ class _ReservationPageState extends State<ReservationPage> {
                     ),
                   ),
                   child: ListView(
+                    controller: _scrollController,
                     children: [
                       buildContent(isAuthenticated, hasVerifiedEmail),
                       if (isAuthenticated) ...[
@@ -246,6 +251,19 @@ class _ReservationPageState extends State<ReservationPage> {
                       ]
                     ],
                   ),
+                ),
+                BottomAnchorIcon(
+                  onTap: () {
+                    // Scroll to the bottom when the icon is tapped
+                    _scrollController.animateTo(
+                      _scrollController
+                          .position.maxScrollExtent, // Bottom position
+                      duration: isAuthenticated
+                          ? Duration(seconds: 1)
+                          : Duration(milliseconds: 200), // Animation duration
+                      curve: Curves.easeOut, // Animation curve
+                    );
+                  },
                 ),
                 if (!hasVerifiedEmail && isAuthenticated)
                   EmailConfirmationNotification(
@@ -427,6 +445,26 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Builds the reservation form with various input fields.
   Widget buildReservationForm() {
+    int getDayOfWeekFromDateString(String dateString) {
+      if (dateString.isEmpty || dateString == "") {
+        return -1;
+      }
+      // Parse the string to a DateTime object
+      DateTime date = DateTime.parse(dateString);
+
+      // Get the weekday (1 = Monday, 7 = Sunday)
+      int weekday = date.weekday;
+
+      // Return the weekday as 1 (Monday) to 7 (Sunday)
+      return weekday;
+    }
+
+    int day = getDayOfWeekFromDateString(
+        context.watch<ReservationProvider>().reservationInfo[8]);
+    bool showLabel = day >= 0 &&
+        day <= 7 &&
+        context.watch<ReservationProvider>().reservationInfo[4] > 0;
+
     return Column(
       children: [
         NameTextField(nameController: _nameController),
@@ -450,6 +488,20 @@ class _ReservationPageState extends State<ReservationPage> {
         SizedBox(height: 20.h),
         CommentSection(
             commentController: _commentController), // Optional comment field
+        if (showLabel)
+          Text(
+            day == 7 // Sunday
+                ? 'Από την κράτηση σου θα κερδίσεις 100 πόντους'
+                : day == 6 // Saturday
+                    ? 'Από την κράτηση σου θα κερδίσεις 50 πόντους'
+                    : day == 5 // Friday
+                        ? 'Από την κράτηση σου θα κερδίσεις 75 πόντους'
+                        : 'Από την κράτηση σου θα κερδίσεις 150 πόντους', // All the rest
+            style: TextStyle(
+                fontSize: 14.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w500),
+          )
       ],
     );
   }

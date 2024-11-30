@@ -226,8 +226,7 @@ AppBar buildAppBar(BuildContext context, String title) {
 Future<void> sendVerificationEmail(BuildContext context) async {
   if (emailOtpService.canSend) {
     emailOtpService.startTimer();
-    showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
-        const Duration(milliseconds: 4000), context);
+
     var response = await http.post(
       Uri.parse('$apiUrl/email-resend/'),
       headers: {
@@ -237,11 +236,19 @@ Future<void> sendVerificationEmail(BuildContext context) async {
     ).timeout(const Duration(seconds: 10));
 
     if (response.statusCode == 200) {
+      if (context.mounted) {
+        showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
+            const Duration(milliseconds: 4000), context);
+      }
       successPrint(response.body);
       if (context.mounted) {
         emailLoop(context);
       }
     } else {
+      if (context.mounted) {
+        showFloatingSnackBar('Υπήρξε κάποιο σφάλμα. Ξαναδοκίμασε σε λίγο',
+            const Duration(milliseconds: 4000), context);
+      }
       errorPrint('${response.statusCode}');
       errorPrint(response.body);
     }
@@ -520,7 +527,6 @@ Future<void> openStore() async {
     // Android: Play Store URL with the app package ID
     url = 'https://play.google.com/store/apps/details?id=com.etairia.mypr';
   } else if (Platform.isIOS) {
-    //TODO Change urls
     // iOS: Play Store URL with the app ID
     url = 'https://apps.apple.com/gr/app/mypr/id6711330363';
   } else {
@@ -740,20 +746,75 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                   IconButton(
                     icon: Icon(Icons.send, color: Colors.white, size: 15.sp),
                     onPressed: () async {
+                      FocusScope.of(context).unfocus();
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(_controller.text)) {
+                        showFloatingSnackBar(
+                            "Λάθος μορφή email", Duration(seconds: 3), context);
+                        _controller.clear();
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
                       if (_controller.text ==
                           context.read<UserProvider>().userDetails.email) {
                         showFloatingSnackBar("Το email χρησιμοποιείται ήδη",
                             Duration(seconds: 3), context);
-                        return;
+                        _controller.clear();
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       }
 
-                      String currentEmail =
-                          context.read<UserProvider>().userDetails.email;
-                      bool success = await AuthService()
-                          .changeEmailOnServerOnly(_controller.text);
-                      if (success && context.mounted) {
+                      int success = 1;
+                      if (context.mounted) {
+                        success = await AuthService()
+                            .changeEmailOnServerOnly(_controller.text);
+                      }
+                      if (success == 0 && context.mounted) {
                         context.read<GlobalStateProvider>().hasVerifiedEmail =
                             false;
+                      } else {
+                        if (success == 2) {
+                          if (context.mounted) {
+                            showFloatingSnackBar(
+                                "Το email χρησιμοποιείται ήδη ή δεν υπάρχει",
+                                Duration(seconds: 3),
+                                context);
+                          }
+                        } else {
+                          if (success == 1) {
+                            if (context.mounted) {
+                              showFloatingSnackBar(
+                                  "Υπήρξε κάποιο σφάλμα. Δοκιμάστε ξανά σε λίγο",
+                                  Duration(seconds: 3),
+                                  context);
+                            }
+                          }
+                        }
+                        _controller.clear();
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+                      if (success == 0 &&
+                          context.mounted &&
+                          context
+                              .read<GlobalStateProvider>()
+                              .hasVerifiedEmail) {
+                        showFloatingSnackBar(
+                            "Υπήρξε κάποιο σφάλμα. Δοκιμάστε ξανά σε λίγο",
+                            Duration(seconds: 3),
+                            context);
+                        _controller.clear();
+
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
                       }
 
                       var response = await http.post(
@@ -763,29 +824,33 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                           'Authorization': 'Bearer ${await getAccessToken()}',
                         },
                       ).timeout(const Duration(seconds: 10));
-
                       if (response.statusCode == 200) {
                         successPrint(response.body);
-                      } else {
-                        bool success = await AuthService()
-                            .changeEmailOnServerOnly(currentEmail);
-                        while (!success) {
-                          await Future.delayed(Duration(seconds: 5));
-                          success = await AuthService()
-                              .changeEmailOnServerOnly(currentEmail);
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        await prefs.setString('savedPassword', '');
+                        if (context.mounted) {
+                          context
+                              .read<GlobalStateProvider>()
+                              .refreshProfilePage = true;
+                          showFloatingSnackBar("Στάλθηκε email επιβεβαίωσης",
+                              Duration(seconds: 3), context);
                         }
+                      } else {
                         errorPrint('${response.statusCode}');
                         errorPrint(response.body);
                         if (context.mounted) {
                           showFloatingSnackBar(
-                              "Το email χρησιμοποιείται ήδη ή δεν υπάρχει",
+                              "Υπήρξε κάποιο σφάλμα στην αποστολή του email επιβεβαίωσης",
                               Duration(seconds: 3),
                               context);
                         }
                       }
-
                       _controller.clear();
                       _toggleExpansion();
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
                     },
                   ),
                 ],
@@ -1181,8 +1246,8 @@ Future<void> emailLoop(BuildContext context) async {
       !context.read<GlobalStateProvider>().hasVerifiedEmail) {
     // Check if 5 minutes (300 seconds) have passed since start
     final elapsedTime = DateTime.now().difference(startTime);
-    if (elapsedTime.inSeconds >= 300) {
-      // Exit the loop if 5 minutes have passed
+    if (elapsedTime.inSeconds >= 600) {
+      // Exit the loop if 10 minutes have passed
       break;
     }
 

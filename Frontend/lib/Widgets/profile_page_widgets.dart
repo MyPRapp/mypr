@@ -118,7 +118,7 @@ class ProfileDialog extends StatelessWidget {
               ProfileInfoRow(label: "Κινητό", value: phone)
             else
               CustomPhoneButton(),
-            // CustomEmailButton(label: 'Αλλαγή email'),
+            CustomEmailButton(label: 'Αλλαγή email'),
             SizedBox(height: 20.h),
             ElevatedButton(
               style: ElevatedButton.styleFrom(

@@ -191,12 +191,11 @@ class AuthService {
     }
   }
 
-  Future<bool> changeEmailOnServerOnly(String email) async {
-    //TODO Check if this works
+  Future<int> changeEmailOnServerOnly(String email) async {
     String? accessToken = await getAccessToken();
     if (accessToken == null) {
       errorPrint('Access token is null. User is not authenticated.');
-      return false;
+      return 1;
     }
 
     try {
@@ -212,7 +211,7 @@ class AuthService {
         }),
       )
           .timeout(const Duration(seconds: 8), onTimeout: () {
-        // print("❌Can't connect to server. Request timed out.");
+        print("❌Can't connect to server. Request timed out.");
         return http.Response('Error: Timeout', 408); // 408 Request Timeout
       });
 
@@ -220,13 +219,19 @@ class AuthService {
         successPrint('Email changed successfully');
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('savedEmail', email);
-        return true;
+        return 0;
       } else {
-        errorPrint('Enail change failed: ${response.body}');
-        return false;
+        errorPrint('Email change failed: ${response.body}');
+        // Check if the response contains the specific error message
+        if (json.decode(response.body)['error'] ==
+            "This email is already in use by another user.") {
+          return 2;
+        }
+
+        return 1;
       }
     } catch (e) {
-      return false;
+      return 1;
     }
   }
 
