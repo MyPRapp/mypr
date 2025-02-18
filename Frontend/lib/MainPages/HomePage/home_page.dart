@@ -8,6 +8,7 @@ import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../Navigation/bottom_nav_bar.dart';
 import '../../Providers/club_provider.dart';
@@ -29,6 +30,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
       context.read<GlobalStateProvider>().refreshHomePage = false;
+      _checkFirstTime();
     });
   }
 
@@ -103,6 +105,16 @@ class _HomePageState extends State<HomePage> {
     final tabsRouter = AutoTabsRouter.of(context);
     if (tabsRouter.activeIndex != 1) {
       tabsRouter.setActiveIndex(1);
+    }
+  }
+
+  Future<void> _checkFirstTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+
+    if (!hasSeenDialog && mounted) {
+      showPointsReminderDialog(context);
+      await prefs.setBool('hasSeenPointsDialog', true);
     }
   }
 

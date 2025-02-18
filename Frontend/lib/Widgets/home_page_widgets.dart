@@ -207,6 +207,53 @@ class _BigClubCardState extends State<BigClubCard> {
     }
   }
 }
+
+void showPointsReminderDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return SizedBox(
+        child: AlertDialog(
+          backgroundColor: const Color.fromARGB(
+              255, 29, 29, 29), // Dark background for a sleek look
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r), // Smooth rounded edges
+          ),
+          title: Text(
+            "Υπενθύμιση Πόντων",
+            style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 19.sp,
+              color: const Color.fromARGB(
+                  255, 255, 0, 0), // Red accent color for contrast
+            ),
+          ),
+          content: Text(
+            "Δημιούργησε καινούργιο προφίλ και χρησιμοποίησε τους πόντους σου για εκπτώσεις σε φιάλες!",
+            style: TextStyle(
+              fontWeight: FontWeight.w600, fontSize: 14.sp,
+              color: Colors.grey[300], // Light grey for better readability
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white, // White text for visibility
+              ),
+              child: Text("Κλείσιμο",
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                  )),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
 /* 
 class SmallClubCard extends StatefulWidget {
   const SmallClubCard({
