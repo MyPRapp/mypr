@@ -687,9 +687,9 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        buildCounterRow('Απλή', 5),
-                        buildCounterRow('Special', 6),
-                        buildCounterRow('Premium', 7),
+                        buildCounterRow('Απλή', widget.regularCatalogue, 5),
+                        buildCounterRow('Special', widget.regularCatalogue, 6),
+                        buildCounterRow('Premium', widget.regularCatalogue, 7),
                       ],
                     ),
                   ),
@@ -702,14 +702,15 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     );
   }
 
-  Widget buildCounterRow(String label, int index) {
+  Widget buildCounterRow(
+      String label, CatalogueInfoStruct catalogue, int index) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            label,
+            '$label: ${catalogue.price}',
             style: TextStyle(color: Colors.white, fontSize: 14.sp),
           ),
           Row(

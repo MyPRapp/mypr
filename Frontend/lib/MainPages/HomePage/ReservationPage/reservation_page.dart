@@ -252,19 +252,6 @@ class _ReservationPageState extends State<ReservationPage> {
                     ],
                   ),
                 ),
-                BottomAnchorIcon(
-                  onTap: () {
-                    // Scroll to the bottom when the icon is tapped
-                    _scrollController.animateTo(
-                      _scrollController
-                          .position.maxScrollExtent, // Bottom position
-                      duration: isAuthenticated
-                          ? Duration(seconds: 1)
-                          : Duration(milliseconds: 200), // Animation duration
-                      curve: Curves.easeOut, // Animation curve
-                    );
-                  },
-                ),
                 if (!hasVerifiedEmail && isAuthenticated)
                   EmailConfirmationNotification(
                     text:
@@ -327,10 +314,10 @@ class _ReservationPageState extends State<ReservationPage> {
           SizedBox(height: 15.h),
           LocationWidget(locationName: widget.club.clubLocation),
           SizedBox(height: 60.h),
-          buildTitle('Φιάλες και Τιμές'), // Display packages
-          SizedBox(height: 10.h),
-          buildPackageInfo(),
-          SizedBox(height: 60.h),
+          // buildTitle('Φιάλες και Τιμές'), // Display packages
+          // SizedBox(height: 10.h),
+          // buildPackageInfo(),
+          // SizedBox(height: 60.h),
           isAuthenticated
               ? Column(
                   children: [
