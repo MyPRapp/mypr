@@ -188,6 +188,26 @@ AppBar buildAppBar(BuildContext context, String title) {
   );
 }
 
+class BannedBanner extends StatelessWidget {
+  const BannedBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color.fromARGB(255, 255, 187, 0),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+      child: Text(
+        'Ο λογαριασμός σου είναι αποκλεισμένος και δεν μπορείς να προβείς σε κρατήσεις προς το παρών',
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
 class EmailConfirmationNotification extends StatelessWidget {
   final String text;
 

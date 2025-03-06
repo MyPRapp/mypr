@@ -262,7 +262,9 @@ class _ReservationPageState extends State<ReservationPage> {
                   EmailConfirmationNotification(
                     text:
                         'Για να προχωρήσεις σε κράτηση παρακαλώ επιβεβαίωσε το email σου',
-                  )
+                  ),
+                if (!context.read<UserProvider>().userDetails.isBanned)
+                  BannedBanner()
               ],
             ),
           ),
@@ -310,8 +312,9 @@ class _ReservationPageState extends State<ReservationPage> {
       padding: EdgeInsets.only(left: 25.w, right: 25.w),
       child: Column(
         children: [
-          if (!hasVerifiedEmail &&
-              isAuthenticated) //top 'resend-email' banner is visible
+          if ((!hasVerifiedEmail && isAuthenticated) ||
+              (context.read<UserProvider>().userDetails.isBanned &&
+                  isAuthenticated)) //top 'resend-email' banner is visible
             SizedBox(height: 60.h),
           SizedBox(height: 20.h),
           buildClubImage(), // Display club image
@@ -555,7 +558,11 @@ class _ReservationPageState extends State<ReservationPage> {
           const Duration(milliseconds: 4000), context);
       return;
     }
-
+    if (context.read<UserProvider>().userDetails.isBanned) {
+      showFloatingSnackBar('Δεν μπορείς να κάνεις κράτηση προς το παρών',
+          const Duration(milliseconds: 4000), context);
+      return;
+    }
     String phone = context.read<UserProvider>().userDetails.phone;
 
     if (phone.length != 10 || !phone.startsWith('69')) {

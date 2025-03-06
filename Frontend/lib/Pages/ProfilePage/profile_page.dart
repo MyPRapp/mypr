@@ -294,8 +294,9 @@ class _ProfilePageState extends State<ProfilePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  if (!hasVerifiedEmail &&
-                                      isAuthenticated) //top 'resend-email' banner is visible
+                                  if ((!hasVerifiedEmail && isAuthenticated) ||
+                                      (userDetails.isBanned &&
+                                          isAuthenticated)) //top 'resend-email' banner is visible
                                     SizedBox(height: 40.h),
                                   SizedBox(height: 20.h),
                                   if (!isAuthenticated) SizedBox(height: 80.h),
@@ -519,6 +520,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   if (!hasVerifiedEmail && isAuthenticated)
                     EmailConfirmationNotification(
                         text: 'Παρακαλώ επιβεβαίωσε το email σου'),
+                  if (userDetails.isBanned) BannedBanner()
                 ],
               ),
             ),
