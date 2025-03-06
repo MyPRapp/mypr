@@ -283,7 +283,6 @@ Future<int> changePhoneOnServerOnly(String phone) async {
 }
 
 Future<bool> newUserAlertEmail() async {
-  print('aaa');
   final response = await http
       .post(
     Uri.parse('$apiUrl/send-email/'),

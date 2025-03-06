@@ -180,22 +180,18 @@ class _ProfilePageState extends State<ProfilePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       // Step 2: Retain specific keys and their values (excluding liked clubs)
-      // final String? savedEmail = prefs.getString('savedEmail');
-      // final String? savedPassword = prefs.getString('savedPassword');
+      final bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+      final bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
 
       // Step 3: Clear all preferences
       await prefs.clear();
       successPrint('Shared preferences cleared.');
 
       // Step 4: Restore the retained preferences (excluding liked clubs)
-      // if (savedEmail != null) {
-      //   await prefs.setString('savedEmail', savedEmail);
-      //   successPrint('Retained savedEmail: $savedEmail');
-      // }
-      // if (savedPassword != null) {
-      //   await prefs.setString('savedPassword', savedPassword);
-      //   successPrint('Retained savedPassword: $savedPassword');
-      // }
+      await prefs.setBool('hasSeenPointsDialog', hasSeenDialog);
+      successPrint('Retained hasSeenDialog: $hasSeenDialog');
+      await prefs.setBool('hasSentNewUserEmail', hasSentEmail);
+      successPrint('Retained hasSentEmail: $hasSentEmail');
 
       // Step 5: Clear liked clubs
       if (mounted) {

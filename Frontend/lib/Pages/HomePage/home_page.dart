@@ -35,6 +35,51 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = ScreenUtil().screenHeight;
+    final screenWidth = ScreenUtil().screenWidth;
+
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: Container(
+          decoration: _backgroundGradient(),
+          height: screenHeight,
+          width: screenWidth,
+          child: RefreshIndicator.adaptive(
+            color: const Color(0xFF9C0C04),
+            onRefresh: _initSyncing,
+            child: Padding(
+              padding: EdgeInsets.only(left: 10.w, right: 10.w),
+              child: ListView(
+                children: [
+                  ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: ScreenUtil().screenHeight),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 10.h),
+                        _buildHeader(screenWidth),
+                        SizedBox(height: 40.h),
+                        _buildResultsTitle(),
+                        SizedBox(height: 15.h),
+                        _buildClubList(screenHeight, screenWidth),
+                        _buildComingSoonText(),
+                        SizedBox(height: 140.h),
+                      ],
+                    ),
+                  ),
+                  const TermsAndPrivacyPolicy()
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _initSyncing() async {
     checkAppVersion(context);
     Future.wait([_fetchClubs(), _syncUser()]);
@@ -150,51 +195,6 @@ class _HomePageState extends State<HomePage> {
     if (!hasSentEmail && await newUserAlertEmail()) {
       await prefs.setBool('hasSentNewUserEmail', true);
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final screenHeight = ScreenUtil().screenHeight;
-    final screenWidth = ScreenUtil().screenWidth;
-
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        body: Container(
-          decoration: _backgroundGradient(),
-          height: screenHeight,
-          width: screenWidth,
-          child: RefreshIndicator.adaptive(
-            color: const Color(0xFF9C0C04),
-            onRefresh: _initSyncing,
-            child: Padding(
-              padding: EdgeInsets.only(left: 10.w, right: 10.w),
-              child: ListView(
-                children: [
-                  ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: ScreenUtil().screenHeight),
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10.h),
-                        _buildHeader(screenWidth),
-                        SizedBox(height: 40.h),
-                        _buildResultsTitle(),
-                        SizedBox(height: 15.h),
-                        _buildClubList(screenHeight, screenWidth),
-                        _buildComingSoonText(),
-                        SizedBox(height: 140.h),
-                      ],
-                    ),
-                  ),
-                  const TermsAndPrivacyPolicy()
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   BoxDecoration _backgroundGradient() {

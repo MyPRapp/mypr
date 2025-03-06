@@ -263,7 +263,7 @@ class _ReservationPageState extends State<ReservationPage> {
                     text:
                         'Για να προχωρήσεις σε κράτηση παρακαλώ επιβεβαίωσε το email σου',
                   ),
-                if (!context.read<UserProvider>().userDetails.isBanned)
+                if (context.read<UserProvider>().userDetails.isBanned)
                   BannedBanner()
               ],
             ),
