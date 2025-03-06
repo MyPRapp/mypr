@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -8,11 +7,10 @@ import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/services/auth_service.dart';
+import 'package:mypr/services/message_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -22,7 +20,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../Providers/global_state_provider.dart';
 import '../routes/app_router.gr.dart';
 
-String apiUrl = 'http://${GlobalStateProvider().validatedIp}/api';
 OtpService emailOtpService = OtpService();
 OtpService phoneOtpService = OtpService();
 
@@ -73,23 +70,6 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
 
     // If the new value contains restricted characters, return the old value
     return oldValue;
-  }
-}
-
-class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(197, 40, 40, 40),
-      body: Center(
-        child: SpinKitRing(
-          color: Color(0xFF9C0C04),
-          size: 50.0,
-        ),
-      ),
-    );
   }
 }
 
@@ -147,31 +127,16 @@ Future<String> getSavedEmail() async {
   }
 }
 
-void printReservationInfo(List<dynamic> reservationInfo) {
-  // print('\x1B[37mReservation Info:');
-  // print('UserID: ${reservationInfo[0]}');
-  // print('ReservationName: ${reservationInfo[1]}');
-  // print('ClubName: ${reservationInfo[2]}');
-  // print('Persons: ${reservationInfo[3]}');
-  // print('Price: ${reservationInfo[4]}');
-  // print('Regular: ${reservationInfo[5]}');
-  // print('Special: ${reservationInfo[6]}');
-  // print('Premium: ${reservationInfo[7]}');
-  // print('Date: ${reservationInfo[8]}');
-  // print('Comment: ${reservationInfo[9]}');
-  // print('Discount(%): ${reservationInfo[10]}');
-}
-
 void successPrint(String text) {
-  // print('✅$text');
+  print('✅$text');
 }
 
 void warningPrint(String text) {
-  // print('🟡$text');
+  print('🟡$text');
 }
 
 void errorPrint(String text) {
-  // print('❌$text');
+  print('❌$text');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
@@ -221,48 +186,6 @@ AppBar buildAppBar(BuildContext context, String title) {
       },
     ),
   );
-}
-
-Future<void> sendVerificationEmail(BuildContext context) async {
-  if (emailOtpService.canSend) {
-    emailOtpService.startTimer();
-
-    var response = await http.post(
-      Uri.parse('$apiUrl/email-resend/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${await getAccessToken()}',
-      },
-    ).timeout(const Duration(seconds: 10));
-
-    if (response.statusCode == 200) {
-      if (context.mounted) {
-        showFloatingSnackBar('Στάλθηκε email επιβεβαίωσης',
-            const Duration(milliseconds: 4000), context);
-      }
-      successPrint(response.body);
-      if (context.mounted) {
-        emailLoop(context);
-      }
-    } else {
-      if (context.mounted) {
-        showFloatingSnackBar('Υπήρξε κάποιο σφάλμα. Ξαναδοκίμασε σε λίγο',
-            const Duration(milliseconds: 4000), context);
-      }
-      errorPrint('${response.statusCode}');
-      errorPrint(response.body);
-    }
-  } else {
-    if (emailOtpService.awaitMinutes == 1) {
-      showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
-          const Duration(milliseconds: 4000), context);
-    } else {
-      showFloatingSnackBar(
-          'Ξαναδοκίμασε σε ${emailOtpService.awaitMinutes} λεπτά',
-          const Duration(milliseconds: 4000),
-          context);
-    }
-  }
 }
 
 class EmailConfirmationNotification extends StatelessWidget {
@@ -351,34 +274,6 @@ class BuildSignInOrRegisterButton extends StatelessWidget {
   }
 }
 
-Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
-  var response = await http.get(
-    Uri.parse('$apiUrl/user-auth-status/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${await getAccessToken()}',
-    },
-  ).timeout(const Duration(seconds: 10));
-
-  if (response.statusCode == 200) {
-    successPrint(response.body);
-    String jsonString = response.body;
-    Map<String, dynamic> jsonData = jsonDecode(jsonString); // Decode JSON
-
-    bool isVerified = jsonData['is_verified']; // Extract the boolean value
-    if (context.mounted) {
-      context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
-      return;
-    }
-    errorPrint('Not mounted');
-  }
-  errorPrint('${response.statusCode}');
-  errorPrint(response.body);
-  if (context.mounted) {
-    context.read<GlobalStateProvider>().hasVerifiedEmail = false;
-  }
-}
-
 void showFloatingSnackBar(
     String message, Duration duration, BuildContext context) {
   floatingSnackBar(
@@ -415,55 +310,24 @@ Future<String> getCurrentAppVersion() async {
 Future<void> checkAppVersion(BuildContext context) async {
   String currentVersion = await getCurrentAppVersion();
 
-  String minimumAndroidVersion = currentVersion;
-  String minimumIOSVersion = currentVersion;
-
   int comparison = 0;
   if (Platform.isAndroid) {
-    final url = '$apiUrl/version_control_android/';
-
-    try {
-      final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        minimumAndroidVersion = response.body.replaceAll('"', '');
-        comparison = compareVersions(currentVersion, minimumAndroidVersion);
-      } else {
-        errorPrint('Couldn\'t check version via server: ${response.body}');
-      }
-    } catch (e) {
-      errorPrint('Couldn\'t check version via server');
-    }
+    comparison =
+        await checkPlatformVersion(currentVersion, 'version_control_android');
+  } else if (Platform.isIOS) {
+    comparison =
+        await checkPlatformVersion(currentVersion, 'version_control_ios');
   } else {
-    if (Platform.isIOS) {
-      final url = '$apiUrl/version_control_ios/';
-
-      try {
-        final response =
-            await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-        if (response.statusCode == 200) {
-          minimumIOSVersion = response.body.replaceAll('"', '');
-        } else {
-          errorPrint('Couldn\'t check version via server');
-        }
-      } catch (e) {
-        errorPrint('Couldn\'t check version via server');
-      }
-      comparison = compareVersions(currentVersion, minimumIOSVersion);
-    } else {
-      errorPrint('$comparison');
-      comparison = -1;
-    }
+    comparison = -1;
   }
+
   if (comparison < 0 && context.mounted) {
     // If the current version is older than the minimum version
     showUpdateDialog(context);
     errorPrint('App must be updated');
-  } else {
-    if (context.mounted) {
-      context.read<GlobalStateProvider>().hasCheckedAppVersion;
-      successPrint('Your app is up-to-date!');
-    }
+  } else if (context.mounted) {
+    context.read<GlobalStateProvider>().hasCheckedAppVersion;
+    successPrint('Your app is up-to-date!');
   }
 }
 
@@ -493,6 +357,7 @@ void showUpdateDialog(context) {
               borderRadius: BorderRadius.circular(10.r), // Rounded corners
             ),
             elevation: 10, // Shadow depth
+            // ignore: deprecated_member_use
             shadowColor: Colors.black.withOpacity(0.5), // Shadow color
             backgroundColor: Colors.black, // Default background color
           ),
@@ -633,8 +498,7 @@ class CustomPhoneButtonState extends State<CustomPhoneButton> {
               if (isPhoneValid.isSuccess) {
                 var phone = isPhoneValid.phone;
                 if (phone.length == 10 && phone.startsWith('69')) {
-                  int result =
-                      await AuthService().changePhoneOnServerOnly(phone);
+                  int result = await changePhoneOnServerOnly(phone);
                   if (result == 0) {
                     if (context.mounted) {
                       context.read<UserProvider>().fetchUserDetailsFromServer();
@@ -770,8 +634,8 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
 
                       int success = 1;
                       if (context.mounted) {
-                        success = await AuthService()
-                            .changeEmailOnServerOnly(_controller.text);
+                        success =
+                            await changeEmailOnServerOnly(_controller.text);
                       }
                       if (success == 0 && context.mounted) {
                         context.read<GlobalStateProvider>().hasVerifiedEmail =
@@ -817,15 +681,7 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                         }
                       }
 
-                      var response = await http.post(
-                        Uri.parse('$apiUrl/email-resend/'),
-                        headers: {
-                          'Content-Type': 'application/json',
-                          'Authorization': 'Bearer ${await getAccessToken()}',
-                        },
-                      ).timeout(const Duration(seconds: 10));
-                      if (response.statusCode == 200) {
-                        successPrint(response.body);
+                      if (await resendVerificationEmail()) {
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
                         await prefs.setString('savedPassword', '');
@@ -837,8 +693,6 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                               Duration(seconds: 3), context);
                         }
                       } else {
-                        errorPrint('${response.statusCode}');
-                        errorPrint(response.body);
                         if (context.mounted) {
                           showFloatingSnackBar(
                               "Υπήρξε κάποιο σφάλμα στην αποστολή του email επιβεβαίωσης",
@@ -881,50 +735,6 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
               ),
       ),
     );
-  }
-}
-
-class OtpService {
-  bool canSend = true;
-  int awaitMinutes = 1;
-  Timer? timer;
-
-  Future<bool> sendOtp(
-      String phoneNumber, int otpCode, BuildContext context) async {
-    try {
-      final response = await http
-          .post(
-            Uri.parse('$apiUrl/send-otp/'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'phone_number': '+30$phoneNumber',
-              'otp': otpCode,
-            }),
-          )
-          .timeout(const Duration(seconds: 10));
-
-      if (response.statusCode == 200 && context.mounted) {
-        showFloatingSnackBar(
-            'Στάλθηκε κωδικός με SMS', Duration(seconds: 3), context);
-
-        startTimer();
-        return true;
-      } else {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
-  }
-
-  void startTimer() {
-    if (timer != null && timer!.isActive) return;
-
-    canSend = false;
-    timer = Timer(Duration(minutes: awaitMinutes), () {
-      awaitMinutes++;
-      canSend = true;
-    });
   }
 }
 

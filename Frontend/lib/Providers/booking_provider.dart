@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:mypr/Globals/structs.dart';
+import 'package:mypr/Globals/classes.dart';
 import 'package:mypr/Providers/club_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,7 +23,7 @@ class BookingProvider with ChangeNotifier {
     setLoading(true);
 
     try {
-      final bookingsData = await BookingService().getBookings();
+      final bookingsData = await getBookings();
       if (bookingsData != null && bookingsData.isNotEmpty) {
         warningPrint('Processing fetched bookings...');
         await _processFetchedBookings(bookingsData, userDetails, clubProvider);
@@ -202,6 +202,10 @@ class BookingProvider with ChangeNotifier {
     }
 
     return price;
+  }
+
+  BookingInfoStruct getBookingByBookingID(int bookingID) {
+    return bookings.firstWhere((booking) => booking.bookingID == bookingID);
   }
 
   // Helper method to toggle loading state

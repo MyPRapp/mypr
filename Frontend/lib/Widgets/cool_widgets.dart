@@ -40,6 +40,7 @@ class PulsingBorderState extends State<PulsingBorder>
           padding: const EdgeInsets.all(8.0),
           decoration: BoxDecoration(
             border: Border.all(
+              // ignore: deprecated_member_use
               color: Colors.red.withOpacity(_controller.value), // Grey or Red
               width: 2.0,
             ),
@@ -64,8 +65,11 @@ class FadingGradientLine extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
+            // ignore: deprecated_member_use
             Colors.red.withOpacity(0.0),
+            // ignore: deprecated_member_use
             Colors.red.withOpacity(0.8),
+            // ignore: deprecated_member_use
             Colors.red.withOpacity(0.0),
           ],
           begin: isHorizontal ? Alignment.centerLeft : Alignment.topCenter,
@@ -123,6 +127,7 @@ class GlowingPulseDotState extends State<GlowingPulseDot>
                 color: Colors.red, // Use grey or red depending on your theme
                 boxShadow: [
                   BoxShadow(
+                    // ignore: deprecated_member_use
                     color: Colors.red.withOpacity(0.7), // Glow effect
                     blurRadius: 20,
                     spreadRadius: 2,
@@ -256,8 +261,10 @@ class RippleButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        splashColor: Colors.red.withOpacity(0.4),
-        highlightColor: Colors.red.withOpacity(0.2),
+        // ignore: deprecated_member_use
+        splashColor: Colors.red.withOpacity(0.5),
+        // ignore: deprecated_member_use
+        highlightColor: Colors.red.withOpacity(0.5),
         onTap: onPressed,
         borderRadius: BorderRadius.circular(8.0),
         child: Container(
@@ -568,6 +575,7 @@ class _PulsingGlowState extends State<PulsingGlow>
         height: 50,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
+          // ignore: deprecated_member_use
           color: Colors.blue.withOpacity(0.7),
           boxShadow: [
             BoxShadow(color: Colors.blueAccent, blurRadius: 10, spreadRadius: 5)
@@ -735,6 +743,7 @@ class _ExpandingCircleState extends State<ExpandingCircle>
           width: _animation.value,
           height: _animation.value,
           decoration: BoxDecoration(
+            // ignore: deprecated_member_use
             color: Colors.green.withOpacity(0.5),
             shape: BoxShape.circle,
           ),

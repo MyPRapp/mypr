@@ -21,11 +21,11 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
   bool _isObscure = true;
   bool _isLoginPressed = false;
   String savedEmail = '';
   String savedPassword = '';
+
   @override
   void initState() {
     super.initState();
@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       });
       bool success = false;
 
-      success = await AuthService().login(
+      success = await login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );

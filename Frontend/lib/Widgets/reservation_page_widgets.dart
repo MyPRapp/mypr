@@ -3,32 +3,32 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:mypr/Globals/constants.dart';
+import 'package:mypr/services/points_service.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../Globals/classes.dart';
 import '../Globals/global_components.dart';
-import '../Globals/structs.dart';
 import '../Providers/reservation_provider.dart';
 import '../Providers/user_provider.dart';
 import '../services/auth_service.dart';
-import '../services/points_service.dart';
 
 class ReservationReview extends StatelessWidget {
   const ReservationReview({super.key});
 
   @override
   Widget build(BuildContext context) {
-    List<dynamic> reservationInfo =
-        context.read<ReservationProvider>().reservationInfo;
+    Reservation reservation = context.read<ReservationProvider>().reservation;
     // Format the date and price
-    String date = context.read<ReservationProvider>().reservationInfo[8];
-    final price = context.read<ReservationProvider>().reservationInfo[4];
+    String date = reservation.reservationDate;
+    final price = reservation.totalPrice;
 
     final formattedDate = _formatDate(date);
     final formattedPrice = price.toStringAsFixed(2);
 
     return Center(
       child: Material(
+        // ignore: deprecated_member_use
         color: Colors.black.withOpacity(0.8),
         child: Container(
           padding: EdgeInsets.all(15.sp),
@@ -51,10 +51,9 @@ class ReservationReview extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 4.h),
-              buildInfoRow('Όνομα κράτησης:',
-                  context.read<ReservationProvider>().reservationInfo[1]),
-              buildInfoRow('Μαγαζί:', reservationInfo[2]),
-              buildInfoRow('Άτομα:', reservationInfo[3].toString()),
+              buildInfoRow('Όνομα κράτησης:', reservation.reservationName),
+              buildInfoRow('Μαγαζί:', reservation.clubName),
+              buildInfoRow('Άτομα:', reservation.numberOfPersons.toString()),
               SizedBox(height: MediaQuery.sizeOf(context).height * 0.015),
               Align(
                 alignment: Alignment.centerLeft,
@@ -66,15 +65,18 @@ class ReservationReview extends StatelessWidget {
                   ),
                 ),
               ),
-              if (reservationInfo[5] > 0)
-                buildInfoRow('      Απλές:', reservationInfo[5].toString()),
-              if (reservationInfo[6] > 0)
-                buildInfoRow('      Special:', reservationInfo[6].toString()),
-              if (reservationInfo[7] > 0)
-                buildInfoRow('      Premium:', reservationInfo[7].toString()),
+              if (reservation.regularBottles > 0)
+                buildInfoRow(
+                    '      Απλές:', reservation.regularBottles.toString()),
+              if (reservation.specialBottles > 0)
+                buildInfoRow(
+                    '      Special:', reservation.specialBottles.toString()),
+              if (reservation.premiumBottles > 0)
+                buildInfoRow(
+                    '      Premium:', reservation.premiumBottles.toString()),
               buildInfoRow('Ημερομηνία:', formattedDate),
-              if (reservationInfo[9].isNotEmpty)
-                _buildCommentSection(reservationInfo[9]),
+              if (reservation.comment.isNotEmpty)
+                _buildCommentSection(reservation.comment),
               buildInfoRow('Συνολική Τιμή:', '$formattedPrice €'),
               SizedBox(height: 4.h),
               ElevatedButton(
@@ -182,6 +184,7 @@ class CommentSection extends StatelessWidget {
           style: TextStyle(color: Colors.white, fontSize: 13.sp),
           decoration: InputDecoration(
             filled: true,
+            // ignore: deprecated_member_use
             fillColor: Colors.white.withOpacity(0.2),
             hintText: 'Γράψε τα σχόλια σου εδώ...',
             hintStyle: TextStyle(color: Colors.white54, fontSize: 13.sp),
@@ -221,110 +224,6 @@ class MaxLinesAndLengthFormatter extends TextInputFormatter {
   }
 }
 
-class PackagesInfo extends StatefulWidget {
-  const PackagesInfo({
-    super.key,
-    required this.package,
-    required this.maxPersons,
-    required this.minPrice,
-  });
-
-  final String package;
-  final int maxPersons;
-  final int minPrice;
-
-  @override
-  PackagesInfoState createState() => PackagesInfoState();
-}
-
-class PackagesInfoState extends State<PackagesInfo> {
-  bool isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          isExpanded = !isExpanded;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 600),
-        height: isExpanded ? 100.h : 60.h,
-        width: double.infinity,
-        curve: Curves.easeInOut,
-        padding: EdgeInsets.only(top: 10.sp, left: 10.sp, right: 10.sp),
-        decoration: BoxDecoration(
-          color: const Color.fromARGB(179, 85, 85, 85), // Dark grey background
-          borderRadius: BorderRadius.circular(10.r),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10.sp,
-              spreadRadius: 2.sp,
-            ),
-          ],
-        ),
-        child: Column(
-          // mainAxisAlignment: MainAxisAlignment.spaceAround,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  widget.package,
-                  style: TextStyle(
-                    color: const Color.fromARGB(255, 0, 0, 0),
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                Icon(
-                  isExpanded ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                  size: 25.sp,
-                  color: const Color.fromARGB(255, 0, 0, 0),
-                )
-              ],
-            ),
-            SizedBox(height: 5.h),
-            // Delay rendering of expanded content
-            if (isExpanded)
-              Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        '${widget.maxPersons} άτομα', // Display max persons
-                        style: TextStyle(
-                            color: const Color.fromARGB(255, 17, 17, 17),
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                    Flexible(
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 5.sp),
-                        child: Text(
-                          '${widget.minPrice} €', // Display price
-                          style: TextStyle(
-                              color: const Color.fromARGB(255, 17, 17, 17),
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class NameTextField extends StatefulWidget {
   const NameTextField({super.key, required this.nameController});
   final TextEditingController nameController;
@@ -357,7 +256,9 @@ class NameTextFieldState extends State<NameTextField> {
       final userDetails = context.read<UserProvider>().userDetails;
       formattedName = '${userDetails.firstName} ${userDetails.lastName}';
     }
-    context.read<ReservationProvider>().setInfo(1, formattedName);
+    context
+        .read<ReservationProvider>()
+        .updateReservation(reservationName: formattedName);
     widget.nameController.text = formattedName;
   }
 
@@ -418,7 +319,7 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
       readOnly: true,
       controller: TextEditingController(
           text:
-              '  ${reservationProvider.getInfo(3).toString()}'), // Persons at index 3
+              '  ${reservationProvider.reservation.numberOfPersons.toString()}'), // Persons at index 3
       decoration: InputDecoration(
         contentPadding: EdgeInsets.all(10.sp),
         suffix: SizedBox(
@@ -458,9 +359,9 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
       child: IconButton(
         onPressed: () async {
           _focusNode.requestFocus();
-          int persons = reservationProvider.getInfo(3);
+          int persons = reservationProvider.reservation.numberOfPersons;
           if (persons > 1) {
-            reservationProvider.setInfo(3, persons - 1);
+            reservationProvider.updateReservation(numPersons: persons - 1);
           }
           await Future.delayed(const Duration(milliseconds: 2500));
           _focusNode.unfocus();
@@ -478,9 +379,9 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
         onPressed: () async {
           _focusNode.requestFocus();
           if (_validateBeforeAdding(reservationProvider, context)) {
-            int persons = reservationProvider.getInfo(3);
+            int persons = reservationProvider.reservation.numberOfPersons;
             if (persons < maxPersons) {
-              reservationProvider.setInfo(3, persons + 1);
+              reservationProvider.updateReservation(numPersons: persons + 1);
             } else if (persons == maxPersons) {
               showFloatingSnackBar(
                   'Μέγιστος αριθμός ατόμων. Για διαφορετικό πακέτο επικοινώνησε μαζί μας.',
@@ -501,9 +402,9 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
 
   bool _validateBeforeAdding(
       ReservationProvider reservationProvider, BuildContext context) {
-    if (reservationProvider.getInfo(5) == 0 &&
-        reservationProvider.getInfo(6) == 0 &&
-        reservationProvider.getInfo(7) == 0) {
+    if (reservationProvider.reservation.regularBottles == 0 &&
+        reservationProvider.reservation.specialBottles == 0 &&
+        reservationProvider.reservation.premiumBottles == 0) {
       showFloatingSnackBar('Παρακαλώ επίλεξε φιάλη πρώτα',
           const Duration(milliseconds: 4000), context);
       return false;
@@ -577,11 +478,11 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
 
   void _updatePriceText() {
     if (mounted) {
-      double price = reservationProvider.getInfo(4);
-      int discount = reservationProvider.getInfo(10);
-      int regularBottles = reservationProvider.getInfo(5);
-      int specialBottles = reservationProvider.getInfo(6);
-      int premiumBottles = reservationProvider.getInfo(7);
+      double price = reservationProvider.reservation.totalPrice;
+      int discount = reservationProvider.reservation.discountPercentage;
+      int regularBottles = reservationProvider.reservation.regularBottles;
+      int specialBottles = reservationProvider.reservation.specialBottles;
+      int premiumBottles = reservationProvider.reservation.premiumBottles;
 
       if (discount > 0) {
         if (regularBottles >= 1) {
@@ -610,9 +511,29 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
   }
 
   void increment(int index) {
-    if (reservationProvider.reservationInfo[index] < 9) {
+    if (index < 0 || index > 2) return; // Ensure index is valid
+
+    final reservationProvider = context.read<ReservationProvider>();
+
+    // Get the current bottle count based on index
+    int currentCount;
+    if (index == 0) {
+      currentCount = reservationProvider.reservation.regularBottles;
+    } else if (index == 1) {
+      currentCount = reservationProvider.reservation.specialBottles;
+    } else {
+      currentCount = reservationProvider.reservation.premiumBottles;
+    }
+
+    // Ensure it doesn't exceed the limit (9 bottles)
+    if (currentCount < 9) {
       setState(() {
-        reservationProvider.reservationInfo[index]++;
+        reservationProvider.updateReservation(
+          numRegularBottles: index == 0 ? currentCount + 1 : null,
+          numSpecialBottles: index == 1 ? currentCount + 1 : null,
+          numPremiumBottles: index == 2 ? currentCount + 1 : null,
+        );
+
         widget.onCountersChanged();
       });
     } else {
@@ -624,11 +545,29 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
   }
 
   void decrement(int index) {
-    if (reservationProvider.reservationInfo[index] > 0) {
-      setState(() {
-        reservationProvider.reservationInfo[index]--;
-        widget.onCountersChanged();
-      });
+    if (index < 0 || index > 2) return; // Ensure index is valid
+
+    final reservationProvider = context.read<ReservationProvider>();
+
+    // Get the current bottle count based on index
+    int currentCount;
+    if (index == 0) {
+      currentCount = reservationProvider.reservation.regularBottles;
+    } else if (index == 1) {
+      currentCount = reservationProvider.reservation.specialBottles;
+    } else {
+      currentCount = reservationProvider.reservation.premiumBottles;
+    }
+
+    // Ensure it doesn't go below 0
+    if (currentCount > 0) {
+      reservationProvider.updateReservation(
+        numRegularBottles: index == 0 ? currentCount - 1 : null,
+        numSpecialBottles: index == 1 ? currentCount - 1 : null,
+        numPremiumBottles: index == 2 ? currentCount - 1 : null,
+      );
+
+      widget.onCountersChanged();
     }
   }
 
@@ -687,9 +626,9 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        buildCounterRow('Απλή', widget.regularCatalogue, 5),
-                        buildCounterRow('Special', widget.regularCatalogue, 6),
-                        buildCounterRow('Premium', widget.regularCatalogue, 7),
+                        buildCounterRow('Απλή', widget.regularCatalogue, 0),
+                        buildCounterRow('Special', widget.specialCatalogue, 1),
+                        buildCounterRow('Premium', widget.premiumCatalogue, 2),
                       ],
                     ),
                   ),
@@ -720,7 +659,15 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                 icon: Icon(Icons.remove, color: Colors.white, size: 18.sp),
               ),
               Text(
-                reservationProvider.reservationInfo[index].toString(),
+                index == 0
+                    ? (reservationProvider.reservation.regularBottles)
+                        .toString()
+                    : index == 1
+                        ? (reservationProvider.reservation.specialBottles)
+                            .toString()
+                        : (reservationProvider.reservation.premiumBottles)
+                            .toString(),
+                // reservationProvider.reservationInfo[index].toString(),
                 style: TextStyle(color: Colors.white, fontSize: 14.sp),
               ),
               IconButton(
@@ -735,7 +682,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
   }
 
   Widget priceText() {
-    if (reservationProvider.getInfo(4) > 0) {
+    if (reservationProvider.reservation.totalPrice > 0) {
       return Row(
         children: [
           Text(
@@ -745,7 +692,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
               fontSize: 14.sp,
             ),
           ),
-          reservationProvider.getInfo(10) <= 0
+          reservationProvider.reservation.discountPercentage <= 0
               ? Text(
                   priceController.text,
                   style: TextStyle(
@@ -765,7 +712,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
                           fontWeight: FontWeight.w800),
                     ),
                     Text(
-                      ' ${reservationProvider.getInfo(4).toStringAsFixed(2)} €',
+                      ' ${reservationProvider.reservation.totalPrice.toStringAsFixed(2)} €',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14.sp,
@@ -929,7 +876,7 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
             // Update the selected date in the ReservationProvider
             context
                 .read<ReservationProvider>()
-                .setInfo(8, _selectedDate.toString());
+                .updateReservation(reservationDate: _selectedDate.toString());
           }
         }
       },
@@ -1012,9 +959,8 @@ Widget buildInfoRow(String label, String value) {
 /// Safely retracts points for the discount and updates the provider.
 Future<void> retractPoints(int pointsToRetract) async {
   try {
-    await AuthService()
-        .refreshAccessToken(); // Ensure token is valid before retracting points
-    await PointsService().retractPoints(pointsToRetract);
+    await refreshAccessToken(); // Ensure token is valid before retracting points
+    await reducePoints(pointsToRetract);
   } catch (error) {
     // print("❌Failed to retract points: $error");
     await Future.delayed(const Duration(seconds: 5));
@@ -1067,33 +1013,29 @@ class _LocationWidgetState extends State<LocationWidget> {
       },
       borderRadius: BorderRadius.circular(
           12.r), // Ensures ripple effect follows the shape
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12.5.w),
-        child: Container(
-          padding: EdgeInsets.all(10.sp),
-          decoration: BoxDecoration(
-            color: _isPressed
-                ? const Color.fromARGB(255, 49, 49, 49) // Change color on tap
-                : const Color.fromARGB(255, 68, 68, 68),
-            borderRadius: BorderRadius.circular(12.r),
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.location_on, color: Colors.white, size: 18.sp),
-              SizedBox(width: 5.w),
-              Text(
-                widget.locationName,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+      child: Container(
+        padding: EdgeInsets.all(10.sp),
+        decoration: BoxDecoration(
+          color: _isPressed
+              ? const Color.fromARGB(255, 49, 49, 49) // Change color on tap
+              : const Color.fromARGB(255, 68, 68, 68),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.location_on, color: Colors.white, size: 18.sp),
+            SizedBox(width: 5.w),
+            Text(
+              widget.locationName,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 12.sp,
+                fontWeight: FontWeight.bold,
               ),
-              const Spacer(),
-              Icon(Icons.keyboard_arrow_right,
-                  color: Colors.white, size: 18.sp),
-            ],
-          ),
+            ),
+            const Spacer(),
+            Icon(Icons.keyboard_arrow_right, color: Colors.white, size: 18.sp),
+          ],
         ),
       ),
     );
@@ -1135,31 +1077,67 @@ class WorkingDays extends StatelessWidget {
   }
 }
 
-class BottomAnchorIcon extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const BottomAnchorIcon({super.key, required this.onTap});
+class AlertsList extends StatelessWidget {
+  final String alerts;
+  const AlertsList({super.key, required this.alerts});
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: 20.h),
-          child: Container(
-            padding: EdgeInsets.all(5.sp),
-            decoration: BoxDecoration(
-              color: Colors.black,
-              shape: BoxShape.circle,
+    if (alerts.trim().isEmpty || alerts == "No comment") {
+      return SizedBox.shrink(); // Returns an invisible widget
+    }
+
+    List<String> alertsList = alerts.split('\n');
+
+    return Padding(
+      padding: EdgeInsets.only(top: 15.h),
+      child: Column(
+        children: alertsList
+            .map((alert) => AlertsAndNotifications(textAlert: alert))
+            .toList(),
+      ),
+    );
+  }
+}
+
+class AlertsAndNotifications extends StatelessWidget {
+  final String textAlert;
+  const AlertsAndNotifications({super.key, required this.textAlert});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 3.h),
+      child: Container(
+        padding: EdgeInsets.all(10.sp),
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 235, 39, 39),
+          borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: 8,
+              offset: Offset(0, 4),
             ),
-            child: Icon(
-              Icons.arrow_downward,
-              color: Colors.grey,
-              size: 35.sp,
+          ],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.warning, color: Colors.white, size: 20.sp),
+            SizedBox(width: 8.w),
+            Expanded(
+              // Ensures text wraps properly
+              child: Text(
+                textAlert,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );

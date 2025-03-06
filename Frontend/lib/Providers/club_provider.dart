@@ -3,35 +3,22 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mypr/Globals/constants.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../Globals/classes.dart';
 import '../Globals/global_components.dart';
-import '../Globals/structs.dart';
 import 'photo_manager.dart';
 
 class ClubProvider with ChangeNotifier {
   final List<ClubInfoStruct> _clubs = [];
   final List<CatalogueInfoStruct> _catalogues = [];
-  final PhotoManager _photoManager = PhotoManager();
-
-  final List<ClubInfoStruct> _tempClubs = [];
-  final List<CatalogueInfoStruct> _tempCatalogues = [];
 
   List<ClubInfoStruct> get allClubs => _clubs;
   List<CatalogueInfoStruct> get allCatalogues => _catalogues;
 
-//// Syncs clubs from the server, loads from file if fetch fails
-  Future<void> syncClubs() async {
-    warningPrint('------------SYNCING CLUBS------------');
-    try {
-      await fetchAndSaveClubsAndCatalogues(); // Fetch from server
-    } catch (e) {
-      await loadClubsFromFile();
-      await loadCataloguesFromFile();
-    }
-    successPrint('------------SYNCED CLUBS------------');
-  }
-////////////////////////////////////////////////////////////////
+  final List<ClubInfoStruct> _tempClubs = [];
+  final List<CatalogueInfoStruct> _tempCatalogues = [];
 
 //// Fetch From Server Functions
   Future<void> fetchAndSaveClubsAndCatalogues() async {
@@ -51,42 +38,38 @@ class ClubProvider with ChangeNotifier {
 
         for (var item in data) {
           final club = ClubInfoStruct.fromJson(item);
+          if (club.clubID < 0) {
+            errorPrint("ClubID is incorrect");
+            return;
+          }
 
-          // Download and save club photo
-          if (club.clubID >= 0) {
-            if (club.clubPhoto.isNotEmpty) {
-              String localPath = await _photoManager.downloadAndSaveClubPhoto(
+          // Store local path in the club object
+          club.localPhotoPath = await PhotoManager.instance
+              .downloadAndSaveClubPhoto(
                   club.clubPhoto, 'club_${club.clubID}_photo');
 
-              club.localPhotoPath =
-                  localPath; // Store local path in the club object
-            } else {
-              errorPrint('Club photo URL is empty');
-            }
+          // Save club details
+          _tempClubs.add(club);
 
-            // Save club details
-            _tempClubs.add(club);
-
-            // Fetch catalogues for the club
-            await fetchCatalogues(club);
-          }
+          // Fetch catalogues for the club
+          await fetchCatalogues(club);
         }
 
-        await checkForRemovedClubs();
-        await addNewClubs();
-        await sortClubs(_clubs);
+        await deleteUnusedClubs();
+        await addTempClubsToMainClubs();
+        await sortClubsByPriority(_clubs);
 
         // Save fetched clubs and catalogues locally for offline use
         await Future.wait([saveClubsToFile(), saveCataloguesToFile()]);
       } else {
         errorPrint(
             'Error fetching clubs from server, loading from local storage');
-        throw Exception('Failed to load clubs: ${response.reasonPhrase}');
+        errorPrint('Failed to load clubs: ${response.reasonPhrase}');
       }
     } catch (e) {
       // print(
       //     '❌Error fetching clubs from server, loading from local storage: $e');
-      throw Exception('Failed to load clubs');
+      errorPrint('Failed to load clubs: $e');
     }
   }
 
@@ -110,18 +93,7 @@ class ClubProvider with ChangeNotifier {
           _tempCatalogues.add(catalogue);
 
           if (catalogue.serviceType == 'Regular') {
-            club.clubMinPrice =
-                (double.tryParse(catalogue.price)?.toInt() ?? 0);
-            club.clubMaxPersons = catalogue.maxPersons;
-            int index = _tempClubs.indexWhere((c) => c.clubID == club.clubID);
-
-            if (index != -1) {
-              // Club exists, update the existing entry
-              _tempClubs[index] = club;
-            } else {
-              // Club does not exist, add it to the list
-              _tempClubs.add(club);
-            }
+            addMinPriceAndMaxPersonsToClub(club, catalogue);
           }
         }
       } else {
@@ -132,7 +104,37 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  Future<void> checkForRemovedClubs() async {
+  Future<void> addMinPriceAndMaxPersonsToClub(
+      ClubInfoStruct club, CatalogueInfoStruct catalogue) async {
+    club.clubMinPrice = (double.tryParse(catalogue.price)?.toInt() ?? 0);
+    club.clubMaxPersons = catalogue.maxPersons;
+    int index = _tempClubs.indexWhere((c) => c.clubID == club.clubID);
+
+    if (index != -1) {
+      // Club exists, update the existing entry
+      _tempClubs[index] = club;
+    } else {
+      printAllClubs();
+      print('a\n');
+      print(club.clubID);
+      printClubWithID(club.clubID);
+      // Club does not exist, add it to the list
+      index = _clubs.indexWhere((c) => c.clubID == club.clubID);
+      if (index == -1) {
+        _tempClubs.add(club);
+        errorPrint("Club wasn't found");
+      } else {
+        addOrUpdateClub(club);
+      }
+    }
+  }
+
+  Future<void> deleteUnusedClubs() async {
+    await deleteUnusedClubsAndCatalogues();
+    await deleteUnusedClubPhotos();
+  }
+
+  Future<void> deleteUnusedClubsAndCatalogues() async {
     // Store clubs to remove in a temporary list
     List<ClubInfoStruct> clubsToRemove = [];
 
@@ -152,7 +154,11 @@ class ClubProvider with ChangeNotifier {
     }
     // Remove clubs after iteration
     _clubs.removeWhere((club) => clubsToRemove.contains(club));
+    deleteUnusedCatalogues(clubsToRemove);
+  }
 
+  Future<void> deleteUnusedCatalogues(
+      List<ClubInfoStruct> clubsToRemove) async {
     List<CatalogueInfoStruct> cataloguesToRemove = [];
 
     for (var catalogue in _catalogues) {
@@ -174,8 +180,6 @@ class ClubProvider with ChangeNotifier {
 
     _catalogues
         .removeWhere((catalogue) => cataloguesToRemove.contains(catalogue));
-
-    await deleteUnusedClubPhotos();
   }
 
   Future<void> deleteUnusedClubPhotos() async {
@@ -217,7 +221,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  Future<void> addNewClubs() async {
+  Future<void> addTempClubsToMainClubs() async {
     for (var club in _tempClubs) {
       addOrUpdateClub(club);
     }
@@ -226,7 +230,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sortClubs(List<ClubInfoStruct> clubList) async {
+  Future<void> sortClubsByPriority(List<ClubInfoStruct> clubList) async {
     clubList.sort((a, b) {
       if (a.clubPriority == -1) return 1; // Place -1 last
       if (b.clubPriority == -1) return -1; // Place -1 last
@@ -285,7 +289,7 @@ class ClubProvider with ChangeNotifier {
     // Save club data as JSON in local storage
     String jsonClubs = jsonEncode(_clubs.map((club) => club.toJson()).toList());
     await file.writeAsString(jsonClubs);
-    successPrint('Clubs saved to $filePath');
+    successPrint('Clubs saved to file');
   }
 
   Future<void> saveCataloguesToFile() async {
@@ -296,7 +300,7 @@ class ClubProvider with ChangeNotifier {
     String jsonCatalogues =
         jsonEncode(_catalogues.map((catalogue) => catalogue.toJson()).toList());
     await file.writeAsString(jsonCatalogues);
-    successPrint('Catalogues saved to $filePath');
+    successPrint('Catalogues saved to file');
   }
 ////////////////////////////////////////////////////////////////
 
@@ -327,7 +331,7 @@ class ClubProvider with ChangeNotifier {
       }
 
       notifyListeners();
-      successPrint('Clubs loaded from $filePath');
+      successPrint('Clubs loaded from file');
     } else {
       errorPrint('Clubs file does not exist');
     }
@@ -347,7 +351,7 @@ class ClubProvider with ChangeNotifier {
           .toList());
 
       notifyListeners();
-      successPrint('Catalogues loaded from $filePath');
+      successPrint('Catalogues loaded from file');
     } else {
       errorPrint('Catalogues file does not exist');
     }
@@ -373,7 +377,6 @@ class ClubProvider with ChangeNotifier {
         _clubs.add(club);
         successPrint('Club \'${club.clubName}\' added.');
       }
-
       notifyListeners();
     } catch (e) {
       errorPrint('Error in addOrUpdateClub for clubID ${club.clubID}: $e');
@@ -409,7 +412,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-//// Get catalogues functions
+//// Get functions
   //Method to initialize catalogues based on club ID and update the provided CatalogueInfoStruct variables
   List<CatalogueInfoStruct> getAllCataloguesForClubWithID(int clubID) {
     ClubInfoStruct club = getClubByID(clubID);
@@ -434,13 +437,11 @@ class ClubProvider with ChangeNotifier {
     }
     return _catalogues[0];
   }
-////////////////////////////////////////////////////////////////
 
-//// UTILITY / HELPER FUNCTIONS
-  String getClubAvailability(String clubName) {
+  String getclubAvailableDays(String clubName) {
     return _clubs
         .firstWhere((club) => club.clubName == clubName)
-        .clubAvailability;
+        .clubAvailableDays;
   }
 
   ClubInfoStruct getClubByID(int clubID) {
@@ -475,7 +476,7 @@ class ClubProvider with ChangeNotifier {
   void printAllClubs() {
     for (var club in _clubs) {
       print(
-          '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
+          '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
     }
   }
 
@@ -487,14 +488,14 @@ class ClubProvider with ChangeNotifier {
 
   void printClub(ClubInfoStruct club) {
     print(
-        '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
+        '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
   }
 
   void printClubWithID(int id) {
     for (var club in _clubs) {
       if (club.clubID == id) {
         print(
-            '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
+            '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
         return;
       }
     }
@@ -505,7 +506,7 @@ class ClubProvider with ChangeNotifier {
     for (var club in _clubs) {
       if (club.clubName == clubName) {
         print(
-            '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailability:"${club.clubAvailability},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
+            '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
         return;
       }
     }

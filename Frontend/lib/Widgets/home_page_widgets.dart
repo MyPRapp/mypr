@@ -9,7 +9,7 @@ import 'package:mypr/Widgets/club_card_widgets.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:provider/provider.dart';
 
-import '../Globals/structs.dart';
+import '../Globals/classes.dart';
 
 class BigClubCard extends StatefulWidget {
   const BigClubCard(
@@ -27,6 +27,8 @@ class BigClubCard extends StatefulWidget {
 }
 
 class _BigClubCardState extends State<BigClubCard> {
+  double _scale = 0;
+
   @override
   void initState() {
     super.initState();
@@ -48,14 +50,11 @@ class _BigClubCardState extends State<BigClubCard> {
 
     // Get the substring after the last comma and trim whitespaces
     String result = parts.last.trim();
-
     return result;
   }
 
-  double _scale = 0;
   @override
   Widget build(BuildContext context) {
-    final screenWidth = widget.screenWidth;
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
@@ -93,7 +92,7 @@ class _BigClubCardState extends State<BigClubCard> {
                           topLeft: Radius.circular(10.r)),
                       child: SizedBox(
                           height: 140.h,
-                          width: screenWidth * 0.3,
+                          width: widget.screenWidth * 0.3,
                           child: buildImage()),
                     ),
                   ),
@@ -138,7 +137,7 @@ class _BigClubCardState extends State<BigClubCard> {
                             maxPersons: widget.club.clubMaxPersons,
                           ),
                           DaysOpen(
-                            openDays: widget.club.clubAvailability,
+                            openDays: widget.club.clubAvailableDays,
                           ),
                         ],
                       ),
@@ -253,115 +252,3 @@ void showPointsReminderDialog(BuildContext context) {
     },
   );
 }
-
-/* 
-class SmallClubCard extends StatefulWidget {
-  const SmallClubCard({
-    super.key,
-    required this.club,
-  });
-
-  final ClubInfoStruct club;
-
-  @override
-  State<SmallClubCard> createState() => _SmallClubCardState();
-}
-
-class _SmallClubCardState extends State<SmallClubCard> {
-  late Future<ImageProvider?> _imageFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadImage();
-  }
-
-  void _loadImage() {
-    setState(() {
-      // Load club photo from network first, then fallback to local storage if needed
-      _imageFuture = context
-          .read<ClubProvider>()
-          .loadImageFromFileOrNetwork(widget.club.clubID);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.sizeOf(context).height;
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    return GestureDetector(
-      onTap: () {
-        AutoRouter.of(context).push(ReservationRoute(club: widget.club));
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 5, left: 15, right: 15),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(7),
-          child: Container(
-            color: Colors.black,
-            height: screenHeight / 2.2,
-            width: screenWidth / 2.7,
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    FutureBuilder<ImageProvider?>(
-                      future: _imageFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done &&
-                            snapshot.hasData) {
-                          return SizedBox(
-                            height: screenHeight / 8,
-                            child: Image(
-                              image: snapshot.data!,
-                              fit: BoxFit.fill,
-                            ),
-                          );
-                        } else {
-                          return SizedBox(
-                            height: screenHeight / 8,
-                            child: const CircularProgressIndicator(),
-                          );
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          widget.club.clubName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color:appRedColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5),
-                      child: MinPriceAndMaxPersons(
-                        screenHeight: screenHeight,
-                        screenWidth: screenWidth,
-                        minPrice: widget.club.clubMinPrice,
-                        maxPersons: widget.club.clubMaxPersons,
-                      ),
-                    ),
-                  ],
-                ),
-                LikeButton(
-                  screenHeight: screenHeight,
-                  screenWidth: screenWidth,
-                  club: widget.club,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
- */

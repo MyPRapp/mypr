@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
+import 'package:mypr/Providers/booking_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/Widgets/home_page_widgets.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:mypr/services/message_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _initApp();
+    _initSyncing();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().show();
       context.read<GlobalStateProvider>().refreshHomePage = false;
@@ -34,10 +35,9 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  Future<void> _initApp() async {
+  Future<void> _initSyncing() async {
     checkAppVersion(context);
-    _requestPermissions();
-    await Future.wait([_syncUser(), _fetchClubs()]);
+    Future.wait([_fetchClubs(), _syncUser()]);
   }
 
   Future<void> _fetchClubs() async {
@@ -49,9 +49,33 @@ class _HomePageState extends State<HomePage> {
   Future<void> _syncUser() async {
     final globalStateProvider = context.read<GlobalStateProvider>();
 
-    if (mounted && globalStateProvider.preferencesLoaded) {
+    if (globalStateProvider.preferencesLoaded) {
       if (globalStateProvider.isAuthenticated) {
         await _attemptUserLogin();
+
+        String mustSendCancellationEmail =
+            globalStateProvider.mustSendCancellationEmail;
+
+        if (mustSendCancellationEmail.isNotEmpty) {
+          List<String> parts = mustSendCancellationEmail
+              .split("||")
+              .map((e) => e.trim())
+              .toList();
+
+          if (parts.length == 2) {
+            int bookingID =
+                int.tryParse(parts[1]) ?? 0; // Convert to int (fallback to 0)
+
+            if (mounted) {
+              sendCancellationEmail(
+                  context,
+                  parts[0], //clubName
+                  context
+                      .read<BookingProvider>()
+                      .getBookingByBookingID(bookingID));
+            }
+          }
+        }
       } else {
         errorPrint('------------USER IS NOT AUTHENTICATED------------');
       }
@@ -69,7 +93,7 @@ class _HomePageState extends State<HomePage> {
     final savedPassword = await getSavedPassword();
 
     if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-      final loggedIn = await AuthService().login(savedEmail, savedPassword);
+      final loggedIn = await login(savedEmail, savedPassword);
       if (mounted) {
         final globalStateProvider = context.read<GlobalStateProvider>();
 
@@ -84,6 +108,10 @@ class _HomePageState extends State<HomePage> {
           }
 
           await userProvider.fetchUserDetailsFromServer();
+          if (mounted) {
+            await context.read<BookingProvider>().fetchBookings(
+                userProvider.userDetails, context.read<ClubProvider>());
+          }
           successPrint('------------USER IS AUTHENTICATED------------');
         } else {
           _showLoginError(globalStateProvider);
@@ -101,7 +129,7 @@ class _HomePageState extends State<HomePage> {
     globalStateProvider.isAuthenticated = false;
   }
 
-  void navigateToSearchTab(BuildContext context) {
+  void navigateToSearchTab(BuildContext context) async {
     final tabsRouter = AutoTabsRouter.of(context);
     if (tabsRouter.activeIndex != 1) {
       tabsRouter.setActiveIndex(1);
@@ -111,10 +139,16 @@ class _HomePageState extends State<HomePage> {
   Future<void> _checkFirstTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
 
     if (!hasSeenDialog && mounted) {
       showPointsReminderDialog(context);
       await prefs.setBool('hasSeenPointsDialog', true);
+      await prefs.setBool('hasSeenPointsDialog', true);
+    }
+
+    if (!hasSentEmail && await newUserAlertEmail()) {
+      await prefs.setBool('hasSentNewUserEmail', true);
     }
   }
 
@@ -132,7 +166,7 @@ class _HomePageState extends State<HomePage> {
           width: screenWidth,
           child: RefreshIndicator.adaptive(
             color: const Color(0xFF9C0C04),
-            onRefresh: _initApp,
+            onRefresh: _initSyncing,
             child: Padding(
               padding: EdgeInsets.only(left: 10.w, right: 10.w),
               child: ListView(
@@ -349,29 +383,5 @@ class _HomePageState extends State<HomePage> {
         fontWeight: FontWeight.w600,
       ),
     );
-  }
-
-  Future<void> _requestPermissions() async {
-    // Request internet permission (not required at runtime)
-    // Check and request storage permission
-    final storageStatus = await Permission.storage.request();
-    if (storageStatus.isDenied) {
-      // Handle the case when the user denies the permission
-      // print('Storage permission denied');
-    } else if (storageStatus.isGranted) {
-      // print('Storage permission granted');
-    }
-
-    // Check and request notification permission for Android 13 and above
-    // if (await Permission.notification.isGranted) {
-    //   print('Notification permission granted');
-    // } else if (await Permission.notification.isDenied) {
-    //   final notificationStatus = await Permission.notification.request();
-    //   if (notificationStatus.isGranted) {
-    //     print('Notification permission granted after request');
-    //   } else {
-    //     print('Notification permission denied');
-    //   }
-    // }
   }
 }

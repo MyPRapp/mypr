@@ -9,10 +9,11 @@ class ClubInfoStruct {
   String clubPhone;
   String clubLocation;
   double clubRating;
-  String clubAvailability;
+  String clubAvailableDays;
   String clubPhoto;
-  String localPhotoPath = ''; // Local file path to the downloaded photo
+  String localPhotoPath = '';
   String clubNotAvailable;
+  String clubInfo; //Use '\n' to split the alerts
 
   ClubInfoStruct({
     required this.clubID,
@@ -22,10 +23,11 @@ class ClubInfoStruct {
     this.clubPhone = '',
     this.clubLocation = '',
     this.clubRating = -1,
-    this.clubAvailability = '',
+    this.clubAvailableDays = '',
     this.clubPhoto = '',
     this.clubNotAvailable = '',
     this.clubPriority = -1,
+    this.clubInfo = '',
   });
 
   factory ClubInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -40,10 +42,11 @@ class ClubInfoStruct {
           clubRating: json['rating'] != null
               ? double.tryParse(json['rating'].toString()) ?? -1
               : -1,
-          clubAvailability: json['availability'] ?? '',
+          clubAvailableDays: json['availability'] ?? '',
           clubPhoto: json['photo'] ?? '',
           clubNotAvailable: json['not_available'] ?? '',
-          clubPriority: json['priority'] ?? -1);
+          clubPriority: json['priority'] ?? -1,
+          clubInfo: json['club_info'] ?? '');
     } catch (e) {
       errorPrint('Error parsing ClubInfoStruct: $e');
       return ClubInfoStruct(
@@ -60,11 +63,12 @@ class ClubInfoStruct {
       'phone': clubPhone,
       'location': clubLocation,
       'rating': clubRating,
-      'availability': clubAvailability,
+      'availability': clubAvailableDays,
       'photo': clubPhoto,
       'not_available': clubNotAvailable,
       'localPhotoPath': localPhotoPath,
-      'priority': clubPriority
+      'priority': clubPriority,
+      'clubInfo': clubInfo,
     };
   }
 }
@@ -78,6 +82,7 @@ class UserInfoStruct {
   String phone;
   String photo;
   String localPhotoPath;
+  bool isBanned;
 
   UserInfoStruct({
     required this.userID,
@@ -89,6 +94,7 @@ class UserInfoStruct {
     this.points = -1,
     this.photo = '',
     this.localPhotoPath = '',
+    this.isBanned = false,
   });
 
   factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
@@ -102,6 +108,7 @@ class UserInfoStruct {
         phone: json['phone'] ?? '',
         points: json['points'] ?? -1,
         photo: json['photo'] ?? '',
+        isBanned: json['is_banned'] ?? false,
       );
     } catch (e) {
       errorPrint('Error parsing UserInfoStruct: $e');
@@ -121,6 +128,7 @@ class UserInfoStruct {
       'points': points,
       'photo': photo,
       'localPhotoPath': localPhotoPath,
+      'is_banned': isBanned,
     };
   }
 }
@@ -238,4 +246,32 @@ class BookingInfoStruct {
       'status': status,
     };
   }
+}
+
+class Reservation {
+  int userID;
+  String reservationName;
+  String clubName;
+  int numberOfPersons;
+  double totalPrice;
+  int regularBottles;
+  int specialBottles;
+  int premiumBottles;
+  String reservationDate;
+  String comment;
+  int discountPercentage;
+
+  Reservation({
+    this.userID = -1,
+    this.reservationName = '',
+    this.clubName = '',
+    this.numberOfPersons = 1,
+    this.totalPrice = 0.0,
+    this.regularBottles = 0,
+    this.specialBottles = 0,
+    this.premiumBottles = 0,
+    this.reservationDate = '',
+    this.comment = '',
+    this.discountPercentage = 0,
+  });
 }

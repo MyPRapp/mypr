@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../Globals/structs.dart';
+import '../Globals/classes.dart';
 
 class LikeButton extends StatefulWidget {
   const LikeButton({super.key, required this.club});

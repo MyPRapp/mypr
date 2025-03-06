@@ -1,16 +1,14 @@
-import 'dart:convert';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/user_provider.dart';
+import 'package:mypr/services/message_service.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../Globals/classes.dart';
 import '../../../Globals/global_components.dart';
-import '../../../Globals/structs.dart';
 import '../../../Navigation/bottom_nav_bar.dart';
 import '../../../Providers/global_state_provider.dart';
 
@@ -294,32 +292,14 @@ class _ContactUsPageState extends State<ContactUsPage> {
     FocusManager.instance.primaryFocus?.unfocus();
 
     try {
-      final response = await http
-          .post(
-        Uri.parse('$apiUrl/send-email/'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonEncode({
-          'subject': nameController.text.trim(),
-          'sender_email': emailController.text.trim(),
-          'message': messageController.text.trim(),
-        }),
-      )
-          .timeout(const Duration(seconds: 8), onTimeout: () {
-        errorPrint('Error on email sending: Timeout exception');
-        return http.Response('Error: Timeout', 408);
-      });
-
-      if (response.statusCode == 200) {
+      if (await sendEmail(nameController.text.trim(),
+          emailController.text.trim(), messageController.text.trim())) {
         if (mounted) {
-          successPrint('Email sent successfully');
           showFloatingSnackBar('Το μήνυμα στάλθηκε',
               const Duration(milliseconds: 4000), context);
         }
       } else {
         if (mounted) {
-          errorPrint('Error on email sending: ${response.body}');
           showFloatingSnackBar('Σφάλμα κατά την αποστολή του μηνύματος',
               const Duration(milliseconds: 4000), context);
         }
@@ -329,6 +309,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
         showFloatingSnackBar('Σφάλμα κατά την αποστολή του μηνύματος',
             const Duration(milliseconds: 4000), context);
       }
+      errorPrint('$e');
     }
   }
 
@@ -341,6 +322,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
       style: TextStyle(color: Colors.white, fontSize: 13.sp),
       decoration: InputDecoration(
         filled: true,
+        // ignore: deprecated_member_use
         fillColor: Colors.white.withOpacity(0.2),
         hintText: hintText,
         hintStyle: TextStyle(color: Colors.white54, fontSize: 13.sp),

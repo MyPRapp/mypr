@@ -180,7 +180,6 @@ class _ProfilePageState extends State<ProfilePage> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
 
       // Step 2: Retain specific keys and their values (excluding liked clubs)
-      final String? validatedIp = prefs.getString('validatedIp');
       // final String? savedEmail = prefs.getString('savedEmail');
       // final String? savedPassword = prefs.getString('savedPassword');
 
@@ -189,10 +188,6 @@ class _ProfilePageState extends State<ProfilePage> {
       successPrint('Shared preferences cleared.');
 
       // Step 4: Restore the retained preferences (excluding liked clubs)
-      if (validatedIp != null) {
-        await prefs.setString('validatedIp', validatedIp);
-        successPrint('Retained validatedIp: $validatedIp');
-      }
       // if (savedEmail != null) {
       //   await prefs.setString('savedEmail', savedEmail);
       //   successPrint('Retained savedEmail: $savedEmail');
@@ -514,10 +509,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                             ),
                           ),
-                          SizedBox(height: screenHeight / 5),
+                          SizedBox(height: screenHeight / 10),
                         ]),
                       deleteAccountRequest(),
                       const TermsAndPrivacyPolicy(),
+                      SizedBox(height: screenHeight / 6),
                     ],
                   ),
                   if (!hasVerifiedEmail && isAuthenticated)
@@ -540,6 +536,7 @@ class _ProfilePageState extends State<ProfilePage> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
+              // ignore: deprecated_member_use
               Colors.red.withOpacity(0.6),
               Colors.black,
             ],

@@ -11,8 +11,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../Globals/global_components.dart';
-import '../services/auth_service.dart';
+import '../../Globals/global_components.dart';
+import '../../services/auth_service.dart';
 import 'login_page.dart';
 
 @RoutePage()
@@ -30,7 +30,6 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
-  final AuthService _authService = AuthService();
 
   String phoneNumber = '';
 
@@ -116,7 +115,7 @@ class _SignUpPageState extends State<SignUpPage> {
     String username = "$firstName$lastName";
     int points = 400;
 
-    int registerSuccess = await _authService.register(
+    int registerSuccess = await register(
       username,
       password,
       firstName,
@@ -162,7 +161,7 @@ class _SignUpPageState extends State<SignUpPage> {
       });
       bool success = false;
 
-      success = await AuthService().login(
+      success = await login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
@@ -701,115 +700,94 @@ class _SignUpForm extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // First and last name fields
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: screenHeight - 220.h),
-          child: Column(
-            children: [
-              _TextFieldWidget(
-                obscureText: false,
-                toggleVisibility: togglePasswordVisibility,
-                showIcon: false,
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                controller: firstNameController,
-                hintText: 'Όνομα',
-                isRegistering: isRegistering,
-                inputFormatters: [NoEmojisTextInputFormatter()],
-              ),
+        Column(
+          children: [
+            _TextFieldWidget(
+              obscureText: false,
+              toggleVisibility: togglePasswordVisibility,
+              showIcon: false,
+              screenWidth: screenWidth,
+              screenHeight: screenHeight,
+              controller: firstNameController,
+              hintText: 'Όνομα',
+              isRegistering: isRegistering,
+              inputFormatters: [NoEmojisTextInputFormatter()],
+            ),
 
-              _TextFieldWidget(
-                obscureText: false,
-                toggleVisibility: togglePasswordVisibility,
-                showIcon: false,
-                controller: lastNameController,
-                hintText: 'Επώνυμο',
-                isRegistering: isRegistering,
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                inputFormatters: [NoEmojisTextInputFormatter()],
-              ),
-              /*
-              // Phone field
-              _TextFieldWidget(
-                obscureText: false,
-                toggleVisibility: togglePasswordVisibility,
-                showIcon: false,
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                controller: phoneController,
-                hintText: 'Τηλέφωνο(+30)',
-                isRegistering: isRegistering,
-                inputFormatters: [
-                  NoEmojisTextInputFormatter(),
-                  FilteringTextInputFormatter.digitsOnly,
-                  LengthLimitingTextInputFormatter(10),
-                ],
-              ),
-              */
-              // Email field
-              _TextFieldWidget(
-                obscureText: false,
-                toggleVisibility: togglePasswordVisibility,
-                showIcon: false,
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-                controller: emailController,
-                hintText: 'Email',
-                isRegistering: isRegistering,
-                inputFormatters: [NoEmojisTextInputFormatter()],
-              ),
+            _TextFieldWidget(
+              obscureText: false,
+              toggleVisibility: togglePasswordVisibility,
+              showIcon: false,
+              controller: lastNameController,
+              hintText: 'Επώνυμο',
+              isRegistering: isRegistering,
+              screenWidth: screenWidth,
+              screenHeight: screenHeight,
+              inputFormatters: [NoEmojisTextInputFormatter()],
+            ),
+            // Email field
+            _TextFieldWidget(
+              obscureText: false,
+              toggleVisibility: togglePasswordVisibility,
+              showIcon: false,
+              screenWidth: screenWidth,
+              screenHeight: screenHeight,
+              controller: emailController,
+              hintText: 'Email',
+              isRegistering: isRegistering,
+              inputFormatters: [NoEmojisTextInputFormatter()],
+            ),
 
-              // Password fields
-              _TextFieldWidget(
-                controller: passwordController,
-                hintText: 'Κωδικός',
-                showIcon: true,
-                obscureText: obscureText,
-                toggleVisibility: togglePasswordVisibility,
-                isRegistering: isRegistering,
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-              ),
-              _TextFieldWidget(
-                controller: confirmPasswordController,
-                hintText: 'Επιβεβαίωση κωδικού',
-                showIcon: true,
-                obscureText: obscureText2,
-                toggleVisibility: togglePasswordVisibility2,
-                isRegistering: isRegistering,
-                screenWidth: screenWidth,
-                screenHeight: screenHeight,
-              ),
-              SizedBox(
-                height: 10.h,
-              ),
-              CheckBoxWidget(
-                isCheckBoxPressed: isCheckBoxPressed,
-                toggleCheckBox: toggleCheckBox,
-                isRegistering: isRegistering,
-              ),
-              SizedBox(height: 10.h),
-              ErrorTexts(
-                firstnameError: firstnameError,
-                lastnameError: lastnameError,
-                emailError: emailError,
-                passwordError: passwordError,
-                confirmationPasswordError: confirmationPasswordError,
-              ),
-              SizedBox(height: 20.h),
-              _SignUpButton(
-                isRegistering: isRegistering,
-                onRegister: onRegister,
-                screenHeight: screenHeight,
-                screenWidth: screenWidth,
-                firstnameError: firstnameError,
-                lastnameError: lastnameError,
-                emailError: emailError,
-                passwordError: passwordError,
-                confirmationPasswordError: confirmationPasswordError,
-              ),
-            ],
-          ),
+            // Password fields
+            _TextFieldWidget(
+              controller: passwordController,
+              hintText: 'Κωδικός',
+              showIcon: true,
+              obscureText: obscureText,
+              toggleVisibility: togglePasswordVisibility,
+              isRegistering: isRegistering,
+              screenWidth: screenWidth,
+              screenHeight: screenHeight,
+            ),
+            _TextFieldWidget(
+              controller: confirmPasswordController,
+              hintText: 'Επιβεβαίωση κωδικού',
+              showIcon: true,
+              obscureText: obscureText2,
+              toggleVisibility: togglePasswordVisibility2,
+              isRegistering: isRegistering,
+              screenWidth: screenWidth,
+              screenHeight: screenHeight,
+            ),
+            SizedBox(
+              height: 10.h,
+            ),
+            CheckBoxWidget(
+              isCheckBoxPressed: isCheckBoxPressed,
+              toggleCheckBox: toggleCheckBox,
+              isRegistering: isRegistering,
+            ),
+            SizedBox(height: 10.h),
+            ErrorTexts(
+              firstnameError: firstnameError,
+              lastnameError: lastnameError,
+              emailError: emailError,
+              passwordError: passwordError,
+              confirmationPasswordError: confirmationPasswordError,
+            ),
+            SizedBox(height: 20.h),
+            _SignUpButton(
+              isRegistering: isRegistering,
+              onRegister: onRegister,
+              screenHeight: screenHeight,
+              screenWidth: screenWidth,
+              firstnameError: firstnameError,
+              lastnameError: lastnameError,
+              emailError: emailError,
+              passwordError: passwordError,
+              confirmationPasswordError: confirmationPasswordError,
+            ),
+          ],
         ),
         SizedBox(height: 40.h),
         SizedBox(

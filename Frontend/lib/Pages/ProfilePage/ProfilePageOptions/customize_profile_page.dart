@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
@@ -150,7 +151,7 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                                           ) // Load from local file
                                         : userDetails.photo.isNotEmpty
                                             ? Image.network(
-                                                'http://${GlobalStateProvider().validatedIp}${userDetails.photo}',
+                                                'http://$validatedIP${userDetails.photo}',
                                                 fit: BoxFit.cover,
                                               )
                                             : const Image(

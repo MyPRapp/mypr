@@ -3,10 +3,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:mypr/Globals/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../Globals/classes.dart';
 import '../Globals/global_components.dart';
-import '../Globals/structs.dart';
 import 'photo_manager.dart';
 
 class UserProvider with ChangeNotifier {
@@ -46,8 +47,9 @@ class UserProvider with ChangeNotifier {
         if (_userDetails.userID >= 0 && _userDetails.photo.isNotEmpty) {
           // Download and save user photo
           if (_userDetails.photo.isNotEmpty) {
-            String localPath = await PhotoManager().downloadAndSaveUserPhoto(
-                _userDetails.photo, 'user_${_userDetails.userID}_photo');
+            String localPath = await PhotoManager.instance
+                .downloadAndSaveUserPhoto(
+                    _userDetails.photo, 'user_${_userDetails.userID}_photo');
 
             _userDetails.localPhotoPath =
                 localPath; // Store local path in the user object

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../Globals/structs.dart';
+import '../../Globals/classes.dart';
 import '../../Providers/club_provider.dart';
 import '../../routes/app_router.gr.dart';
 
