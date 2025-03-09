@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "34088435030",
+    "project_id": "mypr-9303c",
+    "storage_bucket": "mypr-9303c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:34088435030:android:9bfcedc60f464a9170eaf7",
+        "android_client_info": {
+          "package_name": "com.etairia.mypr"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfna-LuwU8s6Qxrqq76qgjpfYH-X0xW1Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
