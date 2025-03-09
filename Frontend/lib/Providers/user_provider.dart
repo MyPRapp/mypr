@@ -44,15 +44,12 @@ class UserProvider with ChangeNotifier {
         final decodedBody = utf8.decode(response.bodyBytes);
         _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
 
-        if (_userDetails.userID >= 0 && _userDetails.photo.isNotEmpty) {
+        if (_userDetails.userID >= 0) {
           // Download and save user photo
           if (_userDetails.photo.isNotEmpty) {
-            String localPath = await PhotoManager.instance
-                .downloadAndSaveUserPhoto(
-                    _userDetails.photo, 'user_${_userDetails.userID}_photo');
-
-            _userDetails.localPhotoPath =
-                localPath; // Store local path in the user object
+            _userDetails.localPhotoPath = await PhotoManager.instance
+                .downloadAndSaveUserPhoto(_userDetails.photo,
+                    'user_${_userDetails.userID}_photo'); // Store local path in the user object
           } else {
             errorPrint('Club photo URL is empty');
           }
@@ -66,17 +63,17 @@ class UserProvider with ChangeNotifier {
         throw Exception('Failed to load user details');
       }
     } on TimeoutException catch (_) {
-      // Fallback to cached data on timeout
       errorPrint('Failed to load user details.Request timed out');
       throw Exception('Request timed out, using cached data');
     } catch (e) {
+      errorPrint('Server unreachable, using cached data');
       throw Exception('Server unreachable, using cached data');
     }
   }
 
   // Save user details and photo to shared preferences
   Future<void> saveUserDetailsToPreferences() async {
-    if (_userDetails.userID == -1) return;
+    if (_userDetails.userID < 0) return;
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_details', jsonEncode(_userDetails.toJson()));
@@ -87,47 +84,31 @@ class UserProvider with ChangeNotifier {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDetailsString = prefs.getString('user_details');
 
-    if (userDetailsString != null) {
-      _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
+    if (userDetailsString == null) return;
 
-      /* 
-      final directory = await getApplicationDocumentsDirectory();
-      final Directory userPhotosDirectory =
-          Directory('${directory.path}/mypDirectory/user_photos');
+    _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
+    successPrint('Loaded user details from preferences');
 
-      if (await userPhotosDirectory.exists()) {
-        _userDetails.localPhotoPath =
-            '${directory.path}/mypDirectory/user_photos/user_${_userDetails.userID}_photo.jpg';
-      } else {
-        errorPrint('User photos directory doesn\'t exist');
-        _userDetails.localPhotoPath = 'assets/otherPhotos/Default_User.jpg';
-      } 
-      */
-
-      successPrint('Loaded user details from preferences');
-
-      notifyListeners();
-    }
+    notifyListeners();
   }
 
   Future<void> resetUserDetails() async {
     // Restore the default values of the _userDetails object
     _userDetails = UserInfoStruct(
-      userID: -1,
-      username: '',
-      firstName: '',
-      lastName: '',
-      email: '',
-      phone: '',
-      points: 0,
-      photo: '',
-    );
+        userID: -1,
+        username: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        points: 0,
+        photo: '',
+        localPhotoPath: '',
+        isBanned: false);
 
     // Clear related user data from SharedPreferences
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_details');
-
-    // Notify listeners of the changes
 
     notifyListeners();
   }

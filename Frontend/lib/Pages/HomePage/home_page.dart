@@ -35,6 +35,124 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  Future<void> _initSyncing() async {
+    checkAppVersion(context);
+    Future.wait([_fetchClubs(), _syncUser()]);
+  }
+
+  Future<void> _fetchClubs() async {
+    warningPrint('------------SYNCING CLUBS------------');
+    await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
+    successPrint('------------SYNCED CLUBS------------');
+  }
+
+  Future<void> _syncUser() async {
+    final globalStateProvider = context.read<GlobalStateProvider>();
+
+    if (globalStateProvider.preferencesLoaded) {
+      if (globalStateProvider.isAuthenticated) {
+        await _attemptUserLogin();
+
+        if (!mounted) return;
+        handleCancellationEmail(context, globalStateProvider);
+      } else {
+        errorPrint('------------USER IS NOT AUTHENTICATED------------');
+      }
+    } else {
+      await Future.delayed(const Duration(seconds: 2));
+      _syncUser();
+    }
+  }
+
+  void handleCancellationEmail(
+      BuildContext context, GlobalStateProvider globalStateProvider) {
+    if (globalStateProvider.mustSendCancellationEmail.isEmpty) {
+      return;
+    }
+
+    var parts = globalStateProvider.mustSendCancellationEmail
+        .split("||")
+        .map((e) => e.trim())
+        .toList();
+
+    if (parts.length == 2) {
+      sendCancellationEmail(
+        context,
+        parts[0], // clubName
+        context
+            .read<BookingProvider>()
+            .getBookingByBookingID(int.tryParse(parts[1]) ?? 0),
+      );
+    }
+  }
+
+  Future<void> _attemptUserLogin() async {
+    final userProvider = context.read<UserProvider>();
+
+    userProvider.loadUserDetailsFromPreferences();
+    final savedEmail = await getSavedEmail();
+    final savedPassword = await getSavedPassword();
+
+    if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+      final loggedIn = await login(savedEmail, savedPassword);
+
+      if (!mounted) return;
+      final globalStateProvider = context.read<GlobalStateProvider>();
+
+      if (loggedIn) {
+        globalStateProvider.isAuthenticated = true;
+
+        if (globalStateProvider.justRegistered) {
+          globalStateProvider.justRegistered = false;
+          emailLoop(context);
+        } else {
+          fetchVerifiedEmailGlobalVariable(context);
+        }
+
+        await userProvider.fetchUserDetailsFromServer();
+        if (mounted) {
+          await context.read<BookingProvider>().fetchBookings(
+              userProvider.userDetails, context.read<ClubProvider>());
+        }
+        successPrint('------------USER IS AUTHENTICATED------------');
+      } else {
+        _showLoginError(globalStateProvider);
+      }
+    } else {
+      if (mounted) {
+        _showLoginError(context.read<GlobalStateProvider>());
+      }
+    }
+  }
+
+  void _showLoginError(GlobalStateProvider globalStateProvider) {
+    errorPrint('Email or Password is incorrect');
+    globalStateProvider.isAuthenticated = false;
+  }
+
+  void navigateToSearchTab(BuildContext context) async {
+    final tabsRouter = AutoTabsRouter.of(context);
+    if (tabsRouter.activeIndex != 1) {
+      tabsRouter.setActiveIndex(1);
+    }
+  }
+
+  Future<void> _checkFirstTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
+
+    if (!hasSeenDialog && mounted) {
+      showPointsReminderDialog(context);
+      await prefs.setBool('hasSeenPointsDialog', true);
+      await prefs.setBool('hasSeenPointsDialog', true);
+    }
+
+    if (!hasSentEmail && await newUserAlertEmail()) {
+      await prefs.setBool('hasSentNewUserEmail', true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = ScreenUtil().screenHeight;
@@ -78,123 +196,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
-  }
-
-  Future<void> _initSyncing() async {
-    checkAppVersion(context);
-    Future.wait([_fetchClubs(), _syncUser()]);
-  }
-
-  Future<void> _fetchClubs() async {
-    warningPrint('------------SYNCING CLUBS------------');
-    await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
-    successPrint('------------SYNCED CLUBS------------');
-  }
-
-  Future<void> _syncUser() async {
-    final globalStateProvider = context.read<GlobalStateProvider>();
-
-    if (globalStateProvider.preferencesLoaded) {
-      if (globalStateProvider.isAuthenticated) {
-        await _attemptUserLogin();
-
-        String mustSendCancellationEmail =
-            globalStateProvider.mustSendCancellationEmail;
-
-        if (mustSendCancellationEmail.isNotEmpty) {
-          List<String> parts = mustSendCancellationEmail
-              .split("||")
-              .map((e) => e.trim())
-              .toList();
-
-          if (parts.length == 2) {
-            int bookingID =
-                int.tryParse(parts[1]) ?? 0; // Convert to int (fallback to 0)
-
-            if (mounted) {
-              sendCancellationEmail(
-                  context,
-                  parts[0], //clubName
-                  context
-                      .read<BookingProvider>()
-                      .getBookingByBookingID(bookingID));
-            }
-          }
-        }
-      } else {
-        errorPrint('------------USER IS NOT AUTHENTICATED------------');
-      }
-    } else {
-      await Future.delayed(const Duration(seconds: 2));
-      _syncUser();
-    }
-  }
-
-  Future<void> _attemptUserLogin() async {
-    final userProvider = context.read<UserProvider>();
-    userProvider.loadUserDetailsFromPreferences();
-
-    final savedEmail = await getSavedEmail();
-    final savedPassword = await getSavedPassword();
-
-    if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-      final loggedIn = await login(savedEmail, savedPassword);
-      if (mounted) {
-        final globalStateProvider = context.read<GlobalStateProvider>();
-
-        if (loggedIn && mounted) {
-          globalStateProvider.isAuthenticated = true;
-
-          if (context.read<GlobalStateProvider>().justRegistered) {
-            context.read<GlobalStateProvider>().justRegistered = false;
-            emailLoop(context);
-          } else {
-            fetchVerifiedEmailGlobalVariable(context);
-          }
-
-          await userProvider.fetchUserDetailsFromServer();
-          if (mounted) {
-            await context.read<BookingProvider>().fetchBookings(
-                userProvider.userDetails, context.read<ClubProvider>());
-          }
-          successPrint('------------USER IS AUTHENTICATED------------');
-        } else {
-          _showLoginError(globalStateProvider);
-        }
-      }
-    } else {
-      if (mounted) {
-        _showLoginError(context.read<GlobalStateProvider>());
-      }
-    }
-  }
-
-  void _showLoginError(GlobalStateProvider globalStateProvider) {
-    errorPrint('Email or Password is incorrect');
-    globalStateProvider.isAuthenticated = false;
-  }
-
-  void navigateToSearchTab(BuildContext context) async {
-    final tabsRouter = AutoTabsRouter.of(context);
-    if (tabsRouter.activeIndex != 1) {
-      tabsRouter.setActiveIndex(1);
-    }
-  }
-
-  Future<void> _checkFirstTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
-    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
-
-    if (!hasSeenDialog && mounted) {
-      showPointsReminderDialog(context);
-      await prefs.setBool('hasSeenPointsDialog', true);
-      await prefs.setBool('hasSeenPointsDialog', true);
-    }
-
-    if (!hasSentEmail && await newUserAlertEmail()) {
-      await prefs.setBool('hasSentNewUserEmail', true);
-    }
   }
 
   BoxDecoration _backgroundGradient() {

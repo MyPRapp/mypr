@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../Globals/classes.dart';
 import '../../Providers/club_provider.dart';
 import '../../routes/app_router.gr.dart';
 
@@ -25,16 +24,15 @@ class SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    _initializeClubs();
     _controller.addListener(() => _filterClubs(_controller.text));
-  }
 
-  void _initializeClubs() {
-    _clubs = context
-        .read<ClubProvider>()
-        .allClubs
-        .map((club) => club.clubName)
-        .toList();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _clubs = context
+          .read<ClubProvider>()
+          .allClubs
+          .map((club) => club.clubName)
+          .toList();
+    });
   }
 
   @override
@@ -71,14 +69,13 @@ class SearchPageState extends State<SearchPage> {
         _controller.clear();
         FocusScope.of(context).unfocus();
       });
-      List<CatalogueInfoStruct> catalogues = context
-          .read<ClubProvider>()
-          .getCataloguesByClubID(
-              context.read<ClubProvider>().getClubByName(clubName).clubID);
-      AutoRouter.of(context).push(ReservationRoute(
-        club: context.read<ClubProvider>().getClubByName(clubName),
-        catalogues: catalogues,
-      ));
+
+      final clubProvider = context.read<ClubProvider>();
+      final club = clubProvider.getClubByName(clubName);
+      final catalogues = clubProvider.getCataloguesByClubID(club.clubID);
+
+      AutoRouter.of(context)
+          .push(ReservationRoute(club: club, catalogues: catalogues));
     } else {
       FocusManager.instance.primaryFocus?.unfocus();
     }

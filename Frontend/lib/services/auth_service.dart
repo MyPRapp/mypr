@@ -310,30 +310,34 @@ Future<bool> newUserAlertEmail() async {
 }
 
 Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
-  var response = await http.get(
-    Uri.parse('$apiUrl/user-auth-status/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${await getAccessToken()}',
-    },
-  ).timeout(const Duration(seconds: 10));
+  try {
+    var response = await http.get(
+      Uri.parse('$apiUrl/user-auth-status/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${await getAccessToken()}',
+      },
+    ).timeout(const Duration(seconds: 10));
 
-  if (response.statusCode == 200) {
-    successPrint(response.body);
-    String jsonString = response.body;
-    Map<String, dynamic> jsonData = jsonDecode(jsonString); // Decode JSON
+    if (response.statusCode == 200) {
+      successPrint(response.body);
+      String jsonString = response.body;
+      Map<String, dynamic> jsonData = jsonDecode(jsonString); // Decode JSON
 
-    bool isVerified = jsonData['is_verified']; // Extract the boolean value
-    if (context.mounted) {
-      context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
-      return;
+      bool isVerified = jsonData['is_verified']; // Extract the boolean value
+      if (context.mounted) {
+        context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
+        return;
+      }
+      errorPrint('Not mounted');
     }
-    errorPrint('Not mounted');
-  }
-  errorPrint('${response.statusCode}');
-  errorPrint(response.body);
-  if (context.mounted) {
-    context.read<GlobalStateProvider>().hasVerifiedEmail = false;
+    errorPrint('${response.statusCode}');
+    errorPrint(response.body);
+    if (context.mounted) {
+      context.read<GlobalStateProvider>().hasVerifiedEmail = false;
+    }
+  } catch (e) {
+    errorPrint('Error while fetching \'verified email\' global variable: $e');
   }
 }
 
