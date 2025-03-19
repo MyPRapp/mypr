@@ -18,6 +18,7 @@ void main() async {
   // Lock the app to portrait mode only
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensure the binding is initialized before calling SystemChrome
+  // await Firebase.initializeApp();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // Lock to portrait mode
   ]).then((_) {

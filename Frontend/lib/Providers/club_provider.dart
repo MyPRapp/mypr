@@ -114,10 +114,6 @@ class ClubProvider with ChangeNotifier {
       // Club exists, update the existing entry
       _tempClubs[index] = club;
     } else {
-      printAllClubs();
-      print('a\n');
-      print(club.clubID);
-      printClubWithID(club.clubID);
       // Club does not exist, add it to the list
       index = _clubs.indexWhere((c) => c.clubID == club.clubID);
       if (index == -1) {

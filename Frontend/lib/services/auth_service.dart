@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -55,6 +58,56 @@ Future<void> refreshAccessToken() async {
   } catch (e) {
     errorPrint('Error refreshing access token: $e');
     rethrow;
+  }
+}
+
+Future<void> requestPermissions() async {
+  if (await Permission.notification.isDenied) {
+    await Permission.notification.request();
+  }
+  FirebaseMessaging.instance.requestPermission();
+}
+
+Future<bool> registerDevice() async {
+  await requestPermissions();
+  await Firebase.initializeApp();
+  String? token = await FirebaseMessaging.instance.getToken();
+
+  if (token == null) {
+    errorPrint('Refresh token not found');
+    return false;
+  }
+
+  String? accessToken = await getAccessToken();
+  if (accessToken == null) {
+    errorPrint('Access token is null. User is not authenticated.');
+    return false;
+  }
+
+  try {
+    final response = await http
+        .post(
+      Uri.parse('$apiUrl/register_device/'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+      body: jsonEncode({'device_token': token}),
+    )
+        .timeout(const Duration(seconds: 10), onTimeout: () {
+      return http.Response('Error: Timeout', 408); // 408 Request Timeout
+    });
+
+    if (response.statusCode == 200) {
+      successPrint('Device was registered');
+      return true;
+    } else {
+      errorPrint(
+          'Error while registering device: ${response.statusCode}\n${response.body}');
+      return false;
+    }
+  } catch (e) {
+    throw Exception('Error while registering device: $e');
   }
 }
 
