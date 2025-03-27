@@ -51,7 +51,7 @@ class UserProvider with ChangeNotifier {
                 .downloadAndSaveUserPhoto(_userDetails.photo,
                     'user_${_userDetails.userID}_photo'); // Store local path in the user object
           } else {
-            errorPrint('Club photo URL is empty');
+            errorPrint('User photo URL is empty');
           }
         }
 

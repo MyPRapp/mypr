@@ -854,12 +854,12 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
                     surface: Colors.black,
                     onSurface: Colors.white,
                   ),
-                  dialogBackgroundColor: Colors.black,
                   textTheme: TextTheme(
                     bodySmall: TextStyle(
                       fontSize: 14.sp, // Adjust font size to make year smaller
                     ),
                   ),
+                  dialogTheme: DialogThemeData(backgroundColor: Colors.black),
                 ),
                 child: child!,
               ),
