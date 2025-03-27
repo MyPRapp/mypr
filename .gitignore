@@ -143,3 +143,4 @@ app.*.symbols
 **.venv
 **env
 **devtools_options.yaml
+Frontend/android/app/.cxx/
