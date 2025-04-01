@@ -348,7 +348,6 @@ Future<void> checkAppVersion(BuildContext context) async {
   } else if (context.mounted) {
     context.read<GlobalStateProvider>().hasCheckedAppVersion;
     successPrint('Your app is up-to-date!');
-    //TODO Fix this from showing if can t retrieve app version from backend
   }
 }
 

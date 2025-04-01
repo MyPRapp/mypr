@@ -27,7 +27,7 @@ class ClubProvider with ChangeNotifier {
     try {
       final url = '$apiUrl/clubs/print/';
       final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
 
       // If there's no error proceed
       if (response.statusCode == 200) {
@@ -83,7 +83,7 @@ class ClubProvider with ChangeNotifier {
     try {
       final url = '$apiUrl/clubs/${club.clubID}/catalogue';
       final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200) {
         final List<dynamic> data = jsonDecode(response.body);
@@ -246,7 +246,7 @@ class ClubProvider with ChangeNotifier {
     final url = '$apiUrl/clubs/print/';
     try {
       final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
+          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
         final List<dynamic> data = jsonDecode(decodedBody);

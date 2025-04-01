@@ -1,13 +1,11 @@
 import 'dart:convert';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,7 +34,7 @@ Future<void> refreshAccessToken() async {
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'refresh': refreshToken}),
     )
-        .timeout(const Duration(seconds: 10), onTimeout: () {
+        .timeout(const Duration(seconds: 15), onTimeout: () {
       // print("❌Can't connect to server. Refresh token request timed out.");
       return http.Response('Error: Timeout', 408); // 408 Request Timeout
     });
@@ -62,15 +60,27 @@ Future<void> refreshAccessToken() async {
 }
 
 Future<void> requestPermissions() async {
-  if (await Permission.notification.isDenied) {
-    await Permission.notification.request();
-  }
-  FirebaseMessaging.instance.requestPermission();
+  // if (await Permission.notification.isDenied) {
+  //   await Permission.notification.request();
+  // }
+  // FirebaseMessaging.instance.requestPermission();
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  print('User granted permission: ${settings.authorizationStatus}');
 }
 
 Future<bool> registerDevice() async {
   await requestPermissions();
-  await Firebase.initializeApp();
   String? token = await FirebaseMessaging.instance.getToken();
 
   if (token == null) {
@@ -94,7 +104,7 @@ Future<bool> registerDevice() async {
       },
       body: jsonEncode({'device_token': token}),
     )
-        .timeout(const Duration(seconds: 10), onTimeout: () {
+        .timeout(const Duration(seconds: 15), onTimeout: () {
       return http.Response('Error: Timeout', 408); // 408 Request Timeout
     });
 
@@ -370,7 +380,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${await getAccessToken()}',
       },
-    ).timeout(const Duration(seconds: 10));
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
       successPrint(response.body);
@@ -411,5 +421,5 @@ Future<int> checkPlatformVersion(
   } catch (e) {
     errorPrint('Couldn\'t check version via server');
   }
-  return -1;
+  return 0;
 }

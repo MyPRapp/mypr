@@ -19,5 +19,5 @@
         "**.iml":true,
         "**/.gitignore":true,
         "**/.vscode":true,
-      }
+    }
 }

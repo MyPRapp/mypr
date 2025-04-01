@@ -12,7 +12,7 @@ java {
 }
 
 android {
-    namespace = "com.example.mypr"
+    namespace = "com.etairia.mypr"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.2.12479018"
 
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.mypr"
+        applicationId = "com.etairia.mypr"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode ?: 1

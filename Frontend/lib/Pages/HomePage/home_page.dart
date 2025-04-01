@@ -141,7 +141,7 @@ class _HomePageState extends State<HomePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
     bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
-    // bool hasSentToken = prefs.getBool('hasSentToken') ?? false;
+    bool hasSentToken = prefs.getBool('hasSentToken') ?? false;
 
     if (!hasSeenDialog && mounted) {
       showPointsReminderDialog(context);
@@ -152,10 +152,9 @@ class _HomePageState extends State<HomePage> {
       await prefs.setBool('hasSentNewUserEmail', true);
     }
 
-    // if (!hasSentToken && await registerDevice()) {
-    //   await prefs.setBool('hasSentToken', true);
-    // }
-    // await registerDevice();
+    if (!hasSentToken && await registerDevice()) {
+      await prefs.setBool('hasSentToken', true);
+    }
   }
 
   @override

@@ -4,7 +4,7 @@
         "**/build": true,
         "**/.dart_tool":true,
         "**/.idea":true,
-	"**/android":true,
+	"**/android":false,
         "**/linux":true,
         "**/macos":true,
         "**/web":true,
@@ -19,5 +19,5 @@
         "**.iml":true,
 	"**/.gitignore":true,
         "**/.vscode":true,
-      },
+    }
 }

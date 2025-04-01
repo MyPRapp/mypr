@@ -105,7 +105,7 @@ Future<bool> deleteBooking(int bookingID) async {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${await getAccessToken()}',
       },
-    ).timeout(const Duration(seconds: 10));
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 204) {
       successPrint('Booking $bookingID was deleted');

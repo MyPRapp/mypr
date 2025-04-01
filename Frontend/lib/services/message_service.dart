@@ -27,7 +27,7 @@ class OtpService {
               'otp': otpCode,
             }),
           )
-          .timeout(const Duration(seconds: 10));
+          .timeout(const Duration(seconds: 15));
 
       if (response.statusCode == 200 && context.mounted) {
         showFloatingSnackBar(
@@ -64,7 +64,7 @@ Future<void> sendVerificationEmail(BuildContext context) async {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${await getAccessToken()}',
       },
-    ).timeout(const Duration(seconds: 10));
+    ).timeout(const Duration(seconds: 15));
 
     if (response.statusCode == 200) {
       if (context.mounted) {
@@ -168,7 +168,7 @@ Future<bool> resendVerificationEmail() async {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${await getAccessToken()}',
     },
-  ).timeout(const Duration(seconds: 10));
+  ).timeout(const Duration(seconds: 15));
   if (response.statusCode == 200) {
     successPrint(response.body);
     return true;

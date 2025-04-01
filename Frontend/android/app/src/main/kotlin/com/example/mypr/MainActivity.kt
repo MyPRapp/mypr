@@ -1,4 +1,4 @@
-package com.example.mypr
+package com.etairia.mypr
 
 import io.flutter.embedding.android.FlutterActivity
 
