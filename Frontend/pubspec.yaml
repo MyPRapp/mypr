@@ -57,6 +57,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   archive: ^3.6.1
+  change_app_package_name: ^1.5.0
   firebase_messaging: ^15.2.4
   firebase_core: ^3.12.1
   # flutter_local_notifications: ^19.0.0

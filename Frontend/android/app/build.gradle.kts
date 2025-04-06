@@ -13,7 +13,7 @@ java {
 
 android {
     namespace = "com.etairia.mypr"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = "27.2.12479018"
 
     compileOptions {
@@ -26,19 +26,36 @@ android {
 
     defaultConfig {
         applicationId = "com.etairia.mypr"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = 21
+        targetSdk = 34
         versionCode = flutter.versionCode ?: 1
         versionName = flutter.versionName ?: "1.0.0"
     }
 
-    buildTypes {
-        release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+    signingConfigs {
+        create("release") {
+            storeFile = file("C:\\Users\\georg\\OneDrive\\Documents\\MyPR\\upload-key.jks")
+            storePassword = System.getenv("STORE_PASSWORD")
+                ?: project.findProperty("STORE_PASSWORD") as String? ?: ""
+            keyAlias = "upload"
+            keyPassword = System.getenv("KEY_PASSWORD")
+                ?: project.findProperty("KEY_PASSWORD") as String? ?: ""
         }
     }
+
+    buildTypes {
+        debug { isDebuggable = false }
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true // Enable code shrinking
+            isShrinkResources = true // Enable resource shrinking
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
 }
 
 flutter {

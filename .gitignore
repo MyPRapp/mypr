@@ -144,3 +144,4 @@ app.*.symbols
 **env
 **devtools_options.yaml
 Frontend/android/app/.cxx/
+Frontend/android/gradle.properties
