@@ -63,7 +63,7 @@ CustomRoute createSlideFromBottomRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }
 
@@ -84,7 +84,7 @@ CustomRoute createSlideFromTopRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }
 
@@ -105,7 +105,7 @@ CustomRoute createSlideFromLeftRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }
 
@@ -126,6 +126,6 @@ CustomRoute createSlideFromRightRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }

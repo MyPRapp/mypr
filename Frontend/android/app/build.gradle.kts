@@ -1,5 +1,8 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    // END: FlutterFire Configuration
     id("kotlin-android")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -17,6 +20,9 @@ android {
     ndkVersion = "27.2.12479018"
 
     compileOptions {
+        // Flag to enable support for the new language APIs
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -44,8 +50,9 @@ android {
     }
 
     buildTypes {
-        debug { isDebuggable = false }
-        getByName("release") {
+        //TODO Change this before release
+        debug { isDebuggable = true }
+        release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true // Enable code shrinking
             isShrinkResources = true // Enable resource shrinking
@@ -56,6 +63,12 @@ android {
         }
     }
 
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
+    // implementation("androidx.window:window:1.0.0")
+    // implementation("androidx.window:window-java:1.0.0")
 }
 
 flutter {

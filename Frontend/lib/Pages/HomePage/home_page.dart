@@ -47,16 +47,22 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _syncUser() async {
-    final globalStateProvider = context.read<GlobalStateProvider>();
+    if (mounted) {
+      final globalStateProvider = context.read<GlobalStateProvider>();
 
-    if (globalStateProvider.preferencesLoaded) {
-      if (globalStateProvider.isAuthenticated) {
-        await _attemptUserLogin();
+      if (globalStateProvider.preferencesLoaded) {
+        if (globalStateProvider.isAuthenticated) {
+          await _attemptUserLogin();
 
-        if (!mounted) return;
-        handleCancellationEmail(context, globalStateProvider);
+          if (mounted) {
+            handleCancellationEmail(context, globalStateProvider);
+          }
+        } else {
+          errorPrint('------------USER IS NOT AUTHENTICATED------------');
+        }
       } else {
-        errorPrint('------------USER IS NOT AUTHENTICATED------------');
+        await Future.delayed(const Duration(seconds: 2));
+        _syncUser();
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));

@@ -8,19 +8,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Globals/classes.dart';
 import '../Globals/global_components.dart';
-import 'photo_manager.dart';
 
 class UserProvider with ChangeNotifier {
   UserInfoStruct _userDetails = UserInfoStruct(
-    userID: -1,
-    username: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    points: 0,
-    photo: '',
-  );
+      userID: -1,
+      username: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      points: 0,
+      photo: '',
+      localPhotoPath: '',
+      isBanned: false);
 
   UserInfoStruct get userDetails => _userDetails;
 
@@ -44,16 +44,16 @@ class UserProvider with ChangeNotifier {
         final decodedBody = utf8.decode(response.bodyBytes);
         _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
 
-        if (_userDetails.userID >= 0) {
-          // Download and save user photo
-          if (_userDetails.photo.isNotEmpty) {
-            _userDetails.localPhotoPath = await PhotoManager.instance
-                .downloadAndSaveUserPhoto(_userDetails.photo,
-                    'user_${_userDetails.userID}_photo'); // Store local path in the user object
-          } else {
-            errorPrint('User photo URL is empty');
-          }
-        }
+        // if (_userDetails.userID >= 0) {
+        //   // Download and save user photo
+        //   if (_userDetails.photo.isNotEmpty) {
+        //     _userDetails.localPhotoPath = await PhotoManager.instance
+        //         .downloadAndSaveUserPhoto(_userDetails.photo,
+        //             'user_${_userDetails.userID}_photo'); // Store local path in the user object
+        //   } else {
+        //     errorPrint('User photo URL is empty');
+        //   }
+        // }
 
         await saveUserDetailsToPreferences();
 

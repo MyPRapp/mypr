@@ -128,15 +128,18 @@ Future<String> getSavedEmail() async {
 }
 
 void successPrint(String text) {
-  print('✅$text');
+  // print('✅$text');
+  print('\x1B[32m$text\x1B[0m');
 }
 
 void warningPrint(String text) {
-  print('🟡$text');
+  // print('🟡$text');
+  print('\x1B[33m$text\x1B[0m');
 }
 
 void errorPrint(String text) {
-  print('❌$text');
+  // print('❌$text');
+  print('\x1B[31m$text\x1B[0m');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
