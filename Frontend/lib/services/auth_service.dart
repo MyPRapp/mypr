@@ -59,48 +59,21 @@ Future<void> refreshAccessToken() async {
   }
 }
 
-Future<void> requestPermissions() async {
-  // if (await Permission.notification.isDenied) {
-  //   await Permission.notification.request();
-  // }
-  // FirebaseMessaging.instance.requestPermission();
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
-  );
-
-  print('User granted permission: ${settings.authorizationStatus}');
-}
-
 Future<bool> registerDevice() async {
-  await requestPermissions();
   String? token = await FirebaseMessaging.instance.getToken();
 
   if (token == null) {
-    errorPrint('Refresh token not found');
+    errorPrint('Firebase token not found');
     return false;
   }
-
-  String? accessToken = await getAccessToken();
-  if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
-    return false;
-  }
-
+  //TODO: Mila me fragkisko gia to http.post
   try {
     final response = await http
         .post(
       Uri.parse('$apiUrl/register_device/'),
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer $accessToken',
+        'Authorization': 'Bearer ${await getAccessToken()}'
       },
       body: jsonEncode({'device_token': token}),
     )

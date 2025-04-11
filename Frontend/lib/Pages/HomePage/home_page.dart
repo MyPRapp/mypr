@@ -15,6 +15,8 @@ import '../../Navigation/bottom_nav_bar.dart';
 import '../../Providers/club_provider.dart';
 import '../../services/auth_service.dart';
 
+//TODO: Liked clubs should be transferend to the top
+
 @RoutePage()
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
