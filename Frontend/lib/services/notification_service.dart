@@ -2,11 +2,10 @@
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/animation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mypr/Globals/global_components.dart';
 
-// TODO: Change notification style while not in foreground too
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -23,18 +22,30 @@ class NotificationService {
     importance: Importance.max,
   );
 
+  static String? token;
+
   static Future<void> initialize() async {
-    await Firebase.initializeApp();
-    await FirebaseMessaging.instance.requestPermission();
-    successPrint('${await FirebaseMessaging.instance.getToken()}');
-    await _setupNotificationChannel();
-    _handleForegroundMessages();
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    try {
+      await Firebase.initializeApp();
+      await FirebaseMessaging.instance.requestPermission();
+
+      token = await FirebaseMessaging.instance.getToken();
+      successPrint(token!);
+
+      await _setupNotificationChannel();
+      _handleForegroundMessages();
+
+      FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    } catch (e, stackTrace) {
+      errorPrint('❌ NotificationService initialization failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   static Future<void> _setupNotificationChannel() async {
     const androidSettings =
-        AndroidInitializationSettings('@drawable/mypr_icon');
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+
     const initSettings = InitializationSettings(android: androidSettings);
 
     await _localNotificationsPlugin.initialize(initSettings);
@@ -53,10 +64,9 @@ class NotificationService {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
-      //TODO: Fix notification icon style
       NotificationDetails notificationDetails = NotificationDetails(
         android: AndroidNotificationDetails(_channel.id, _channel.name,
-            icon: android?.smallIcon ?? '@drawable/mypr_icon',
+            icon: android?.smallIcon ?? '@mipmap/ic_launcher',
             color: Color.fromARGB(255, 255, 0, 0)),
       );
 

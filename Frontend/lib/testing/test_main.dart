@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:mypr/services/notification_service.dart';
+// import 'package:mypr/services/notification_service.dart';
 import 'package:mypr/testing/testing_app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService.initialize();
+  // await NotificationService.initialize();
 
   runApp(MyPR());
 }

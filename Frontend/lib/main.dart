@@ -14,12 +14,16 @@ import 'package:mypr/routes/app_router.dart';
 import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 
+//TODO Change debug = false to debug = true in build.gradle.kts for debugging
+
 void main() async {
   // Lock the app to portrait mode only
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensure the binding is initialized before calling SystemChrome
 
-  await NotificationService.initialize();
+  await NotificationService.initialize().timeout(const Duration(
+      seconds:
+          8)); // TODO Add notification service on a different thread for parallelism
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // Lock to portrait mode

@@ -1,7 +1,7 @@
 name: mypr
 description: "Best night club app"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 1.0.3+4
+version: 2.0.0+14
 
 environment:
   sdk: '>=3.3.2 <4.0.0'

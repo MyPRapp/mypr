@@ -51,7 +51,7 @@ android {
 
     buildTypes {
         //TODO Change this before release
-        debug { isDebuggable = true }
+        debug { isDebuggable = false }
         release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true // Enable code shrinking

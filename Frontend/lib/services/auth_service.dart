@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -66,15 +67,12 @@ Future<bool> registerDevice() async {
     errorPrint('Firebase token not found');
     return false;
   }
-  //TODO: Mila me fragkisko gia to http.post
+
   try {
     final response = await http
         .post(
       Uri.parse('$apiUrl/register_device/'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${await getAccessToken()}'
-      },
+      headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'device_token': token}),
     )
         .timeout(const Duration(seconds: 15), onTimeout: () {
@@ -328,7 +326,8 @@ Future<bool> newUserAlertEmail() async {
     body: jsonEncode({
       'subject': 'Νέος χρήστης',
       'sender_email': 'georgetsomhs@gmail.com',
-      'message': 'Καινούριος χρήστης, δεν έχει εγγραφεί ακόμα!',
+      'message':
+          'Καινούριος χρήστης, δεν έχει εγγραφεί ακόμα!\nFCM token:\n\t${NotificationService.token}',
     }),
   )
       .timeout(const Duration(seconds: 8), onTimeout: () {

@@ -16,6 +16,7 @@ import '../../Providers/club_provider.dart';
 import '../../services/auth_service.dart';
 
 //TODO: Liked clubs should be transferend to the top
+//TODO: Add grid for clubs
 
 @RoutePage()
 class HomePage extends StatefulWidget {
@@ -148,20 +149,20 @@ class _HomePageState extends State<HomePage> {
   Future<void> _checkFirstTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
-    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
     bool hasSentToken = prefs.getBool('hasSentToken') ?? false;
+    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
 
     if (!hasSeenDialog && mounted) {
       showPointsReminderDialog(context);
       await prefs.setBool('hasSeenPointsDialog', true);
     }
 
-    if (!hasSentEmail && await newUserAlertEmail()) {
-      await prefs.setBool('hasSentNewUserEmail', true);
-    }
-
     if (!hasSentToken && await registerDevice()) {
       await prefs.setBool('hasSentToken', true);
+    }
+
+    if (!hasSentEmail && await newUserAlertEmail()) {
+      await prefs.setBool('hasSentNewUserEmail', true);
     }
   }
 
