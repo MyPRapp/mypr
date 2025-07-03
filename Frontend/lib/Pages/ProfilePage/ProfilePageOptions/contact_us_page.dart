@@ -41,7 +41,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
   final messageController = TextEditingController();
 
   Future<void> _launchInstagram() async {
-    const String username = 'mypr_app';
+    const String username = 'mypr.app';
 
     final Uri instagramAppUri =
         Uri.parse('instagram://user?username=$username');

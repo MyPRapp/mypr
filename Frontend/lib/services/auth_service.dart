@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -9,6 +10,8 @@ import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'dart:io';
 
 Future<String?> getAccessToken() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -327,7 +330,7 @@ Future<bool> newUserAlertEmail() async {
       'subject': 'Νέος χρήστης',
       'sender_email': 'georgetsomhs@gmail.com',
       'message':
-          'Καινούριος χρήστης, δεν έχει εγγραφεί ακόμα!\nFCM token:\n\t${NotificationService.token}',
+          'Καινούριος χρήστης ${Platform.isIOS ? 'iphone' : 'android'}, δεν έχει εγγραφεί ακόμα!\nFCM token:\n\t${NotificationService.token}'
     }),
   )
       .timeout(const Duration(seconds: 8), onTimeout: () {

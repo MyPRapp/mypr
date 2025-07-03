@@ -7,6 +7,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
+import 'package:mypr/services/message_service.dart';
+import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -131,6 +133,8 @@ class _SignUpPageState extends State<SignUpPage> {
       _showSnackBar('Επιτυχής εγγραφή');
       await _clearPreferences();
       await _login();
+      sendEmail('Νέα εγγραφή', 'georgetsomhs@gmail.com',
+          'Ο χρήστης με email: $email και FCM token: ${NotificationService.token} μόλις εγγράφηκε');
     } else {
       setState(() {
         _isRegistering = false;

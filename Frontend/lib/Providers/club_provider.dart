@@ -40,7 +40,12 @@ class ClubProvider with ChangeNotifier {
           final club = ClubInfoStruct.fromJson(item);
           if (club.clubID < 0) {
             errorPrint("ClubID is incorrect");
-            return;
+            continue;
+          }
+
+          if (club.clubPriority == -2) {
+            // Skip clubs with priority -2 (hidden clubs)
+            continue;
           }
 
           // Store local path in the club object

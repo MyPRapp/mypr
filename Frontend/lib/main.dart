@@ -21,9 +21,8 @@ void main() async {
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensure the binding is initialized before calling SystemChrome
 
-  await NotificationService.initialize().timeout(const Duration(
-      seconds:
-          8)); // TODO Add notification service on a different thread for parallelism
+  await NotificationService
+      .initialize(); // TODO Add notification service on a different thread for parallelism
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // Lock to portrait mode

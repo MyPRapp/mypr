@@ -315,6 +315,7 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index) {
             if (clubProvider.allClubs.isNotEmpty) {
               final club = clubProvider.allClubs[index];
+
               if (club.clubPhoto.isNotEmpty || club.localPhotoPath.isNotEmpty) {
                 return BigClubCard(
                   key: ValueKey(club.clubID),

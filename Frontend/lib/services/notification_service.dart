@@ -27,7 +27,16 @@ class NotificationService {
   static Future<void> initialize() async {
     try {
       await Firebase.initializeApp();
+
       await FirebaseMessaging.instance.requestPermission();
+
+      // Ensure notifications are displayed while the app is in the foreground on iOS
+      await FirebaseMessaging.instance
+          .setForegroundNotificationPresentationOptions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 
       token = await FirebaseMessaging.instance.getToken();
       successPrint(token!);
@@ -37,7 +46,7 @@ class NotificationService {
 
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     } catch (e, stackTrace) {
-      errorPrint('❌ NotificationService initialization failed: $e');
+      errorPrint('NotificationService initialization failed: $e');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
@@ -46,7 +55,15 @@ class NotificationService {
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    const initSettings = InitializationSettings(android: androidSettings);
+    const DarwinInitializationSettings iosSettings =
+        DarwinInitializationSettings(
+      requestSoundPermission: true,
+      requestBadgePermission: true,
+      requestAlertPermission: true,
+    );
+
+    const initSettings =
+        InitializationSettings(android: androidSettings, iOS: iosSettings);
 
     await _localNotificationsPlugin.initialize(initSettings);
 
@@ -64,26 +81,44 @@ class NotificationService {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
-      NotificationDetails notificationDetails = NotificationDetails(
-        android: AndroidNotificationDetails(_channel.id, _channel.name,
-            icon: android?.smallIcon ?? '@mipmap/ic_launcher',
-            color: Color.fromARGB(255, 255, 0, 0)),
+      // NotificationDetails notificationDetails = NotificationDetails(
+      //   android: AndroidNotificationDetails(_channel.id, _channel.name,
+      //       icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+      //       color: Color.fromARGB(255, 255, 0, 0)),
+      // );
+
+      final NotificationDetails notificationDetails = NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channel.id,
+          _channel.name,
+          icon: android?.smallIcon ?? '@mipmap/ic_launcher',
+          color: const Color.fromARGB(255, 255, 0, 0),
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
       );
 
-      // Check if the notification part exists, then display it
-      if (notification != null && android != null) {
-        // If the notification field is present, show it
-        _localNotificationsPlugin.show(notification.hashCode,
-            notification.title, notification.body, notificationDetails);
-      } else if (message.data.isNotEmpty) {
-        // If there is no notification but data exists, use data for the notification
+      if (notification != null && message.data.isEmpty) {
+        // Show only the notification payload
         _localNotificationsPlugin.show(
-            0,
-            message.data['title'] ??
-                'Data title', // Title from data or fallback
-            message.data['body'] ?? 'Data body', // Body from data or fallback,
-
-            notificationDetails);
+          notification.hashCode,
+          notification.title,
+          notification.body,
+          notificationDetails,
+        );
+      } else if (notification == null && message.data.isNotEmpty) {
+        // Fallback to data payload only if no notification exists
+        _localNotificationsPlugin.show(
+          0,
+          message.data['title'] ?? 'Data title',
+          message.data['body'] ?? 'Data body',
+          notificationDetails,
+        );
       }
     });
   }
