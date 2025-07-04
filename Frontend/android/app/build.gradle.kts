@@ -33,7 +33,7 @@ android {
     defaultConfig {
         applicationId = "com.etairia.mypr"
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 35
         versionCode = flutter.versionCode ?: 1
         versionName = flutter.versionName ?: "1.0.0"
     }
