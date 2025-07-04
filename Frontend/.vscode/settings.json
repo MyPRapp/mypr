@@ -1,5 +1,4 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic",
     "files.exclude": {
         "**/build": true,
         "**/.dart_tool": true,
