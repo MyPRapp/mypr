@@ -95,50 +95,6 @@ Future<bool> registerDevice() async {
   }
 }
 
-Future<bool> login(String email, String password) async {
-  try {
-    // Send login request
-    final response = await http
-        .post(
-          Uri.parse('$apiUrl/token/'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'username': email, 'password': password}),
-        )
-        .timeout(const Duration(seconds: 5)); // Adding a 5-second timeout
-
-    // Check if the response is successful
-    if (response.statusCode == 200) {
-      successPrint('Login successful');
-      warningPrint('Parsing tokens...');
-      var data = jsonDecode(response.body);
-      String? accessToken = data['access'];
-      String? refreshToken = data['refresh'];
-
-      // Check if tokens are received
-      if (accessToken != null && refreshToken != null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access_token', accessToken);
-        await prefs.setString('refresh_token', refreshToken);
-        await prefs.setString('savedEmail', email);
-        await prefs.setString('savedPassword', password);
-
-        successPrint('Tokens received and saved to SharedPreferences');
-        return true;
-      } else {
-        errorPrint('Tokens are null');
-        return false;
-      }
-    } else {
-      errorPrint('Login failed with status code: ${response.statusCode}');
-      errorPrint('Response body: ${utf8.decode(response.bodyBytes)}');
-      return false;
-    }
-  } catch (e) {
-    errorPrint('Exception occurred during login: $e');
-    return false;
-  }
-}
-
 Future<int> register(String username, String password, String firstName,
     String lastName, String email, String phone, int points) async {
   try {

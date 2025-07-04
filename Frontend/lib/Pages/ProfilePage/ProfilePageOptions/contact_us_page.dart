@@ -73,7 +73,7 @@ class _ContactUsPageState extends State<ContactUsPage> {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    UserInfoStruct? userProvider = context.read<UserProvider>().userDetails;
+    User? userProvider = context.read<UserProvider>().userDetails;
     if (isAuthenticated) {
       nameController.text =
           '${userProvider.firstName} ${userProvider.lastName}';

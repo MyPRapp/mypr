@@ -6,8 +6,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
-import 'package:mypr/services/auth_service.dart';
 import 'package:provider/provider.dart';
 
 @RoutePage()
@@ -29,65 +29,69 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
-
     _autofillCredentials();
   }
 
   Future<void> _login() async {
+    //Check if something is missing
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
       FocusManager.instance.primaryFocus?.unfocus();
+
       showFloatingSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία',
           const Duration(milliseconds: 4000), context);
+
       return;
-    } else {
-      successPrint('------------LOGGING IN------------');
-      setState(() {
-        _isLoginPressed = true;
-      });
-      bool success = false;
-
-      success = await login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
-
-      if (success) {
-        if (mounted) {
-          context.read<GlobalStateProvider>().isAuthenticated = true;
-          bool authenticated =
-              context.read<GlobalStateProvider>().isAuthenticated;
-          while (!authenticated) {}
-          FocusManager.instance.primaryFocus?.unfocus();
-          context.router.replaceAll([const BottomNavBarRoute()]);
-        }
-
-        successPrint('------------LOGGED IN------------');
-      } else {
-        _handleLoginFailure();
-        errorPrint('------------LOGIN FAILED------------');
-      }
-      setState(() {
-        _isLoginPressed = false;
-      });
     }
+
+    warningPrint('------------LOGGING IN------------');
+
+    setState(() {
+      _isLoginPressed = true;
+    });
+
+    //Attempting to login
+    int loginResultCode = await context.read<UserProvider>().login(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+
+    if (loginResultCode == 0) {
+      if (mounted) {
+        context.read<GlobalStateProvider>().isAuthenticated = true;
+
+        FocusManager.instance.primaryFocus?.unfocus();
+
+        context.router.replaceAll([const BottomNavBarRoute()]);
+      }
+
+      successPrint('------------LOGGED IN------------');
+    } else {
+      _handleLoginFailure(loginResultCode);
+      errorPrint('------------LOGIN FAILED------------');
+    }
+
+    setState(() {
+      _isLoginPressed = false;
+    });
   }
 
   void _autofillCredentials() async {
     String savedEmail = await getSavedEmail();
     String savedPassword = await getSavedPassword();
+
     setState(() {
       _emailController.text = savedEmail;
       _passwordController.text = savedPassword;
     });
   }
 
-  void _handleLoginFailure() {
-    if (_emailController.text.isNotEmpty &&
-        _passwordController.text.isNotEmpty) {
-      FocusManager.instance.primaryFocus?.unfocus();
-      showFloatingSnackBar('Λάθος στοιχεία εισόδου',
-          const Duration(milliseconds: 4000), context);
-    }
+  void _handleLoginFailure(int loginResultCode) {
+    FocusManager.instance.primaryFocus?.unfocus();
+    String message = loginResultCode == 2
+        ? 'Λάθος στοιχεία εισόδου'
+        : 'Προέκυψε κάποιο σφάλμα. Παρακαλώ δοκιμάστε αργότερα';
+
+    showFloatingSnackBar(message, const Duration(milliseconds: 4000), context);
   }
 
   void _togglePasswordVisibility() {

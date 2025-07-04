@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/routes/app_router.gr.dart';
 import 'package:mypr/services/message_service.dart';
 import 'package:mypr/services/notification_service.dart';
@@ -163,14 +164,13 @@ class _SignUpPageState extends State<SignUpPage> {
       setState(() {
         _isRegistering = true;
       });
-      bool success = false;
 
-      success = await login(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+      int success = await context.read<UserProvider>().login(
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+          );
 
-      if (success) {
+      if (success == 0) {
         if (mounted) {
           context.read<GlobalStateProvider>().isAuthenticated = true;
           context.read<GlobalStateProvider>().justRegistered = true;

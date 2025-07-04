@@ -65,7 +65,7 @@ class _ReservationPageState extends State<ReservationPage> {
   /// Initializes the reservation page by setting the club's catalogues and resetting form data.
   void _initializePage() {
     final reservationProvider = context.read<ReservationProvider>();
-    UserInfoStruct userDetails = context.read<UserProvider>().userDetails;
+    User userDetails = context.read<UserProvider>().userDetails;
 
     // Reset reservation data
     reservationProvider.resetReservation();

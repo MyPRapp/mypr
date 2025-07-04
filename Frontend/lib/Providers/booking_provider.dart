@@ -17,7 +17,7 @@ class BookingProvider with ChangeNotifier {
 
   // Fetch bookings from server or preferences if already loaded
   Future<void> fetchBookings(
-      UserInfoStruct userDetails, ClubProvider clubProvider) async {
+      User userDetails, ClubProvider clubProvider) async {
     warningPrint('Fetching bookings...');
 
     setLoading(true);
@@ -42,7 +42,7 @@ class BookingProvider with ChangeNotifier {
 
 // Process fetched bookings and update UI
   Future<void> _processFetchedBookings(List<dynamic> bookingsData,
-      UserInfoStruct? userDetails, ClubProvider clubProvider) async {
+      User? userDetails, ClubProvider clubProvider) async {
     _bookings.clear();
     for (var bookingData in bookingsData) {
       bool clubFound = false;

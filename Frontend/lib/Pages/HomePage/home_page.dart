@@ -103,12 +103,12 @@ class _HomePageState extends State<HomePage> {
     final savedPassword = await getSavedPassword();
 
     if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-      final loggedIn = await login(savedEmail, savedPassword);
+      final loggedIn = await userProvider.login(savedEmail, savedPassword);
 
       if (!mounted) return;
       final globalStateProvider = context.read<GlobalStateProvider>();
 
-      if (loggedIn) {
+      if (loggedIn == 0) {
         globalStateProvider.isAuthenticated = true;
 
         if (globalStateProvider.justRegistered) {

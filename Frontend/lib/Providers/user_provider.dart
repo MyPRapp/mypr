@@ -10,7 +10,7 @@ import '../Globals/classes.dart';
 import '../Globals/global_components.dart';
 
 class UserProvider with ChangeNotifier {
-  UserInfoStruct _userDetails = UserInfoStruct(
+  User _userDetails = User(
       userID: -1,
       username: '',
       firstName: '',
@@ -22,7 +22,53 @@ class UserProvider with ChangeNotifier {
       localPhotoPath: '',
       isBanned: false);
 
-  UserInfoStruct get userDetails => _userDetails;
+  User get userDetails => _userDetails;
+
+  Future<int> login(String email, String password) async {
+    try {
+      // Send login request
+      final response = await http
+          .post(
+            Uri.parse('$apiUrl/token/'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'username': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 8));
+
+      // Check if the response is successful
+      if (response.statusCode == 200) {
+        successPrint('Login successful');
+
+        warningPrint('Parsing tokens...');
+
+        var data = jsonDecode(response.body);
+        String? accessToken = data['access'];
+        String? refreshToken = data['refresh'];
+
+        // Check if tokens are received
+        if (accessToken != null && refreshToken != null) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access_token', accessToken);
+          await prefs.setString('refresh_token', refreshToken);
+          await prefs.setString('savedEmail', email);
+          await prefs.setString('savedPassword', password);
+
+          successPrint('Tokens received and saved to SharedPreferences');
+          return 0;
+        } else {
+          errorPrint('Tokens are null');
+          return 1;
+        }
+      } else {
+        errorPrint('Login failed with status code: ${response.statusCode}');
+        errorPrint('Response body: ${utf8.decode(response.bodyBytes)}');
+        return 2;
+      }
+    } catch (e) {
+      errorPrint('Exception occurred during login: $e');
+      return 1;
+    }
+  }
 
   // Fetch user details from the server, save to shared preferences, and notify listeners
   Future<void> fetchUserDetailsFromServer() async {
@@ -42,18 +88,7 @@ class UserProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final decodedBody = utf8.decode(response.bodyBytes);
-        _userDetails = UserInfoStruct.fromJson(jsonDecode(decodedBody));
-
-        // if (_userDetails.userID >= 0) {
-        //   // Download and save user photo
-        //   if (_userDetails.photo.isNotEmpty) {
-        //     _userDetails.localPhotoPath = await PhotoManager.instance
-        //         .downloadAndSaveUserPhoto(_userDetails.photo,
-        //             'user_${_userDetails.userID}_photo'); // Store local path in the user object
-        //   } else {
-        //     errorPrint('User photo URL is empty');
-        //   }
-        // }
+        _userDetails = User.fromJson(jsonDecode(decodedBody));
 
         await saveUserDetailsToPreferences();
 
@@ -86,7 +121,7 @@ class UserProvider with ChangeNotifier {
 
     if (userDetailsString == null) return;
 
-    _userDetails = UserInfoStruct.fromJson(jsonDecode(userDetailsString));
+    _userDetails = User.fromJson(jsonDecode(userDetailsString));
     successPrint('Loaded user details from preferences');
 
     notifyListeners();
@@ -94,7 +129,7 @@ class UserProvider with ChangeNotifier {
 
   Future<void> resetUserDetails() async {
     // Restore the default values of the _userDetails object
-    _userDetails = UserInfoStruct(
+    _userDetails = User(
         userID: -1,
         username: '',
         firstName: '',

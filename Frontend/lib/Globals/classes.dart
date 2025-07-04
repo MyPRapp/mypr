@@ -73,18 +73,12 @@ class ClubInfoStruct {
   }
 }
 
-class UserInfoStruct {
+class User {
   int userID, points;
-  String username;
-  String firstName;
-  String lastName;
-  String email;
-  String phone;
-  String photo;
-  String localPhotoPath;
+  String username, firstName, lastName, email, phone, photo, localPhotoPath;
   bool isBanned;
 
-  UserInfoStruct({
+  User({
     required this.userID,
     this.username = '',
     this.firstName = '',
@@ -97,9 +91,9 @@ class UserInfoStruct {
     this.isBanned = false,
   });
 
-  factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json) {
     try {
-      return UserInfoStruct(
+      return User(
         userID: json['id'] ?? -1,
         username: json['username'] ?? '',
         firstName: json['first_name'] ?? '',
@@ -111,9 +105,8 @@ class UserInfoStruct {
         isBanned: json['is_banned'] ?? false,
       );
     } catch (e) {
-      errorPrint('Error parsing UserInfoStruct: $e');
-      return UserInfoStruct(
-          userID: -1); // Return a default object with userID -1
+      errorPrint('Error parsing User: $e');
+      return User(userID: -1); // Return a default object with userID -1
     }
   }
 
