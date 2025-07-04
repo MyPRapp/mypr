@@ -1,5 +1,7 @@
 // notification_service.dart
 
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +48,7 @@ class NotificationService {
 
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     } catch (e, stackTrace) {
-      errorPrint('NotificationService initialization failed: $e');
+      errorPrint('❌ NotificationService initialization failed: $e');
       debugPrintStack(stackTrace: stackTrace);
     }
   }
@@ -81,12 +83,6 @@ class NotificationService {
       RemoteNotification? notification = message.notification;
       AndroidNotification? android = message.notification?.android;
 
-      // NotificationDetails notificationDetails = NotificationDetails(
-      //   android: AndroidNotificationDetails(_channel.id, _channel.name,
-      //       icon: android?.smallIcon ?? '@mipmap/ic_launcher',
-      //       color: Color.fromARGB(255, 255, 0, 0)),
-      // );
-
       final NotificationDetails notificationDetails = NotificationDetails(
         android: AndroidNotificationDetails(
           _channel.id,
@@ -103,22 +99,40 @@ class NotificationService {
         ),
       );
 
-      if (notification != null && message.data.isEmpty) {
-        // Show only the notification payload
-        _localNotificationsPlugin.show(
-          notification.hashCode,
-          notification.title,
-          notification.body,
-          notificationDetails,
-        );
-      } else if (notification == null && message.data.isNotEmpty) {
-        // Fallback to data payload only if no notification exists
-        _localNotificationsPlugin.show(
-          0,
-          message.data['title'] ?? 'Data title',
-          message.data['body'] ?? 'Data body',
-          notificationDetails,
-        );
+      if (Platform.isAndroid) {
+        // Check if the notification part exists, then display it
+        if (notification != null && android != null) {
+          // If the notification field is present, show it
+          _localNotificationsPlugin.show(notification.hashCode,
+              notification.title, notification.body, notificationDetails);
+        } else if (message.data.isNotEmpty) {
+          // If there is no notification but data exists, use data for the notification
+          _localNotificationsPlugin.show(
+              0,
+              message.data['title'] ?? 'MyPR', // Title from data or fallback
+              message.data['body'] ?? ' ', // Body from data or fallback,
+              notificationDetails);
+        }
+      }
+
+      if (Platform.isIOS) {
+        if (notification != null && message.data.isEmpty) {
+          // Show only the notification payload
+          _localNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            notificationDetails,
+          );
+        } else if (notification == null && message.data.isNotEmpty) {
+          // Fallback to data payload only if no notification exists
+          _localNotificationsPlugin.show(
+            0,
+            message.data['title'] ?? 'Data title',
+            message.data['body'] ?? 'Data body',
+            notificationDetails,
+          );
+        }
       }
     });
   }

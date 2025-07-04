@@ -40,7 +40,7 @@ android {
 
     signingConfigs {
         create("release") {
-            storeFile = file("C:\\Users\\georg\\OneDrive\\Documents\\MyPR\\upload-key.jks")
+            storeFile = file("C:\\Users\\georg\\mypr_signing\\upload-key.jks")
             storePassword = System.getenv("STORE_PASSWORD")
                 ?: project.findProperty("STORE_PASSWORD") as String? ?: ""
             keyAlias = "upload"
