@@ -33,9 +33,10 @@ android {
     defaultConfig {
         applicationId = "com.etairia.mypr"
         minSdk = 21
+        //noinspection OldTargetApi
         targetSdk = 35
-        versionCode = flutter.versionCode ?: 1
-        versionName = flutter.versionName ?: "1.0.0"
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     signingConfigs {
