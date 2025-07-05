@@ -44,6 +44,8 @@ class GlobalStateProvider with ChangeNotifier {
 
   String get mustSendCancellationEmail => _mustSendCancellationEmail;
 
+  //TODO IMPORTANT: Check if setters actually work!
+
   // Setters
   set isAuthenticated(bool value) {
     _isAuthenticated = value;

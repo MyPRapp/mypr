@@ -14,6 +14,9 @@ import 'package:mypr/routes/app_router.dart';
 import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 
+//LOGIN PAGE
+//SEARCH PAGE
+
 //TODO Change debug = false to debug = true in build.gradle.kts for debugging
 
 void main() async {

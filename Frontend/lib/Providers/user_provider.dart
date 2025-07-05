@@ -24,6 +24,9 @@ class UserProvider with ChangeNotifier {
 
   User get userDetails => _userDetails;
 
+  //0: User logged in successfully
+  //1: User didn't fill in the correct credentials
+  //2: There was an error by our side
   Future<int> login(String email, String password) async {
     try {
       // Send login request
@@ -57,16 +60,16 @@ class UserProvider with ChangeNotifier {
           return 0;
         } else {
           errorPrint('Tokens are null');
-          return 1;
+          return 2;
         }
       } else {
         errorPrint('Login failed with status code: ${response.statusCode}');
         errorPrint('Response body: ${utf8.decode(response.bodyBytes)}');
-        return 2;
+        return 1;
       }
     } catch (e) {
       errorPrint('Exception occurred during login: $e');
-      return 1;
+      return 2;
     }
   }
 

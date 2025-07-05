@@ -19,24 +19,27 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
   bool _isObscure = true;
   bool _isLoginPressed = false;
-  String savedEmail = '';
-  String savedPassword = '';
 
   @override
   void initState() {
     super.initState();
+
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+
     _autofillCredentials();
   }
 
   Future<void> _login() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+
     //Check if something is missing
     if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      FocusManager.instance.primaryFocus?.unfocus();
-
       showFloatingSnackBar('Παρακαλώ συμπλήρωσε όλα τα πεδία',
           const Duration(milliseconds: 4000), context);
 
@@ -50,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
     });
 
     //Attempting to login
-    int loginResultCode = await context.read<UserProvider>().login(
+    final int loginResultCode = await context.read<UserProvider>().login(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
@@ -58,13 +61,9 @@ class _LoginPageState extends State<LoginPage> {
     if (loginResultCode == 0) {
       if (mounted) {
         context.read<GlobalStateProvider>().isAuthenticated = true;
-
-        FocusManager.instance.primaryFocus?.unfocus();
-
         context.router.replaceAll([const BottomNavBarRoute()]);
+        successPrint('------------LOGGED IN------------');
       }
-
-      successPrint('------------LOGGED IN------------');
     } else {
       _handleLoginFailure(loginResultCode);
       errorPrint('------------LOGIN FAILED------------');
@@ -75,23 +74,18 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _autofillCredentials() async {
-    String savedEmail = await getSavedEmail();
-    String savedPassword = await getSavedPassword();
-
-    setState(() {
-      _emailController.text = savedEmail;
-      _passwordController.text = savedPassword;
-    });
-  }
-
   void _handleLoginFailure(int loginResultCode) {
-    FocusManager.instance.primaryFocus?.unfocus();
-    String message = loginResultCode == 2
+    final String message = loginResultCode == 1
         ? 'Λάθος στοιχεία εισόδου'
-        : 'Προέκυψε κάποιο σφάλμα. Παρακαλώ δοκιμάστε αργότερα';
+        : 'Προέκυψε κάποιο σφάλμα. Παρακαλώ ξανα δοκίμασε αργότερα';
 
     showFloatingSnackBar(message, const Duration(milliseconds: 4000), context);
+  }
+
+//TODO Check if we need credentials to be saved after sign out
+  void _autofillCredentials() async {
+    _emailController.text = await getSavedEmail();
+    _passwordController.text = await getSavedPassword();
   }
 
   void _togglePasswordVisibility() {

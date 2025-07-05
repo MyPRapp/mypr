@@ -372,7 +372,7 @@ class ClubProvider with ChangeNotifier {
       if (index != -1) {
         // Club exists, update the existing entry
         _clubs[index] = club;
-        successPrint(' \'${club.clubName}\' is up to date.');
+        successPrint('\'${club.clubName}\' is up to date.');
       } else {
         // Club does not exist, add it to the list
         _clubs.add(club);

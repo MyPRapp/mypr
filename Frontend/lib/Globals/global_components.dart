@@ -122,9 +122,8 @@ Future<String> getSavedEmail() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.getString('savedEmail') != null) {
     return prefs.getString('savedEmail')!;
-  } else {
-    return '';
   }
+  return '';
 }
 
 void successPrint(String text) {
