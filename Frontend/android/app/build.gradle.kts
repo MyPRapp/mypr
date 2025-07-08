@@ -33,14 +33,15 @@ android {
     defaultConfig {
         applicationId = "com.etairia.mypr"
         minSdk = 21
-        targetSdk = 34
-        versionCode = flutter.versionCode ?: 1
-        versionName = flutter.versionName ?: "1.0.0"
+        //noinspection OldTargetApi
+        targetSdk = 35
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
     }
 
     signingConfigs {
         create("release") {
-            storeFile = file("C:\\Users\\georg\\OneDrive\\Documents\\MyPR\\upload-key.jks")
+            storeFile = file("C:\\Users\\georg\\mypr_signing\\upload-key.jks")
             storePassword = System.getenv("STORE_PASSWORD")
                 ?: project.findProperty("STORE_PASSWORD") as String? ?: ""
             keyAlias = "upload"
