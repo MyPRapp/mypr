@@ -209,11 +209,11 @@ class ClubProvider with ChangeNotifier {
               int clubID = int.parse(match.group(1)!);
               if (!existingClubIDs.contains(clubID)) {
                 await file.delete();
-                successPrint('Deleted unused club photo: ${file.path}');
               }
             }
           }
         }
+        successPrint('Deleted unused club photos');
       } else {
         errorPrint('Directory does not exist: ${clubPhotosDirectory.path}');
       }
