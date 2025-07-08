@@ -18,8 +18,6 @@ import 'package:provider/provider.dart';
 //SEARCH PAGE
 //CUSTOMIZE PROFILE PAGE
 
-//TODO Change debug = false to debug = true in build.gradle.kts for debugging
-
 void main() async {
   // Lock the app to portrait mode only
   WidgetsFlutterBinding
