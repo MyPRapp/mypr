@@ -59,8 +59,11 @@ class _HomePageState extends State<HomePage> {
 
     if (globalStateProvider.preferencesLoaded) {
       handleCancellationEmail(context, globalStateProvider);
-      if (globalStateProvider.hasLoggedIn) {
-        await context.read<UserProvider>().loadUserDetailsFromPreferences();
+
+      final bool loadedUserDetails =
+          await context.read<UserProvider>().loadUserDetailsFromPreferences();
+
+      if (globalStateProvider.hasLoggedIn && loadedUserDetails) {
         successPrint('------------USER IS LOGGED IN------------');
       } else {
         errorPrint('------------USER IS NOT LOGGED IN------------');
@@ -73,9 +76,10 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _checkFirstTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
-    bool hasSentFirebaseToken = prefs.getBool('hasSentFirebaseToken') ?? false;
-    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
+    final bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+    final bool hasSentFirebaseToken =
+        prefs.getBool('hasSentFirebaseToken') ?? false;
+    final bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
 
     if (!hasSeenDialog) {
       await prefs.setBool('hasSeenPointsDialog', true);
@@ -109,7 +113,8 @@ class _HomePageState extends State<HomePage> {
     if (parts.length == 2) {
       final Booking cancelledBooking = context
           .read<BookingProvider>()
-          .getBookingByBookingID(int.tryParse(parts[1]) ?? -1);
+          .getBookingByBookingID(int.tryParse(parts[1]) ??
+              -1); //TODO What if booking wasn't found???
 
       sendCancellationEmail(
           context,

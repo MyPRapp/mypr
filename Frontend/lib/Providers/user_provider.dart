@@ -114,16 +114,20 @@ class UserProvider with ChangeNotifier {
   }
 
   // Load user details and photo from shared preferences
-  Future<void> loadUserDetailsFromPreferences() async {
+  Future<bool> loadUserDetailsFromPreferences() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userDetailsString = prefs.getString('user_details');
 
-    if (userDetailsString == null) return;
+    if (userDetailsString == null) {
+      errorPrint('User details could not load from preferences');
+      return false;
+    }
 
     _userDetails = User.fromJson(jsonDecode(userDetailsString));
     successPrint('Loaded user details from preferences');
 
     notifyListeners();
+    return true;
   }
 
   Future<void> resetUserDetails() async {
