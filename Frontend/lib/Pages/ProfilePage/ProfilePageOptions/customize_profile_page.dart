@@ -1,8 +1,5 @@
-import 'dart:io';
-
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:provider/provider.dart';
@@ -86,10 +83,10 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
           }
         }
 
-        // Step 7: Set isAuthenticated to false
+        // Step 7: Set hasLoggedIn to false
         if (context.mounted) {
-          context.read<GlobalStateProvider>().isAuthenticated = false;
-          successPrint('\'isAuthenticated\' flag set to false.');
+          context.read<GlobalStateProvider>().setHasLoggedIn(false);
+          successPrint('\'hasLoggedIn\' flag set to false.');
         }
         // Step 8: Reset saved user details
         if (context.mounted) {
@@ -141,25 +138,9 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
                             width: screenWidth * screenHeight * 0.00036,
                             child: ClipRRect(
                                 borderRadius: BorderRadius.circular(300),
-                                child: context
-                                        .read<GlobalStateProvider>()
-                                        .isAuthenticated
-                                    ? userDetails.localPhotoPath.isNotEmpty
-                                        ? Image.file(
-                                            File(userDetails.localPhotoPath),
-                                            fit: BoxFit.cover,
-                                          ) // Load from local file
-                                        : userDetails.photo.isNotEmpty
-                                            ? Image.network(
-                                                'http://$validatedIP${userDetails.photo}',
-                                                fit: BoxFit.cover,
-                                              )
-                                            : const Image(
-                                                image: AssetImage(
-                                                    'assets/otherPhotos/Default_User.jpg'))
-                                    : const Image(
-                                        image: AssetImage(
-                                            'assets/otherPhotos/Default_User.jpg'))),
+                                child: const Image(
+                                    image: AssetImage(
+                                        'assets/otherPhotos/Default_User.jpg'))),
                           ),
                           SizedBox(width: screenWidth * 0.05),
                           Expanded(

@@ -581,8 +581,9 @@ class _CancelReservationButtonState extends State<CancelReservationButton> {
                             .fetchUserDetailsFromServer();
                       }
                       if (context.mounted) {
-                        context.read<GlobalStateProvider>().refreshProfilePage =
-                            true;
+                        context
+                            .read<GlobalStateProvider>()
+                            .setRefreshProfilePage(true);
                       }
                       if (context.mounted) {
                         showFloatingSnackBar('Η κράτηση ακυρώθηκε',

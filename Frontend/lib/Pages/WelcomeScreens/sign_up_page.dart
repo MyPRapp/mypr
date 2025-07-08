@@ -172,8 +172,8 @@ class _SignUpPageState extends State<SignUpPage> {
 
       if (success == 0) {
         if (mounted) {
-          context.read<GlobalStateProvider>().isAuthenticated = true;
-          context.read<GlobalStateProvider>().justRegistered = true;
+          context.read<GlobalStateProvider>().setHasLoggedIn(true);
+          context.read<GlobalStateProvider>().setJustRegistered(true);
           FocusManager.instance.primaryFocus?.unfocus();
           await Future.delayed(Duration(seconds: 1));
 

@@ -60,7 +60,10 @@ class _LoginPageState extends State<LoginPage> {
 
     if (loginResultCode == 0) {
       if (mounted) {
-        context.read<GlobalStateProvider>().isAuthenticated = true;
+        await context.read<GlobalStateProvider>().setHasLoggedIn(true);
+        if (!mounted) {
+          return;
+        }
         context.router.replaceAll([const BottomNavBarRoute()]);
         successPrint('------------LOGGED IN------------');
       }

@@ -334,22 +334,22 @@ Future<void> checkAppVersion(BuildContext context) async {
 
   int comparison = 0;
   if (Platform.isAndroid) {
-    comparison =
-        await checkPlatformVersion(currentVersion, 'version_control_android');
+    comparison = await checkPlatformVersion(currentVersion, 'android');
   } else if (Platform.isIOS) {
-    comparison =
-        await checkPlatformVersion(currentVersion, 'version_control_ios');
+    comparison = await checkPlatformVersion(currentVersion, 'ios');
   } else {
     comparison = -1;
   }
 
-  if (comparison < 0 && context.mounted) {
-    // If the current version is older than the minimum version
-    showUpdateDialog(context);
-    errorPrint('App must be updated');
-  } else if (context.mounted) {
-    context.read<GlobalStateProvider>().hasCheckedAppVersion;
-    successPrint('Your app is up-to-date!');
+  if (context.mounted) {
+    if (comparison < 0) {
+      // If the current version is older than the minimum version
+      showUpdateDialog(context);
+      errorPrint('App must be updated');
+    } else {
+      context.read<GlobalStateProvider>().hasCheckedAppVersion;
+      successPrint('Your app is up-to-date!');
+    }
   }
 }
 
@@ -524,8 +524,9 @@ class CustomPhoneButtonState extends State<CustomPhoneButton> {
                   if (result == 0) {
                     if (context.mounted) {
                       context.read<UserProvider>().fetchUserDetailsFromServer();
-                      context.read<GlobalStateProvider>().refreshProfilePage =
-                          true;
+                      context
+                          .read<GlobalStateProvider>()
+                          .setRefreshProfilePage(true);
                       Navigator.pop(context);
                       showFloatingSnackBar('Επιτυχής προσθήκη κινητού',
                           Duration(seconds: 4), context);
@@ -660,8 +661,9 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                             await changeEmailOnServerOnly(_controller.text);
                       }
                       if (success == 0 && context.mounted) {
-                        context.read<GlobalStateProvider>().hasVerifiedEmail =
-                            false;
+                        context
+                            .read<GlobalStateProvider>()
+                            .setHasVerifiedEmail(false);
                       } else {
                         if (success == 2) {
                           if (context.mounted) {
@@ -710,7 +712,7 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                         if (context.mounted) {
                           context
                               .read<GlobalStateProvider>()
-                              .refreshProfilePage = true;
+                              .setRefreshProfilePage(true);
                           showFloatingSnackBar("Στάλθηκε email επιβεβαίωσης",
                               Duration(seconds: 3), context);
                         }

@@ -72,7 +72,7 @@ class _ReservationPageState extends State<ReservationPage> {
     reservationProvider.updateReservation(
         clubName: widget.club.clubName); // Set club name
 
-    if (context.read<GlobalStateProvider>().isAuthenticated) {
+    if (context.read<GlobalStateProvider>().hasLoggedIn) {
       if (userDetails.userID > 0) {
         reservationProvider.updateReservation(
             userID: userDetails.userID); // Set user ID
@@ -169,7 +169,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   /// Refreshes the page to fetch the latest catalogues for the selected club.
   Future<void> _refresh() async {
-    context.read<GlobalStateProvider>().refreshReservationPage = false;
+    context.read<GlobalStateProvider>().setRefreshReservationPage(false);
     final clubProvider = context.read<ClubProvider>();
     try {
       // Fetch updated catalogues
@@ -181,7 +181,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
       _updateCatalogues(catalogues);
       successPrint('${widget.club.clubName} is up to date');
-      if (mounted && context.read<GlobalStateProvider>().isAuthenticated) {
+      if (mounted && context.read<GlobalStateProvider>().hasLoggedIn) {
         setState(() {
           context.read<UserProvider>().fetchUserDetailsFromServer();
         });
@@ -212,8 +212,7 @@ class _ReservationPageState extends State<ReservationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool isAuthenticated =
-        context.watch<GlobalStateProvider>().isAuthenticated;
+    final bool hasLoggedIn = context.watch<GlobalStateProvider>().hasLoggedIn;
     final bool hasVerifiedEmail =
         context.watch<GlobalStateProvider>().hasVerifiedEmail;
     if (context.watch<GlobalStateProvider>().refreshReservationPage == true) {
@@ -247,8 +246,8 @@ class _ReservationPageState extends State<ReservationPage> {
                   child: ListView(
                     controller: _scrollController,
                     children: [
-                      buildContent(isAuthenticated, hasVerifiedEmail),
-                      if (isAuthenticated) ...[
+                      buildContent(hasLoggedIn, hasVerifiedEmail),
+                      if (hasLoggedIn) ...[
                         SizedBox(height: 20.h),
                         buildDiscountCheckbox(), // Discount checkbox
                         SizedBox(height: 20.h),
@@ -258,7 +257,7 @@ class _ReservationPageState extends State<ReservationPage> {
                     ],
                   ),
                 ),
-                if (!hasVerifiedEmail && isAuthenticated)
+                if (!hasVerifiedEmail && hasLoggedIn)
                   EmailConfirmationNotification(
                     text:
                         'Για να προχωρήσεις σε κράτηση παρακαλώ επιβεβαίωσε το email σου',
@@ -307,14 +306,14 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
   /// Builds the content section with form fields for reservation details.
-  Widget buildContent(bool isAuthenticated, bool hasVerifiedEmail) {
+  Widget buildContent(bool hasLoggedIn, bool hasVerifiedEmail) {
     return Container(
       padding: EdgeInsets.only(left: 25.w, right: 25.w),
       child: Column(
         children: [
-          if ((!hasVerifiedEmail && isAuthenticated) ||
+          if ((!hasVerifiedEmail && hasLoggedIn) ||
               (context.read<UserProvider>().userDetails.isBanned &&
-                  isAuthenticated)) //top 'resend-email' banner is visible
+                  hasLoggedIn)) //top 'resend-email' banner is visible
             SizedBox(height: 60.h),
           SizedBox(height: 20.h),
           buildClubImage(), // Display club image
@@ -323,7 +322,7 @@ class _ReservationPageState extends State<ReservationPage> {
           SizedBox(height: 15.h),
           LocationWidget(locationName: widget.club.clubLocation),
 
-          isAuthenticated
+          hasLoggedIn
               ? Column(
                   children: [
                     AlertsList(alerts: widget.club.clubInfo),
@@ -585,7 +584,7 @@ class _ReservationPageState extends State<ReservationPage> {
             if (result == 0) {
               if (mounted) {
                 context.read<UserProvider>().fetchUserDetailsFromServer();
-                context.read<GlobalStateProvider>().refreshProfilePage = true;
+                context.read<GlobalStateProvider>().setRefreshProfilePage(true);
 
                 showFloatingSnackBar(
                     'Επιτυχής προσθήκη κινητού', Duration(seconds: 4), context);
@@ -851,7 +850,7 @@ class _ReservationPageState extends State<ReservationPage> {
         final bool? result = await reservationReviewDialog();
         if (mounted) {
           context.read<UserProvider>().fetchUserDetailsFromServer();
-          context.read<GlobalStateProvider>().refreshProfilePage = true;
+          context.read<GlobalStateProvider>().setRefreshProfilePage(true);
         }
         // If the user confirmed (result == true), perform actions
         if (result == true) {

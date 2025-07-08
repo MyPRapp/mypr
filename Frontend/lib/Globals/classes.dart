@@ -75,7 +75,7 @@ class ClubInfoStruct {
 
 class User {
   int userID, points;
-  String username, firstName, lastName, email, phone, photo, localPhotoPath;
+  String username, firstName, lastName, email, phone;
   bool isBanned;
 
   User({
@@ -86,8 +86,6 @@ class User {
     this.email = '',
     this.phone = '',
     this.points = -1,
-    this.photo = '',
-    this.localPhotoPath = '',
     this.isBanned = false,
   });
 
@@ -101,7 +99,6 @@ class User {
         email: json['email'] ?? '',
         phone: json['phone'] ?? '',
         points: json['points'] ?? -1,
-        photo: json['photo'] ?? '',
         isBanned: json['is_banned'] ?? false,
       );
     } catch (e) {
@@ -119,8 +116,6 @@ class User {
       'email': email,
       'phone': phone,
       'points': points,
-      'photo': photo,
-      'localPhotoPath': localPhotoPath,
       'is_banned': isBanned,
     };
   }

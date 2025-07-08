@@ -30,17 +30,17 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _initSyncing();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<BottomNavBarVisibility>().show();
-      context.read<GlobalStateProvider>().refreshHomePage = false;
+      context.read<GlobalStateProvider>().setRefreshHomePage(false); //TODO
+      checkAppVersion(context);
+      await _initSyncing();
       _checkFirstTime();
     });
   }
 
-  Future<void> _initSyncing() async {
-    checkAppVersion(context);
-    Future.wait([_fetchClubs(), _syncUser()]);
+  Future<void> _initSyncing() {
+    return Future.wait([_fetchClubs(), _syncUser()]);
   }
 
   Future<void> _fetchClubs() async {
@@ -50,26 +50,41 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _syncUser() async {
-    if (mounted) {
-      final globalStateProvider = context.read<GlobalStateProvider>();
+    final globalStateProvider = context.read<GlobalStateProvider>();
 
-      if (globalStateProvider.preferencesLoaded) {
-        if (globalStateProvider.isAuthenticated) {
-          await _attemptUserLogin();
+    if (globalStateProvider.preferencesLoaded) {
+      handleCancellationEmail(context, globalStateProvider);
+      globalStateProvider.hasLoggedIn
+          ? successPrint('------------USER IS LOGGED IN------------')
+          : errorPrint('------------USER IS NOT LOGGED IN------------');
+      // if (globalStateProvider.hasLoggedIn) {
+      //   await _attemptUserLogin();
 
-          if (mounted) {
-            handleCancellationEmail(context, globalStateProvider);
-          }
-        } else {
-          errorPrint('------------USER IS NOT AUTHENTICATED------------');
-        }
-      } else {
-        await Future.delayed(const Duration(seconds: 2));
-        _syncUser();
-      }
+      // } else {
+      // }
     } else {
       await Future.delayed(const Duration(seconds: 2));
       _syncUser();
+    }
+  }
+
+  Future<void> _checkFirstTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+    bool hasSentFirebaseToken = prefs.getBool('hasSentFirebaseToken') ?? false;
+    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
+
+    if (!hasSeenDialog && mounted) {
+      showPointsReminderDialog(context);
+      await prefs.setBool('hasSeenPointsDialog', true);
+    }
+
+    if (!hasSentFirebaseToken && await registerDevice()) {
+      await prefs.setBool('hasSentFirebaseToken', true);
+    }
+
+    if (!hasSentEmail && await newUserAlertEmail()) {
+      await prefs.setBool('hasSentNewUserEmail', true);
     }
   }
 
@@ -109,13 +124,15 @@ class _HomePageState extends State<HomePage> {
       final globalStateProvider = context.read<GlobalStateProvider>();
 
       if (loggedIn == 0) {
-        globalStateProvider.isAuthenticated = true;
-
-        if (globalStateProvider.justRegistered) {
-          globalStateProvider.justRegistered = false;
-          emailLoop(context);
-        } else {
-          fetchVerifiedEmailGlobalVariable(context);
+        await globalStateProvider.setHasLoggedIn(true);
+        if (mounted) {
+          if (globalStateProvider.justRegistered) {
+            globalStateProvider.setJustRegistered(false);
+            emailLoop(
+                context); //email loop happens asynchronously after signing up and just registered shouldn't exist
+          } else {
+            fetchVerifiedEmailGlobalVariable(context);
+          }
         }
 
         await userProvider.fetchUserDetailsFromServer();
@@ -123,7 +140,7 @@ class _HomePageState extends State<HomePage> {
           await context.read<BookingProvider>().fetchBookings(
               userProvider.userDetails, context.read<ClubProvider>());
         }
-        successPrint('------------USER IS AUTHENTICATED------------');
+        successPrint('------------USER IS LOGGED IN------------');
       } else {
         _showLoginError(globalStateProvider);
       }
@@ -136,33 +153,13 @@ class _HomePageState extends State<HomePage> {
 
   void _showLoginError(GlobalStateProvider globalStateProvider) {
     errorPrint('Email or Password is incorrect');
-    globalStateProvider.isAuthenticated = false;
+    globalStateProvider.setHasLoggedIn(false);
   }
 
   void navigateToSearchTab(BuildContext context) async {
     final tabsRouter = AutoTabsRouter.of(context);
     if (tabsRouter.activeIndex != 1) {
       tabsRouter.setActiveIndex(1);
-    }
-  }
-
-  Future<void> _checkFirstTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
-    bool hasSentToken = prefs.getBool('hasSentToken') ?? false;
-    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
-
-    if (!hasSeenDialog && mounted) {
-      showPointsReminderDialog(context);
-      await prefs.setBool('hasSeenPointsDialog', true);
-    }
-
-    if (!hasSentToken && await registerDevice()) {
-      await prefs.setBool('hasSentToken', true);
-    }
-
-    if (!hasSentEmail && await newUserAlertEmail()) {
-      await prefs.setBool('hasSentNewUserEmail', true);
     }
   }
 

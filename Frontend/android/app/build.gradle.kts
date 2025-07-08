@@ -33,7 +33,6 @@ android {
     defaultConfig {
         applicationId = "com.etairia.mypr"
         minSdk = 21
-        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -51,8 +50,7 @@ android {
     }
 
     buildTypes {
-        //TODO Change this before release
-        debug { isDebuggable = false }
+        debug { isDebuggable = true }
         release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true // Enable code shrinking

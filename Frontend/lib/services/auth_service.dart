@@ -188,7 +188,7 @@ Future<int> register(String username, String password, String firstName,
 Future<int> changeEmailOnServerOnly(String email) async {
   String? accessToken = await getAccessToken();
   if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
+    errorPrint('Access token is null. User has not logged in.');
     return 1;
   }
 
@@ -232,7 +232,7 @@ Future<int> changeEmailOnServerOnly(String email) async {
 Future<int> changePhoneOnServerOnly(String phone) async {
   String? accessToken = await getAccessToken();
   if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
+    errorPrint('Access token is null. User has not logged in.');
     return 1;
   }
 
@@ -320,7 +320,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
 
       bool isVerified = jsonData['is_verified']; // Extract the boolean value
       if (context.mounted) {
-        context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
+        context.read<GlobalStateProvider>().setHasVerifiedEmail(isVerified);
         return;
       }
       errorPrint('Not mounted');
@@ -328,7 +328,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
     errorPrint('${response.statusCode}');
     errorPrint(response.body);
     if (context.mounted) {
-      context.read<GlobalStateProvider>().hasVerifiedEmail = false;
+      context.read<GlobalStateProvider>().setHasVerifiedEmail(false);
     }
   } catch (e) {
     errorPrint('Error while fetching \'verified email\' global variable: $e');
@@ -337,7 +337,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
 
 Future<int> checkPlatformVersion(
     String currentVersion, String platformUrl) async {
-  final url = '$apiUrl/$platformUrl/';
+  final url = '$apiUrl/version_control_$platformUrl/';
 
   try {
     final response =

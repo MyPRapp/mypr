@@ -18,8 +18,6 @@ class UserProvider with ChangeNotifier {
       email: '',
       phone: '',
       points: 0,
-      photo: '',
-      localPhotoPath: '',
       isBanned: false);
 
   User get userDetails => _userDetails;
@@ -140,8 +138,6 @@ class UserProvider with ChangeNotifier {
         email: '',
         phone: '',
         points: 0,
-        photo: '',
-        localPhotoPath: '',
         isBanned: false);
 
     // Clear related user data from SharedPreferences

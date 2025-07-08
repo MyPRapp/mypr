@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 
 //LOGIN PAGE
 //SEARCH PAGE
+//CUSTOMIZE PROFILE PAGE
 
 //TODO Change debug = false to debug = true in build.gradle.kts for debugging
 
