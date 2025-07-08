@@ -1,23 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import this for setting orientations
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/global_components.dart';
+import 'package:mypr/Navigation/bottom_nav_bar.dart';
+import 'package:mypr/Providers/booking_provider.dart';
+import 'package:mypr/Providers/club_provider.dart';
 import 'package:mypr/Providers/global_state_provider.dart';
 import 'package:mypr/Providers/liked_clubs_provider.dart';
 import 'package:mypr/Providers/reservation_provider.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/routes/app_router.dart';
+import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 
-import 'Globals/global_components.dart';
-import 'Navigation/bottom_nav_bar.dart';
-import 'Providers/booking_provider.dart';
-import 'Providers/club_provider.dart';
-import 'Providers/user_provider.dart';
+//TODO Change debug = false to debug = true in build.gradle.kts for debugging
 
 void main() async {
   // Lock the app to portrait mode only
   WidgetsFlutterBinding
       .ensureInitialized(); // Ensure the binding is initialized before calling SystemChrome
+
+  await NotificationService
+      .initialize(); // TODO Add notification service on a different thread for parallelism
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp, // Lock to portrait mode
   ]).then((_) {
@@ -52,6 +58,7 @@ class _MyPRState extends State<MyPR> {
     _initApp();
   }
 
+  // TODO: Create threads to split start up work and optimize it
   Future<void> _initApp() async {
     await createFilePath();
     if (mounted) {
@@ -80,7 +87,7 @@ class _MyPRState extends State<MyPR> {
             Locale('el', 'GR'), // Greek
             Locale('en', 'US'), // English (Optional, you can add more locales)
           ],
-          localizationsDelegates: const [
+          localizationsDelegates: [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,

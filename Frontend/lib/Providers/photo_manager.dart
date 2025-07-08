@@ -3,14 +3,28 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img; // For compressing images
-import 'package:mypr/Providers/global_state_provider.dart';
+import 'package:mypr/Globals/constants.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../Globals/global_components.dart';
 
 class PhotoManager {
+  // Private constructor
+  PhotoManager._privateConstructor();
+
+  // Static instance
+  static final PhotoManager _instance = PhotoManager._privateConstructor();
+
+  // Getter to access the instance
+  static PhotoManager get instance => _instance;
+
   // Function to download and save the image to local storage
   Future<String> downloadAndSaveClubPhoto(String url, String fileName) async {
+    if (url.isEmpty) {
+      errorPrint('Club photo URL is empty');
+      return '';
+    }
+
     try {
       // Fetch the image from the URL
       final response = await http.get(Uri.parse(url));
@@ -35,7 +49,7 @@ class PhotoManager {
         File file = File(filePath);
         await file.writeAsBytes(compressedImage);
 
-        successPrint('Photo saved to $filePath');
+        successPrint('Photo saved to file');
         return filePath;
       } else {
         throw Exception('Failed to download image');
@@ -49,8 +63,7 @@ class PhotoManager {
   Future<String> downloadAndSaveUserPhoto(String url, String fileName) async {
     try {
       // Fetch the image from the URL
-      final response = await http
-          .get(Uri.parse('http://${GlobalStateProvider().validatedIp}$url'));
+      final response = await http.get(Uri.parse('http://$validatedIP$url'));
 
       if (response.statusCode == 200) {
         // Compress the image before saving it
@@ -72,7 +85,7 @@ class PhotoManager {
         File file = File(filePath);
         await file.writeAsBytes(compressedImage);
 
-        successPrint('Photo saved to $filePath');
+        successPrint('Photo saved to file');
         return filePath;
       } else {
         throw Exception('Failed to download image');

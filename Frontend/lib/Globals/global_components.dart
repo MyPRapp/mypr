@@ -1,15 +1,16 @@
-import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:auto_route/auto_route.dart';
 import 'package:floating_snackbar/floating_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
+import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/services/auth_service.dart';
+import 'package:mypr/services/message_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -19,7 +20,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../Providers/global_state_provider.dart';
 import '../routes/app_router.gr.dart';
 
-String apiUrl = 'http://${GlobalStateProvider().validatedIp}/api';
+OtpService emailOtpService = OtpService();
+OtpService phoneOtpService = OtpService();
 
 class NoEmojisTextInputFormatter extends TextInputFormatter {
   // RegExp to allow Greek and English letters, numbers, and specific symbols
@@ -68,23 +70,6 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
 
     // If the new value contains restricted characters, return the old value
     return oldValue;
-  }
-}
-
-class LoadingScreen extends StatelessWidget {
-  const LoadingScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Color.fromARGB(197, 40, 40, 40),
-      body: Center(
-        child: SpinKitRing(
-          color: Color(0xFF9C0C04),
-          size: 50.0,
-        ),
-      ),
-    );
   }
 }
 
@@ -142,31 +127,19 @@ Future<String> getSavedEmail() async {
   }
 }
 
-void printReservationInfo(List<dynamic> reservationInfo) {
-  // print('\x1B[37mReservation Info:');
-  // print('UserID: ${reservationInfo[0]}');
-  // print('ReservationName: ${reservationInfo[1]}');
-  // print('ClubName: ${reservationInfo[2]}');
-  // print('Persons: ${reservationInfo[3]}');
-  // print('Price: ${reservationInfo[4]}');
-  // print('Regular: ${reservationInfo[5]}');
-  // print('Special: ${reservationInfo[6]}');
-  // print('Premium: ${reservationInfo[7]}');
-  // print('Date: ${reservationInfo[8]}');
-  // print('Comment: ${reservationInfo[9]}');
-  // print('Discount(%): ${reservationInfo[10]}');
-}
-
 void successPrint(String text) {
-  // print('✅$text');
+  print('✅$text');
+  // print('\x1B[32m$text\x1B[0m');
 }
 
 void warningPrint(String text) {
-  // print('🟡$text');
+  print('🟡$text');
+  // print('\x1B[33m$text\x1B[0m');
 }
 
 void errorPrint(String text) {
-  // print('❌$text');
+  print('❌$text');
+  // print('\x1B[31m$text\x1B[0m');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
@@ -218,12 +191,30 @@ AppBar buildAppBar(BuildContext context, String title) {
   );
 }
 
+class BannedBanner extends StatelessWidget {
+  const BannedBanner({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: const Color.fromARGB(255, 255, 187, 0),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 10.w),
+      child: Text(
+        'Ο λογαριασμός σου είναι αποκλεισμένος και δεν μπορείς να προβείς σε κρατήσεις προς το παρών',
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+}
+
 class EmailConfirmationNotification extends StatelessWidget {
-  final VoidCallback onResendEmail;
   final String text;
 
-  const EmailConfirmationNotification(
-      {super.key, required this.onResendEmail, required this.text});
+  const EmailConfirmationNotification({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
@@ -244,8 +235,10 @@ class EmailConfirmationNotification extends StatelessWidget {
             ),
           ),
           SizedBox(width: 10.w),
-          GestureDetector(
-            onTap: onResendEmail,
+          TextButton(
+            onPressed: () {
+              sendVerificationEmail(context);
+            },
             child: Text(
               'Επαναποστολή',
               style: TextStyle(
@@ -304,34 +297,6 @@ class BuildSignInOrRegisterButton extends StatelessWidget {
   }
 }
 
-Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
-  var response = await http.get(
-    Uri.parse('$apiUrl/user-auth-status/'),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${await getAccessToken()}',
-    },
-  ).timeout(const Duration(seconds: 10));
-
-  if (response.statusCode == 200) {
-    successPrint(response.body);
-    String jsonString = response.body;
-    Map<String, dynamic> jsonData = jsonDecode(jsonString); // Decode JSON
-
-    bool isVerified = jsonData['is_verified']; // Extract the boolean value
-    if (context.mounted) {
-      context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
-      return;
-    }
-    errorPrint('Not mounted');
-  }
-  errorPrint('${response.statusCode}');
-  errorPrint(response.body);
-  if (context.mounted) {
-    context.read<GlobalStateProvider>().hasVerifiedEmail = false;
-  }
-}
-
 void showFloatingSnackBar(
     String message, Duration duration, BuildContext context) {
   floatingSnackBar(
@@ -368,55 +333,24 @@ Future<String> getCurrentAppVersion() async {
 Future<void> checkAppVersion(BuildContext context) async {
   String currentVersion = await getCurrentAppVersion();
 
-  String minimumAndroidVersion = currentVersion;
-  String minimumIOSVersion = currentVersion;
-
   int comparison = 0;
   if (Platform.isAndroid) {
-    final url = '$apiUrl/version_control_android/';
-
-    try {
-      final response =
-          await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        minimumAndroidVersion = response.body.replaceAll('"', '');
-        comparison = compareVersions(currentVersion, minimumAndroidVersion);
-      } else {
-        errorPrint('Couldn\'t check version via server');
-      }
-    } catch (e) {
-      errorPrint('Couldn\'t check version via server');
-    }
+    comparison =
+        await checkPlatformVersion(currentVersion, 'version_control_android');
+  } else if (Platform.isIOS) {
+    comparison =
+        await checkPlatformVersion(currentVersion, 'version_control_ios');
   } else {
-    if (Platform.isIOS) {
-      final url = '$apiUrl/version_control_ios/';
-
-      try {
-        final response =
-            await http.get(Uri.parse(url)).timeout(const Duration(seconds: 5));
-        if (response.statusCode == 200) {
-          minimumIOSVersion = response.body.replaceAll('"', '');
-        } else {
-          errorPrint('Couldn\'t check version via server');
-        }
-      } catch (e) {
-        errorPrint('Couldn\'t check version via server');
-      }
-      comparison = compareVersions(currentVersion, minimumIOSVersion);
-    } else {
-      errorPrint('$comparison');
-      comparison = -1;
-    }
+    comparison = -1;
   }
+
   if (comparison < 0 && context.mounted) {
     // If the current version is older than the minimum version
     showUpdateDialog(context);
     errorPrint('App must be updated');
-  } else {
-    if (context.mounted) {
-      context.read<GlobalStateProvider>().hasCheckedAppVersion;
-      successPrint('Your app is up-to-date!');
-    }
+  } else if (context.mounted) {
+    context.read<GlobalStateProvider>().hasCheckedAppVersion;
+    successPrint('Your app is up-to-date!');
   }
 }
 
@@ -428,7 +362,7 @@ void showUpdateDialog(context) {
       backgroundColor: const Color.fromARGB(255, 141, 14, 5),
       shadowColor: appRedColor,
       elevation: 30,
-      title: Text('Ενημέρωση διαθέσιμη!',
+      title: Text('Νέα έκδοση διαθέσιμη!',
           style: TextStyle(
               fontSize: 25.sp,
               color: Colors.black,
@@ -446,6 +380,7 @@ void showUpdateDialog(context) {
               borderRadius: BorderRadius.circular(10.r), // Rounded corners
             ),
             elevation: 10, // Shadow depth
+            // ignore: deprecated_member_use
             shadowColor: Colors.black.withOpacity(0.5), // Shadow color
             backgroundColor: Colors.black, // Default background color
           ),
@@ -478,12 +413,10 @@ Future<void> openStore() async {
   String url;
   if (Platform.isAndroid) {
     // Android: Play Store URL with the app package ID
-    url =
-        'https://play.google.com/store/apps/details?id=com.example.your_app_id';
+    url = 'https://play.google.com/store/apps/details?id=com.etairia.mypr';
   } else if (Platform.isIOS) {
-    //TODO Change urls
-    // iOS: App Store URL with the app ID
-    url = 'https://apps.apple.com/app/id6711330363';
+    // iOS: Play Store URL with the app ID
+    url = 'https://apps.apple.com/gr/app/mypr/id6711330363';
   } else {
     throw 'Unsupported platform';
   }
@@ -548,5 +481,615 @@ class TermsAndPrivacyPolicy extends StatelessWidget {
         ),
       ],
     );
+  }
+}
+
+class CustomPhoneButton extends StatefulWidget {
+  const CustomPhoneButton({
+    super.key,
+  });
+
+  @override
+  CustomPhoneButtonState createState() => CustomPhoneButtonState();
+}
+
+class CustomPhoneButtonState extends State<CustomPhoneButton> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Container(
+        width: 130.w,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 47, 47, 47),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: TextButton(
+          onPressed: () async {
+            if (!phoneOtpService.canSend) {
+              if (phoneOtpService.awaitMinutes == 1) {
+                showFloatingSnackBar(
+                    'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
+              } else {
+                showFloatingSnackBar(
+                    'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+                    Duration(seconds: 4),
+                    context);
+              }
+            } else {
+              var isPhoneValid = await showFillPhoneDialog(context);
+              if (isPhoneValid.isSuccess) {
+                var phone = isPhoneValid.phone;
+                if (phone.length == 10 && phone.startsWith('69')) {
+                  int result = await changePhoneOnServerOnly(phone);
+                  if (result == 0) {
+                    if (context.mounted) {
+                      context.read<UserProvider>().fetchUserDetailsFromServer();
+                      context.read<GlobalStateProvider>().refreshProfilePage =
+                          true;
+                      Navigator.pop(context);
+                      showFloatingSnackBar('Επιτυχής προσθήκη κινητού',
+                          Duration(seconds: 4), context);
+                    }
+                  } else {
+                    if (result == 2) {
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                        showFloatingSnackBar(
+                            'Αυτός ο αριμός τηλεφώνου χρησιμοποιείται ήδη',
+                            Duration(seconds: 4),
+                            context);
+                      }
+                    }
+                  }
+                } else {
+                  if (context.mounted) {
+                    showFloatingSnackBar(
+                        'Υπήρξε κάποιο πρόβλημα. Προσπάθησε ξανά σε λίγο',
+                        Duration(seconds: 4),
+                        context);
+                  }
+                }
+              }
+            }
+          },
+          style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              overlayColor: const Color.fromARGB(255, 0, 0, 0)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                "Προσθήκη κινητού",
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: Colors.black,
+                size: 15.sp,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomEmailButton extends StatefulWidget {
+  final String label;
+
+  const CustomEmailButton({
+    super.key,
+    required this.label,
+  });
+
+  @override
+  CustomEmailButtonState createState() => CustomEmailButtonState();
+}
+
+class CustomEmailButtonState extends State<CustomEmailButton> {
+  bool isExpanded = false;
+  final TextEditingController _controller = TextEditingController();
+
+  void _toggleExpansion() {
+    setState(() {
+      isExpanded = !isExpanded;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+        width: isExpanded ? 400.w : 130.w,
+        decoration: BoxDecoration(
+          color: const Color.fromARGB(255, 47, 47, 47),
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: isExpanded
+            ? Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        hintText: 'Πληκτρολόγησε το νέο email',
+                        hintStyle:
+                            TextStyle(color: Colors.grey, fontSize: 12.sp),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10.w),
+                      ),
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.send, color: Colors.white, size: 15.sp),
+                    onPressed: () async {
+                      FocusScope.of(context).unfocus();
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(_controller.text)) {
+                        showFloatingSnackBar(
+                            "Λάθος μορφή email", Duration(seconds: 3), context);
+                        _controller.clear();
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+                      if (_controller.text ==
+                          context.read<UserProvider>().userDetails.email) {
+                        showFloatingSnackBar("Το email χρησιμοποιείται ήδη",
+                            Duration(seconds: 3), context);
+                        _controller.clear();
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+
+                      int success = 1;
+                      if (context.mounted) {
+                        success =
+                            await changeEmailOnServerOnly(_controller.text);
+                      }
+                      if (success == 0 && context.mounted) {
+                        context.read<GlobalStateProvider>().hasVerifiedEmail =
+                            false;
+                      } else {
+                        if (success == 2) {
+                          if (context.mounted) {
+                            showFloatingSnackBar(
+                                "Το email χρησιμοποιείται ήδη ή δεν υπάρχει",
+                                Duration(seconds: 3),
+                                context);
+                          }
+                        } else {
+                          if (success == 1) {
+                            if (context.mounted) {
+                              showFloatingSnackBar(
+                                  "Υπήρξε κάποιο σφάλμα. Δοκιμάστε ξανά σε λίγο",
+                                  Duration(seconds: 3),
+                                  context);
+                            }
+                          }
+                        }
+                        _controller.clear();
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+                      if (success == 0 &&
+                          context.mounted &&
+                          context
+                              .read<GlobalStateProvider>()
+                              .hasVerifiedEmail) {
+                        showFloatingSnackBar(
+                            "Υπήρξε κάποιο σφάλμα. Δοκιμάστε ξανά σε λίγο",
+                            Duration(seconds: 3),
+                            context);
+                        _controller.clear();
+
+                        _toggleExpansion();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+
+                      if (await resendVerificationEmail()) {
+                        SharedPreferences prefs =
+                            await SharedPreferences.getInstance();
+                        await prefs.setString('savedPassword', '');
+                        if (context.mounted) {
+                          context
+                              .read<GlobalStateProvider>()
+                              .refreshProfilePage = true;
+                          showFloatingSnackBar("Στάλθηκε email επιβεβαίωσης",
+                              Duration(seconds: 3), context);
+                        }
+                      } else {
+                        if (context.mounted) {
+                          showFloatingSnackBar(
+                              "Υπήρξε κάποιο σφάλμα στην αποστολή του email επιβεβαίωσης",
+                              Duration(seconds: 3),
+                              context);
+                        }
+                      }
+                      _controller.clear();
+                      _toggleExpansion();
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                  ),
+                ],
+              )
+            : TextButton(
+                onPressed: _toggleExpansion,
+                style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    overlayColor: const Color.fromARGB(255, 0, 0, 0)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    Text(
+                      widget.label,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.black,
+                      size: 15.sp,
+                    ),
+                  ],
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+int generateRandom6DigitNumber() {
+  Random random = Random();
+  int min = 100000;
+  int max = 999999;
+  return min + random.nextInt(max - min + 1);
+}
+
+Future<IsPhoneValid> showFillPhoneDialog(BuildContext context) async {
+  bool phoneError = false;
+  String phoneInput = '';
+  bool isCodeValid = false;
+  bool showError = false;
+  int attemptCount = 0;
+  String codeInput = '';
+  bool initialPage = true;
+  int otpCode = generateRandom6DigitNumber();
+  String tempPhoneNumber = '';
+
+  if (!phoneOtpService.canSend && initialPage == false) {
+    if (phoneOtpService.awaitMinutes == 1) {
+      showFloatingSnackBar(
+          'Ξαναδοκίμασε σε 1 λεπτό', Duration(seconds: 4), context);
+    } else {
+      showFloatingSnackBar(
+          'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+          Duration(seconds: 4),
+          context);
+    }
+    return IsPhoneValid('', false);
+  }
+
+  PageController pageController = PageController();
+
+  await showDialog(
+    barrierDismissible: false,
+    barrierColor: const Color.fromARGB(150, 0, 0, 0),
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 28, 28, 28),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new,
+                      color: Colors.white, size: 17.sp),
+                  onPressed: () {
+                    if (initialPage) {
+                      Navigator.pop(context);
+                    } else {
+                      attemptCount = 0;
+                      pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut);
+                      initialPage = true;
+                    }
+                  },
+                ),
+                SizedBox(width: 20.w),
+                Text(
+                  'Επιβεβαίωση Κινητού',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                ),
+              ],
+            ),
+            content: SizedBox(
+              width: ScreenUtil().screenWidth - 30.w,
+              height: 100.h,
+              child: PageView(
+                controller: pageController,
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  // First page for phone number input
+                  Column(
+                    children: [
+                      TextField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        keyboardType: TextInputType.number,
+                        maxLength: 10,
+                        style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                        decoration: InputDecoration(
+                          hintText: ' Συμπλήρωσε το κινητό σου',
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 12.sp),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          phoneInput = value;
+                        },
+                      ),
+                      if (phoneError)
+                        Text(
+                          "Μη έγκυρος αριθμός τηλεφώνου",
+                          style: TextStyle(
+                              color: const Color.fromARGB(255, 211, 32, 20),
+                              fontSize: 14.sp),
+                        ),
+                    ],
+                  ),
+                  // Second page for OTP input
+                  Column(
+                    children: [
+                      TextField(
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly
+                        ],
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                        style: TextStyle(color: Colors.white, fontSize: 15.sp),
+                        decoration: InputDecoration(
+                          hintText: ' Εισάγετε τον 6-ψήφιο κωδικό',
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 12.sp),
+                          enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Color(0xFF9C0C04)),
+                          ),
+                          focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.red),
+                          ),
+                        ),
+                        onChanged: (value) {
+                          codeInput = value;
+                        },
+                      ),
+                      if (showError)
+                        Padding(
+                          padding: EdgeInsets.only(top: 10.h),
+                          child: Text(
+                            'Λάθος κωδικός',
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 211, 32, 20),
+                                fontSize: 14.sp),
+                          ),
+                        )
+                      else
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Κινητό: $phoneInput',
+                            style: TextStyle(
+                                color: const Color.fromARGB(255, 80, 80, 80),
+                                fontSize: 14.sp),
+                          ),
+                        )
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              if (initialPage)
+                ElevatedButton(
+                    onPressed: () async {
+                      // Phone validation
+                      tempPhoneNumber = normalizePhoneNumber(phoneInput);
+                      phoneError = tempPhoneNumber.length != 10 ||
+                          !tempPhoneNumber.startsWith('69');
+                      if (phoneError == false) {
+                        if (!phoneOtpService.canSend) {
+                          if (phoneOtpService.awaitMinutes == 1) {
+                            showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+                                const Duration(milliseconds: 4000), context);
+                          } else {
+                            showFloatingSnackBar(
+                                'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+                                const Duration(milliseconds: 4000),
+                                context);
+                          }
+                        } else {
+                          otpCode = generateRandom6DigitNumber();
+                          phoneOtpService.sendOtp(
+                              tempPhoneNumber, otpCode, context);
+                          phoneOtpService
+                              .startTimer(); // Start the timer to handle resending OTP
+                          setState(() {
+                            initialPage = false;
+                          });
+                          await pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      } else {
+                        setState(() {
+                          phoneError = true;
+                        });
+                        if (context.mounted) {
+                          if (phoneError == true) {
+                            await Future.delayed(const Duration(seconds: 2));
+                            if (phoneError == true) {
+                              setState(() {
+                                phoneError = false;
+                              });
+                            }
+                          }
+                        }
+                      }
+                    },
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all<Color>(Colors.black),
+                    ),
+                    child: Text(
+                      "Συνέχεια",
+                      style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                    )),
+              if (!initialPage)
+                Column(
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        if (codeInput.length == 6) {
+                          if (codeInput == otpCode.toString()) {
+                            isCodeValid = true;
+                            setState(() {
+                              showError = false;
+                            });
+                            if (context.mounted) {
+                              Navigator.of(context).pop(true);
+                            }
+                          } else {
+                            if (attemptCount >= 2) {
+                              showFloatingSnackBar(
+                                  'Ο αριθμός κινητού δεν επιβεβαιώθηκε',
+                                  Duration(seconds: 4),
+                                  context);
+                              setState(() {
+                                showError = false;
+                              });
+                              isCodeValid = false;
+                              if (context.mounted) {
+                                Navigator.of(context).pop(true);
+                              }
+                            }
+                            setState(() {
+                              showError = true;
+                            });
+                            attemptCount++;
+                            if (context.mounted) {
+                              if (showError == true) {
+                                await Future.delayed(
+                                    const Duration(milliseconds: 1350));
+                                if (showError == true) {
+                                  setState(() {
+                                    showError = false;
+                                  });
+                                }
+                              }
+                            }
+                            isCodeValid = false;
+                            return;
+                          }
+                        }
+                      },
+                      child: Text(
+                        'Επιβεβαίωση',
+                        style: TextStyle(
+                            color: const Color(0xFF9C0C04), fontSize: 13.sp),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        if (phoneOtpService.canSend) {
+                          phoneOtpService.sendOtp(
+                              tempPhoneNumber, otpCode, context);
+                          phoneOtpService.startTimer();
+                        } else {
+                          if (phoneOtpService.awaitMinutes == 1) {
+                            showFloatingSnackBar('Ξαναδοκίμασε σε 1 λεπτό',
+                                const Duration(milliseconds: 4000), context);
+                          } else {
+                            showFloatingSnackBar(
+                                'Ξαναδοκίμασε σε ${phoneOtpService.awaitMinutes} λεπτά',
+                                const Duration(milliseconds: 4000),
+                                context);
+                          }
+                        }
+                      },
+                      child: Text(
+                        'Επαναποστολή κωδικού',
+                        style: TextStyle(color: Colors.white, fontSize: 13.sp),
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          );
+        },
+      );
+    },
+  );
+  var result = IsPhoneValid(tempPhoneNumber, isCodeValid);
+  return result;
+}
+
+class IsPhoneValid {
+  final String phone;
+  final bool isSuccess;
+  IsPhoneValid(this.phone, this.isSuccess);
+}
+
+Future<void> emailLoop(BuildContext context) async {
+  final startTime = DateTime.now();
+
+  while (context.mounted &&
+      !context.read<GlobalStateProvider>().hasVerifiedEmail) {
+    // Check if 5 minutes (300 seconds) have passed since start
+    final elapsedTime = DateTime.now().difference(startTime);
+    if (elapsedTime.inSeconds >= 600) {
+      // Exit the loop if 10 minutes have passed
+      break;
+    }
+
+    // Fetch email verification status
+    if (context.mounted) {
+      fetchVerifiedEmailGlobalVariable(context);
+    }
+
+    // Wait for 5 seconds before the next iteration
+    await Future.delayed(Duration(seconds: 5));
   }
 }
