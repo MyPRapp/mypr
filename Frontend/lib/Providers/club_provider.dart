@@ -84,7 +84,6 @@ class ClubProvider with ChangeNotifier {
       return;
     }
 
-    warningPrint('Fetching catalogues for ${club.clubName} from server...');
     try {
       final url = '$apiUrl/clubs/${club.clubID}/catalogue';
       final response =
@@ -123,7 +122,7 @@ class ClubProvider with ChangeNotifier {
       index = _clubs.indexWhere((c) => c.clubID == club.clubID);
       if (index == -1) {
         _tempClubs.add(club);
-        errorPrint("Club wasn't found");
+        errorPrint("Club ${club.clubName} wasn't found");
       } else {
         addOrUpdateClub(club);
       }
@@ -372,7 +371,6 @@ class ClubProvider with ChangeNotifier {
       if (index != -1) {
         // Club exists, update the existing entry
         _clubs[index] = club;
-        successPrint('\'${club.clubName}\' is up to date.');
       } else {
         // Club does not exist, add it to the list
         _clubs.add(club);
@@ -380,7 +378,7 @@ class ClubProvider with ChangeNotifier {
       }
       notifyListeners();
     } catch (e) {
-      errorPrint('Error in addOrUpdateClub for clubID ${club.clubID}: $e');
+      errorPrint('Error in addOrUpdateClub for clubID ${club.clubName}: $e');
     }
   }
 

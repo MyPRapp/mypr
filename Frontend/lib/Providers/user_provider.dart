@@ -40,8 +40,6 @@ class UserProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         successPrint('Login successful');
 
-        warningPrint('Parsing tokens...');
-
         var data = jsonDecode(response.body);
         String? accessToken = data['access'];
         String? refreshToken = data['refresh'];

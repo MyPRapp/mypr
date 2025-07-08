@@ -66,14 +66,12 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
         // Step 5: Clear liked clubs
         if (context.mounted) {
-          warningPrint('Clearing liked clubs...');
           await context.read<LikedClubsProvider>().deleteAllLiked();
         }
 
         // Step 6: Clear bookings and reset flags
         if (context.mounted) {
           try {
-            warningPrint('Clearing bookings and resetting flags...');
             BookingProvider bookingProvider = context.read<BookingProvider>();
             bookingProvider.bookings.clear();
             bookingProvider.setLoading(false);
@@ -96,7 +94,6 @@ class _CustomizeProfilePageState extends State<CustomizeProfilePage> {
 
         // Step 9: Navigate to the Login page
         if (context.mounted) {
-          warningPrint('Navigating to the login page...');
           AutoRouter.of(context).replaceAll([const LoginRoute()]);
           successPrint('Navigation to login page successful.');
         }

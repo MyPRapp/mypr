@@ -8,7 +8,7 @@ class GlobalStateProvider with ChangeNotifier {
   bool _hasVerifiedEmail = false;
   bool _preferencesLoaded =
       false; // Add this state to track if preferences are loaded
-  final bool _hasCheckedAppVersion = false;
+  bool _hasCheckedAppVersion = false;
   bool _refreshProfilePage = false;
   bool _refreshHomePage = false;
   bool _refreshReservationPage = false;
@@ -81,6 +81,11 @@ class GlobalStateProvider with ChangeNotifier {
 
   void setJustRegistered(bool value) {
     _justRegistered = value;
+    notifyListeners();
+  }
+
+  void setHasCheckedAppVersion(bool value) {
+    _hasCheckedAppVersion = value;
     notifyListeners();
   }
 

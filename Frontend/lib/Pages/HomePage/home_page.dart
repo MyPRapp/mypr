@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/classes.dart';
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/booking_provider.dart';
@@ -30,11 +31,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _initSyncing();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<BottomNavBarVisibility>().show();
-      context.read<GlobalStateProvider>().setRefreshHomePage(false); //TODO
-      checkAppVersion(context);
-      await _initSyncing();
+      context
+          .read<GlobalStateProvider>()
+          .setRefreshHomePage(false); //TODO Check if this is needed
+      if (!context.read<GlobalStateProvider>().hasCheckedAppVersion) {
+        checkAppVersion(context);
+      }
       _checkFirstTime();
     });
   }
@@ -72,9 +77,13 @@ class _HomePageState extends State<HomePage> {
     bool hasSentFirebaseToken = prefs.getBool('hasSentFirebaseToken') ?? false;
     bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
 
-    if (!hasSeenDialog && mounted) {
-      showPointsReminderDialog(context);
+    if (!hasSeenDialog) {
       await prefs.setBool('hasSeenPointsDialog', true);
+      if (mounted) {
+        showPointsReminderDialog(context);
+      } else {
+        await prefs.setBool('hasSeenPointsDialog', false);
+      }
     }
 
     if (!hasSentFirebaseToken && await registerDevice()) {
@@ -92,19 +101,20 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    var parts = globalStateProvider.mustSendCancellationEmail
+    final parts = globalStateProvider.mustSendCancellationEmail
         .split("||")
         .map((e) => e.trim())
         .toList();
 
     if (parts.length == 2) {
+      final BookingInfoStruct cancelledBooking = context
+          .read<BookingProvider>()
+          .getBookingByBookingID(int.tryParse(parts[1]) ?? -1);
+
       sendCancellationEmail(
-        context,
-        parts[0], // clubName
-        context
-            .read<BookingProvider>()
-            .getBookingByBookingID(int.tryParse(parts[1]) ?? 0),
-      );
+          context,
+          parts[0], // clubName
+          cancelledBooking);
     }
   }
 

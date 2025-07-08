@@ -18,14 +18,11 @@ class BookingProvider with ChangeNotifier {
   // Fetch bookings from server or preferences if already loaded
   Future<void> fetchBookings(
       User userDetails, ClubProvider clubProvider) async {
-    warningPrint('Fetching bookings...');
-
     setLoading(true);
 
     try {
       final bookingsData = await getBookings();
       if (bookingsData != null && bookingsData.isNotEmpty) {
-        warningPrint('Processing fetched bookings...');
         await _processFetchedBookings(bookingsData, userDetails, clubProvider);
         successPrint('Bookings loaded and processed successfully');
       } else {
@@ -146,7 +143,6 @@ class BookingProvider with ChangeNotifier {
 
   // Load bookings from shared preferences
   Future<void> _loadBookingsFromPreferences() async {
-    warningPrint('Attempting to load bookings from shared preferences...');
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? bookingsJson = prefs.getString('bookings');

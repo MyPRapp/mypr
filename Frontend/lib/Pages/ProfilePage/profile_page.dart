@@ -44,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.read<GlobalStateProvider>().hasCheckedAppVersion == false) {
+      if (!context.read<GlobalStateProvider>().hasCheckedAppVersion) {
         checkAppVersion(context);
       }
     });
@@ -198,14 +198,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Step 5: Clear liked clubs
       if (mounted) {
-        warningPrint('Clearing liked clubs...');
         await context.read<LikedClubsProvider>().deleteAllLiked();
       }
 
       // Step 6: Clear bookings and reset flags
       if (mounted) {
         try {
-          warningPrint('Clearing bookings and resetting flags...');
           BookingProvider bookingProvider = context.read<BookingProvider>();
           bookingProvider.bookings.clear();
           bookingProvider.setLoading(false);
@@ -228,7 +226,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Step 9: Navigate to the Login page
       if (mounted) {
-        warningPrint('Navigating to the login page...');
         AutoRouter.of(context).replaceAll([const LoginRoute()]);
         successPrint('Navigation to login page successful.');
       }

@@ -81,8 +81,6 @@ Future<void> createFilePath() async {
   if (await myprDirectory.exists() == false) {
     await myprDirectory.create(recursive: true);
     successPrint('Folder created: ${myprDirectory.path}');
-  } else {
-    successPrint('Folder ${myprDirectory.path} already exists');
   }
 }
 
@@ -127,18 +125,18 @@ Future<String> getSavedEmail() async {
 }
 
 void successPrint(String text) {
-  // print('✅$text');
-  print('\x1B[32m$text\x1B[0m');
+  print('✅$text');
+  // print('\x1B[32m$text\x1B[0m');
 }
 
 void warningPrint(String text) {
-  // print('🟡$text');
-  print('\x1B[33m$text\x1B[0m');
+  print('🟡$text');
+  // print('\x1B[33m$text\x1B[0m');
 }
 
 void errorPrint(String text) {
-  // print('❌$text');
-  print('\x1B[31m$text\x1B[0m');
+  print('❌$text');
+  // print('\x1B[31m$text\x1B[0m');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
@@ -347,7 +345,7 @@ Future<void> checkAppVersion(BuildContext context) async {
       showUpdateDialog(context);
       errorPrint('App must be updated');
     } else {
-      context.read<GlobalStateProvider>().hasCheckedAppVersion;
+      context.read<GlobalStateProvider>().setHasCheckedAppVersion(true);
       successPrint('Your app is up-to-date!');
     }
   }

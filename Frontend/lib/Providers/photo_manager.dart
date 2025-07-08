@@ -3,7 +3,6 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img; // For compressing images
-import 'package:mypr/Globals/constants.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../Globals/global_components.dart';
@@ -49,46 +48,9 @@ class PhotoManager {
         File file = File(filePath);
         await file.writeAsBytes(compressedImage);
 
-        successPrint('Photo saved to file');
         return filePath;
       } else {
-        throw Exception('Failed to download image');
-      }
-    } catch (e) {
-      errorPrint('Error saving photo: $e');
-      return '';
-    }
-  }
-
-  Future<String> downloadAndSaveUserPhoto(String url, String fileName) async {
-    try {
-      // Fetch the image from the URL
-      final response = await http.get(Uri.parse('http://$validatedIP$url'));
-
-      if (response.statusCode == 200) {
-        // Compress the image before saving it
-        Uint8List compressedImage = await _compressImage(response.bodyBytes);
-
-        // Get the app's cache directory to store images
-        final directory = await getApplicationDocumentsDirectory();
-        final Directory userPhotosDirectory =
-            Directory('${directory.path}/mypDirectory/user_photos');
-
-        // Create the new folder if it doesn't exist
-        if (await userPhotosDirectory.exists() == false) {
-          await userPhotosDirectory.create(recursive: true);
-          successPrint('Folder created: ${userPhotosDirectory.path}');
-        }
-        String filePath = '${userPhotosDirectory.path}/$fileName.jpg';
-
-        // Write the compressed image to a file
-        File file = File(filePath);
-        await file.writeAsBytes(compressedImage);
-
-        successPrint('Photo saved to file');
-        return filePath;
-      } else {
-        throw Exception('Failed to download image');
+        throw Exception('Failed to download club image');
       }
     } catch (e) {
       errorPrint('Error saving photo: $e');
