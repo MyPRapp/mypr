@@ -12,13 +12,13 @@ import 'photo_manager.dart';
 
 class ClubProvider with ChangeNotifier {
   final List<ClubInfoStruct> _clubs = [];
-  final List<CatalogueInfoStruct> _catalogues = [];
+  final List<Catalogue> _catalogues = [];
 
   List<ClubInfoStruct> get allClubs => _clubs;
-  List<CatalogueInfoStruct> get allCatalogues => _catalogues;
+  List<Catalogue> get allCatalogues => _catalogues;
 
   final List<ClubInfoStruct> _tempClubs = [];
-  final List<CatalogueInfoStruct> _tempCatalogues = [];
+  final List<Catalogue> _tempCatalogues = [];
 
 //// Fetch From Server Functions
   Future<void> fetchAndSaveClubsAndCatalogues() async {
@@ -93,7 +93,7 @@ class ClubProvider with ChangeNotifier {
         final List<dynamic> data = jsonDecode(response.body);
 
         for (var item in data) {
-          final catalogue = CatalogueInfoStruct.fromJson(item);
+          final catalogue = Catalogue.fromJson(item);
           _tempCatalogues.add(catalogue);
 
           if (catalogue.serviceType == 'Regular') {
@@ -109,7 +109,7 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> addMinPriceAndMaxPersonsToClub(
-      ClubInfoStruct club, CatalogueInfoStruct catalogue) async {
+      ClubInfoStruct club, Catalogue catalogue) async {
     club.clubMinPrice = (double.tryParse(catalogue.price)?.toInt() ?? 0);
     club.clubMaxPersons = catalogue.maxPersons;
     int index = _tempClubs.indexWhere((c) => c.clubID == club.clubID);
@@ -159,7 +159,7 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> deleteUnusedCatalogues(
       List<ClubInfoStruct> clubsToRemove) async {
-    List<CatalogueInfoStruct> cataloguesToRemove = [];
+    List<Catalogue> cataloguesToRemove = [];
 
     for (var catalogue in _catalogues) {
       bool catalogueFound = false;
@@ -346,9 +346,8 @@ class ClubProvider with ChangeNotifier {
       List<dynamic> cataloguesList = jsonDecode(jsonCatalogues);
 
       _catalogues.clear();
-      _catalogues.addAll(cataloguesList
-          .map((json) => CatalogueInfoStruct.fromJson(json))
-          .toList());
+      _catalogues.addAll(
+          cataloguesList.map((json) => Catalogue.fromJson(json)).toList());
 
       notifyListeners();
       successPrint('Catalogues loaded from file');
@@ -382,7 +381,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  void addOrUpdateCatalogue(CatalogueInfoStruct catalogue) {
+  void addOrUpdateCatalogue(Catalogue catalogue) {
     if (catalogue.clubID <= 0) {
       errorPrint('AddOrUpdateCatalogue: Invalid clubID: ${catalogue.clubID}');
       return;
@@ -412,19 +411,19 @@ class ClubProvider with ChangeNotifier {
   }
 
 //// Get functions
-  //Method to initialize catalogues based on club ID and update the provided CatalogueInfoStruct variables
-  List<CatalogueInfoStruct> getAllCataloguesForClubWithID(int clubID) {
+  //Method to initialize catalogues based on club ID and update the provided Catalogue variables
+  List<Catalogue> getAllCataloguesForClubWithID(int clubID) {
     ClubInfoStruct club = getClubByID(clubID);
 
-//// Initialize and update the CatalogueInfoStruct variables
-    CatalogueInfoStruct regularCatalogue = getCatalogue(club, 'Regular');
-    CatalogueInfoStruct specialCatalogue = getCatalogue(club, 'Special');
-    CatalogueInfoStruct premiumCatalogue = getCatalogue(club, 'Premium');
+//// Initialize and update the Catalogue variables
+    Catalogue regularCatalogue = getCatalogue(club, 'Regular');
+    Catalogue specialCatalogue = getCatalogue(club, 'Special');
+    Catalogue premiumCatalogue = getCatalogue(club, 'Premium');
 
     return [regularCatalogue, specialCatalogue, premiumCatalogue];
   }
 
-  CatalogueInfoStruct getCatalogue(ClubInfoStruct club, String serviceType) {
+  Catalogue getCatalogue(ClubInfoStruct club, String serviceType) {
     var catalogueList = _catalogues
         .where((catalogue) =>
             catalogue.clubID == club.clubID &&
@@ -459,8 +458,8 @@ class ClubProvider with ChangeNotifier {
     return _clubs.firstWhere((club) => club.clubID == clubID).clubName;
   }
 
-  List<CatalogueInfoStruct> getCataloguesByClubID(int clubID) {
-    List<CatalogueInfoStruct> tempCatalogues = [];
+  List<Catalogue> getCataloguesByClubID(int clubID) {
+    List<Catalogue> tempCatalogues = [];
 
     for (int i = 0; i < _catalogues.length; i++) {
       if (_catalogues[i].clubID == clubID) {
@@ -519,7 +518,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  void printCatalogue(CatalogueInfoStruct catalogue) {
+  void printCatalogue(Catalogue catalogue) {
     print(
         '{"clubID:"${catalogue.clubID},"clubName:${getClubNameByID(catalogue.clubID)}","serviceType:"${catalogue.serviceType},"price:"${catalogue.price},"maxPersons:"${catalogue.maxPersons}}');
   }

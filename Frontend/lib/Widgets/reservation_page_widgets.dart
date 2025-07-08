@@ -422,9 +422,9 @@ class _PersonsTextFieldState extends State<PersonsTextField> {
 }
 
 class CategoriesTextField extends StatefulWidget {
-  final CatalogueInfoStruct regularCatalogue;
-  final CatalogueInfoStruct specialCatalogue;
-  final CatalogueInfoStruct premiumCatalogue;
+  final Catalogue regularCatalogue;
+  final Catalogue specialCatalogue;
+  final Catalogue premiumCatalogue;
   final VoidCallback onCountersChanged;
 
   const CategoriesTextField({
@@ -641,8 +641,7 @@ class CategoriesTextFieldState extends State<CategoriesTextField>
     );
   }
 
-  Widget buildCounterRow(
-      String label, CatalogueInfoStruct catalogue, int index) {
+  Widget buildCounterRow(String label, Catalogue catalogue, int index) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
       child: Row(
@@ -906,8 +905,8 @@ class _BookingDatePickerState extends State<BookingDatePicker> {
   }
 }
 
-CatalogueInfoStruct createCatalogue(String serviceType) {
-  return CatalogueInfoStruct(
+Catalogue createCatalogue(String serviceType) {
+  return Catalogue(
     clubID: -1,
     serviceType: serviceType,
     price: '0',

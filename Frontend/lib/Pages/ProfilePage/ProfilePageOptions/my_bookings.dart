@@ -186,7 +186,7 @@ class _MyBookingsPageState extends State<MyBookingsPage>
 class BookingCard extends StatefulWidget {
   const BookingCard({super.key, required this.booking});
 
-  final BookingInfoStruct booking;
+  final Booking booking;
 
   @override
   State<BookingCard> createState() => _BookingCardState();

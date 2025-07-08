@@ -107,7 +107,7 @@ class _HomePageState extends State<HomePage> {
         .toList();
 
     if (parts.length == 2) {
-      final BookingInfoStruct cancelledBooking = context
+      final Booking cancelledBooking = context
           .read<BookingProvider>()
           .getBookingByBookingID(int.tryParse(parts[1]) ?? -1);
 

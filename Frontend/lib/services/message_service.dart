@@ -97,7 +97,7 @@ Future<void> sendVerificationEmail(BuildContext context) async {
 }
 
 Future<void> sendCancellationEmail(
-    BuildContext context, String clubName, BookingInfoStruct booking) async {
+    BuildContext context, String clubName, Booking booking) async {
   FocusManager.instance.primaryFocus?.unfocus();
 
   try {

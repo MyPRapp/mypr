@@ -19,7 +19,7 @@ import '../../../../Providers/global_state_provider.dart';
 
 @RoutePage()
 class BookingDetailsPage extends StatelessWidget {
-  final BookingInfoStruct booking;
+  final Booking booking;
 
   const BookingDetailsPage({
     super.key,
@@ -46,7 +46,7 @@ class BookingDetailsPage extends StatelessWidget {
     // Caching club data to avoid multiple calls
     final clubProvider = context.read<ClubProvider>();
     final clubName = clubProvider.getClubNameByID(booking.clubID);
-    List<CatalogueInfoStruct> catalogues = context
+    List<Catalogue> catalogues = context
         .read<ClubProvider>()
         .getAllCataloguesForClubWithID(booking.clubID);
     return Scaffold(
@@ -179,7 +179,7 @@ class BookingDetailsPage extends StatelessWidget {
   }
 
   Widget _buildBookingDetails(
-      String formattedDate, List<CatalogueInfoStruct> catalogues) {
+      String formattedDate, List<Catalogue> catalogues) {
     List<int> fourbitIntegers = extractFourBits(booking.fourbitString);
     final regular = fourbitIntegers[0];
     final special = fourbitIntegers[1];
@@ -504,7 +504,7 @@ class BuildRichText extends StatelessWidget {
 class CancelReservationButton extends StatefulWidget {
   const CancelReservationButton({super.key, required this.booking});
 
-  final BookingInfoStruct booking;
+  final Booking booking;
 
   @override
   State<CancelReservationButton> createState() =>

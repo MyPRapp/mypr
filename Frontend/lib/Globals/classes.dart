@@ -121,30 +121,30 @@ class User {
   }
 }
 
-class CatalogueInfoStruct {
+class Catalogue {
   int clubID;
   String serviceType;
   String price;
   int maxPersons;
 
-  CatalogueInfoStruct({
+  Catalogue({
     required this.clubID,
     required this.serviceType,
     required this.price,
     required this.maxPersons,
   });
 
-  factory CatalogueInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory Catalogue.fromJson(Map<String, dynamic> json) {
     try {
-      return CatalogueInfoStruct(
+      return Catalogue(
         clubID: json['club'] ?? -1,
         serviceType: json['service_type'] ?? '',
         price: json['price'] ?? '',
         maxPersons: json['max_person'] ?? -1,
       );
     } catch (e) {
-      errorPrint('Error parsing CatalogueInfoStruct: $e');
-      return CatalogueInfoStruct(
+      errorPrint('Error parsing Catalogue: $e');
+      return Catalogue(
           clubID: -1,
           serviceType: '',
           price: '0',
@@ -162,7 +162,7 @@ class CatalogueInfoStruct {
   }
 }
 
-class BookingInfoStruct {
+class Booking {
   final int bookingID;
   final int userID;
   final int clubID;
@@ -174,7 +174,7 @@ class BookingInfoStruct {
   final String comments;
   final int status;
 
-  BookingInfoStruct({
+  Booking({
     required this.bookingID,
     required this.userID,
     required this.clubID,
@@ -187,9 +187,9 @@ class BookingInfoStruct {
     required this.status,
   });
 
-  factory BookingInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory Booking.fromJson(Map<String, dynamic> json) {
     try {
-      return BookingInfoStruct(
+      return Booking(
         bookingID: json['bookingID'] ?? -1,
         userID: json['userID'] ?? -1,
         clubID: json['clubID'] ?? -1,
@@ -204,8 +204,8 @@ class BookingInfoStruct {
         status: json['status'] ?? 0,
       );
     } catch (e) {
-      errorPrint('Error parsing BookingInfoStruct: $e');
-      return BookingInfoStruct(
+      errorPrint('Error parsing Booking: $e');
+      return Booking(
         bookingID: -1,
         userID: -1,
         clubID: -1,

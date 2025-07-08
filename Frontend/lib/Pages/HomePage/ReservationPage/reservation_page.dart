@@ -25,7 +25,7 @@ class ReservationPage extends StatefulWidget {
   const ReservationPage(
       {super.key, required this.club, required this.catalogues});
   final ClubInfoStruct club;
-  final List<CatalogueInfoStruct> catalogues;
+  final List<Catalogue> catalogues;
 
   @override
   State<ReservationPage> createState() => _ReservationPageState();
@@ -56,7 +56,7 @@ class _ReservationPageState extends State<ReservationPage> {
   }
 
 // List of catalogues for different types of services in the club
-  List<CatalogueInfoStruct> localCatalogues = [
+  List<Catalogue> localCatalogues = [
     createCatalogue('Regular'),
     createCatalogue('Special'),
     createCatalogue('Premium'),
@@ -192,7 +192,7 @@ class _ReservationPageState extends State<ReservationPage> {
     }
   }
 
-  void _updateCatalogues(List<CatalogueInfoStruct> catalogues) {
+  void _updateCatalogues(List<Catalogue> catalogues) {
     setState(() {
       localCatalogues[0] = catalogues[0];
       localCatalogues[1] = catalogues[1];
