@@ -54,14 +54,12 @@ class _HomePageState extends State<HomePage> {
 
     if (globalStateProvider.preferencesLoaded) {
       handleCancellationEmail(context, globalStateProvider);
-      globalStateProvider.hasLoggedIn
-          ? successPrint('------------USER IS LOGGED IN------------')
-          : errorPrint('------------USER IS NOT LOGGED IN------------');
-      // if (globalStateProvider.hasLoggedIn) {
-      //   await _attemptUserLogin();
-
-      // } else {
-      // }
+      if (globalStateProvider.hasLoggedIn) {
+        await context.read<UserProvider>().loadUserDetailsFromPreferences();
+        successPrint('------------USER IS LOGGED IN------------');
+      } else {
+        errorPrint('------------USER IS NOT LOGGED IN------------');
+      }
     } else {
       await Future.delayed(const Duration(seconds: 2));
       _syncUser();
@@ -110,51 +108,51 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<void> _attemptUserLogin() async {
-    final userProvider = context.read<UserProvider>();
+  // Future<void> _attemptUserLogin() async {
+  //   final userProvider = context.read<UserProvider>();
 
-    userProvider.loadUserDetailsFromPreferences();
-    final savedEmail = await getSavedEmail();
-    final savedPassword = await getSavedPassword();
+  //   userProvider.loadUserDetailsFromPreferences();
+  //   final savedEmail = await getSavedEmail();
+  //   final savedPassword = await getSavedPassword();
 
-    if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-      final loggedIn = await userProvider.login(savedEmail, savedPassword);
+  //   if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+  //     final loggedIn = await userProvider.login(savedEmail, savedPassword);
 
-      if (!mounted) return;
-      final globalStateProvider = context.read<GlobalStateProvider>();
+  //     if (!mounted) return;
+  //     final globalStateProvider = context.read<GlobalStateProvider>();
 
-      if (loggedIn == 0) {
-        await globalStateProvider.setHasLoggedIn(true);
-        if (mounted) {
-          if (globalStateProvider.justRegistered) {
-            globalStateProvider.setJustRegistered(false);
-            emailLoop(
-                context); //email loop happens asynchronously after signing up and just registered shouldn't exist
-          } else {
-            fetchVerifiedEmailGlobalVariable(context);
-          }
-        }
+  //     if (loggedIn == 0) {
+  //       await globalStateProvider.setHasLoggedIn(true);
+  //       if (mounted) {
+  //         if (globalStateProvider.justRegistered) {
+  //           globalStateProvider.setJustRegistered(false);
+  //           emailLoop(
+  //               context); //email loop happens asynchronously after signing up and just registered shouldn't exist
+  //         } else {
+  //           fetchVerifiedEmailGlobalVariable(context);
+  //         }
+  //       }
 
-        await userProvider.fetchUserDetailsFromServer();
-        if (mounted) {
-          await context.read<BookingProvider>().fetchBookings(
-              userProvider.userDetails, context.read<ClubProvider>());
-        }
-        successPrint('------------USER IS LOGGED IN------------');
-      } else {
-        _showLoginError(globalStateProvider);
-      }
-    } else {
-      if (mounted) {
-        _showLoginError(context.read<GlobalStateProvider>());
-      }
-    }
-  }
+  //       await userProvider.fetchUserDetailsFromServer();
+  //       if (mounted) {
+  //         await context.read<BookingProvider>().fetchBookings(
+  //             userProvider.userDetails, context.read<ClubProvider>());
+  //       }
+  //       successPrint('------------USER IS LOGGED IN------------');
+  //     } else {
+  //       _showLoginError(globalStateProvider);
+  //     }
+  //   } else {
+  //     if (mounted) {
+  //       _showLoginError(context.read<GlobalStateProvider>());
+  //     }
+  //   }
+  // }
 
-  void _showLoginError(GlobalStateProvider globalStateProvider) {
-    errorPrint('Email or Password is incorrect');
-    globalStateProvider.setHasLoggedIn(false);
-  }
+  // void _showLoginError(GlobalStateProvider globalStateProvider) {
+  //   errorPrint('Email or Password is incorrect');
+  //   globalStateProvider.setHasLoggedIn(false);
+  // }
 
   void navigateToSearchTab(BuildContext context) async {
     final tabsRouter = AutoTabsRouter.of(context);
