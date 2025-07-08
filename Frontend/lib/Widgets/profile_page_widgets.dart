@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:mypr/Globals/constants.dart';
+import 'package:mypr/Globals/global_components.dart';
+import 'package:mypr/Widgets/cool_widgets.dart';
 
 class FadeText extends StatelessWidget {
   const FadeText(this.isVisible, this.text, {super.key});
@@ -112,7 +114,11 @@ class ProfileDialog extends StatelessWidget {
             SizedBox(height: 10.h),
             ProfileInfoRow(label: "Email", value: email),
             SizedBox(height: 10.h),
-            ProfileInfoRow(label: "Τηλέφωνο", value: phone),
+            if (phone.length == 10 && phone.startsWith("69"))
+              ProfileInfoRow(label: "Κινητό", value: phone)
+            else
+              CustomPhoneButton(),
+            CustomEmailButton(label: 'Αλλαγή email'),
             SizedBox(height: 20.h),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -148,7 +154,7 @@ class ProfileInfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
+        SelectableText(
           "$label:",
           style: TextStyle(
             color: Colors.grey,
@@ -202,7 +208,12 @@ class GradientProgressBarState extends State<GradientProgressBar>
     );
 
     _animation = Tween<double>(
-            begin: 0, end: widget.points <= 2000 ? widget.points / 20 : 100)
+            begin: 0,
+            end: widget.points <= 2000
+                ? widget.points >= 0
+                    ? widget.points / 20
+                    : 0
+                : 100)
         .animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
@@ -233,7 +244,11 @@ class GradientProgressBarState extends State<GradientProgressBar>
     if (oldWidget.points != widget.points || widget.restartAnimation) {
       _animation = Tween<double>(
         begin: 0,
-        end: widget.points <= 2000 ? widget.points / 20 : 100,
+        end: widget.points <= 2000
+            ? widget.points >= 0
+                ? widget.points / 20
+                : 0
+            : 100,
       ).animate(CurvedAnimation(
         parent: _controller,
         curve: Curves.easeInOut,
@@ -297,6 +312,16 @@ class GradientProgressBarState extends State<GradientProgressBar>
                             ),
                           ),
                         ),
+                        if (_animation.isCompleted)
+                          Align(
+                              alignment: Alignment.centerLeft,
+                              child: Padding(
+                                padding:
+                                    EdgeInsets.only(left: filledWidth - 7.5.w),
+                                child: GlowingPulseDot(
+                                  height: 7.5.h,
+                                ),
+                              ))
                       ],
                     ),
                   ],
@@ -307,22 +332,28 @@ class GradientProgressBarState extends State<GradientProgressBar>
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: List.generate(6, (index) {
                       bool isActive = (_animation.value >= (index * 20));
-                      return Container(
-                        height: 15.h,
-                        width: 12.5.w,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isActive
-                              ? Color.fromARGB(
-                                  255, (80 + index * 20), (13), (6))
-                              : Colors.grey[800],
-                          border: Border.all(
-                            color: isActive
-                                ? const Color.fromARGB(0, 0, 0, 0)
-                                : const Color.fromARGB(255, 0, 0, 0),
-                            width: 1.sp,
+                      bool max = (_animation.value == (index * 20));
+                      return Stack(
+                        children: [
+                          Container(
+                            height: 15.h,
+                            width: 12.5.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isActive
+                                  ? Color.fromARGB(
+                                      255, (80 + index * 20), (13), (6))
+                                  : Colors.grey[800],
+                              border: Border.all(
+                                color: isActive
+                                    ? const Color.fromARGB(0, 0, 0, 0)
+                                    : const Color.fromARGB(255, 0, 0, 0),
+                                width: 1.sp,
+                              ),
+                            ),
                           ),
-                        ),
+                          if (max) GlowingPulseDot(height: 15.h)
+                        ],
                       );
                     }),
                   ),
@@ -354,7 +385,9 @@ class GradientProgressBarState extends State<GradientProgressBar>
         FadeText(
           (_showLabel || widget.isVisible) && _animation.isCompleted,
           widget.points >= 400
-              ? "Έχεις ένα κουπόνι για 20% έκπτωση"
+              ? widget.points < 800
+                  ? "Έχεις ένα κουπόνι για 20% έκπτωση"
+                  : "Έχεις ${widget.points ~/ 400} κουπόνια για 20% έκπτωση"
               : 'Σε ${400 - widget.points} πόντους κερδίζεις έκπτωση',
         ),
       ],

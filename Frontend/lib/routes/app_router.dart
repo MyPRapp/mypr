@@ -7,15 +7,8 @@ class AppRouter extends RootStackRouter {
   // RootStackRouter provides router configuration
   @override
   List<AutoRoute> get routes => [
-        AutoRoute(
-          page: LoginRoute.page,
-          initial: false,
-          // initial:true,
-        ),
-        AutoRoute(
-          page: SignUpRoute.page, initial: false,
-          // initial:true,
-        ),
+        AutoRoute(page: LoginRoute.page, initial: false),
+        AutoRoute(page: SignUpRoute.page, initial: false),
         AutoRoute(
           page: BottomNavBarRoute.page,
           // initial: false,
@@ -70,7 +63,7 @@ CustomRoute createSlideFromBottomRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }
 
@@ -91,7 +84,7 @@ CustomRoute createSlideFromTopRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }
 
@@ -112,7 +105,7 @@ CustomRoute createSlideFromLeftRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }
 
@@ -133,6 +126,6 @@ CustomRoute createSlideFromRightRoute(PageInfo page, bool initial) {
         child: child,
       );
     },
-    durationInMilliseconds: 300,
+    duration: Duration(milliseconds: 300),
   );
 }

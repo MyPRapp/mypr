@@ -143,3 +143,6 @@ app.*.symbols
 **.venv
 **env
 **devtools_options.yaml
+Frontend/android/app/.cxx/
+Frontend/android/gradle.properties
+Frontend/lib/firebase_options.dart
