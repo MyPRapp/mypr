@@ -316,8 +316,9 @@ class GradientProgressBarState extends State<GradientProgressBar>
                           Align(
                               alignment: Alignment.centerLeft,
                               child: Padding(
-                                padding:
-                                    EdgeInsets.only(left: filledWidth - 7.5.w),
+                                padding: EdgeInsets.only(
+                                    left: filledWidth -
+                                        7.5.w), //TODO Here padding goes negative but after refresh it gets fixed
                                 child: GlowingPulseDot(
                                   height: 7.5.h,
                                 ),

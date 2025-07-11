@@ -9,23 +9,20 @@ import '../Globals/global_components.dart';
 import '../services/booking_service.dart';
 
 class BookingProvider with ChangeNotifier {
-  final List<BookingInfoStruct> _bookings = [];
+  final List<Booking> _bookings = [];
   bool _isLoading = false;
 
-  List<BookingInfoStruct> get bookings => _bookings;
+  List<Booking> get bookings => _bookings;
   bool get isLoading => _isLoading;
 
   // Fetch bookings from server or preferences if already loaded
   Future<void> fetchBookings(
-      UserInfoStruct userDetails, ClubProvider clubProvider) async {
-    warningPrint('Fetching bookings...');
-
+      User userDetails, ClubProvider clubProvider) async {
     setLoading(true);
 
     try {
       final bookingsData = await getBookings();
       if (bookingsData != null && bookingsData.isNotEmpty) {
-        warningPrint('Processing fetched bookings...');
         await _processFetchedBookings(bookingsData, userDetails, clubProvider);
         successPrint('Bookings loaded and processed successfully');
       } else {
@@ -42,7 +39,7 @@ class BookingProvider with ChangeNotifier {
 
 // Process fetched bookings and update UI
   Future<void> _processFetchedBookings(List<dynamic> bookingsData,
-      UserInfoStruct? userDetails, ClubProvider clubProvider) async {
+      User? userDetails, ClubProvider clubProvider) async {
     _bookings.clear();
     for (var bookingData in bookingsData) {
       bool clubFound = false;
@@ -56,7 +53,7 @@ class BookingProvider with ChangeNotifier {
       if (clubFound == false) {
         return;
       }
-      List<CatalogueInfoStruct> catalogues =
+      List<Catalogue> catalogues =
           clubProvider.getAllCataloguesForClubWithID(bookingData['club']);
       final regularCatalogue =
           _getCatalogue(catalogues, 0, bookingData['club'], 'Regular');
@@ -65,7 +62,7 @@ class BookingProvider with ChangeNotifier {
       final premiumCatalogue =
           _getCatalogue(catalogues, 2, bookingData['club'], 'Premium');
 
-      _bookings.add(BookingInfoStruct(
+      _bookings.add(Booking(
         bookingID: bookingData['id'],
         userID: bookingData['user'],
         clubID: clubID,
@@ -93,15 +90,15 @@ class BookingProvider with ChangeNotifier {
   }
 
   // Helper function to get catalogues or return a default one
-  CatalogueInfoStruct _getCatalogue(List<CatalogueInfoStruct> catalogues,
-      int index, int clubID, String type) {
+  Catalogue _getCatalogue(
+      List<Catalogue> catalogues, int index, int clubID, String type) {
     return catalogues.length > index
         ? catalogues[index]
         : _defaultCatalogue(clubID, type);
   }
 
-  CatalogueInfoStruct _defaultCatalogue(int clubID, String serviceType) {
-    return CatalogueInfoStruct(
+  Catalogue _defaultCatalogue(int clubID, String serviceType) {
+    return Catalogue(
       clubID: clubID,
       serviceType: serviceType,
       price: '0.0',
@@ -131,8 +128,7 @@ class BookingProvider with ChangeNotifier {
   }
 
   // Save bookings to shared preferences
-  Future<void> _saveBookingsToPreferences(
-      List<BookingInfoStruct> bookings) async {
+  Future<void> _saveBookingsToPreferences(List<Booking> bookings) async {
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String bookingsJson =
@@ -146,7 +142,6 @@ class BookingProvider with ChangeNotifier {
 
   // Load bookings from shared preferences
   Future<void> _loadBookingsFromPreferences() async {
-    warningPrint('Attempting to load bookings from shared preferences...');
     try {
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       final String? bookingsJson = prefs.getString('bookings');
@@ -156,8 +151,8 @@ class BookingProvider with ChangeNotifier {
 
         _bookings.clear();
         _bookings.addAll(
-          bookingsList.map<BookingInfoStruct>((bookingData) {
-            return BookingInfoStruct.fromJson(bookingData);
+          bookingsList.map<Booking>((bookingData) {
+            return Booking.fromJson(bookingData);
           }).toList(),
         );
 
@@ -175,9 +170,9 @@ class BookingProvider with ChangeNotifier {
   // Calculate price based on the fourbitString and catalogues
   double _calculatePrice(
     String fourbitString,
-    CatalogueInfoStruct regularCatalogue,
-    CatalogueInfoStruct specialCatalogue,
-    CatalogueInfoStruct premiumCatalogue,
+    Catalogue regularCatalogue,
+    Catalogue specialCatalogue,
+    Catalogue premiumCatalogue,
   ) {
     double regularBottles = double.parse(fourbitString[0]);
     double specialBottles = double.parse(fourbitString[1]);
@@ -204,7 +199,7 @@ class BookingProvider with ChangeNotifier {
     return price;
   }
 
-  BookingInfoStruct getBookingByBookingID(int bookingID) {
+  Booking getBookingByBookingID(int bookingID) {
     return bookings.firstWhere((booking) => booking.bookingID == bookingID);
   }
 

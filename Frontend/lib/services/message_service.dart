@@ -97,7 +97,7 @@ Future<void> sendVerificationEmail(BuildContext context) async {
 }
 
 Future<void> sendCancellationEmail(
-    BuildContext context, String clubName, BookingInfoStruct booking) async {
+    BuildContext context, String clubName, Booking booking) async {
   FocusManager.instance.primaryFocus?.unfocus();
 
   try {
@@ -119,13 +119,14 @@ Future<void> sendCancellationEmail(
 
     if (response.statusCode == 200) {
       if (context.mounted) {
-        context.read<GlobalStateProvider>().mustSendCancellationEmail = '';
+        context.read<GlobalStateProvider>().setMustSendCancellationEmail('');
       }
       successPrint('Email sent successfully');
     } else {
       if (context.mounted) {
-        context.read<GlobalStateProvider>().mustSendCancellationEmail =
-            '$clubName || ${booking.bookingID}';
+        context
+            .read<GlobalStateProvider>()
+            .setMustSendCancellationEmail('$clubName || ${booking.bookingID}');
       }
       errorPrint('Error on email sending: ${response.body}');
     }

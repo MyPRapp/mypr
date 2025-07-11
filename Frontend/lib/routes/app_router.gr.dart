@@ -38,7 +38,7 @@ import 'package:mypr/Pages/WelcomeScreens/sign_up_page.dart' as _i15;
 class BookingDetailsRoute extends _i16.PageRouteInfo<BookingDetailsRouteArgs> {
   BookingDetailsRoute({
     _i17.Key? key,
-    required _i18.BookingInfoStruct booking,
+    required _i18.Booking booking,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           BookingDetailsRoute.name,
@@ -71,7 +71,7 @@ class BookingDetailsRouteArgs {
 
   final _i17.Key? key;
 
-  final _i18.BookingInfoStruct booking;
+  final _i18.Booking booking;
 
   @override
   String toString() {
@@ -275,7 +275,7 @@ class ReservationRoute extends _i16.PageRouteInfo<ReservationRouteArgs> {
   ReservationRoute({
     _i17.Key? key,
     required _i18.ClubInfoStruct club,
-    required List<_i18.CatalogueInfoStruct> catalogues,
+    required List<_i18.Catalogue> catalogues,
     List<_i16.PageRouteInfo>? children,
   }) : super(
           ReservationRoute.name,
@@ -313,7 +313,7 @@ class ReservationRouteArgs {
 
   final _i18.ClubInfoStruct club;
 
-  final List<_i18.CatalogueInfoStruct> catalogues;
+  final List<_i18.Catalogue> catalogues;
 
   @override
   String toString() {

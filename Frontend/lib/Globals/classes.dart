@@ -73,18 +73,12 @@ class ClubInfoStruct {
   }
 }
 
-class UserInfoStruct {
+class User {
   int userID, points;
-  String username;
-  String firstName;
-  String lastName;
-  String email;
-  String phone;
-  String photo;
-  String localPhotoPath;
+  String username, firstName, lastName, email, phone;
   bool isBanned;
 
-  UserInfoStruct({
+  User({
     required this.userID,
     this.username = '',
     this.firstName = '',
@@ -92,14 +86,12 @@ class UserInfoStruct {
     this.email = '',
     this.phone = '',
     this.points = -1,
-    this.photo = '',
-    this.localPhotoPath = '',
     this.isBanned = false,
   });
 
-  factory UserInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory User.fromJson(Map<String, dynamic> json) {
     try {
-      return UserInfoStruct(
+      return User(
         userID: json['id'] ?? -1,
         username: json['username'] ?? '',
         firstName: json['first_name'] ?? '',
@@ -107,13 +99,11 @@ class UserInfoStruct {
         email: json['email'] ?? '',
         phone: json['phone'] ?? '',
         points: json['points'] ?? -1,
-        photo: json['photo'] ?? '',
         isBanned: json['is_banned'] ?? false,
       );
     } catch (e) {
-      errorPrint('Error parsing UserInfoStruct: $e');
-      return UserInfoStruct(
-          userID: -1); // Return a default object with userID -1
+      errorPrint('Error parsing User: $e');
+      return User(userID: -1); // Return a default object with userID -1
     }
   }
 
@@ -126,37 +116,35 @@ class UserInfoStruct {
       'email': email,
       'phone': phone,
       'points': points,
-      'photo': photo,
-      'localPhotoPath': localPhotoPath,
       'is_banned': isBanned,
     };
   }
 }
 
-class CatalogueInfoStruct {
+class Catalogue {
   int clubID;
   String serviceType;
   String price;
   int maxPersons;
 
-  CatalogueInfoStruct({
+  Catalogue({
     required this.clubID,
     required this.serviceType,
     required this.price,
     required this.maxPersons,
   });
 
-  factory CatalogueInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory Catalogue.fromJson(Map<String, dynamic> json) {
     try {
-      return CatalogueInfoStruct(
+      return Catalogue(
         clubID: json['club'] ?? -1,
         serviceType: json['service_type'] ?? '',
         price: json['price'] ?? '',
         maxPersons: json['max_person'] ?? -1,
       );
     } catch (e) {
-      errorPrint('Error parsing CatalogueInfoStruct: $e');
-      return CatalogueInfoStruct(
+      errorPrint('Error parsing Catalogue: $e');
+      return Catalogue(
           clubID: -1,
           serviceType: '',
           price: '0',
@@ -174,7 +162,7 @@ class CatalogueInfoStruct {
   }
 }
 
-class BookingInfoStruct {
+class Booking {
   final int bookingID;
   final int userID;
   final int clubID;
@@ -186,7 +174,7 @@ class BookingInfoStruct {
   final String comments;
   final int status;
 
-  BookingInfoStruct({
+  Booking({
     required this.bookingID,
     required this.userID,
     required this.clubID,
@@ -199,9 +187,9 @@ class BookingInfoStruct {
     required this.status,
   });
 
-  factory BookingInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory Booking.fromJson(Map<String, dynamic> json) {
     try {
-      return BookingInfoStruct(
+      return Booking(
         bookingID: json['bookingID'] ?? -1,
         userID: json['userID'] ?? -1,
         clubID: json['clubID'] ?? -1,
@@ -216,8 +204,8 @@ class BookingInfoStruct {
         status: json['status'] ?? 0,
       );
     } catch (e) {
-      errorPrint('Error parsing BookingInfoStruct: $e');
-      return BookingInfoStruct(
+      errorPrint('Error parsing Booking: $e');
+      return Booking(
         bookingID: -1,
         userID: -1,
         clubID: -1,

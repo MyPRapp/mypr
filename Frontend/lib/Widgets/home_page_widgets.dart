@@ -58,7 +58,7 @@ class _BigClubCardState extends State<BigClubCard> {
     return GestureDetector(
       behavior: HitTestBehavior.translucent,
       onTap: () {
-        List<CatalogueInfoStruct> catalogues = context
+        List<Catalogue> catalogues = context
             .read<ClubProvider>()
             .getCataloguesByClubID(widget.club.clubID);
 

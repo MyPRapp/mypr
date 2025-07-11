@@ -18,6 +18,9 @@ import '../../Providers/liked_clubs_provider.dart';
 import '../../Providers/user_provider.dart';
 import '../../Widgets/profile_page_widgets.dart';
 
+//TODO Gradient bar resolves to a padding error when first opening profile page while also logged in
+//TODO App prompts user to verify email while it's already verified
+
 @RoutePage()
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -41,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (context.read<GlobalStateProvider>().hasCheckedAppVersion == false) {
+      if (!context.read<GlobalStateProvider>().hasCheckedAppVersion) {
         checkAppVersion(context);
       }
     });
@@ -97,12 +100,12 @@ class _ProfilePageState extends State<ProfilePage> {
       await Future.delayed(Duration(seconds: 3));
     }
     if (mounted) {
-      context.read<GlobalStateProvider>().refreshProfilePage = false;
+      context.read<GlobalStateProvider>().setRefreshProfilePage(false);
 
       UserProvider userProvider = context.read<UserProvider>();
 
-      if (context.read<GlobalStateProvider>().isAuthenticated) {
-        context.read<GlobalStateProvider>().isAuthenticated = true;
+      if (context.read<GlobalStateProvider>().hasLoggedIn) {
+        context.read<GlobalStateProvider>().setHasLoggedIn(true);
         await userProvider.fetchUserDetailsFromServer();
 
         if (mounted) {
@@ -195,14 +198,12 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Step 5: Clear liked clubs
       if (mounted) {
-        warningPrint('Clearing liked clubs...');
         await context.read<LikedClubsProvider>().deleteAllLiked();
       }
 
       // Step 6: Clear bookings and reset flags
       if (mounted) {
         try {
-          warningPrint('Clearing bookings and resetting flags...');
           BookingProvider bookingProvider = context.read<BookingProvider>();
           bookingProvider.bookings.clear();
           bookingProvider.setLoading(false);
@@ -212,10 +213,10 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       }
 
-      // Step 7: Set isAuthenticated to false
+      // Step 7: Set hasLoggedIn to false
       if (mounted) {
-        context.read<GlobalStateProvider>().isAuthenticated = false;
-        successPrint('\'isAuthenticated\' flag set to false.');
+        context.read<GlobalStateProvider>().setHasLoggedIn(false);
+        successPrint('\'hasLoggedIn\' flag set to false.');
       }
       // Step 8: Reset saved user details
       if (mounted) {
@@ -225,7 +226,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
       // Step 9: Navigate to the Login page
       if (mounted) {
-        warningPrint('Navigating to the login page...');
         AutoRouter.of(context).replaceAll([const LoginRoute()]);
         successPrint('Navigation to login page successful.');
       }
@@ -247,8 +247,7 @@ class _ProfilePageState extends State<ProfilePage> {
     final double screenWidth = MediaQuery.sizeOf(context).width;
     final userDetails = context.watch<UserProvider>().userDetails;
 
-    final bool isAuthenticated =
-        context.watch<GlobalStateProvider>().isAuthenticated;
+    final bool hasLoggedIn = context.watch<GlobalStateProvider>().hasLoggedIn;
     final bool hasVerifiedEmail =
         context.watch<GlobalStateProvider>().hasVerifiedEmail;
     final int points = context.watch<UserProvider>().userDetails.points;
@@ -290,13 +289,13 @@ class _ProfilePageState extends State<ProfilePage> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  if ((!hasVerifiedEmail && isAuthenticated) ||
+                                  if ((!hasVerifiedEmail && hasLoggedIn) ||
                                       (userDetails.isBanned &&
-                                          isAuthenticated)) //top 'resend-email' banner is visible
+                                          hasLoggedIn)) //top 'resend-email' banner is visible
                                     SizedBox(height: 40.h),
                                   SizedBox(height: 20.h),
-                                  if (!isAuthenticated) SizedBox(height: 80.h),
-                                  if (isAuthenticated)
+                                  if (!hasLoggedIn) SizedBox(height: 80.h),
+                                  if (hasLoggedIn)
                                     Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
@@ -336,7 +335,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         borderRadius:
                                             BorderRadius.circular(360.r),
                                         child:
-                                            //  isAuthenticated
+                                            //  hasLoggedIn
                                             // ? userDetails
                                             //         .localPhotoPath.isNotEmpty
                                             //     ? Image.file(
@@ -361,7 +360,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                           fit: BoxFit.cover,
                                         )),
                                   ),
-                                  if (isAuthenticated) ...[
+                                  if (hasLoggedIn) ...[
                                     Padding(
                                       padding: EdgeInsets.only(top: 20.h),
                                       child: Text(
@@ -391,7 +390,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   width: 260.w,
                                   child: Column(
                                     children: [
-                                      if (isAuthenticated)
+                                      if (hasLoggedIn)
                                         Column(
                                           children: [
                                             GestureDetector(
@@ -426,9 +425,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                             redDivider(),
                                           ],
                                         ),
-                                      if (isAuthenticated)
-                                        SizedBox(height: 20.h),
-                                      if (isAuthenticated)
+                                      if (hasLoggedIn) SizedBox(height: 20.h),
+                                      if (hasLoggedIn)
                                         Column(
                                           children: [
                                             profileOptions(
@@ -461,18 +459,18 @@ class _ProfilePageState extends State<ProfilePage> {
                                 ),
                               ),
                             ),
-                            if (!isAuthenticated) SizedBox(height: 100.h),
-                            if (!isAuthenticated)
+                            if (!hasLoggedIn) SizedBox(height: 100.h),
+                            if (!hasLoggedIn)
                               GestureDetector(
                                   behavior: HitTestBehavior.translucent,
                                   onTap: () => _showSignOutDialog(context),
                                   child: BuildSignInOrRegisterButton(
                                       context: context)),
-                            if (!isAuthenticated) SizedBox(height: 50.h),
+                            if (!hasLoggedIn) SizedBox(height: 50.h),
                           ],
                         ),
                       ),
-                      if (isAuthenticated)
+                      if (hasLoggedIn)
                         Column(children: [
                           Center(
                             child: GestureDetector(
@@ -513,7 +511,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       SizedBox(height: screenHeight / 6),
                     ],
                   ),
-                  if (!hasVerifiedEmail && isAuthenticated)
+                  if (!hasVerifiedEmail && hasLoggedIn)
                     EmailConfirmationNotification(
                         text: 'Παρακαλώ επιβεβαίωσε το email σου'),
                   if (userDetails.isBanned) BannedBanner()

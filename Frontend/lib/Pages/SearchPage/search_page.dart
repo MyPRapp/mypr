@@ -15,18 +15,27 @@ class SearchPage extends StatefulWidget {
 }
 
 class SearchPageState extends State<SearchPage> {
-  final TextEditingController _controller = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  late List<String> _clubs;
+  late final TextEditingController _controller;
+
+  late final FocusNode _focusNode;
+
+  List<String> _clubs = [];
+
   List<String> _filteredClubs = [];
+
   bool _isDropdownVisible = false;
 
   @override
   void initState() {
     super.initState();
+
+    _controller = TextEditingController();
     _controller.addListener(() => _filterClubs(_controller.text));
 
+    _focusNode = FocusNode();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      //Pass all club names in a list
       _clubs = context
           .read<ClubProvider>()
           .allClubs
@@ -35,40 +44,29 @@ class SearchPageState extends State<SearchPage> {
     });
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
-
   void _filterClubs(String query) {
+    final filtered = _clubs
+        .where((club) => club.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
     setState(() {
-      _filteredClubs = query.isEmpty
-          ? _clubs
-          : _clubs
-              .where((club) => club.toLowerCase().contains(query.toLowerCase()))
-              .toList();
-      _isDropdownVisible = _filteredClubs.isNotEmpty;
+      _filteredClubs = filtered;
+      _isDropdownVisible = filtered.isNotEmpty;
     });
   }
 
   void _clearSearchField() {
+    _controller.clear();
+    FocusScope.of(context).unfocus();
+
     setState(() {
-      _controller.clear();
-      _filterClubs('');
       _isDropdownVisible = false;
-      FocusScope.of(context).unfocus();
     });
   }
 
   void _onClubTap(String clubName) {
     if (_isDropdownVisible) {
-      setState(() {
-        _isDropdownVisible = false;
-        _controller.clear();
-        FocusScope.of(context).unfocus();
-      });
+      _clearSearchField();
 
       final clubProvider = context.read<ClubProvider>();
       final club = clubProvider.getClubByName(clubName);
@@ -76,9 +74,14 @@ class SearchPageState extends State<SearchPage> {
 
       AutoRouter.of(context)
           .push(ReservationRoute(club: club, catalogues: catalogues));
-    } else {
-      FocusManager.instance.primaryFocus?.unfocus();
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
   }
 
   @override
@@ -91,9 +94,9 @@ class SearchPageState extends State<SearchPage> {
         backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: () {
+            FocusManager.instance.primaryFocus?.unfocus();
             setState(() {
               _isDropdownVisible = false;
-              FocusManager.instance.primaryFocus?.unfocus();
             });
           },
           child: Container(

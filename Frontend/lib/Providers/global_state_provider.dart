@@ -4,11 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class GlobalStateProvider with ChangeNotifier {
   static final GlobalStateProvider _instance = GlobalStateProvider._internal();
 
-  bool _isAuthenticated = false;
+  bool _hasLoggedIn = false;
   bool _hasVerifiedEmail = false;
   bool _preferencesLoaded =
       false; // Add this state to track if preferences are loaded
-  final bool _hasCheckedAppVersion = false;
+  bool _hasCheckedAppVersion = false;
   bool _refreshProfilePage = false;
   bool _refreshHomePage = false;
   bool _refreshReservationPage = false;
@@ -24,15 +24,13 @@ class GlobalStateProvider with ChangeNotifier {
   }
 
   // Getters
-
-  bool get isAuthenticated => _isAuthenticated;
+  bool get hasLoggedIn => _hasLoggedIn;
 
   bool get hasVerifiedEmail => _hasVerifiedEmail;
 
   bool get hasCheckedAppVersion => _hasCheckedAppVersion;
 
-  bool get preferencesLoaded =>
-      _preferencesLoaded; // New getter to check if preferences are loaded
+  bool get preferencesLoaded => _preferencesLoaded;
 
   bool get refreshProfilePage => _refreshProfilePage;
 
@@ -45,51 +43,56 @@ class GlobalStateProvider with ChangeNotifier {
   String get mustSendCancellationEmail => _mustSendCancellationEmail;
 
   // Setters
-  set isAuthenticated(bool value) {
-    _isAuthenticated = value;
-    _saveToPreferences('isAuthenticated', value);
+  Future<void> setHasLoggedIn(bool value) async {
+    _hasLoggedIn = value;
+    await _saveToPreferences('hasLoggedIn', value);
 
     notifyListeners();
   }
 
-  set hasVerifiedEmail(bool value) {
+  Future<void> setHasVerifiedEmail(bool value) async {
     _hasVerifiedEmail = value;
-    _saveToPreferences('hasVerifiedEmail', value);
+    await _saveToPreferences('hasVerifiedEmail', value);
 
     notifyListeners();
   }
 
-  set mustSendCancellationEmail(String value) {
+  Future<void> setMustSendCancellationEmail(String value) async {
     _mustSendCancellationEmail = value;
-    _saveToPreferences('mustSendCancellationEmail', value);
+    await _saveToPreferences('mustSendCancellationEmail', value);
 
     notifyListeners();
   }
 
-  set refreshProfilePage(bool value) {
+  void setRefreshProfilePage(bool value) {
     _refreshProfilePage = value;
     notifyListeners();
   }
 
-  set refreshHomePage(bool value) {
+  void setRefreshHomePage(bool value) {
     _refreshHomePage = value;
     notifyListeners();
   }
 
-  set refreshReservationPage(bool value) {
+  void setRefreshReservationPage(bool value) {
     _refreshReservationPage = value;
     notifyListeners();
   }
 
-  set justRegistered(bool value) {
+  void setJustRegistered(bool value) {
     _justRegistered = value;
+    notifyListeners();
+  }
+
+  void setHasCheckedAppVersion(bool value) {
+    _hasCheckedAppVersion = value;
     notifyListeners();
   }
 
   // Load values from SharedPreferences
   Future<void> loadFromPreferences() async {
     final prefs = await SharedPreferences.getInstance();
-    _isAuthenticated = prefs.getBool('isAuthenticated') ?? false;
+    _hasLoggedIn = prefs.getBool('hasLoggedIn') ?? false;
     _hasVerifiedEmail = prefs.getBool('hasVerifiedEmail') ?? false;
     _mustSendCancellationEmail =
         prefs.getString('mustSendCancellationEmail') ?? '';

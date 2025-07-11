@@ -10,7 +10,7 @@ Future<bool> submitForm(String reservationName, String clubName, String type,
     String time, String numberOfPeople, String comments) async {
   String? accessToken = await _refreshAndGetAccessToken();
   if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
+    errorPrint('Access token is null. User has not logged in.');
     return false;
   }
 
@@ -52,7 +52,7 @@ Future<bool> submitForm(String reservationName, String clubName, String type,
 Future<List<dynamic>?> getBookings() async {
   String? accessToken = await _refreshAndGetAccessToken();
   if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
+    errorPrint('Access token is null. User has not logged in.');
     return null;
   }
 

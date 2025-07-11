@@ -14,7 +14,9 @@ import 'package:mypr/routes/app_router.dart';
 import 'package:mypr/services/notification_service.dart';
 import 'package:provider/provider.dart';
 
-//TODO Change debug = false to debug = true in build.gradle.kts for debugging
+//LOGIN PAGE
+//SEARCH PAGE
+//CUSTOMIZE PROFILE PAGE
 
 void main() async {
   // Lock the app to portrait mode only

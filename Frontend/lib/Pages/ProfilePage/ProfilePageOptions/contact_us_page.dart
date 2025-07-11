@@ -21,16 +21,16 @@ class ContactUsPage extends StatefulWidget {
 }
 
 class _ContactUsPageState extends State<ContactUsPage> {
-  bool isAuthenticated = false;
+  bool hasLoggedIn = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<BottomNavBarVisibility>().hide();
-      if (context.read<GlobalStateProvider>().isAuthenticated) {
+      if (context.read<GlobalStateProvider>().hasLoggedIn) {
         setState(() {
-          isAuthenticated = true;
+          hasLoggedIn = true;
         });
       }
     });
@@ -73,8 +73,8 @@ class _ContactUsPageState extends State<ContactUsPage> {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    UserInfoStruct? userProvider = context.read<UserProvider>().userDetails;
-    if (isAuthenticated) {
+    User? userProvider = context.read<UserProvider>().userDetails;
+    if (hasLoggedIn) {
       nameController.text =
           '${userProvider.firstName} ${userProvider.lastName}';
       if (nameController.text == ' ') {

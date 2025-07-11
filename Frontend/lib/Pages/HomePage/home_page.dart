@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:mypr/Globals/classes.dart';
 import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
 import 'package:mypr/Providers/booking_provider.dart';
@@ -30,17 +31,26 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     _initSyncing();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<BottomNavBarVisibility>().show();
-      context.read<GlobalStateProvider>().refreshHomePage = false;
+
+      context
+          .read<GlobalStateProvider>()
+          .setRefreshHomePage(false); //TODO Check if this is needed
+
+      if (!context.read<GlobalStateProvider>().hasCheckedAppVersion) {
+        checkAppVersion(context);
+      }
+
       _checkFirstTime();
     });
   }
 
-  Future<void> _initSyncing() async {
-    checkAppVersion(context);
-    Future.wait([_fetchClubs(), _syncUser()]);
+  Future<void> _initSyncing() {
+    return Future.wait([_fetchClubs(), _syncUser()]);
   }
 
   Future<void> _fetchClubs() async {
@@ -50,22 +60,17 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _syncUser() async {
-    if (mounted) {
-      final globalStateProvider = context.read<GlobalStateProvider>();
+    final globalStateProvider = context.read<GlobalStateProvider>();
 
-      if (globalStateProvider.preferencesLoaded) {
-        if (globalStateProvider.isAuthenticated) {
-          await _attemptUserLogin();
+    if (globalStateProvider.preferencesLoaded) {
+      handleCancellationEmail(
+          context, globalStateProvider.mustSendCancellationEmail);
 
-          if (mounted) {
-            handleCancellationEmail(context, globalStateProvider);
-          }
-        } else {
-          errorPrint('------------USER IS NOT AUTHENTICATED------------');
-        }
+      if (globalStateProvider.hasLoggedIn) {
+        successPrint('------------USER IS LOGGED IN------------');
+        await context.read<UserProvider>().loadUserDetailsFromPreferences();
       } else {
-        await Future.delayed(const Duration(seconds: 2));
-        _syncUser();
+        errorPrint('------------USER IS NOT LOGGED IN------------');
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));
@@ -73,96 +78,105 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  Future<void> _checkFirstTime() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final bool hasSeenPointsDialog =
+        prefs.getBool('hasSeenPointsDialog') ?? false;
+    final bool hasSentFirebaseToken =
+        prefs.getBool('hasSentFirebaseToken') ?? false;
+    final bool hasSentNewUserEmail =
+        prefs.getBool('hasSentNewUserEmail') ?? false;
+
+    if (!hasSeenPointsDialog) {
+      await prefs.setBool('hasSeenPointsDialog', true);
+      if (mounted) {
+        showPointsReminderDialog(context);
+      } else {
+        await prefs.setBool('hasSeenPointsDialog', false);
+      }
+    }
+
+    if (!hasSentFirebaseToken && await registerDevice()) {
+      await prefs.setBool('hasSentFirebaseToken', true);
+    }
+
+    if (!hasSentNewUserEmail && await newUserAlertEmail()) {
+      await prefs.setBool('hasSentNewUserEmail', true);
+    }
+  }
+
   void handleCancellationEmail(
-      BuildContext context, GlobalStateProvider globalStateProvider) {
-    if (globalStateProvider.mustSendCancellationEmail.isEmpty) {
+      BuildContext context, String mustSendCancellationEmail) {
+    if (mustSendCancellationEmail.isEmpty) {
       return;
     }
 
-    var parts = globalStateProvider.mustSendCancellationEmail
-        .split("||")
-        .map((e) => e.trim())
-        .toList();
+    final parts =
+        mustSendCancellationEmail.split("||").map((e) => e.trim()).toList();
 
     if (parts.length == 2) {
+      final Booking cancelledBooking = context
+          .read<BookingProvider>()
+          .getBookingByBookingID(int.tryParse(parts[1]) ??
+              -1); //TODO What if booking wasn't found???
+
       sendCancellationEmail(
-        context,
-        parts[0], // clubName
-        context
-            .read<BookingProvider>()
-            .getBookingByBookingID(int.tryParse(parts[1]) ?? 0),
-      );
+          context,
+          parts[0], // clubName
+          cancelledBooking);
     }
   }
 
-  Future<void> _attemptUserLogin() async {
-    final userProvider = context.read<UserProvider>();
+  // Future<void> _attemptUserLogin() async {
+  //   final userProvider = context.read<UserProvider>();
 
-    userProvider.loadUserDetailsFromPreferences();
-    final savedEmail = await getSavedEmail();
-    final savedPassword = await getSavedPassword();
+  //   userProvider.loadUserDetailsFromPreferences();
+  //   final savedEmail = await getSavedEmail();
+  //   final savedPassword = await getSavedPassword();
 
-    if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-      final loggedIn = await login(savedEmail, savedPassword);
+  //   if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+  //     final loggedIn = await userProvider.login(savedEmail, savedPassword);
 
-      if (!mounted) return;
-      final globalStateProvider = context.read<GlobalStateProvider>();
+  //     if (!mounted) return;
+  //     final globalStateProvider = context.read<GlobalStateProvider>();
 
-      if (loggedIn) {
-        globalStateProvider.isAuthenticated = true;
+  //     if (loggedIn == 0) {
+  //       await globalStateProvider.setHasLoggedIn(true);
+  //       if (mounted) {
+  //         if (globalStateProvider.justRegistered) {
+  //           globalStateProvider.setJustRegistered(false);
+  //           emailLoop(
+  //               context); //email loop happens asynchronously after signing up and just registered shouldn't exist
+  //         } else {
+  //           fetchVerifiedEmailGlobalVariable(context);
+  //         }
+  //       }
 
-        if (globalStateProvider.justRegistered) {
-          globalStateProvider.justRegistered = false;
-          emailLoop(context);
-        } else {
-          fetchVerifiedEmailGlobalVariable(context);
-        }
+  //       await userProvider.fetchUserDetailsFromServer();
+  //       if (mounted) {
+  //         await context.read<BookingProvider>().fetchBookings(
+  //             userProvider.userDetails, context.read<ClubProvider>());
+  //       }
+  //       successPrint('------------USER IS LOGGED IN------------');
+  //     } else {
+  //       _showLoginError(globalStateProvider);
+  //     }
+  //   } else {
+  //     if (mounted) {
+  //       _showLoginError(context.read<GlobalStateProvider>());
+  //     }
+  //   }
+  // }
 
-        await userProvider.fetchUserDetailsFromServer();
-        if (mounted) {
-          await context.read<BookingProvider>().fetchBookings(
-              userProvider.userDetails, context.read<ClubProvider>());
-        }
-        successPrint('------------USER IS AUTHENTICATED------------');
-      } else {
-        _showLoginError(globalStateProvider);
-      }
-    } else {
-      if (mounted) {
-        _showLoginError(context.read<GlobalStateProvider>());
-      }
-    }
-  }
-
-  void _showLoginError(GlobalStateProvider globalStateProvider) {
-    errorPrint('Email or Password is incorrect');
-    globalStateProvider.isAuthenticated = false;
-  }
+  // void _showLoginError(GlobalStateProvider globalStateProvider) {
+  //   errorPrint('Email or Password is incorrect');
+  //   globalStateProvider.setHasLoggedIn(false);
+  // }
 
   void navigateToSearchTab(BuildContext context) async {
     final tabsRouter = AutoTabsRouter.of(context);
     if (tabsRouter.activeIndex != 1) {
       tabsRouter.setActiveIndex(1);
-    }
-  }
-
-  Future<void> _checkFirstTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
-    bool hasSentToken = prefs.getBool('hasSentToken') ?? false;
-    bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
-
-    if (!hasSeenDialog && mounted) {
-      showPointsReminderDialog(context);
-      await prefs.setBool('hasSeenPointsDialog', true);
-    }
-
-    if (!hasSentToken && await registerDevice()) {
-      await prefs.setBool('hasSentToken', true);
-    }
-
-    if (!hasSentEmail && await newUserAlertEmail()) {
-      await prefs.setBool('hasSentNewUserEmail', true);
     }
   }
 

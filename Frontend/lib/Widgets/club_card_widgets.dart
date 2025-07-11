@@ -94,10 +94,10 @@ class NameAndStars extends StatelessWidget {
           ),
           textAlign: TextAlign.start,
         ),
-        if (stars > 0)
-          RatingStars(
-            stars: stars,
-          ),
+        // if (stars > 0)
+        //   RatingStars(
+        //     stars: stars,
+        //   ),
       ],
     );
   }

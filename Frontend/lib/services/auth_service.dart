@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 // import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -86,56 +87,12 @@ Future<bool> registerDevice() async {
       successPrint('Device was registered');
       return true;
     } else {
-      errorPrint(
-          'Error while registering device: ${response.statusCode}\n${response.body}');
+      errorPrint('Error while registering device: ${response.statusCode}\n');
+      // ${response.body}'); //TODO Uncomment this
       return false;
     }
   } catch (e) {
     throw Exception('Error while registering device: $e');
-  }
-}
-
-Future<bool> login(String email, String password) async {
-  try {
-    // Send login request
-    final response = await http
-        .post(
-          Uri.parse('$apiUrl/token/'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({'username': email, 'password': password}),
-        )
-        .timeout(const Duration(seconds: 5)); // Adding a 5-second timeout
-
-    // Check if the response is successful
-    if (response.statusCode == 200) {
-      successPrint('Login successful');
-      warningPrint('Parsing tokens...');
-      var data = jsonDecode(response.body);
-      String? accessToken = data['access'];
-      String? refreshToken = data['refresh'];
-
-      // Check if tokens are received
-      if (accessToken != null && refreshToken != null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('access_token', accessToken);
-        await prefs.setString('refresh_token', refreshToken);
-        await prefs.setString('savedEmail', email);
-        await prefs.setString('savedPassword', password);
-
-        successPrint('Tokens received and saved to SharedPreferences');
-        return true;
-      } else {
-        errorPrint('Tokens are null');
-        return false;
-      }
-    } else {
-      errorPrint('Login failed with status code: ${response.statusCode}');
-      errorPrint('Response body: ${utf8.decode(response.bodyBytes)}');
-      return false;
-    }
-  } catch (e) {
-    errorPrint('Exception occurred during login: $e');
-    return false;
   }
 }
 
@@ -232,7 +189,7 @@ Future<int> register(String username, String password, String firstName,
 Future<int> changeEmailOnServerOnly(String email) async {
   String? accessToken = await getAccessToken();
   if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
+    errorPrint('Access token is null. User has not logged in.');
     return 1;
   }
 
@@ -276,7 +233,7 @@ Future<int> changeEmailOnServerOnly(String email) async {
 Future<int> changePhoneOnServerOnly(String phone) async {
   String? accessToken = await getAccessToken();
   if (accessToken == null) {
-    errorPrint('Access token is null. User is not authenticated.');
+    errorPrint('Access token is null. User has not logged in.');
     return 1;
   }
 
@@ -319,7 +276,30 @@ Future<int> changePhoneOnServerOnly(String phone) async {
   }
 }
 
+Future<bool> isEmulator() async {
+  final deviceInfo = DeviceInfoPlugin();
+
+  if (Platform.isAndroid) {
+    final androidInfo = await deviceInfo.androidInfo;
+    return androidInfo.isPhysicalDevice == false ||
+        androidInfo.brand.toLowerCase().contains('generic') ||
+        androidInfo.device.toLowerCase().contains('generic') ||
+        androidInfo.product.toLowerCase().contains('sdk');
+  } else if (Platform.isIOS) {
+    final iosInfo = await deviceInfo.iosInfo;
+    return iosInfo.isPhysicalDevice == false ||
+        iosInfo.utsname.machine.toLowerCase().contains('simulator');
+  }
+
+  return false;
+}
+
 Future<bool> newUserAlertEmail() async {
+  if (await isEmulator()) {
+    warningPrint('Device is an emulator. Skipping new user email.');
+    return true;
+  }
+
   final response = await http
       .post(
     Uri.parse('$apiUrl/send-email/'),
@@ -364,7 +344,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
 
       bool isVerified = jsonData['is_verified']; // Extract the boolean value
       if (context.mounted) {
-        context.read<GlobalStateProvider>().hasVerifiedEmail = isVerified;
+        context.read<GlobalStateProvider>().setHasVerifiedEmail(isVerified);
         return;
       }
       errorPrint('Not mounted');
@@ -372,7 +352,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
     errorPrint('${response.statusCode}');
     errorPrint(response.body);
     if (context.mounted) {
-      context.read<GlobalStateProvider>().hasVerifiedEmail = false;
+      context.read<GlobalStateProvider>().setHasVerifiedEmail(false);
     }
   } catch (e) {
     errorPrint('Error while fetching \'verified email\' global variable: $e');
@@ -381,7 +361,7 @@ Future<void> fetchVerifiedEmailGlobalVariable(BuildContext context) async {
 
 Future<int> checkPlatformVersion(
     String currentVersion, String platformUrl) async {
-  final url = '$apiUrl/$platformUrl/';
+  final url = '$apiUrl/version_control_$platformUrl/';
 
   try {
     final response =

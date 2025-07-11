@@ -1,7 +1,7 @@
 name: mypr
 description: "Best night club app"
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 2.1.0+18
+version: 2.1.0+20
 
 environment:
   sdk: '>=3.3.2 <4.0.0'
@@ -41,6 +41,7 @@ dependencies:
   rxdart: ^0.28.0
   firebase_messaging: ^15.2.5
   firebase_core: ^3.13.0
+  device_info_plus: ^11.5.0
 
 dev_dependencies:
   flutter_test:
@@ -192,8 +193,8 @@ flutter_native_splash:
   # the respective parameter.  You may specify all, selected, or none of these parameters:
   #color_android: "#42a5f5"
   #color_dark_android: "#042a49"
-  #color_ios: "#42a5f5"
-  #color_dark_ios: "#042a49"
+  color_ios: "#9C0C04"
+  color_dark_ios: "#9C0C04"
   #color_web: "#42a5f5"
   #color_dark_web: "#042a49"
   #image_android: assets/splash-android.png
