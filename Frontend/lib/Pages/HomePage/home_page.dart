@@ -31,15 +31,20 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     _initSyncing();
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<BottomNavBarVisibility>().show();
+
       context
           .read<GlobalStateProvider>()
           .setRefreshHomePage(false); //TODO Check if this is needed
+
       if (!context.read<GlobalStateProvider>().hasCheckedAppVersion) {
         checkAppVersion(context);
       }
+
       _checkFirstTime();
     });
   }
@@ -58,7 +63,8 @@ class _HomePageState extends State<HomePage> {
     final globalStateProvider = context.read<GlobalStateProvider>();
 
     if (globalStateProvider.preferencesLoaded) {
-      handleCancellationEmail(context, globalStateProvider);
+      handleCancellationEmail(
+          context, globalStateProvider.mustSendCancellationEmail);
 
       final bool loadedUserDetails =
           await context.read<UserProvider>().loadUserDetailsFromPreferences();
@@ -76,12 +82,14 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _checkFirstTime() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
+    final bool hasSeenPointsDialog =
+        prefs.getBool('hasSeenPointsDialog') ?? false;
     final bool hasSentFirebaseToken =
         prefs.getBool('hasSentFirebaseToken') ?? false;
-    final bool hasSentEmail = prefs.getBool('hasSentNewUserEmail') ?? false;
+    final bool hasSentNewUserEmail =
+        prefs.getBool('hasSentNewUserEmail') ?? false;
 
-    if (!hasSeenDialog) {
+    if (!hasSeenPointsDialog) {
       await prefs.setBool('hasSeenPointsDialog', true);
       if (mounted) {
         showPointsReminderDialog(context);
@@ -94,21 +102,19 @@ class _HomePageState extends State<HomePage> {
       await prefs.setBool('hasSentFirebaseToken', true);
     }
 
-    if (!hasSentEmail && await newUserAlertEmail()) {
+    if (!hasSentNewUserEmail && await newUserAlertEmail()) {
       await prefs.setBool('hasSentNewUserEmail', true);
     }
   }
 
   void handleCancellationEmail(
-      BuildContext context, GlobalStateProvider globalStateProvider) {
-    if (globalStateProvider.mustSendCancellationEmail.isEmpty) {
+      BuildContext context, String mustSendCancellationEmail) {
+    if (mustSendCancellationEmail.isEmpty) {
       return;
     }
 
-    final parts = globalStateProvider.mustSendCancellationEmail
-        .split("||")
-        .map((e) => e.trim())
-        .toList();
+    final parts =
+        mustSendCancellationEmail.split("||").map((e) => e.trim()).toList();
 
     if (parts.length == 2) {
       final Booking cancelledBooking = context
