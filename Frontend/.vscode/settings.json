@@ -3,7 +3,7 @@
         "**/build": true,
         "**/.dart_tool": true,
         "**/.idea": true,
-        "**/android": true,
+        "**/android": false,
         "**/ios": true,
         "**/linux": true,
         "**/macos": true,
