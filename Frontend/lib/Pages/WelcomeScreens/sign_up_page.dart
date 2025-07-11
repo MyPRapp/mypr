@@ -116,7 +116,7 @@ class _SignUpPageState extends State<SignUpPage> {
     });
 
     String username = "$firstName$lastName";
-    int points = 50;
+    const points = 50;
 
     int registerSuccess = await register(
       username,

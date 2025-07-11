@@ -66,11 +66,9 @@ class _HomePageState extends State<HomePage> {
       handleCancellationEmail(
           context, globalStateProvider.mustSendCancellationEmail);
 
-      final bool loadedUserDetails =
-          await context.read<UserProvider>().loadUserDetailsFromPreferences();
-
-      if (globalStateProvider.hasLoggedIn && loadedUserDetails) {
+      if (globalStateProvider.hasLoggedIn) {
         successPrint('------------USER IS LOGGED IN------------');
+        await context.read<UserProvider>().loadUserDetailsFromPreferences();
       } else {
         errorPrint('------------USER IS NOT LOGGED IN------------');
       }

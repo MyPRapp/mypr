@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 // import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -86,8 +87,8 @@ Future<bool> registerDevice() async {
       successPrint('Device was registered');
       return true;
     } else {
-      errorPrint(
-          'Error while registering device: ${response.statusCode}\n${response.body}');
+      errorPrint('Error while registering device: ${response.statusCode}\n');
+      // ${response.body}'); //TODO Uncomment this
       return false;
     }
   } catch (e) {
@@ -275,7 +276,30 @@ Future<int> changePhoneOnServerOnly(String phone) async {
   }
 }
 
+Future<bool> isEmulator() async {
+  final deviceInfo = DeviceInfoPlugin();
+
+  if (Platform.isAndroid) {
+    final androidInfo = await deviceInfo.androidInfo;
+    return androidInfo.isPhysicalDevice == false ||
+        androidInfo.brand.toLowerCase().contains('generic') ||
+        androidInfo.device.toLowerCase().contains('generic') ||
+        androidInfo.product.toLowerCase().contains('sdk');
+  } else if (Platform.isIOS) {
+    final iosInfo = await deviceInfo.iosInfo;
+    return iosInfo.isPhysicalDevice == false ||
+        iosInfo.utsname.machine.toLowerCase().contains('simulator');
+  }
+
+  return false;
+}
+
 Future<bool> newUserAlertEmail() async {
+  if (await isEmulator()) {
+    warningPrint('Device is an emulator. Skipping new user email.');
+    return true;
+  }
+
   final response = await http
       .post(
     Uri.parse('$apiUrl/send-email/'),
