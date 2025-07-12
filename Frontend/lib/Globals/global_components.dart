@@ -12,7 +12,6 @@ import 'package:mypr/Providers/user_provider.dart';
 import 'package:mypr/services/auth_service.dart';
 import 'package:mypr/services/message_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -73,30 +72,6 @@ class AllowSpacesNoEmojisTextInputFormatter extends TextInputFormatter {
   }
 }
 
-Future<void> createFilePath() async {
-  final directory = await getApplicationDocumentsDirectory();
-  final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
-
-  // Create the new folder if it doesn't exist
-  if (await myprDirectory.exists() == false) {
-    await myprDirectory.create(recursive: true);
-    successPrint('Folder created: ${myprDirectory.path}');
-  }
-}
-
-Future<String> getFilePath(String fileName) async {
-  final directory = await getApplicationDocumentsDirectory();
-  final Directory myprDirectory = Directory('${directory.path}/mypDirectory');
-
-  // Create the new folder if it doesn't exist
-  if (await myprDirectory.exists() == false) {
-    await myprDirectory.create(recursive: true);
-    successPrint('Folder created: ${myprDirectory.path}');
-  }
-
-  return '${directory.path}/mypDirectory/$fileName.json';
-}
-
 String formatName(String name) {
   // Trim any leading/trailing spaces and replace multiple spaces with a single space
   return name.trim().replaceAll(RegExp(r'\s+'), ' ').split(' ').map((word) {
@@ -108,7 +83,7 @@ String formatName(String name) {
 }
 
 Future<String> getSavedPassword() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   if (prefs.getString('savedPassword') != null) {
     return prefs.getString('savedPassword')!;
   } else {
@@ -117,7 +92,7 @@ Future<String> getSavedPassword() async {
 }
 
 Future<String> getSavedEmail() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   if (prefs.getString('savedEmail') != null) {
     return prefs.getString('savedEmail')!;
   }
@@ -125,18 +100,18 @@ Future<String> getSavedEmail() async {
 }
 
 void successPrint(String text) {
-  print('✅$text');
-  // print('\x1B[32m$text\x1B[0m');
+  // print('✅$text');
+  print('\x1B[32m$text\x1B[0m');
 }
 
 void warningPrint(String text) {
-  print('🟡$text');
-  // print('\x1B[33m$text\x1B[0m');
+  // print('🟡$text');
+  print('\x1B[33m$text\x1B[0m');
 }
 
 void errorPrint(String text) {
-  print('❌$text');
-  // print('\x1B[31m$text\x1B[0m');
+  // print('❌$text');
+  print('\x1B[31m$text\x1B[0m');
 }
 
 String normalizePhoneNumber(String phoneNumber) {
@@ -704,8 +679,7 @@ class CustomEmailButtonState extends State<CustomEmailButton> {
                       }
 
                       if (await resendVerificationEmail()) {
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
+                        final prefs = await SharedPreferences.getInstance();
                         await prefs.setString('savedPassword', '');
                         if (context.mounted) {
                           context

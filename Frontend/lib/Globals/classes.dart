@@ -1,6 +1,6 @@
 import 'global_components.dart';
 
-class ClubInfoStruct {
+class Club {
   int clubID;
   String clubName;
   int clubMinPrice;
@@ -15,7 +15,7 @@ class ClubInfoStruct {
   String clubNotAvailable;
   String clubInfo; //Use '\n' to split the alerts
 
-  ClubInfoStruct({
+  Club({
     required this.clubID,
     this.clubName = '',
     this.clubMinPrice = -1,
@@ -30,9 +30,9 @@ class ClubInfoStruct {
     this.clubInfo = '',
   });
 
-  factory ClubInfoStruct.fromJson(Map<String, dynamic> json) {
+  factory Club.fromJson(Map<String, dynamic> json) {
     try {
-      return ClubInfoStruct(
+      return Club(
           clubID: json['id'] ?? -1,
           clubName: json['club_name'] ?? '',
           clubMinPrice: json['min_price'] ?? -1,
@@ -48,9 +48,8 @@ class ClubInfoStruct {
           clubPriority: json['priority'] ?? -1,
           clubInfo: json['club_info'] ?? '');
     } catch (e) {
-      errorPrint('Error parsing ClubInfoStruct: $e');
-      return ClubInfoStruct(
-          clubID: -1); // Return a default object with clubID -1
+      errorPrint('Error parsing Club: $e');
+      return Club(clubID: -1); // Return a default object with clubID -1
     }
   }
 

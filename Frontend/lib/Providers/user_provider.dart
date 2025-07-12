@@ -71,7 +71,7 @@ class UserProvider with ChangeNotifier {
 
   // Fetch user details from the server, save to shared preferences, and notify listeners
   Future<void> fetchUserDetailsFromServer() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('access_token');
 
     if (token == null) {
@@ -109,13 +109,13 @@ class UserProvider with ChangeNotifier {
   Future<void> saveUserDetailsToPreferences() async {
     if (_userDetails.userID < 0) return;
 
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user_details', jsonEncode(_userDetails.toJson()));
   }
 
   // Load user details and photo from shared preferences
   Future<bool> loadUserDetailsFromPreferences() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
     String? userDetailsString = prefs.getString('user_details');
 
@@ -144,7 +144,7 @@ class UserProvider with ChangeNotifier {
         isBanned: false);
 
     // Clear related user data from SharedPreferences
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     await prefs.remove('user_details');
 
     notifyListeners();

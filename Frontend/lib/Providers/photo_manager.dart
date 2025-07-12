@@ -3,7 +3,8 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:image/image.dart' as img; // For compressing images
-import 'package:path_provider/path_provider.dart';
+import 'package:mypr/services/file_service.dart';
+import 'package:path/path.dart' as path;
 
 import '../Globals/global_components.dart';
 
@@ -25,33 +26,26 @@ class PhotoManager {
     }
 
     try {
-      // Fetch the image from the URL
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        // Compress the image before saving it
-        Uint8List compressedImage = await _compressImage(response.bodyBytes);
+      final uri = Uri.parse(url);
+      final response = await http.get(uri);
 
-        // Get the app's cache directory to store images
-        final directory = await getApplicationDocumentsDirectory();
-        final Directory clubPhotosDirectory =
-            Directory('${directory.path}/mypDirectory/club_photos');
-
-        // Create the new folder if it doesn't exist
-        if (await clubPhotosDirectory.exists() == false) {
-          await clubPhotosDirectory.create(recursive: true);
-          successPrint('Folder created: ${clubPhotosDirectory.path}');
-        }
-
-        String filePath = '${clubPhotosDirectory.path}/$fileName.jpg';
-
-        // Write the compressed image to a file
-        File file = File(filePath);
-        await file.writeAsBytes(compressedImage);
-
-        return filePath;
-      } else {
-        throw Exception('Failed to download club image');
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to download club image: HTTP ${response.statusCode}');
       }
+
+      // Compress image (assumed you have this function)
+      Uint8List compressedImage = await _compressImage(response.bodyBytes);
+
+      // Use FileHelper to get the photos directory
+      final photosDirPath = await FileHelper.getClubPhotosDirectory();
+
+      final filePath = path.join(photosDirPath, '$fileName.jpg');
+      final file = File(filePath);
+
+      await file.writeAsBytes(compressedImage);
+
+      return filePath;
     } catch (e) {
       errorPrint('Error saving photo: $e');
       return '';

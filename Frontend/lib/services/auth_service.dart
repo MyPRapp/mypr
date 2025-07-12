@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-// import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
@@ -15,17 +13,17 @@ import 'dart:async';
 import 'dart:io';
 
 Future<String?> getAccessToken() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   return prefs.getString('access_token');
 }
 
 Future<String?> getRefreshToken() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   return prefs.getString('refresh_token');
 }
 
 Future<void> refreshAccessToken() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+  final prefs = await SharedPreferences.getInstance();
   String? refreshToken = prefs.getString('refresh_token');
 
   if (refreshToken == null) {
@@ -61,38 +59,6 @@ Future<void> refreshAccessToken() async {
   } catch (e) {
     errorPrint('Error refreshing access token: $e');
     rethrow;
-  }
-}
-
-Future<bool> registerDevice() async {
-  String? token = await FirebaseMessaging.instance.getToken();
-
-  if (token == null) {
-    errorPrint('Firebase token not found');
-    return false;
-  }
-
-  try {
-    final response = await http
-        .post(
-      Uri.parse('$apiUrl/register_device/'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'device_token': token}),
-    )
-        .timeout(const Duration(seconds: 15), onTimeout: () {
-      return http.Response('Error: Timeout', 408); // 408 Request Timeout
-    });
-
-    if (response.statusCode == 200) {
-      successPrint('Device was registered');
-      return true;
-    } else {
-      errorPrint('Error while registering device: ${response.statusCode}\n');
-      // ${response.body}'); //TODO Uncomment this
-      return false;
-    }
-  } catch (e) {
-    throw Exception('Error while registering device: $e');
   }
 }
 
@@ -212,7 +178,7 @@ Future<int> changeEmailOnServerOnly(String email) async {
 
     if (response.statusCode == 200) {
       successPrint('Email changed successfully');
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('savedEmail', email);
       return 0;
     } else {
@@ -310,7 +276,7 @@ Future<bool> newUserAlertEmail() async {
       'subject': 'Νέος χρήστης',
       'sender_email': 'georgetsomhs@gmail.com',
       'message':
-          'Καινούριος χρήστης ${Platform.isIOS ? 'iphone' : 'android'}, δεν έχει εγγραφεί ακόμα!\nFCM token:\n\t${NotificationService.token}'
+          'Καινούριος χρήστης ${Platform.isIOS ? 'iphone' : 'android'}, δεν έχει εγγραφεί ακόμα!\nFirebaseService token:\n\t${FirebaseService.token}'
     }),
   )
       .timeout(const Duration(seconds: 8), onTimeout: () {

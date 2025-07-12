@@ -274,7 +274,7 @@ class ProfileRoute extends _i16.PageRouteInfo<void> {
 class ReservationRoute extends _i16.PageRouteInfo<ReservationRouteArgs> {
   ReservationRoute({
     _i17.Key? key,
-    required _i18.ClubInfoStruct club,
+    required _i18.Club club,
     required List<_i18.Catalogue> catalogues,
     List<_i16.PageRouteInfo>? children,
   }) : super(
@@ -311,7 +311,7 @@ class ReservationRouteArgs {
 
   final _i17.Key? key;
 
-  final _i18.ClubInfoStruct club;
+  final _i18.Club club;
 
   final List<_i18.Catalogue> catalogues;
 

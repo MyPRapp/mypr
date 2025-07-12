@@ -20,7 +20,7 @@ class FavoritesPage extends StatelessWidget {
     final screenHeight = MediaQuery.sizeOf(context).height;
     final screenWidth = MediaQuery.sizeOf(context).width;
 
-    List<ClubInfoStruct> likedClubs = context
+    List<Club> likedClubs = context
         .watch<LikedClubsProvider>()
         .getAllLikedClubs(context.read<ClubProvider>().allClubs);
     return PopScope(

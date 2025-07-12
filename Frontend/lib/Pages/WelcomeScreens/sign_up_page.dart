@@ -135,7 +135,7 @@ class _SignUpPageState extends State<SignUpPage> {
       await _clearPreferences();
       await _login();
       sendEmail('Νέα εγγραφή', 'georgetsomhs@gmail.com',
-          'Ο χρήστης με email: $email και FCM token: ${NotificationService.token} μόλις εγγράφηκε');
+          'Ο χρήστης με email: $email και FirebaseService token: ${FirebaseService.token} μόλις εγγράφηκε');
     } else {
       setState(() {
         _isRegistering = false;
@@ -160,7 +160,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Future<void> _login() async {
     if (_emailController.text.isNotEmpty &&
         _passwordController.text.isNotEmpty) {
-      successPrint('------------LOGGING IN------------');
+      successPrint('logging in');
       setState(() {
         _isRegistering = true;
       });
@@ -181,10 +181,10 @@ class _SignUpPageState extends State<SignUpPage> {
             context.router.replaceAll([const BottomNavBarRoute()]);
           }
         }
-        successPrint('------------LOGGED IN------------');
+        successPrint('Logged in');
       } else {
         _showSnackBar('Λάθος στοιχεία εισόδου');
-        errorPrint('------------LOGIN FAILED------------');
+        errorPrint('Login failed');
         setState(() {
           _isRegistering = false;
         });
@@ -521,7 +521,7 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Future<void> _clearPreferences() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
 
     if (mounted) {
       await context.read<LikedClubsProvider>().deleteAllLiked();

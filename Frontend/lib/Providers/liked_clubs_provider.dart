@@ -33,7 +33,7 @@ class LikedClubsProvider extends ChangeNotifier {
 
   Future<void> loadLikedClubsFromPreferences() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       List<String>? likedClubIDsFromPreferences =
           prefs.getStringList('likedClubs');
 
@@ -53,7 +53,7 @@ class LikedClubsProvider extends ChangeNotifier {
 
   Future<void> saveLikedClubsToPreferences() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setStringList(
           'likedClubs', _likedClubs.map((id) => id.toString()).toList());
       print("Liked clubs saved successfully.");
@@ -62,7 +62,7 @@ class LikedClubsProvider extends ChangeNotifier {
     }
   }
 
-  List<ClubInfoStruct> getAllLikedClubs(List<ClubInfoStruct> clubs) {
+  List<Club> getAllLikedClubs(List<Club> clubs) {
     return clubs.where((club) => _likedClubs.contains(club.clubID)).toList();
   }
 

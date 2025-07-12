@@ -1,12 +1,17 @@
 // notification_service.dart
 
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:http/http.dart' as http;
+import 'package:mypr/Globals/constants.dart';
 import 'package:mypr/Globals/global_components.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -14,21 +19,25 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print('🔙 Handling background message: ${message.messageId}');
 }
 
-class NotificationService {
-  static final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+class FirebaseService {
+  static String? token;
 
-  static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
+  static final _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  static const _channel = AndroidNotificationChannel(
     'high_importance_channel',
     'High Importance Notifications',
     importance: Importance.max,
   );
 
-  static String? token;
-
   static Future<void> initialize() async {
     try {
       await Firebase.initializeApp();
+
+      // ignore: unused_local_variable
+      FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+      registerDevice();
 
       await FirebaseMessaging.instance.requestPermission();
 
@@ -44,12 +53,58 @@ class NotificationService {
       successPrint(token!);
 
       await _setupNotificationChannel();
+
       _handleForegroundMessages();
 
       FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     } catch (e, stackTrace) {
-      errorPrint('❌ NotificationService initialization failed: $e');
+      errorPrint('❌ FirebaseService initialization failed: $e');
       debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  static Future<bool> registerDevice() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final bool hasSentFirebaseToken =
+        prefs.getBool('hasSentFirebaseToken') ?? false;
+
+    if (hasSentFirebaseToken) {
+      return true;
+    }
+
+    String? token = await FirebaseMessaging.instance.getToken();
+
+    if (token == null) {
+      errorPrint('Firebase token not found');
+      return false;
+    }
+
+    try {
+      final response = await http
+          .post(
+        Uri.parse('$apiUrl/register_device/'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'device_token': token}),
+      )
+          .timeout(const Duration(seconds: 15), onTimeout: () {
+        return http.Response('Error: Timeout', 408); // 408 Request Timeout
+      });
+
+      if (response.statusCode == 200) {
+        await prefs.setBool('hasSentFirebaseToken', true);
+
+        successPrint('Device was registered');
+
+        return true;
+      } else {
+        errorPrint(
+            'Error while registering device: ${response.statusCode}\n${response.body}');
+
+        return false;
+      }
+    } catch (e) {
+      throw Exception('Error while registering device: $e');
     }
   }
 

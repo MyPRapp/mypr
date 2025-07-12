@@ -37,10 +37,6 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<BottomNavBarVisibility>().show();
 
-      context
-          .read<GlobalStateProvider>()
-          .setRefreshHomePage(false); //TODO Check if this is needed
-
       if (!context.read<GlobalStateProvider>().hasCheckedAppVersion) {
         checkAppVersion(context);
       }
@@ -54,9 +50,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _fetchClubs() async {
-    warningPrint('------------SYNCING CLUBS------------');
+    warningPrint('Syncing clubs');
     await context.read<ClubProvider>().fetchAndSaveClubsAndCatalogues();
-    successPrint('------------SYNCED CLUBS------------');
+    successPrint('Synced clubs');
   }
 
   Future<void> _syncUser() async {
@@ -67,10 +63,10 @@ class _HomePageState extends State<HomePage> {
           context, globalStateProvider.mustSendCancellationEmail);
 
       if (globalStateProvider.hasLoggedIn) {
-        successPrint('------------USER IS LOGGED IN------------');
+        successPrint('User is logged in');
         await context.read<UserProvider>().loadUserDetailsFromPreferences();
       } else {
-        errorPrint('------------USER IS NOT LOGGED IN------------');
+        errorPrint('User is not logged in');
       }
     } else {
       await Future.delayed(const Duration(seconds: 2));
@@ -79,11 +75,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _checkFirstTime() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final bool hasSeenPointsDialog =
         prefs.getBool('hasSeenPointsDialog') ?? false;
-    final bool hasSentFirebaseToken =
-        prefs.getBool('hasSentFirebaseToken') ?? false;
+
     final bool hasSentNewUserEmail =
         prefs.getBool('hasSentNewUserEmail') ?? false;
 
@@ -94,10 +89,6 @@ class _HomePageState extends State<HomePage> {
       } else {
         await prefs.setBool('hasSeenPointsDialog', false);
       }
-    }
-
-    if (!hasSentFirebaseToken && await registerDevice()) {
-      await prefs.setBool('hasSentFirebaseToken', true);
     }
 
     if (!hasSentNewUserEmail && await newUserAlertEmail()) {
@@ -126,52 +117,6 @@ class _HomePageState extends State<HomePage> {
           cancelledBooking);
     }
   }
-
-  // Future<void> _attemptUserLogin() async {
-  //   final userProvider = context.read<UserProvider>();
-
-  //   userProvider.loadUserDetailsFromPreferences();
-  //   final savedEmail = await getSavedEmail();
-  //   final savedPassword = await getSavedPassword();
-
-  //   if (savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
-  //     final loggedIn = await userProvider.login(savedEmail, savedPassword);
-
-  //     if (!mounted) return;
-  //     final globalStateProvider = context.read<GlobalStateProvider>();
-
-  //     if (loggedIn == 0) {
-  //       await globalStateProvider.setHasLoggedIn(true);
-  //       if (mounted) {
-  //         if (globalStateProvider.justRegistered) {
-  //           globalStateProvider.setJustRegistered(false);
-  //           emailLoop(
-  //               context); //email loop happens asynchronously after signing up and just registered shouldn't exist
-  //         } else {
-  //           fetchVerifiedEmailGlobalVariable(context);
-  //         }
-  //       }
-
-  //       await userProvider.fetchUserDetailsFromServer();
-  //       if (mounted) {
-  //         await context.read<BookingProvider>().fetchBookings(
-  //             userProvider.userDetails, context.read<ClubProvider>());
-  //       }
-  //       successPrint('------------USER IS LOGGED IN------------');
-  //     } else {
-  //       _showLoginError(globalStateProvider);
-  //     }
-  //   } else {
-  //     if (mounted) {
-  //       _showLoginError(context.read<GlobalStateProvider>());
-  //     }
-  //   }
-  // }
-
-  // void _showLoginError(GlobalStateProvider globalStateProvider) {
-  //   errorPrint('Email or Password is incorrect');
-  //   globalStateProvider.setHasLoggedIn(false);
-  // }
 
   void navigateToSearchTab(BuildContext context) async {
     final tabsRouter = AutoTabsRouter.of(context);
@@ -215,7 +160,8 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  const TermsAndPrivacyPolicy()
+                  const TermsAndPrivacyPolicy(),
+                  SizedBox(height: 5.h)
                 ],
               ),
             ),

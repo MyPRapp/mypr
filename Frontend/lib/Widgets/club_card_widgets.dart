@@ -8,7 +8,7 @@ import '../Globals/classes.dart';
 class LikeButton extends StatefulWidget {
   const LikeButton({super.key, required this.club});
 
-  final ClubInfoStruct club;
+  final Club club;
   @override
   LikeButtonState createState() => LikeButtonState();
 }

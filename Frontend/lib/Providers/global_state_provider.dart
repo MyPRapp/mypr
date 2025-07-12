@@ -10,7 +10,6 @@ class GlobalStateProvider with ChangeNotifier {
       false; // Add this state to track if preferences are loaded
   bool _hasCheckedAppVersion = false;
   bool _refreshProfilePage = false;
-  bool _refreshHomePage = false;
   bool _refreshReservationPage = false;
   bool _justRegistered = false;
   String _mustSendCancellationEmail = '';
@@ -33,8 +32,6 @@ class GlobalStateProvider with ChangeNotifier {
   bool get preferencesLoaded => _preferencesLoaded;
 
   bool get refreshProfilePage => _refreshProfilePage;
-
-  bool get refreshHomePage => _refreshHomePage;
 
   bool get refreshReservationPage => _refreshReservationPage;
 
@@ -66,11 +63,6 @@ class GlobalStateProvider with ChangeNotifier {
 
   void setRefreshProfilePage(bool value) {
     _refreshProfilePage = value;
-    notifyListeners();
-  }
-
-  void setRefreshHomePage(bool value) {
-    _refreshHomePage = value;
     notifyListeners();
   }
 

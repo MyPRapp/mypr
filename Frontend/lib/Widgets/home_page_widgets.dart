@@ -18,7 +18,7 @@ class BigClubCard extends StatefulWidget {
       required this.screenHeight,
       required this.screenWidth});
 
-  final ClubInfoStruct club;
+  final Club club;
   final double screenHeight;
   final double screenWidth;
 

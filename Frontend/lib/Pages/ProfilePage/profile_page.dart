@@ -107,6 +107,7 @@ class _ProfilePageState extends State<ProfilePage> {
       if (context.read<GlobalStateProvider>().hasLoggedIn) {
         context.read<GlobalStateProvider>().setHasLoggedIn(true);
         await userProvider.fetchUserDetailsFromServer();
+        //TODO This and maybe more are running many times in a loop.
 
         if (mounted) {
           await context.read<BookingProvider>().fetchBookings(
@@ -177,10 +178,10 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void signOut() async {
     try {
-      warningPrint('------------SIGNING OUT------------');
+      warningPrint('Signing out');
 
       // Step 1: Get SharedPreferences instance for key-value data
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
 
       // Step 2: Retain specific keys and their values (excluding liked clubs)
       final bool hasSeenDialog = prefs.getBool('hasSeenPointsDialog') ?? false;
@@ -229,7 +230,7 @@ class _ProfilePageState extends State<ProfilePage> {
         AutoRouter.of(context).replaceAll([const LoginRoute()]);
         successPrint('Navigation to login page successful.');
       }
-      successPrint('------------SIGNED OUT------------');
+      successPrint('Signed out');
     } catch (e) {
       errorPrint('Error during sign out: $e');
     }

@@ -24,7 +24,7 @@ import '../../../services/auth_service.dart';
 class ReservationPage extends StatefulWidget {
   const ReservationPage(
       {super.key, required this.club, required this.catalogues});
-  final ClubInfoStruct club;
+  final Club club;
   final List<Catalogue> catalogues;
 
   @override

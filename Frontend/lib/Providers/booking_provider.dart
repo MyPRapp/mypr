@@ -130,7 +130,7 @@ class BookingProvider with ChangeNotifier {
   // Save bookings to shared preferences
   Future<void> _saveBookingsToPreferences(List<Booking> bookings) async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       final String bookingsJson =
           jsonEncode(bookings.map((booking) => booking.toJson()).toList());
       await prefs.setString('bookings', bookingsJson);
@@ -143,7 +143,7 @@ class BookingProvider with ChangeNotifier {
   // Load bookings from shared preferences
   Future<void> _loadBookingsFromPreferences() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       final String? bookingsJson = prefs.getString('bookings');
 
       if (bookingsJson != null) {

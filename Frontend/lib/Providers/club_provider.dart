@@ -1,28 +1,50 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mypr/Globals/constants.dart';
-import 'package:path_provider/path_provider.dart';
 
 import '../Globals/classes.dart';
 import '../Globals/global_components.dart';
+import '../services/file_service.dart';
 import 'photo_manager.dart';
 
 class ClubProvider with ChangeNotifier {
-  final List<ClubInfoStruct> _clubs = [];
+  final List<Club> _clubs = [];
   final List<Catalogue> _catalogues = [];
 
-  List<ClubInfoStruct> get allClubs => _clubs;
+  List<Club> get allClubs => _clubs;
   List<Catalogue> get allCatalogues => _catalogues;
 
-  final List<ClubInfoStruct> _tempClubs = [];
+  final List<Club> _tempClubs = [];
   final List<Catalogue> _tempCatalogues = [];
 
-//// Fetch From Server Functions
+  List<Future<void>> fetchCatalogueTasks = [];
+
+  Future<void> fetchCataloguesList() async {
+    final url = '$apiUrl/catalogue/create/';
+    final response =
+        await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
+
+    if (response.statusCode == 200) {
+      final decodedBody = utf8.decode(response.bodyBytes);
+      final List<dynamic> data = jsonDecode(decodedBody);
+      for (var item in data) {
+        print(item);
+      }
+    } else {
+      print(response.statusCode);
+      print(response.body);
+    }
+  }
+
+// ╔══════════════════════════════════════════════╗
+// ║              FETCH FROM SERVER               ║
+// ╚══════════════════════════════════════════════╝
   Future<void> fetchAndSaveClubsAndCatalogues() async {
-    warningPrint('Fetching clubs from server...');
+    // fetchCataloguesList();
 
     try {
       final url = '$apiUrl/clubs/print/';
@@ -37,7 +59,7 @@ class ClubProvider with ChangeNotifier {
         final List<dynamic> data = jsonDecode(decodedBody);
 
         for (var item in data) {
-          final club = ClubInfoStruct.fromJson(item);
+          final club = Club.fromJson(item);
           if (club.clubID < 0) {
             errorPrint("ClubID is incorrect");
             continue;
@@ -56,9 +78,12 @@ class ClubProvider with ChangeNotifier {
           // Save club details
           _tempClubs.add(club);
 
-          // Fetch catalogues for the club
-          await fetchCatalogues(club);
+          // Fetch catalogues for the club by
+          // adding the jobs/tasks in a list and running later
+          fetchCatalogueTasks.add(fetchCatalogues(club));
         }
+
+        await Future.wait(fetchCatalogueTasks); // Run in parallel
 
         await deleteUnusedClubs();
         await addTempClubsToMainClubs();
@@ -78,7 +103,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  Future<void> fetchCatalogues(ClubInfoStruct club) async {
+  Future<void> fetchCatalogues(Club club) async {
     if (club.clubID <= 0) {
       errorPrint('FetchCatalogues: Invalid club ID');
       return;
@@ -109,7 +134,7 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> addMinPriceAndMaxPersonsToClub(
-      ClubInfoStruct club, Catalogue catalogue) async {
+      Club club, Catalogue catalogue) async {
     club.clubMinPrice = (double.tryParse(catalogue.price)?.toInt() ?? 0);
     club.clubMaxPersons = catalogue.maxPersons;
     int index = _tempClubs.indexWhere((c) => c.clubID == club.clubID);
@@ -136,7 +161,7 @@ class ClubProvider with ChangeNotifier {
 
   Future<void> deleteUnusedClubsAndCatalogues() async {
     // Store clubs to remove in a temporary list
-    List<ClubInfoStruct> clubsToRemove = [];
+    List<Club> clubsToRemove = [];
 
     // Collect clubs that need to be removed
     for (var club in _clubs) {
@@ -157,8 +182,7 @@ class ClubProvider with ChangeNotifier {
     deleteUnusedCatalogues(clubsToRemove);
   }
 
-  Future<void> deleteUnusedCatalogues(
-      List<ClubInfoStruct> clubsToRemove) async {
+  Future<void> deleteUnusedCatalogues(List<Club> clubsToRemove) async {
     List<Catalogue> cataloguesToRemove = [];
 
     for (var catalogue in _catalogues) {
@@ -185,13 +209,10 @@ class ClubProvider with ChangeNotifier {
   Future<void> deleteUnusedClubPhotos() async {
     try {
       // Get the app's cache directory to find the folder where club photos are stored
-      final directory = await getApplicationDocumentsDirectory();
-      final Directory clubPhotosDirectory =
-          Directory('${directory.path}/mypDirectory/club_photos');
+      final clubPhotosPath = await FileHelper.getClubPhotosDirectory();
+      final Directory clubPhotosDirectory = Directory(clubPhotosPath);
 
-      // Check if the directory exists
       if (await clubPhotosDirectory.exists()) {
-        // List all files in the directory
         List<FileSystemEntity> files = clubPhotosDirectory.listSync();
 
         // Get the list of club IDs from the _clubs list
@@ -230,7 +251,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  Future<void> sortClubsByPriority(List<ClubInfoStruct> clubList) async {
+  Future<void> sortClubsByPriority(List<Club> clubList) async {
     clubList.sort((a, b) {
       if (a.clubPriority == -1) return 1; // Place -1 last
       if (b.clubPriority == -1) return -1; // Place -1 last
@@ -259,9 +280,9 @@ class ClubProvider with ChangeNotifier {
           return;
         }
         //// Search for the club with the given clubID
-        ClubInfoStruct club;
+        Club club;
         for (var item in data) {
-          club = ClubInfoStruct.fromJson(item);
+          club = Club.fromJson(item);
 
           if (club.clubID == clubID) {
             addOrUpdateClub(club);
@@ -278,12 +299,13 @@ class ClubProvider with ChangeNotifier {
           'Error fetching club from server, loading from local storage: $e');
     }
   }
+// ─────────────────────────────────────────────────────────────────────────────
 
-////////////////////////////////////////////////////////////////
-
-//// Saving To File Functions
+// ╔══════════════════════════════════════════════╗
+// ║                SAVE TO FILE                  ║
+// ╚══════════════════════════════════════════════╝
   Future<void> saveClubsToFile() async {
-    String filePath = await getFilePath('clubs');
+    String filePath = await FileHelper.getFilePath('clubs');
     File file = File(filePath);
 
     // Save club data as JSON in local storage
@@ -293,7 +315,7 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> saveCataloguesToFile() async {
-    String filePath = await getFilePath('catalogues');
+    String filePath = await FileHelper.getFilePath('catalogues');
     File file = File(filePath);
 
     // Save catalogue data as JSON in local storage
@@ -302,11 +324,13 @@ class ClubProvider with ChangeNotifier {
     await file.writeAsString(jsonCatalogues);
     successPrint('Catalogues saved to file');
   }
-////////////////////////////////////////////////////////////////
+// ─────────────────────────────────────────────────────────────────────────────
 
-//// Load From File Functions (Replaces SharedPreferences)
+// ╔══════════════════════════════════════════════╗
+// ║               LOAD FROM FILE                 ║
+// ╚══════════════════════════════════════════════╝
   Future<void> loadClubsFromFile() async {
-    String filePath = await getFilePath('clubs');
+    String filePath = await FileHelper.getFilePath('clubs');
     File file = File(filePath);
 
     if (await file.exists()) {
@@ -314,20 +338,12 @@ class ClubProvider with ChangeNotifier {
       List<dynamic> clubsList = jsonDecode(jsonClubs);
 
       _clubs.clear();
-      _clubs.addAll(
-          clubsList.map((json) => ClubInfoStruct.fromJson(json)).toList());
+      _clubs.addAll(clubsList.map((json) => Club.fromJson(json)).toList());
 
-      final directory = await getApplicationDocumentsDirectory();
-      final Directory clubPhotosDirectory =
-          Directory('${directory.path}/mypDirectory/club_photos');
+      final clubPhotosPath = await FileHelper.getClubPhotosDirectory();
 
-      if (await clubPhotosDirectory.exists()) {
-        for (var club in _clubs) {
-          club.localPhotoPath =
-              '${directory.path}/mypDirectory/club_photos/club_${club.clubID}_photo.jpg';
-        }
-      } else {
-        errorPrint('Club photos directory doesn\'t exist');
+      for (var club in _clubs) {
+        club.localPhotoPath = '$clubPhotosPath/club_${club.clubID}_photo.jpg';
       }
 
       notifyListeners();
@@ -338,7 +354,7 @@ class ClubProvider with ChangeNotifier {
   }
 
   Future<void> loadCataloguesFromFile() async {
-    String filePath = await getFilePath('catalogues');
+    String filePath = await FileHelper.getFilePath('catalogues');
     File file = File(filePath);
 
     if (await file.exists()) {
@@ -355,10 +371,12 @@ class ClubProvider with ChangeNotifier {
       errorPrint('Catalogues file does not exist');
     }
   }
-////////////////////////////////////////////////////////////////
+// ─────────────────────────────────────────────────────────────────────────────
 
-//// Add Functions
-  void addOrUpdateClub(ClubInfoStruct club) {
+// ╔══════════════════════════════════════════════╗
+// ║               ADD OR UPDATE                  ║
+// ╚══════════════════════════════════════════════╝
+  void addOrUpdateClub(Club club) {
     if (club.clubID <= 0) {
       errorPrint('AddOrUpdateClub: Invalid clubID: ${club.clubID}');
       return;
@@ -373,7 +391,6 @@ class ClubProvider with ChangeNotifier {
       } else {
         // Club does not exist, add it to the list
         _clubs.add(club);
-        successPrint('Club \'${club.clubName}\' added.');
       }
       notifyListeners();
     } catch (e) {
@@ -409,11 +426,13 @@ class ClubProvider with ChangeNotifier {
       //  print(   '❌Error in addOrUpdateCatalogue for clubID ${catalogue.clubID}: $e');
     }
   }
+// ─────────────────────────────────────────────────────────────────────────────
 
-//// Get functions
-  //Method to initialize catalogues based on club ID and update the provided Catalogue variables
+// ╔══════════════════════════════════════════════╗
+// ║                    GET                       ║
+// ╚══════════════════════════════════════════════╝
   List<Catalogue> getAllCataloguesForClubWithID(int clubID) {
-    ClubInfoStruct club = getClubByID(clubID);
+    Club club = getClubByID(clubID);
 
 //// Initialize and update the Catalogue variables
     Catalogue regularCatalogue = getCatalogue(club, 'Regular');
@@ -423,7 +442,7 @@ class ClubProvider with ChangeNotifier {
     return [regularCatalogue, specialCatalogue, premiumCatalogue];
   }
 
-  Catalogue getCatalogue(ClubInfoStruct club, String serviceType) {
+  Catalogue getCatalogue(Club club, String serviceType) {
     var catalogueList = _catalogues
         .where((catalogue) =>
             catalogue.clubID == club.clubID &&
@@ -442,11 +461,11 @@ class ClubProvider with ChangeNotifier {
         .clubAvailableDays;
   }
 
-  ClubInfoStruct getClubByID(int clubID) {
+  Club getClubByID(int clubID) {
     return _clubs.firstWhere((club) => club.clubID == clubID);
   }
 
-  ClubInfoStruct getClubByName(String clubName) {
+  Club getClubByName(String clubName) {
     return _clubs.firstWhere((club) => club.clubName == clubName);
   }
 
@@ -468,9 +487,11 @@ class ClubProvider with ChangeNotifier {
     }
     return tempCatalogues;
   }
-////////////////////////////////////////////////////////////////
+// ─────────────────────────────────────────────────────────────────────────────
 
-//// PRINT FUNCTIONS FOR DEBUGGING
+// ╔══════════════════════════════════════════════╗
+// ║              PRINT(FOR DEBUGGING)            ║
+// ╚══════════════════════════════════════════════╝
   void printAllClubs() {
     for (var club in _clubs) {
       print(
@@ -484,7 +505,7 @@ class ClubProvider with ChangeNotifier {
     }
   }
 
-  void printClub(ClubInfoStruct club) {
+  void printClub(Club club) {
     print(
         '{"clubID:"${club.clubID},"clubName:"${club.clubName},"clubMinPrice:"${club.clubMinPrice},"clubMaxPersons:"${club.clubMaxPersons},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhone:"${club.clubPhone},"clubLocation:"${club.clubLocation},"clubRating:"${club.clubRating},"clubAvailableDays:"${club.clubAvailableDays},"clubPhoto:"${club.clubPhoto},"localPhotoPath:"${club.localPhotoPath},}');
   }
@@ -522,5 +543,5 @@ class ClubProvider with ChangeNotifier {
     print(
         '{"clubID:"${catalogue.clubID},"clubName:${getClubNameByID(catalogue.clubID)}","serviceType:"${catalogue.serviceType},"price:"${catalogue.price},"maxPersons:"${catalogue.maxPersons}}');
   }
-////////////////////////////////////////////////////////////////
+// ─────────────────────────────────────────────────────────────────────────────
 }

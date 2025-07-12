@@ -113,7 +113,7 @@ class BookingDetailsPage extends StatelessWidget {
   }
 
   Widget _buildClubPhoto(int clubID, ClubProvider clubProvider) {
-    ClubInfoStruct club = clubProvider.getClubByID(clubID);
+    Club club = clubProvider.getClubByID(clubID);
     return ClipRRect(
       borderRadius: BorderRadius.circular(15.r),
       child: SizedBox(
@@ -124,7 +124,7 @@ class BookingDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget buildImage(ClubInfoStruct club) {
+  Widget buildImage(Club club) {
     return club.localPhotoPath.isNotEmpty
         ? Image(
             fit: BoxFit.fill,
@@ -138,7 +138,7 @@ class BookingDetailsPage extends StatelessWidget {
         : loadNetworkImage(club);
   }
 
-  Widget loadNetworkImage(ClubInfoStruct club) {
+  Widget loadNetworkImage(Club club) {
     if (club.clubPhoto.isNotEmpty) {
       return Image.network(
         club.clubPhoto,
@@ -568,7 +568,7 @@ class _CancelReservationButtonState extends State<CancelReservationButton> {
                           context.read<ClubProvider>());
 
                       if (context.mounted) {
-                        ClubInfoStruct club = context
+                        Club club = context
                             .read<ClubProvider>()
                             .getClubByID(widget.booking.clubID);
                         await sendCancellationEmail(

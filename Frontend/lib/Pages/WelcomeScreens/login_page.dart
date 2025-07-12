@@ -46,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    warningPrint('------------LOGGING IN------------');
+    warningPrint('logging in');
 
     setState(() {
       _isLoginPressed = true;
@@ -65,11 +65,11 @@ class _LoginPageState extends State<LoginPage> {
           return;
         }
         context.router.replaceAll([const BottomNavBarRoute()]);
-        successPrint('------------LOGGED IN------------');
+        successPrint('Logged in');
       }
     } else {
       _handleLoginFailure(loginResultCode);
-      errorPrint('------------LOGIN FAILED------------');
+      errorPrint('Login failed');
     }
 
     setState(() {
