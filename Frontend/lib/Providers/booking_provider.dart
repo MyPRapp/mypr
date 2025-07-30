@@ -8,6 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../Globals/global_components.dart';
 import '../services/booking_service.dart';
 
+//TODO IMPORTANT!!!! Reservations aren't shown to user
+
 class BookingProvider with ChangeNotifier {
   final List<Booking> _bookings = [];
   bool _isLoading = false;
